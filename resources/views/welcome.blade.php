@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Koperasi Neovala - Solusi Keuangan Terpercaya</title>
+    <title>Koperasi Majakara - Solusi Keuangan Terpercaya</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
@@ -243,7 +243,7 @@
                         <span class="gradient-text">Terpercaya</span>
                     </h1>
                     <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        Koperasi Neovala hadir untuk membantu mewujudkan impian finansial Anda dengan layanan terbaik dan terpercaya.
+                        Koperasi Majakara hadir untuk membantu mewujudkan impian finansial Anda dengan layanan terbaik dan terpercaya.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                         <a href="#layanan" class="px-8 py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition shadow-lg hover:shadow-xl">
@@ -287,7 +287,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 fade-in-up animate-on-scroll">
                 <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-                    Apa Saja yang Dapat Dilakukan di Koperasi Neovala?
+                    Apa Saja yang Dapat Dilakukan di Koperasi Majakara?
                 </h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
                     Kami menyediakan berbagai layanan keuangan yang lengkap untuk memenuhi kebutuhan Anda
@@ -379,7 +379,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 fade-in-up animate-on-scroll">
                 <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-                    Keuntungan Memakai Neovala Koperasi
+                    Keuntungan Memakai Majakara Koperasi
                 </h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
                     Mengapa memilih kami sebagai partner keuangan Anda?
@@ -447,7 +447,7 @@
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-16 fade-in-up animate-on-scroll">
                 <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
-                    Bangun Kepercayaan untuk Koperasi Neovala
+                    Bangun Kepercayaan untuk Koperasi Majakara
                 </h2>
                 <p class="text-xl text-gray-600 max-w-2xl mx-auto">
                     Dengarkan pengalaman nyata dari anggota kami
@@ -484,7 +484,7 @@
                         </svg>
                     </div>
                     <p class="text-gray-700 leading-relaxed">
-                        "Banyak keuntungan yang saya dapatkan sejak bergabung dengan Koperasi Neovala. Pelayanan yang ramah, proses cepat, dan bunga yang kompetitif membuat saya sangat puas."
+                        "Banyak keuntungan yang saya dapatkan sejak bergabung dengan Koperasi Majakara. Pelayanan yang ramah, proses cepat, dan bunga yang kompetitif membuat saya sangat puas."
                     </p>
                 </div>
                 
@@ -517,7 +517,7 @@
                         </svg>
                     </div>
                     <p class="text-gray-700 leading-relaxed">
-                        "Proses pinjaman sangat mudah dan cepat. Saya sangat terbantu dengan layanan Koperasi Neovala untuk kebutuhan usaha saya."
+                        "Proses pinjaman sangat mudah dan cepat. Saya sangat terbantu dengan layanan Koperasi Majakara untuk kebutuhan usaha saya."
                     </p>
                 </div>
                 
@@ -550,7 +550,7 @@
                         </svg>
                     </div>
                     <p class="text-gray-700 leading-relaxed">
-                        "Saya sudah menggunakan layanan deposito selama 3 tahun dan sangat puas dengan return yang diberikan. Koperasi Neovala memang terpercaya!"
+                        "Saya sudah menggunakan layanan deposito selama 3 tahun dan sangat puas dengan return yang diberikan. Koperasi Majakara memang terpercaya!"
                     </p>
                 </div>
             </div>
@@ -658,7 +658,7 @@
                         <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
                             <span class="text-white font-bold text-xl">N</span>
                         </div>
-                        <span class="text-xl font-bold">Koperasi Neovala</span>
+                        <span class="text-xl font-bold">Koperasi Majakara</span>
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed">
                         Solusi keuangan terpercaya untuk mewujudkan impian finansial Anda.
@@ -701,7 +701,7 @@
             
             <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-white/80 text-sm mb-4 md:mb-0">
-                    Copyright © 2025 Koperasi Neovala. All rights reserved.
+                    Copyright © 2025 Koperasi Majakara. All rights reserved.
                 </p>
                 <div class="flex items-center space-x-4">
                     <span class="text-white/80 text-sm">Ikuti Kami:</span>

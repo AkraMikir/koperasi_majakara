@@ -18,9 +18,13 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
+        'nama',
         'email',
+        'pin',
         'password',
+        'nomor_hp',
+        'foto',
+        'role',
     ];
 
     /**
@@ -44,5 +48,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Get the nasabah temp for the user.
+     */
+    public function nasabahTemp()
+    {
+        return $this->hasOne(NasabahTemp::class);
     }
 }
