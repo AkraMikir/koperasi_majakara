@@ -93,6 +93,7 @@ class RegisterController extends Controller
                 'tempat_lahir' => 'required|string|max:255',
                 'tanggal_lahir' => 'required|date',
                 'jenis_kelamin' => 'required|in:L,P',
+                'alamat' => 'required|string',
                 'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
                 'foto_kk' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
             ]);
@@ -281,6 +282,7 @@ class RegisterController extends Controller
                     'tempat_lahir' => $step2['tempat_lahir'],
                     'tanggal_lahir' => $step2['tanggal_lahir'],
                     'jenis_kelamin' => $step2['jenis_kelamin'],
+                    'alamat' => $step2['alamat'],
                     'foto_ktp' => $step2['foto_ktp'] ?? null,
                     'foto_kk' => $step2['foto_kk'] ?? null,
                 ]);

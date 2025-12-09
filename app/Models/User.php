@@ -57,4 +57,36 @@ class User extends Authenticatable
     {
         return $this->hasOne(NasabahTemp::class);
     }
+
+    /**
+     * Get the nasabah for the user.
+     */
+    public function nasabah()
+    {
+        return $this->hasOne(Nasabah::class);
+    }
+
+    /**
+     * Get the admin operasional for the user.
+     */
+    public function adminOperasional()
+    {
+        return $this->hasOne(AdminOperasional::class);
+    }
+
+    /**
+     * Get the admin utama for the user.
+     */
+    public function adminUtama()
+    {
+        return $this->hasOne(AdminUtama::class);
+    }
+
+    /**
+     * Get the otps for the user.
+     */
+    public function otps()
+    {
+        return $this->hasMany(Otp::class);
+    }
 }

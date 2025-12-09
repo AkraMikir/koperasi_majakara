@@ -8,11 +8,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class NasabahTemp extends Model
+class Nasabah extends Model
 {
     use HasFactory;
 
-    protected $table = 'tbl_nasabah_temp';
+    protected $table = 'tbl_nasabah';
 
     protected $fillable = [
         'user_id',
@@ -32,7 +32,7 @@ class NasabahTemp extends Model
     ];
 
     /**
-     * Get the user that owns the nasabah temp.
+     * Get the user that owns the nasabah.
      */
     public function user(): BelongsTo
     {
@@ -40,34 +40,36 @@ class NasabahTemp extends Model
     }
 
     /**
-     * Get the pekerjaan temp for the nasabah temp.
+     * Get the pekerjaan for the nasabah.
      */
-    public function pekerjaanTemp(): HasOne
+    public function pekerjaan(): HasOne
     {
-        return $this->hasOne(PekerjaanTemp::class, 'nasabah_id');
+        return $this->hasOne(Pekerjaan::class, 'nasabah_id');
     }
 
     /**
-     * Get the data rek temp for the nasabah temp.
+     * Get the data rek for the nasabah.
      */
-    public function dataRekTemp(): HasOne
+    public function dataRek(): HasOne
     {
-        return $this->hasOne(DataRekTemp::class, 'nasabah_id');
+        return $this->hasOne(DataRek::class, 'nasabah_id');
     }
 
     /**
-     * Get the data ktp temp for the nasabah temp.
+     * Get the data ktp for the nasabah.
      */
-    public function dataKtpTemp(): HasOne
+    public function dataKtp(): HasOne
     {
-        return $this->hasOne(DataKtpTemp::class, 'nasabah_id');
+        return $this->hasOne(DataKtp::class, 'nasabah_id');
     }
 
     /**
-     * Get the darurat temp for the nasabah temp.
+     * Get the darurat for the nasabah.
      */
-    public function daruratTemp(): HasOne
+    public function darurat(): HasOne
     {
-        return $this->hasOne(DaruratTemp::class, 'id_nasabah');
+        return $this->hasOne(Darurat::class, 'id_nasabah');
     }
 }
+
+

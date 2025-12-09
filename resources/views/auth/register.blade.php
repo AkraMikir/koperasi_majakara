@@ -214,6 +214,16 @@
                                         @enderror
                                     </div>
 
+                                    <div>
+                                        <label for="alamat" class="block text-sm font-medium text-gray-700 mb-2">Alamat Lengkap</label>
+                                        <textarea name="alamat" id="alamat" rows="4" required
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
+                                            placeholder="Alamat lengkap tempat tinggal">{{ old('alamat') }}</textarea>
+                                        @error('alamat')
+                                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                         <div>
                                             <label for="foto_ktp" class="block text-sm font-medium text-gray-700 mb-2">Foto KTP</label>
@@ -528,7 +538,7 @@
                             <!-- Navigation Buttons -->
                             <div class="mt-8 flex justify-between">
                                 @if($step > 1)
-                                    <button type="button" onclick="goToStep({{ $step - 1 }})" 
+                                    <button type="button" data-step="{{ $step - 1 }}" onclick="goToStep(this.dataset.step)" 
                                         class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium">
                                         Kembali
                                     </button>
@@ -540,7 +550,7 @@
                                 @endif
 
                                 @if($step < 6)
-                                    <button type="button" onclick="goToStep({{ $step + 1 }})" 
+                                    <button type="button" data-step="{{ $step + 1 }}" onclick="goToStep(this.dataset.step)" 
                                         class="px-8 py-3 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium shadow-md">
                                         Lanjutkan
                                     </button>
@@ -555,7 +565,7 @@
                     </div>
 
                     <!-- Right Side - Image Placeholder -->
-                    <div class="hidden lg:block bg-gradient-to-br from-[#674c1d] to-[#4a3514] p-12 flex items-center justify-center">
+                    <div class="hidden lg:flex bg-gradient-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
                         <div class="text-center text-white">
                             <div class="mb-6">
                                 <div class="w-64 h-64 mx-auto bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
@@ -583,16 +593,27 @@
 
     <script>
         function goToStep(step) {
+            // Convert step to number
+            step = parseInt(step);
+            
+            // Validate step
+            if (step < 1 || step > 6) {
+                console.error('Invalid step:', step);
+                return;
+            }
+            
             // Simpan data form ke sessionStorage
             const form = document.getElementById('registerForm');
-            const formData = new FormData(form);
-            const data = {};
-            for (let [key, value] of formData.entries()) {
-                if (key !== 'step' && key !== '_token') {
-                    data[key] = value;
+            if (form) {
+                const formData = new FormData(form);
+                const data = {};
+                for (let [key, value] of formData.entries()) {
+                    if (key !== 'step' && key !== '_token' && key !== 'foto' && key !== 'foto_ktp' && key !== 'foto_kk' && key !== 'file_ktp' && key !== 'darurat_foto_ktp') {
+                        data[key] = value;
+                    }
                 }
+                sessionStorage.setItem('registerData', JSON.stringify(data));
             }
-            sessionStorage.setItem('registerData', JSON.stringify(data));
             
             // Redirect ke step berikutnya
             window.location.href = '{{ route("register") }}?step=' + step;
