@@ -3,7 +3,7 @@
 @endphp
 
 <nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-transform duration-300">
-    <div class="container mx-auto px-2 max-w-7xl">
+    <div class="w-full px-2">
         <div class="flex items-center justify-around py-2">
             <!-- Home/Dashboard -->
             <a href="{{ route('nasabah.dashboard') }}" class="flex flex-col items-center justify-center space-y-1 px-3 py-2 rounded-lg transition-colors {{ $currentRoute === 'nasabah.dashboard' ? 'text-primary' : 'text-gray-600 hover:text-primary' }}">

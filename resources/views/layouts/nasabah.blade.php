@@ -50,7 +50,7 @@
     <x-nasabah.header />
     
     <!-- Main Content -->
-    <main class="container mx-auto px-4 py-3 max-w-7xl">
+    <main class="w-full overflow-x-hidden">
         @yield('content')
     </main>
     

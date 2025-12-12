@@ -70,6 +70,85 @@ class Nasabah extends Model
     {
         return $this->hasOne(Darurat::class, 'id_nasabah');
     }
+
+    // Tabungan relationships
+    public function pengajuanTabungan(): HasMany
+    {
+        return $this->hasMany(PengajuanTabungan::class, 'id_anggota');
+    }
+
+    public function pengajuanPenarikanTabungan(): HasMany
+    {
+        return $this->hasMany(PengajuanPenarikanTabungan::class, 'id_anggota');
+    }
+
+    public function transTabungan(): HasMany
+    {
+        return $this->hasMany(TransTabungan::class, 'id_anggota');
+    }
+
+    // Pinjaman relationships
+    public function pengajuanPinjaman(): HasMany
+    {
+        return $this->hasMany(PengajuanPinjaman::class, 'id_anggota');
+    }
+
+    public function pinjaman(): HasMany
+    {
+        return $this->hasMany(PinjamanH::class, 'id_anggota');
+    }
+
+    public function tempoPinjamanBulanan(): HasMany
+    {
+        return $this->hasMany(TempoPinjamanB::class, 'anggota_id');
+    }
+
+    public function tempoPinjamanMingguan(): HasMany
+    {
+        return $this->hasMany(TempoPinjamanM::class, 'anggota_id');
+    }
+
+    // Deposito relationships
+    public function pengajuanDeposito(): HasMany
+    {
+        return $this->hasMany(PengajuanDeposito::class, 'id_nasabah');
+    }
+
+    public function deposito(): HasMany
+    {
+        return $this->hasMany(DepositoH::class, 'id_nasabah');
+    }
+
+    public function pencairanDeposito(): HasMany
+    {
+        return $this->hasMany(PencairanDeposito::class, 'id_nasabah');
+    }
+
+    // Gadai relationships
+    public function itemGadai(): HasMany
+    {
+        return $this->hasMany(ItemGadai::class, 'id_nasabah');
+    }
+
+    public function pengajuanGadai(): HasMany
+    {
+        return $this->hasMany(PengajuanGadai::class, 'id_nasabah');
+    }
+
+    public function gadai(): HasMany
+    {
+        return $this->hasMany(GadaiH::class, 'id_nasabah');
+    }
+
+    public function tempoGadai(): HasMany
+    {
+        return $this->hasMany(TempoGadai::class, 'nasabah_id');
+    }
+
+    public function transGadai(): HasMany
+    {
+        return $this->hasMany(TransGadai::class, 'nasabah_id');
+    }
 }
 
 

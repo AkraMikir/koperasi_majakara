@@ -5,7 +5,7 @@
 @endphp
 
 <header class="bg-white shadow-sm sticky top-0 z-40">
-    <div class="container mx-auto px-4 py-2 max-w-7xl">
+    <div class="w-full px-4 py-2 max-w-full">
         <div class="flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center space-x-2">
