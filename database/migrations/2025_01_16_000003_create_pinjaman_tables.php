@@ -18,6 +18,10 @@ return new class extends Migration
             $table->decimal('nominal', 15, 2);
             $table->enum('jenis', ['bulanan', 'mingguan']);
             $table->char('durasi', 1);
+            $table->enum('status', ['1', '2', '3', '4'])->default('1');
+            $table->text('keterangan')->nullable();
+            $table->dateTime('tgl_cair')->nullable();
+            $table->decimal('bunga_persen', 5, 2)->nullable();
             $table->timestamps();
         });
 

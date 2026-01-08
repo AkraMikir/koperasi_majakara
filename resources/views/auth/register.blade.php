@@ -43,13 +43,25 @@
                         </div>
                     @endfor
                 </div>
-                <div class="flex justify-between mt-2 text-xs text-gray-600">
-                    <span class="{{ $step >= 1 ? 'text-[#674c1d] font-medium' : '' }}">Data Diri</span>
-                    <span class="{{ $step >= 2 ? 'text-[#674c1d] font-medium' : '' }}">Detail Nasabah</span>
-                    <span class="{{ $step >= 3 ? 'text-[#674c1d] font-medium' : '' }}">Pekerjaan</span>
-                    <span class="{{ $step >= 4 ? 'text-[#674c1d] font-medium' : '' }}">Rekening</span>
-                    <span class="{{ $step >= 5 ? 'text-[#674c1d] font-medium' : '' }}">Data KTP</span>
-                    <span class="{{ $step >= 6 ? 'text-[#674c1d] font-medium' : '' }}">Kontak Darurat</span>
+                <div class="flex items-center justify-between mt-2 text-xs text-gray-600">
+                    @php
+                        $labels = [
+                            1 => 'Data Diri',
+                            2 => 'Detail Nasabah',
+                            3 => 'Pekerjaan',
+                            4 => 'Rekening',
+                            5 => 'Data KTP',
+                            6 => 'Kontak Darurat (Optional)'
+                        ];
+                    @endphp
+                    @for($i = 1; $i <= 6; $i++)
+                        <div class="flex items-center {{ $i < 6 ? 'flex-1' : '' }}">
+                            <span class="{{ $step >= $i ? 'text-[#674c1d] font-medium' : '' }} text-center">{{ $labels[$i] }}</span>
+                            @if($i < 6)
+                                <div class="flex-1 mx-2"></div>
+                            @endif
+                        </div>
+                    @endfor
                 </div>
             </div>
 
@@ -71,7 +83,7 @@
                                 @elseif($step == 5)
                                     Data KTP
                                 @else
-                                    Kontak Darurat
+                                    Kontak Darurat (Optional)
                                 @endif
                             </h2>
                             <p class="text-gray-600">
@@ -86,7 +98,7 @@
                                 @elseif($step == 5)
                                     Masukkan data dari KTP Anda
                                 @else
-                                    Informasi kontak darurat untuk keperluan penting
+                                    Informasi kontak darurat untuk keperluan penting (Optional)
                                 @endif
                             </p>
                         </div>
