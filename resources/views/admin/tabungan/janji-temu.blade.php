@@ -47,6 +47,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal & Waktu</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Lokasi</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -74,10 +75,16 @@
                         <td class="px-6 py-4">
                             <p class="font-semibold text-[#674c1d]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
                         </td>
+                        <td class="px-6 py-4">
+                            <a href="{{ route('admin.tabungan.detail-janji-temu', $item->id) }}" 
+                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-xs font-medium">
+                                Detail
+                            </a>
+                        </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
+                        <td colspan="6" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

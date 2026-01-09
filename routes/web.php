@@ -27,7 +27,17 @@ Route::prefix('nasabah')->name('nasabah.')->group(function () {
     Route::prefix('tabungan')->name('tabungan.')->group(function () {
         Route::get('/', [TabunganController::class, 'index'])->name('index');
         Route::get('/nabung-sekarang', [TabunganController::class, 'nabungSekarang'])->name('nabung-sekarang');
+        Route::post('/nabung-sekarang', [TabunganController::class, 'submitSetoran'])->name('submit-setoran');
         Route::get('/penarikan', [TabunganController::class, 'penarikanTabungan'])->name('penarikan');
+        Route::post('/penarikan', [TabunganController::class, 'submitPenarikan'])->name('submit-penarikan');
+        Route::get('/janji-temu', [TabunganController::class, 'janjiTemu'])->name('janji-temu');
+        Route::post('/janji-temu', [TabunganController::class, 'submitJanjiTemu'])->name('submit-janji-temu');
+        Route::get('/status-pengajuan-setor', [TabunganController::class, 'statusPengajuanSetor'])->name('status-pengajuan-setor');
+        Route::get('/status-pengajuan-tarik', [TabunganController::class, 'statusPengajuanTarik'])->name('status-pengajuan-tarik');
+        Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
+        Route::get('/pengajuan-tarik/{id}', [TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
+        Route::get('/transaksi/{id}', [TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+        Route::get('/janji-temu/{id}', [TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
     });
 });
 
@@ -47,11 +57,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/pengajuan-tarik/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveTarik'])->name('approve-tarik');
         Route::post('/pengajuan-tarik/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectTarik'])->name('reject-tarik');
         Route::get('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'transaksi'])->name('transaksi');
+        Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
         Route::get('/janji-temu', [\App\Http\Controllers\Admin\TabunganController::class, 'janjiTemu'])->name('janji-temu');
+        Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
+        Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
     });
     
-    // Placeholder routes untuk menu lainnya
-    Route::get('/pinjaman', function () { return view('admin.pinjaman.index'); })->name('pinjaman.index');
+    // Pinjaman Routes
+    Route::prefix('pinjaman')->name('pinjaman.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PinjamanController::class, 'index'])->name('index');
+        Route::get('/pengajuan', [\App\Http\Controllers\Admin\PinjamanController::class, 'pengajuan'])->name('pengajuan');
+        Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
+        Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\PinjamanController::class, 'approvePengajuan'])->name('approve-pengajuan');
+        Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPengajuan'])->name('reject-pengajuan');
+        Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
+        Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
+        Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
+        Route::post('/angsuran/{id}/bayar', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePembayaranAngsuran'])->name('update-pembayaran-angsuran');
+    });
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');

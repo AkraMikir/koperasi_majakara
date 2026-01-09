@@ -17,41 +17,15 @@
                 <span class="text-xl font-bold text-primary hidden sm:block">Kospin Majakara</span>
             </div>
             
-            <!-- Welcome Text & Action Buttons -->
+            <!-- Welcome Text -->
             <div class="flex-1 text-center mx-2">
-                @if($isTabunganPage)
-                    <!-- Tab Buttons for Tabungan Pages -->
-                    <div class="flex items-center justify-center gap-3 flex-wrap">
-                        <a href="{{ route('nasabah.tabungan.nabung-sekarang') }}" 
-                            class="group relative px-6 py-3 {{ $currentRoute === 'nasabah.tabungan.nabung-sekarang' ? 'bg-gradient-to-r from-[#674c1d] to-[#4a3514] text-white shadow-lg' : 'bg-gradient-to-r from-[#8b6f2f]/10 to-[#d4af37]/10 text-[#674c1d] border-2 border-[#8b6f2f]/30 hover:from-[#8b6f2f]/20 hover:to-[#d4af37]/20' }} text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2">
-                            <div class="w-8 h-8 {{ $currentRoute === 'nasabah.tabungan.nabung-sekarang' ? 'bg-white/20' : 'bg-gradient-to-br from-[#674c1d] to-[#8b6f2f]' }} rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 {{ $currentRoute === 'nasabah.tabungan.nabung-sekarang' ? 'text-white' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
-                            </div>
-                            <span>NABUNG SEKARANG</span>
-                            @if($currentRoute === 'nasabah.tabungan.nabung-sekarang')
-                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-[#d4af37] to-[#8b6f2f] rounded-full"></div>
-                            @endif
-                        </a>
-                        <a href="{{ route('nasabah.tabungan.penarikan') }}" 
-                            class="group relative px-6 py-3 {{ $currentRoute === 'nasabah.tabungan.penarikan' ? 'bg-gradient-to-r from-[#674c1d] to-[#4a3514] text-white shadow-lg' : 'bg-gradient-to-r from-[#8b6f2f]/10 to-[#d4af37]/10 text-[#674c1d] border-2 border-[#8b6f2f]/30 hover:from-[#8b6f2f]/20 hover:to-[#d4af37]/20' }} text-sm font-bold rounded-xl transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-105 flex items-center gap-2">
-                            <div class="w-8 h-8 {{ $currentRoute === 'nasabah.tabungan.penarikan' ? 'bg-white/20' : 'bg-gradient-to-br from-[#674c1d] to-[#8b6f2f]' }} rounded-lg flex items-center justify-center">
-                                <svg class="w-5 h-5 {{ $currentRoute === 'nasabah.tabungan.penarikan' ? 'text-white' : 'text-white' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                            </div>
-                            <span>PENARIKAN TABUNGAN</span>
-                            @if($currentRoute === 'nasabah.tabungan.penarikan')
-                                <div class="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-3/4 h-1 bg-gradient-to-r from-[#d4af37] to-[#8b6f2f] rounded-full"></div>
-                            @endif
-                        </a>
-                    </div>
-                @else
-                    <h1 class="text-base sm:text-lg font-bold text-primary font-display">
+                <h1 class="text-base sm:text-lg font-bold text-primary font-display">
+                    @if($isTabunganPage)
+                        TABUNGAN
+                    @else
                         SELAMAT DATANG DI KOPERASI MAJAKARA!!
-                    </h1>
-                @endif
+                    @endif
+                </h1>
             </div>
             
             <!-- Right Side: Icons and Time -->

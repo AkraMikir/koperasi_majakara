@@ -107,8 +107,26 @@ class TabunganController extends Controller
         // Update status to approved (status '2')
         $pengajuan->update(['status' => '2']);
 
-        // Create transaksi tabungan jika belum ada
-        // Note: Implementasi sesuai kebutuhan bisnis
+        // Get nominal from bukti foto atau janji temu
+        $nominal = 0;
+        if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
+            $nominal = $pengajuan->buktiFoto->sum('nominal');
+        } elseif ($pengajuan->janjiTemu) {
+            $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+        }
+
+        // Create transaksi tabungan jika belum ada dan nominal > 0
+        if ($nominal > 0 && $pengajuan->transTabungan->count() == 0) {
+            TransTabungan::create([
+                'id_pengajuan_setor' => $pengajuan->id,
+                'id_anggota' => $pengajuan->id_anggota,
+                'nominal' => $nominal,
+                'keterangan' => $pengajuan->keterangan ?? 'Setoran tabungan disetujui',
+                'jenis' => 'setoran',
+                'via' => $request->via ?? 'transfer',
+                'tgl_transaksi' => now(),
+            ]);
+        }
 
         return redirect()->route('admin.tabungan.pengajuan-setor')
             ->with('success', 'Pengajuan setoran berhasil disetujui');
@@ -285,6 +303,61 @@ class TabunganController extends Controller
         $janjiTemu = $query->paginate(15);
 
         return view('admin.tabungan.janji-temu', compact('janjiTemu'));
+    }
+
+    /**
+     * Display detail transaksi tabungan.
+     */
+    public function detailTransaksi($id)
+    {
+        $transaksi = TransTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'pengajuanSetor.buktiFoto', 'pengajuanTarik'])
+            ->findOrFail($id);
+
+        return view('admin.tabungan.detail-transaksi', compact('transaksi'));
+    }
+
+    /**
+     * Display detail janji temu.
+     */
+    public function detailJanjiTemu($id)
+    {
+        $janjiTemu = JanjiTemuTabungan::with(['pengajuan.nasabah.user', 'pengajuan.nasabah.dataKtp', 'lokasi'])
+            ->findOrFail($id);
+
+        return view('admin.tabungan.detail-janji-temu', compact('janjiTemu'));
+    }
+
+    /**
+     * Display saldo nasabah per nasabah.
+     */
+    public function saldoNasabah(Request $request)
+    {
+        $query = Nasabah::with('user');
+
+        // Search
+        if ($request->has('search') && $request->search !== '') {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $nasabah = $query->paginate(20);
+
+        // Calculate saldo for each nasabah
+        $nasabah->getCollection()->transform(function($item) {
+            $item->saldo = $this->getSaldoNasabah($item->id);
+            $item->total_setoran = TransTabungan::where('id_anggota', $item->id)
+                ->where('jenis', 'setoran')
+                ->sum('nominal') ?? 0;
+            $item->total_penarikan = TransTabungan::where('id_anggota', $item->id)
+                ->where('jenis', 'penarikan')
+                ->sum('nominal') ?? 0;
+            return $item;
+        });
+
+        return view('admin.tabungan.saldo-nasabah', compact('nasabah'));
     }
 
     /**
