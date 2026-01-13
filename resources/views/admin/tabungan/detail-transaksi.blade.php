@@ -81,7 +81,8 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($transaksi->pengajuanSetor->buktiFoto as $bukti)
                     <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <img src="{{ asset('storage/' . $bukti->file_photo) }}" alt="Bukti Foto" class="w-full h-48 object-cover">
+                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($bukti->file_photo) }}" alt="Bukti Foto" class="w-full h-48 object-cover"
+                            onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'400\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EGambar tidak dapat dimuat%3C/text%3E%3C/svg%3E';">
                         <div class="p-3 bg-gray-50">
                             <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($bukti->nominal, 0, ',', '.') }}</p>
                             <p class="text-xs text-gray-600">{{ $bukti->keterangan }}</p>

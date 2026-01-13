@@ -10,6 +10,7 @@ use App\Models\JanjiTemuTabungan;
 use App\Models\Nasabah;
 use App\Models\BuktiFotoTabungan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class TabunganController extends Controller
 {
@@ -61,7 +62,7 @@ class TabunganController extends Controller
      */
     public function pengajuanSetor(Request $request)
     {
-        $query = PengajuanTabungan::with(['nasabah.user', 'buktiFoto'])
+        $query = PengajuanTabungan::with(['nasabah.user', 'buktiFoto', 'janjiTemu'])
             ->latest();
 
         // Filter by status
@@ -91,7 +92,7 @@ class TabunganController extends Controller
      */
     public function detailPengajuanSetor($id)
     {
-        $pengajuan = PengajuanTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'buktiFoto', 'janjiTemu.lokasi'])
+        $pengajuan = PengajuanTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'buktiFoto', 'janjiTemu.lokasi'])
             ->findOrFail($id);
 
         return view('admin.tabungan.detail-pengajuan-setor', compact('pengajuan'));
@@ -102,7 +103,7 @@ class TabunganController extends Controller
      */
     public function approveSetor(Request $request, $id)
     {
-        $pengajuan = PengajuanTabungan::findOrFail($id);
+        $pengajuan = PengajuanTabungan::with(['buktiFoto', 'janjiTemu', 'transTabungan'])->findOrFail($id);
         
         // Update status to approved (status '2')
         $pengajuan->update(['status' => '2']);
@@ -116,6 +117,7 @@ class TabunganController extends Controller
         }
 
         // Create transaksi tabungan jika belum ada dan nominal > 0
+        // Pastikan tidak ada duplikasi transaksi
         if ($nominal > 0 && $pengajuan->transTabungan->count() == 0) {
             TransTabungan::create([
                 'id_pengajuan_setor' => $pengajuan->id,
@@ -123,9 +125,12 @@ class TabunganController extends Controller
                 'nominal' => $nominal,
                 'keterangan' => $pengajuan->keterangan ?? 'Setoran tabungan disetujui',
                 'jenis' => 'setoran',
-                'via' => $request->via ?? 'transfer',
+                'via' => $pengajuan->janjiTemu ? 'cash' : ($request->via ?? 'transfer'),
                 'tgl_transaksi' => now(),
             ]);
+        } elseif ($nominal == 0) {
+            return redirect()->back()
+                ->with('error', 'Tidak dapat menyetujui pengajuan: Nominal tidak ditemukan. Pastikan ada bukti foto atau janji temu dengan nominal.');
         }
 
         return redirect()->route('admin.tabungan.pengajuan-setor')
@@ -321,10 +326,129 @@ class TabunganController extends Controller
      */
     public function detailJanjiTemu($id)
     {
-        $janjiTemu = JanjiTemuTabungan::with(['pengajuan.nasabah.user', 'pengajuan.nasabah.dataKtp', 'lokasi'])
+        $janjiTemu = JanjiTemuTabungan::with(['pengajuan.nasabah.user', 'pengajuan.nasabah.dataKtp', 'pengajuan.nasabah.dataRek', 'lokasi', 'pengajuan.transTabungan'])
             ->findOrFail($id);
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu'));
+    }
+
+    /**
+     * Create transaksi tabungan langsung dari janji temu.
+     */
+    public function createTransFromJanjiTemu(Request $request, $id)
+    {
+        $request->validate([
+            'nominal' => 'required|string',
+            'keterangan' => 'nullable|string|max:500',
+            'foto_penerimaan' => 'nullable|image|max:5120',
+            'tgl_transaksi' => 'required|date',
+        ]);
+
+        // Parse nominal from formatted currency string
+        $nominal = (float) str_replace(['.', ','], '', $request->nominal);
+        
+        if ($nominal < 10000) {
+            return redirect()->back()
+                ->with('error', 'Nominal minimal Rp 10.000')
+                ->withInput();
+        }
+
+        $janjiTemu = JanjiTemuTabungan::with('pengajuan')->findOrFail($id);
+        $pengajuan = $janjiTemu->pengajuan;
+
+        // Check if transaksi already exists
+        if ($pengajuan->transTabungan->count() > 0) {
+            return redirect()->back()
+                ->with('error', 'Transaksi untuk janji temu ini sudah pernah dibuat');
+        }
+
+        // Handle foto penerimaan jika ada
+        $fotoPenerimaan = null;
+        if ($request->hasFile('foto_penerimaan')) {
+            $fotoPenerimaan = $request->file('foto_penerimaan')->store('bukti_tabungan', 'public');
+            
+            // Simpan juga ke bukti foto tabungan
+            BuktiFotoTabungan::create([
+                'id_pengajuan' => $pengajuan->id,
+                'file_photo' => $fotoPenerimaan,
+                'jenis' => 'tabungan',
+                'nominal' => $nominal,
+                'keterangan' => $request->keterangan ?? 'Bukti penerimaan dari janji temu',
+            ]);
+        }
+
+        // Update status pengajuan menjadi approved jika belum
+        if ($pengajuan->status == '1') {
+            $pengajuan->update(['status' => '2']);
+        }
+
+        // Create transaksi tabungan
+        $transaksi = TransTabungan::create([
+            'id_pengajuan_setor' => $pengajuan->id,
+            'id_anggota' => $pengajuan->id_anggota,
+            'nominal' => $nominal,
+            'keterangan' => $request->keterangan ?? 'Setoran tabungan dari janji temu',
+            'jenis' => 'setoran',
+            'via' => 'cash',
+            'tgl_transaksi' => $request->tgl_transaksi,
+        ]);
+
+        return redirect()->route('admin.tabungan.detail-janji-temu', $id)
+            ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu');
+    }
+
+    /**
+     * Edit pengajuan setoran.
+     */
+    public function editPengajuanSetor(Request $request, $id)
+    {
+        $request->validate([
+            'keterangan' => 'nullable|string|max:500',
+            'status' => 'required|in:1,2,3',
+        ]);
+
+        $pengajuan = PengajuanTabungan::findOrFail($id);
+        
+        $updateData = [
+            'keterangan' => $request->keterangan,
+            'status' => $request->status,
+        ];
+
+        $pengajuan->update($updateData);
+
+        return redirect()->route('admin.tabungan.detail-pengajuan-setor', $id)
+            ->with('success', 'Pengajuan setoran berhasil diupdate');
+    }
+
+    /**
+     * Delete pengajuan setoran.
+     */
+    public function deletePengajuanSetor($id)
+    {
+        $pengajuan = PengajuanTabungan::findOrFail($id);
+        
+        // Hanya bisa delete jika status masih pending dan belum ada transaksi
+        if ($pengajuan->status != '1') {
+            return redirect()->back()
+                ->with('error', 'Hanya pengajuan dengan status pending yang bisa dihapus');
+        }
+
+        if ($pengajuan->transTabungan->count() > 0) {
+            return redirect()->back()
+                ->with('error', 'Pengajuan yang sudah memiliki transaksi tidak bisa dihapus');
+        }
+
+        // Delete bukti foto files
+        foreach ($pengajuan->buktiFoto as $bukti) {
+            if (Storage::disk('public')->exists($bukti->file_photo)) {
+                Storage::disk('public')->delete($bukti->file_photo);
+            }
+        }
+
+        $pengajuan->delete();
+
+        return redirect()->route('admin.tabungan.pengajuan-setor')
+            ->with('success', 'Pengajuan setoran berhasil dihapus');
     }
 
     /**
@@ -365,6 +489,7 @@ class TabunganController extends Controller
      */
     private function getSaldoNasabah($idAnggota)
     {
+        // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'setoran')
             ->sum('nominal') ?? 0;
@@ -372,6 +497,23 @@ class TabunganController extends Controller
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'penarikan')
             ->sum('nominal') ?? 0;
+
+        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
+        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->with('buktiFoto', 'janjiTemu')
+            ->get();
+
+        foreach ($pengajuanApproved as $pengajuan) {
+            $nominal = 0;
+            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
+                $nominal = $pengajuan->buktiFoto->sum('nominal');
+            } elseif ($pengajuan->janjiTemu) {
+                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+            }
+            $totalSetoran += $nominal;
+        }
 
         return max(0, $totalSetoran - $totalPenarikan);
     }

@@ -41,7 +41,7 @@
                             <p class="text-white text-xs font-medium text-center">Tabungan</p>
                         </div>
                     </a>
-                    <a href="#" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
+                    <a href="{{ route('nasabah.pinjaman.index') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
                         <div class="flex flex-col items-center gap-2">
                             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,7 +101,7 @@
             </a>
 
             <!-- Pinjaman Card -->
-            <a href="#" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#8b6f2f]/30 group">
+            <a href="{{ route('nasabah.pinjaman.index') }}" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#8b6f2f]/30 group">
                 <div class="flex items-center justify-between mb-4">
                     <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">

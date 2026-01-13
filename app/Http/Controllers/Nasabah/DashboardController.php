@@ -103,4 +103,28 @@ class DashboardController extends Controller
             'transaksiTerbaru' => $transaksiTerbaru,
         ]);
     }
+
+    /**
+     * Show the nasabah profile page.
+     */
+    public function profile()
+    {
+        // TODO: Get from auth
+        $idAnggota = 1;
+        
+        // Get nasabah data with all relationships
+        $nasabah = Nasabah::with(['user', 'pekerjaan', 'dataKtp', 'dataRek', 'darurat', 'transTabungan'])
+            ->findOrFail($idAnggota);
+
+        // Calculate saldo tabungan
+        $totalSetoran = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
+            ->where('jenis', 'setoran')
+            ->sum('nominal') ?? 0;
+        $totalPenarikan = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
+            ->where('jenis', 'penarikan')
+            ->sum('nominal') ?? 0;
+        $saldoTabungan = max(0, $totalSetoran - $totalPenarikan);
+
+        return view('nasabah.profile', compact('nasabah', 'saldoTabungan'));
+    }
 }

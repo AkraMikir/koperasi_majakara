@@ -9,12 +9,12 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
+                            </svg>
+                        </div>
                 <h2 class="text-lg font-bold text-[#674c1d] font-display">Pilih Metode Setoran</h2>
-            </div>
+                    </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Metode Tunai -->
@@ -37,7 +37,7 @@
                         </svg>
                         <span>Datang ke kantor terdekat</span>
                     </div>
-                </button>
+                        </button>
 
                 <!-- Metode Transfer -->
                 <button onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
@@ -114,11 +114,11 @@
                     </button>
                 </div>
             </form>
+            </div>
         </div>
-    </div>
 
     <!-- Riwayat Setoran -->
-    <div class="mx-4 mb-6">
+        <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
@@ -129,8 +129,8 @@
                     </div>
                     <h2 class="text-lg font-bold text-[#674c1d] font-display">Riwayat Setoran</h2>
                 </div>
-            </div>
-            
+                </div>
+                
             <div class="space-y-3">
                 @forelse($riwayatTabungan ?? [] as $riwayat)
                 <a href="{{ route('nasabah.tabungan.detail-transaksi', $riwayat->id) }}" class="block p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#674c1d]/30 hover:shadow-md transition-all">
@@ -139,7 +139,7 @@
                             <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                                </svg>
+                            </svg>
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900">Setoran</p>
@@ -150,7 +150,7 @@
                             <div>
                                 <p class="font-bold text-green-600">+Rp {{ number_format($riwayat->nominal, 0, ',', '.') }}</p>
                                 <p class="text-xs text-gray-500 font-mono">TRX{{ str_pad($riwayat->id, 3, '0', STR_PAD_LEFT) }}</p>
-                            </div>
+                    </div>
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
@@ -252,6 +252,20 @@
             alert('Minimal upload 1 bukti transfer');
             return;
         }
+
+        // Convert formatted currency to number before submit
+        const nominalInput = document.getElementById('nominal');
+        if (nominalInput) {
+            const value = nominalInput.value.replace(/[^\d]/g, '');
+            nominalInput.value = value;
+        }
+
+        // Convert all nominal_foto inputs
+        const nominalFotoInputs = document.querySelectorAll('input[name="nominal_foto[]"]');
+        nominalFotoInputs.forEach(input => {
+            const value = input.value.replace(/[^\d]/g, '');
+            input.value = value;
+        });
     });
 </script>
 @endpush

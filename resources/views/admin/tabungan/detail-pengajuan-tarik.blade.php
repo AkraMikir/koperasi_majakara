@@ -57,12 +57,47 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Saldo Saat Ini</p>
-                        <p class="font-semibold text-gray-900">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
                         @if($saldo < $pengajuan->nominal)
-                            <p class="text-sm text-red-600 mt-1">⚠ Saldo tidak mencukupi</p>
+                            <p class="text-sm text-red-600 mt-1 font-semibold">⚠ Saldo tidak mencukupi</p>
+                            <p class="text-xs text-gray-500 mt-1">Kekurangan: Rp {{ number_format($pengajuan->nominal - $saldo, 0, ',', '.') }}</p>
                         @else
-                            <p class="text-sm text-green-600 mt-1">✓ Saldo mencukupi</p>
+                            <p class="text-sm text-green-600 mt-1 font-semibold">✓ Saldo mencukupi</p>
+                            <p class="text-xs text-gray-500 mt-1">Sisa setelah penarikan: Rp {{ number_format($saldo - $pengajuan->nominal, 0, ',', '.') }}</p>
                         @endif
+                        @php
+                            // Debug info untuk melihat detail saldo
+                            $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $pengajuan->id_anggota)
+                                ->where('jenis', 'setoran')
+                                ->sum('nominal') ?? 0;
+                            $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $pengajuan->id_anggota)
+                                ->where('jenis', 'penarikan')
+                                ->sum('nominal') ?? 0;
+                            $pengajuanApproved = \App\Models\PengajuanTabungan::where('id_anggota', $pengajuan->id_anggota)
+                                ->where('status', '2')
+                                ->whereDoesntHave('transTabungan')
+                                ->with('buktiFoto', 'janjiTemu')
+                                ->get();
+                            $totalSetoranPending = 0;
+                            foreach ($pengajuanApproved as $p) {
+                                if ($p->buktiFoto && $p->buktiFoto->count() > 0) {
+                                    $totalSetoranPending += $p->buktiFoto->sum('nominal');
+                                } elseif ($p->janjiTemu) {
+                                    $totalSetoranPending += $p->janjiTemu->nominal ?? 0;
+                                }
+                            }
+                        @endphp
+                        <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">Detail Saldo:</p>
+                            <div class="space-y-1 text-xs text-gray-600">
+                                <p>Total Setoran (Transaksi): Rp {{ number_format($totalSetoranTrans, 0, ',', '.') }}</p>
+                                <p>Total Penarikan (Transaksi): Rp {{ number_format($totalPenarikanTrans, 0, ',', '.') }}</p>
+                                @if($totalSetoranPending > 0)
+                                <p class="text-blue-600">Setoran Pending (Belum Transaksi): Rp {{ number_format($totalSetoranPending, 0, ',', '.') }}</p>
+                                @endif
+                                <p class="font-semibold text-gray-900 pt-1 border-t border-gray-300">Saldo Akhir: Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+                            </div>
+                        </div>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Status</p>

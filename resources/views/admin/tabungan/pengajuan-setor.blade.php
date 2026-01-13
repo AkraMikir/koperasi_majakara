@@ -47,6 +47,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">ID</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal Pengajuan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Bukti Foto</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
@@ -54,6 +55,15 @@
                 </thead>
                 <tbody>
                     @forelse($pengajuan as $item)
+                    @php
+                        // Calculate total nominal from bukti foto or janji temu
+                        $totalNominal = 0;
+                        if ($item->buktiFoto && $item->buktiFoto->count() > 0) {
+                            $totalNominal = $item->buktiFoto->sum('nominal');
+                        } elseif ($item->janjiTemu) {
+                            $totalNominal = $item->janjiTemu->nominal ?? 0;
+                        }
+                    @endphp
                     <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
                         <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>
                         <td class="px-6 py-4">
@@ -63,6 +73,13 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm">{{ $item->created_at->format('d M Y, H:i') }}</td>
+                        <td class="px-6 py-4">
+                            @if($totalNominal > 0)
+                                <p class="font-semibold text-[#674c1d]">Rp {{ number_format($totalNominal, 0, ',', '.') }}</p>
+                            @else
+                                <p class="text-sm text-gray-400">-</p>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">
                             <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                 {{ $item->buktiFoto->count() ?? 0 }} foto
@@ -90,7 +107,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="6" class="px-6 py-12 text-center">
+                        <td colspan="7" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>

@@ -135,9 +135,8 @@ class TabunganController extends Controller
             'metode' => 'required|in:tunai,transfer',
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
-            'bukti_file' => 'required_if:metode,transfer|image|max:5120',
             'bukti_foto.*' => 'required_if:metode,transfer|image|max:5120',
-            'nominal_foto.*' => 'required_if:metode,transfer|numeric|min:10000',
+            'nominal_foto.*' => 'required_if:metode,transfer|string',
             'keterangan_foto.*' => 'nullable|string|max:255',
         ]);
 
@@ -145,10 +144,17 @@ class TabunganController extends Controller
         $idAnggota = 1; // TODO: Get from auth
 
         if ($request->metode === 'transfer') {
+            // Validate bukti foto exists
+            if (!$request->hasFile('bukti_foto') || count($request->file('bukti_foto')) == 0) {
+                return redirect()->back()
+                    ->with('error', 'Minimal upload 1 bukti transfer')
+                    ->withInput();
+            }
+
             // Create pengajuan tabungan
             $pengajuan = PengajuanTabungan::create([
                 'id_anggota' => $idAnggota,
-                'foto_bukti_tf' => 'dummy', // Will be updated
+                'foto_bukti_tf' => 'transfer', // Indikator bahwa ini transfer
                 'keterangan' => $request->keterangan,
                 'status' => '1', // Pending
             ]);
@@ -158,11 +164,15 @@ class TabunganController extends Controller
                 foreach ($request->file('bukti_foto') as $index => $file) {
                     $path = $file->store('bukti_tabungan', 'public');
                     
+                    // Parse nominal from formatted currency string
+                    $nominalStr = $request->nominal_foto[$index] ?? '0';
+                    $nominal = (float) str_replace(['.', ','], '', $nominalStr);
+                    
                     BuktiFotoTabungan::create([
                         'id_pengajuan' => $pengajuan->id,
                         'file_photo' => $path,
                         'jenis' => 'tabungan',
-                        'nominal' => $request->nominal_foto[$index] ?? $request->nominal,
+                        'nominal' => $nominal > 0 ? $nominal : $request->nominal,
                         'keterangan' => $request->keterangan_foto[$index] ?? 'Bukti transfer',
                     ]);
                 }

@@ -75,28 +75,58 @@ class TabunganSeeder extends Seeder
             ]);
         }
 
-        // Pengajuan penarikan tabungan untuk nasabah ketiga (jika ada)
+        // Pengajuan setoran dan penarikan tabungan untuk nasabah ketiga (Ahmad Fauzi)
         if ($nasabahList->count() >= 3) {
-            $nasabah = $nasabahList[2];
+            $nasabah = $nasabahList[2]; // Ahmad Fauzi
 
+            // Buat beberapa pengajuan setoran untuk Ahmad Fauzi (total 12.5 juta)
+            $setoranData = [
+                ['nominal' => 5000000, 'hari' => 5, 'keterangan' => 'Setoran pertama'],
+                ['nominal' => 3000000, 'hari' => 3, 'keterangan' => 'Setoran kedua'],
+                ['nominal' => 2500000, 'hari' => 1, 'keterangan' => 'Setoran ketiga'],
+                ['nominal' => 2000000, 'hari' => 0, 'keterangan' => 'Setoran keempat'],
+            ];
+
+            foreach ($setoranData as $idx => $setoran) {
+                $pengajuanSetor = PengajuanTabungan::create([
+                    'id_anggota' => $nasabah->id,
+                    'foto_bukti_tf' => "setoran_ahmad_{$idx}.jpg",
+                    'keterangan' => $setoran['keterangan'] . ' untuk Ahmad Fauzi',
+                    'status' => '2', // disetujui
+                ]);
+
+                // Bukti foto setoran
+                BuktiFotoTabungan::create([
+                    'id_pengajuan' => $pengajuanSetor->id,
+                    'file_photo' => "bukti_setoran_ahmad_{$idx}.jpg",
+                    'jenis' => 'tabungan',
+                    'nominal' => $setoran['nominal'],
+                    'keterangan' => 'Setoran via transfer',
+                ]);
+
+                // Transaksi setoran untuk Ahmad Fauzi
+                TransTabungan::create([
+                    'id_pengajuan_setor' => $pengajuanSetor->id,
+                    'id_anggota' => $nasabah->id,
+                    'nominal' => $setoran['nominal'],
+                    'keterangan' => $setoran['keterangan'] . ' untuk Ahmad Fauzi',
+                    'jenis' => 'setoran',
+                    'via' => 'transfer',
+                    'tgl_transaksi' => now()->subDays($setoran['hari']),
+                ]);
+            }
+
+            // Pengajuan penarikan tabungan untuk Ahmad Fauzi
             $pengajuanTarik = PengajuanPenarikanTabungan::create([
                 'id_anggota' => $nasabah->id,
-                'tgl_pengajuan' => now()->addDays(2),
+                'tgl_pengajuan' => now(),
                 'nominal' => 750000,
                 'keterangan' => 'Penarikan sebagian saldo',
                 'status' => '1', // menunggu
             ]);
 
-            // Transaksi penarikan (menunggu) tanpa bukti setoran
-            TransTabungan::create([
-                'id_pengajuan_tarik' => $pengajuanTarik->id,
-                'id_anggota' => $nasabah->id,
-                'nominal' => 750000,
-                'keterangan' => 'Pengajuan penarikan saldo',
-                'jenis' => 'penarikan',
-                'via' => 'transfer',
-                'tgl_transaksi' => now()->addDays(2),
-            ]);
+            // Jangan buat transaksi penarikan dulu, karena masih pending
+            // Transaksi penarikan akan dibuat saat admin approve
         }
     }
 }

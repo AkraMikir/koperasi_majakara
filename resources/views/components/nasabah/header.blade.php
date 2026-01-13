@@ -10,22 +10,20 @@
     <div class="w-full px-4 py-2 max-w-full">
         <div class="flex items-center justify-between">
             <!-- Logo -->
-            <div class="flex items-center space-x-2">
-                <div class="w-10 h-10 gradient-primary rounded-lg flex items-center justify-center">
-                    <span class="text-white font-bold text-xl">K</span>
-                </div>
+            <div class="flex items-center space-x-3">
+                <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo" class="h-24 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                 <span class="text-xl font-bold text-primary hidden sm:block">Kospin Majakara</span>
             </div>
             
             <!-- Welcome Text -->
             <div class="flex-1 text-center mx-2">
                 <h1 class="text-base sm:text-lg font-bold text-primary font-display">
-                    @if($isTabunganPage)
+                @if($isTabunganPage)
                         TABUNGAN
-                    @else
+                @else
                         SELAMAT DATANG DI KOPERASI MAJAKARA!!
                     @endif
-                </h1>
+                    </h1>
             </div>
             
             <!-- Right Side: Icons and Time -->
@@ -39,7 +37,7 @@
                 </button>
                 
                 <!-- Profile/Settings Icon -->
-                <a href="#" class="p-2 text-gray-600 hover:text-primary transition-colors">
+                <a href="{{ route('nasabah.profile') }}" class="p-2 text-gray-600 hover:text-primary transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
