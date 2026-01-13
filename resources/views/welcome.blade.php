@@ -144,7 +144,7 @@
             <div class="flex justify-between items-center h-20">
                 <!-- Logo -->
                 <div class="flex items-center space-x-3">
-                    <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Kospin Majakara" class="h-24 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                    <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Kospin Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                     <span class="text-xl font-bold text-primary">Kospin Majakara</span>
                 </div>
                 
@@ -456,7 +456,7 @@
                 <!-- Testimonial 1 -->
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 fade-in-up animate-on-scroll delay-100">
                     <div class="flex items-center mb-6">
-                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Ahmad Rizki" class="w-28 h-28 object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Ahmad Rizki" class="w-16 h-16 object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                         <div class="ml-4">
                             <h4 class="font-bold text-lg text-primary">Ahmad Rizki</h4>
                             <p class="text-gray-600 text-sm">Anggota Sejak 2020</p>
@@ -487,7 +487,7 @@
                 <!-- Testimonial 2 -->
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 fade-in-up animate-on-scroll delay-200">
                     <div class="flex items-center mb-6">
-                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Siti Nurhaliza" class="w-28 h-28 object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Siti Nurhaliza" class="w-16 h-16 object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                         <div class="ml-4">
                             <h4 class="font-bold text-lg text-primary">Siti Nurhaliza</h4>
                             <p class="text-gray-600 text-sm">Anggota Sejak 2021</p>
@@ -518,7 +518,7 @@
                 <!-- Testimonial 3 -->
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 fade-in-up animate-on-scroll delay-300">
                     <div class="flex items-center mb-6">
-                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Budi Santoso" class="w-20 h-20 object-contain">
+                        <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Budi Santoso" class="w-16 h-16 object-contain">
                         <div class="ml-4">
                             <h4 class="font-bold text-lg text-primary">Budi Santoso</h4>
                             <p class="text-gray-600 text-sm">Anggota Sejak 2019</p>
@@ -647,7 +647,7 @@
                 <!-- Logo & Description -->
                 <div class="md:col-span-1 fade-in-up animate-on-scroll delay-100">
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-24 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                         <span class="text-xl font-bold">Koperasi Majakara</span>
                     </div>
                     <p class="text-white/80 text-sm leading-relaxed">

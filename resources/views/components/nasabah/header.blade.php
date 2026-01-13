@@ -11,7 +11,7 @@
         <div class="flex items-center justify-between">
             <!-- Logo -->
             <div class="flex items-center space-x-3">
-                <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo" class="h-24 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
                 <span class="text-xl font-bold text-primary hidden sm:block">Kospin Majakara</span>
             </div>
             
