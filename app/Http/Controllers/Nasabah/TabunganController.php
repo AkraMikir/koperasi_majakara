@@ -29,15 +29,18 @@ class TabunganController extends Controller
             'role' => 'nasabah',
         ];
 
-        // Dummy data for tabungan info
+        // Get transaksi tabungan from database
+        $idAnggota = 1; // TODO: Get from auth
+        
+        // Calculate saldo from database
+        $saldo = $this->getSaldoNasabah($idAnggota);
+        
+        // Tabungan info from database
         $tabunganInfo = (object) [
-            'saldo' => 5000000,
+            'saldo' => $saldo,
             'bunga' => 3.5,
             'status' => 'Aktif',
         ];
-
-        // Get transaksi tabungan from database
-        $idAnggota = 1; // TODO: Get from auth
         $transaksiTabungan = TransTabungan::where('id_anggota', $idAnggota)
             ->latest('tgl_transaksi')
             ->take(10)
@@ -375,10 +378,11 @@ class TabunganController extends Controller
     }
 
     /**
-     * Get saldo nasabah.
+     * Get saldo nasabah (same method as Admin controller).
      */
     private function getSaldoNasabah($idAnggota)
     {
+        // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'setoran')
             ->sum('nominal') ?? 0;
@@ -386,6 +390,23 @@ class TabunganController extends Controller
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'penarikan')
             ->sum('nominal') ?? 0;
+
+        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
+        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->with('buktiFoto', 'janjiTemu')
+            ->get();
+
+        foreach ($pengajuanApproved as $pengajuan) {
+            $nominal = 0;
+            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
+                $nominal = $pengajuan->buktiFoto->sum('nominal');
+            } elseif ($pengajuan->janjiTemu) {
+                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+            }
+            $totalSetoran += $nominal;
+        }
 
         return max(0, $totalSetoran - $totalPenarikan);
     }

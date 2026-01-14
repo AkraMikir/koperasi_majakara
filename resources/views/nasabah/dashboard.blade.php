@@ -20,7 +20,6 @@
                         <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display">
                             Rp {{ number_format($stats['total_assets'] ?? 0, 0, ',', '.') }}
                         </h1>
-                        <p class="text-white/80 text-sm">Tabungan + Deposito</p>
                     </div>
                     <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                         <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
