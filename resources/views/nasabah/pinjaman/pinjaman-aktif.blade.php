@@ -1,0 +1,130 @@
+@extends('layouts.nasabah')
+
+@section('title', 'Pinjaman Aktif')
+
+@section('content')
+<div class="w-full pb-6">
+    <!-- Hero Section -->
+    <div class="mx-4 mt-4 mb-6">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+            <div class="relative z-10">
+                <h1 class="text-3xl font-bold text-white mb-2 font-display">Pinjaman Aktif</h1>
+                <p class="text-white/90 text-sm">Daftar semua pinjaman aktif Anda</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="mx-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div class="flex items-center gap-2 mb-4">
+                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                </svg>
+                <p class="text-xs font-semibold text-gray-700">Filter Pinjaman</p>
+            </div>
+            
+            <form method="GET" action="{{ route('nasabah.pinjaman.pinjaman-aktif') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Jenis</label>
+                    <select name="jenis" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20">
+                        <option value="">Semua Jenis</option>
+                        <option value="bulanan" {{ request('jenis') === 'bulanan' ? 'selected' : '' }}>Bulanan</option>
+                        <option value="mingguan" {{ request('jenis') === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-700 mb-2">Status</label>
+                    <select name="status" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20">
+                        <option value="">Semua Status</option>
+                        <option value="pencairan" {{ request('status') === 'pencairan' ? 'selected' : '' }}>Pencairan</option>
+                        <option value="telaksana" {{ request('status') === 'telaksana' ? 'selected' : '' }}>Telaksana</option>
+                    </select>
+                </div>
+                <div class="flex items-end">
+                    <button type="submit" class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-2 rounded-xl hover:shadow-lg transition-all">
+                        Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- List Pinjaman -->
+    <div class="mx-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-[#8b6f2f]/20">
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Tanggal Pinjam</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jenis</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pinjaman ?? [] as $item)
+                        @php
+                            $totalTagihan = $item->jumlah_pinjam + $item->bunga_rp;
+                            $totalTerbayar = 0;
+                            if ($item->jenis === 'bulanan') {
+                                $totalTerbayar = $item->tempoBulanan->sum('jumlah_terbayar') ?? 0;
+                            } else {
+                                $totalTerbayar = $item->tempoMingguan->sum('jumlah_terbayar') ?? 0;
+                            }
+                            $sisa = max(0, $totalTagihan - $totalTerbayar);
+                        @endphp
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pinjaman', $item->id) }}'">
+                            <td class="px-4 py-3 text-sm">
+                                <p class="font-medium text-gray-900">{{ $item->tgl_pinjam->format('d M Y') }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-gray-900">Rp {{ number_format($item->jumlah_pinjam, 0, ',', '.') }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                    {{ ucfirst($item->jenis) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-orange-600">Rp {{ number_format($sisa, 0, ',', '.') }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="px-3 py-1 {{ $item->status === 'telaksana' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
+                                        {{ ucfirst($item->status) }}
+                                    </span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="px-4 py-12 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="text-gray-500">Belum ada pinjaman aktif</p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            @if(isset($pinjaman) && $pinjaman->hasPages())
+            <div class="mt-6">
+                {{ $pinjaman->links() }}
+            </div>
+            @endif
+        </div>
+    </div>
+</div>
+@endsection

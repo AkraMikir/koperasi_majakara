@@ -79,6 +79,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('gadai_id')->constrained('tbl_gadai_h')->onDelete('cascade');
             $table->foreignId('nasabah_id')->constrained('tbl_nasabah')->onDelete('cascade');
+            $table->integer('no_urut');
             $table->dateTime('tgl_jatuh_tempo');
             $table->decimal('jumlah_tagihan', 15, 2);
             $table->decimal('jumlah_terbayar', 15, 2)->default(0);
