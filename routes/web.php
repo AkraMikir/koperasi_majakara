@@ -14,9 +14,11 @@ Route::get('/', function () {
 // Authentication Routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
+Route::post('/register/ocr', [RegisterController::class, 'processOcr'])->name('register.ocr');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
+Route::post('/login/verify-pin', [LoginController::class, 'verifyPin'])->name('login.verify-pin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
 // Nasabah Routes (Frontend Only - No Auth Required)

@@ -23,18 +23,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // TODO: Get from auth
-        $idAnggota = 1;
-        
-        // Dummy data for frontend preview
-        $dummyUser = (object) [
-            'id' => 1,
-            'nama' => 'Ahmad Rizki',
-            'email' => 'ahmad.rizki@example.com',
-            'nomor_hp' => '081234567890',
-            'foto' => null,
-            'role' => 'nasabah',
-        ];
+        $idAnggota = $this->getIdAnggota();
         
         $dummyNasabah = (object) [
             'pekerjaanTemp' => (object) [
@@ -113,7 +102,7 @@ class DashboardController extends Controller
         ];
         
         return view('nasabah.dashboard', [
-            'user' => $dummyUser,
+            'user' => auth()->user(),
             'dummyNasabah' => $dummyNasabah,
             'stats' => $stats,
             'transaksiTerbaru' => $transaksiTerbaru,
@@ -125,8 +114,7 @@ class DashboardController extends Controller
      */
     public function profile()
     {
-        // TODO: Get from auth
-        $idAnggota = 1;
+        $idAnggota = $this->getIdAnggota();
         
         // Get nasabah data with all relationships
         $nasabah = Nasabah::with(['user', 'pekerjaan', 'dataKtp', 'dataRek', 'darurat', 'transTabungan'])
@@ -264,6 +252,26 @@ class DashboardController extends Controller
         }
         
         return $notifikasi;
+    }
+
+    /**
+     * Get ID anggota from authenticated user.
+     */
+    private function getIdAnggota()
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
+        $nasabah = $user->nasabah;
+        
+        if (!$nasabah) {
+            abort(403, 'User tidak memiliki data nasabah');
+        }
+
+        return $nasabah->id;
     }
 
     /**

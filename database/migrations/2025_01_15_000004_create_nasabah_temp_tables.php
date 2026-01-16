@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('tbl_nasabah_temp', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users_temp')->onDelete('cascade');
             $table->char('no_kk', 16)->unique();
             $table->string('tempat_lahir');
             $table->date('tanggal_lahir');
