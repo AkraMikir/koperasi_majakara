@@ -23,18 +23,7 @@ class DashboardController extends Controller
      */
     public function index()
     {
-        // TODO: Get from auth
-        $idAnggota = 1;
-        
-        // Dummy data for frontend preview
-        $dummyUser = (object) [
-            'id' => 1,
-            'nama' => 'Ahmad Rizki',
-            'email' => 'ahmad.rizki@example.com',
-            'nomor_hp' => '081234567890',
-            'foto' => null,
-            'role' => 'nasabah',
-        ];
+        $idAnggota = $this->getIdAnggota();
         
         $dummyNasabah = (object) [
             'pekerjaanTemp' => (object) [
@@ -49,14 +38,8 @@ class DashboardController extends Controller
             ],
         ];
 
-        // Calculate Tabungan Stats
-        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
-            ->sum('nominal') ?? 0;
-        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
-            ->sum('nominal') ?? 0;
-        $saldoTabungan = max(0, $totalSetoran - $totalPenarikan);
+        // Calculate Tabungan Stats using same method as Admin
+        $saldoTabungan = $this->getSaldoNasabah($idAnggota);
 
         // Get Pinjaman Aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
@@ -119,7 +102,7 @@ class DashboardController extends Controller
         ];
         
         return view('nasabah.dashboard', [
-            'user' => $dummyUser,
+            'user' => auth()->user(),
             'dummyNasabah' => $dummyNasabah,
             'stats' => $stats,
             'transaksiTerbaru' => $transaksiTerbaru,
@@ -131,21 +114,14 @@ class DashboardController extends Controller
      */
     public function profile()
     {
-        // TODO: Get from auth
-        $idAnggota = 1;
+        $idAnggota = $this->getIdAnggota();
         
         // Get nasabah data with all relationships
         $nasabah = Nasabah::with(['user', 'pekerjaan', 'dataKtp', 'dataRek', 'darurat', 'transTabungan'])
             ->findOrFail($idAnggota);
 
-        // Calculate saldo tabungan
-        $totalSetoran = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
-            ->sum('nominal') ?? 0;
-        $totalPenarikan = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
-            ->sum('nominal') ?? 0;
-        $saldoTabungan = max(0, $totalSetoran - $totalPenarikan);
+        // Calculate saldo tabungan using same method as Admin
+        $saldoTabungan = $this->getSaldoNasabah($idAnggota);
 
         return view('nasabah.profile', compact('nasabah', 'saldoTabungan'));
     }
@@ -276,5 +252,59 @@ class DashboardController extends Controller
         }
         
         return $notifikasi;
+    }
+
+    /**
+     * Get ID anggota from authenticated user.
+     */
+    private function getIdAnggota()
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
+        $nasabah = $user->nasabah;
+        
+        if (!$nasabah) {
+            abort(403, 'User tidak memiliki data nasabah');
+        }
+
+        return $nasabah->id;
+    }
+
+    /**
+     * Get saldo nasabah (same method as Admin controller).
+     */
+    private function getSaldoNasabah($idAnggota)
+    {
+        // Hitung dari trans_tabungan yang sudah ada
+        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
+            ->where('jenis', 'setoran')
+            ->sum('nominal') ?? 0;
+
+        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
+            ->where('jenis', 'penarikan')
+            ->sum('nominal') ?? 0;
+
+        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
+        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->with('buktiFoto', 'janjiTemu')
+            ->get();
+
+        foreach ($pengajuanApproved as $pengajuan) {
+            $nominal = 0;
+            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
+                $nominal = $pengajuan->buktiFoto->sum('nominal');
+            } elseif ($pengajuan->janjiTemu) {
+                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+            }
+            $totalSetoran += $nominal;
+        }
+
+        return max(0, $totalSetoran - $totalPenarikan);
     }
 }

@@ -19,25 +19,17 @@ class TabunganController extends Controller
      */
     public function index()
     {
-        // Dummy data for frontend preview
-        $dummyUser = (object) [
-            'id' => 1,
-            'nama' => 'Ahmad Rizki',
-            'email' => 'ahmad.rizki@example.com',
-            'nomor_hp' => '081234567890',
-            'foto' => null,
-            'role' => 'nasabah',
-        ];
-
-        // Dummy data for tabungan info
+        $idAnggota = $this->getIdAnggota();
+        
+        // Calculate saldo from database
+        $saldo = $this->getSaldoNasabah($idAnggota);
+        
+        // Tabungan info from database
         $tabunganInfo = (object) [
-            'saldo' => 5000000,
+            'saldo' => $saldo,
             'bunga' => 3.5,
             'status' => 'Aktif',
         ];
-
-        // Get transaksi tabungan from database
-        $idAnggota = 1; // TODO: Get from auth
         $transaksiTabungan = TransTabungan::where('id_anggota', $idAnggota)
             ->latest('tgl_transaksi')
             ->take(10)
@@ -53,7 +45,7 @@ class TabunganController extends Controller
             ->get();
 
         return view('nasabah.tabungan.index', [
-            'user' => $dummyUser,
+            'user' => auth()->user(),
             'tabunganInfo' => $tabunganInfo,
             'transaksiTabungan' => $transaksiTabungan,
             'riwayatJanjiTemu' => $riwayatJanjiTemu,
@@ -65,18 +57,9 @@ class TabunganController extends Controller
      */
     public function nabungSekarang()
     {
-        // Dummy data for frontend preview
-        $dummyUser = (object) [
-            'id' => 1,
-            'nama' => 'Ahmad Rizki',
-            'email' => 'ahmad.rizki@example.com',
-            'nomor_hp' => '081234567890',
-            'foto' => null,
-            'role' => 'nasabah',
-        ];
-
+        $idAnggota = $this->getIdAnggota();
+        
         // Get riwayat setoran from database
-        $idAnggota = 1; // TODO: Get from auth
         $riwayatTabungan = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'setoran')
             ->latest('tgl_transaksi')
@@ -84,7 +67,7 @@ class TabunganController extends Controller
             ->get();
 
         return view('nasabah.tabungan.nabung-sekarang', [
-            'user' => $dummyUser,
+            'user' => auth()->user(),
             'riwayatTabungan' => $riwayatTabungan,
         ]);
     }
@@ -94,25 +77,19 @@ class TabunganController extends Controller
      */
     public function penarikanTabungan()
     {
-        // Dummy data for frontend preview
-        $dummyUser = (object) [
-            'id' => 1,
-            'nama' => 'Ahmad Rizki',
-            'email' => 'ahmad.rizki@example.com',
-            'nomor_hp' => '081234567890',
-            'foto' => null,
-            'role' => 'nasabah',
-        ];
-
-        // Dummy data for tabungan info
+        $idAnggota = $this->getIdAnggota();
+        
+        // Calculate saldo from database
+        $saldo = $this->getSaldoNasabah($idAnggota);
+        
+        // Tabungan info from database
         $tabunganInfo = (object) [
-            'saldo' => 5000000,
+            'saldo' => $saldo,
             'bunga' => 3.5,
             'status' => 'Aktif',
         ];
 
         // Get riwayat penarikan from database
-        $idAnggota = 1; // TODO: Get from auth
         $riwayatPenarikan = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'penarikan')
             ->latest('tgl_transaksi')
@@ -120,7 +97,7 @@ class TabunganController extends Controller
             ->get();
 
         return view('nasabah.tabungan.penarikan-tabungan', [
-            'user' => $dummyUser,
+            'user' => auth()->user(),
             'tabunganInfo' => $tabunganInfo,
             'riwayatPenarikan' => $riwayatPenarikan,
         ]);
@@ -140,8 +117,8 @@ class TabunganController extends Controller
             'keterangan_foto.*' => 'nullable|string|max:255',
         ]);
 
-        // Get nasabah ID (dummy untuk sekarang)
-        $idAnggota = 1; // TODO: Get from auth
+        // Get nasabah ID from auth
+        $idAnggota = $this->getIdAnggota();
 
         if ($request->metode === 'transfer') {
             // Validate bukti foto exists
@@ -216,7 +193,7 @@ class TabunganController extends Controller
             'keterangan' => 'nullable|string|max:500',
         ]);
 
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         // Create pengajuan tabungan
         $pengajuan = PengajuanTabungan::create([
@@ -253,7 +230,7 @@ class TabunganController extends Controller
             'no_rekening' => 'required_if:metode,transfer|string|max:50',
         ]);
 
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         // Check saldo
         $saldo = $this->getSaldoNasabah($idAnggota);
@@ -281,7 +258,7 @@ class TabunganController extends Controller
      */
     public function statusPengajuanSetor()
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $pengajuan = PengajuanTabungan::where('id_anggota', $idAnggota)
             ->with(['buktiFoto', 'janjiTemu.lokasi'])
@@ -298,7 +275,7 @@ class TabunganController extends Controller
      */
     public function statusPengajuanTarik()
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $pengajuan = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
             ->latest()
@@ -314,7 +291,7 @@ class TabunganController extends Controller
      */
     public function detailPengajuanSetor($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $pengajuan = PengajuanTabungan::where('id_anggota', $idAnggota)
             ->with(['buktiFoto', 'janjiTemu.lokasi'])
@@ -330,7 +307,7 @@ class TabunganController extends Controller
      */
     public function detailPengajuanTarik($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $pengajuan = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
             ->findOrFail($id);
@@ -345,7 +322,7 @@ class TabunganController extends Controller
      */
     public function detailTransaksi($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $transaksi = TransTabungan::where('id_anggota', $idAnggota)
             ->with(['pengajuanSetor.buktiFoto', 'pengajuanTarik'])
@@ -361,7 +338,7 @@ class TabunganController extends Controller
      */
     public function detailJanjiTemu($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         
         $janjiTemu = JanjiTemuTabungan::whereHas('pengajuan', function($q) use ($idAnggota) {
                 $q->where('id_anggota', $idAnggota);
@@ -375,10 +352,11 @@ class TabunganController extends Controller
     }
 
     /**
-     * Get saldo nasabah.
+     * Get saldo nasabah (same method as Admin controller).
      */
     private function getSaldoNasabah($idAnggota)
     {
+        // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
             ->where('jenis', 'setoran')
             ->sum('nominal') ?? 0;
@@ -387,7 +365,44 @@ class TabunganController extends Controller
             ->where('jenis', 'penarikan')
             ->sum('nominal') ?? 0;
 
+        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
+        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->with('buktiFoto', 'janjiTemu')
+            ->get();
+
+        foreach ($pengajuanApproved as $pengajuan) {
+            $nominal = 0;
+            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
+                $nominal = $pengajuan->buktiFoto->sum('nominal');
+            } elseif ($pengajuan->janjiTemu) {
+                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+            }
+            $totalSetoran += $nominal;
+        }
+
         return max(0, $totalSetoran - $totalPenarikan);
+    }
+
+    /**
+     * Get ID anggota from authenticated user.
+     */
+    private function getIdAnggota()
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
+        $nasabah = $user->nasabah;
+        
+        if (!$nasabah) {
+            abort(403, 'User tidak memiliki data nasabah');
+        }
+
+        return $nasabah->id;
     }
 }
 

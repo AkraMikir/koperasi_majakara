@@ -17,6 +17,10 @@ class Otp extends Model
         'otp_code',
         'expired_at',
         'is_verified',
+        'type',
+        'channel',
+        'phone_number',
+        'session_id',
     ];
 
     protected $casts = [

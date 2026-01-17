@@ -32,11 +32,19 @@ class NasabahTemp extends Model
     ];
 
     /**
-     * Get the user that owns the nasabah temp.
+     * Get the user temp that owns the nasabah temp.
+     */
+    public function userTemp(): BelongsTo
+    {
+        return $this->belongsTo(UserTemp::class, 'user_id');
+    }
+
+    /**
+     * Get the user that owns the nasabah temp (via user_temp).
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     /**
