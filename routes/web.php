@@ -3,13 +3,20 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Nasabah\DashboardController as NasabahDashboardController;
 use App\Http\Controllers\Nasabah\TabunganController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('welcome');
+
+// Landing Page Routes
+Route::get('/layanan', [\App\Http\Controllers\LandingPageController::class, 'layanan'])->name('landing.layanan');
+Route::get('/keuntungan', [\App\Http\Controllers\LandingPageController::class, 'keuntungan'])->name('landing.keuntungan');
+Route::get('/testimoni', [\App\Http\Controllers\LandingPageController::class, 'testimoni'])->name('landing.testimoni');
+Route::get('/faq', [\App\Http\Controllers\LandingPageController::class, 'faq'])->name('landing.faq');
 
 // Authentication Routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
@@ -21,8 +28,8 @@ Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/login/verify-pin', [LoginController::class, 'verifyPin'])->name('login.verify-pin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
-// Nasabah Routes (Frontend Only - No Auth Required)
-Route::prefix('nasabah')->name('nasabah.')->group(function () {
+// Nasabah Routes (Protected with Auth Middleware)
+Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function () {
     Route::get('/dashboard', [NasabahDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     

@@ -17,7 +17,7 @@ class PinjamanController extends Controller
      */
     public function index()
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         // Get pinjaman aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
@@ -119,7 +119,7 @@ class PinjamanController extends Controller
      */
     public function pengajuanPinjaman()
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         // Get riwayat pengajuan
         $riwayatPengajuan = PengajuanPinjaman::where('id_anggota', $idAnggota)
@@ -145,7 +145,7 @@ class PinjamanController extends Controller
             'keterangan' => 'nullable|string|max:500',
         ]);
 
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         PengajuanPinjaman::create([
             'id_anggota' => $idAnggota,
@@ -166,7 +166,7 @@ class PinjamanController extends Controller
      */
     public function statusPengajuan(Request $request)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         $query = PengajuanPinjaman::where('id_anggota', $idAnggota)
             ->with('pinjaman')
@@ -198,7 +198,7 @@ class PinjamanController extends Controller
      */
     public function detailPengajuan($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         $pengajuan = PengajuanPinjaman::where('id_anggota', $idAnggota)
             ->with(['pinjaman', 'nasabah.user'])
@@ -214,7 +214,7 @@ class PinjamanController extends Controller
      */
     public function pinjamanAktif(Request $request)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         $query = PinjamanH::where('id_anggota', $idAnggota)
             ->whereIn('status', ['pencairan', 'telaksana'])
@@ -244,7 +244,7 @@ class PinjamanController extends Controller
      */
     public function detailPinjaman($id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         $pinjaman = PinjamanH::where('id_anggota', $idAnggota)
             ->with([
@@ -285,7 +285,7 @@ class PinjamanController extends Controller
      */
     public function angsuran(Request $request)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
 
         $jenis = $request->get('jenis', 'bulanan');
         $query = null;
@@ -327,7 +327,7 @@ class PinjamanController extends Controller
      */
     public function detailAngsuran(Request $request, $id)
     {
-        $idAnggota = 1; // TODO: Get from auth
+        $idAnggota = $this->getIdAnggota();
         $jenis = $request->get('jenis', 'bulanan');
 
         if ($jenis === 'bulanan') {
@@ -349,5 +349,25 @@ class PinjamanController extends Controller
             'sisaTagihan' => $sisaTagihan,
             'isTelat' => $isTelat,
         ]);
+    }
+
+    /**
+     * Get ID anggota from authenticated user.
+     */
+    private function getIdAnggota()
+    {
+        $user = auth()->user();
+        
+        if (!$user) {
+            abort(401, 'Unauthorized');
+        }
+
+        $nasabah = $user->nasabah;
+        
+        if (!$nasabah) {
+            abort(403, 'User tidak memiliki data nasabah');
+        }
+
+        return $nasabah->id;
     }
 }

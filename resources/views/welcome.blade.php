@@ -151,18 +151,25 @@
                 <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="#beranda" class="text-gray-700 hover:text-primary transition">Beranda</a>
-                    <a href="#layanan" class="text-gray-700 hover:text-primary transition">Layanan</a>
-                    <a href="#keuntungan" class="text-gray-700 hover:text-primary transition">Keuntungan</a>
-                    <a href="#testimoni" class="text-gray-700 hover:text-primary transition">Testimoni</a>
-                    <a href="#faq" class="text-gray-700 hover:text-primary transition">FAQ</a>
+                    <a href="{{ route('landing.layanan') }}" class="text-gray-700 hover:text-primary transition">Layanan</a>
+                    <a href="{{ route('landing.keuntungan') }}" class="text-gray-700 hover:text-primary transition">Keuntungan</a>
+                    <a href="{{ route('landing.testimoni') }}" class="text-gray-700 hover:text-primary transition">Testimoni</a>
+                    <a href="{{ route('landing.faq') }}" class="text-gray-700 hover:text-primary transition">FAQ</a>
                 </div>
                 
                 <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center space-x-4">
                     @if (Route::has('login'))
-                        @auth
-                            <a href="{{ url('/dashboard') }}" class="px-4 py-2 text-primary hover:bg-primary hover:text-white rounded-lg transition">
-                                Dashboard
+                        @if (auth()->check())
+                            @php
+                                $user = auth()->user();
+                                $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
+                            @endphp
+                            <a href="{{ $dashboardUrl }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-medium flex items-center space-x-2 group">
+                                <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span>Dashboard</span>
                             </a>
                         @else
                             <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
@@ -173,7 +180,7 @@
                                     Register
                                 </a>
                             @endif
-                        @endauth
+                        @endif
                     @else
                         <a href="#" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
                             Login
@@ -197,15 +204,22 @@
         <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
             <div class="px-4 py-4 space-y-3">
                 <a href="#beranda" class="block text-gray-700 hover:text-primary">Beranda</a>
-                <a href="#layanan" class="block text-gray-700 hover:text-primary">Layanan</a>
-                <a href="#keuntungan" class="block text-gray-700 hover:text-primary">Keuntungan</a>
-                <a href="#testimoni" class="block text-gray-700 hover:text-primary">Testimoni</a>
-                <a href="#faq" class="block text-gray-700 hover:text-primary">FAQ</a>
+                <a href="{{ route('landing.layanan') }}" class="block text-gray-700 hover:text-primary">Layanan</a>
+                <a href="{{ route('landing.keuntungan') }}" class="block text-gray-700 hover:text-primary">Keuntungan</a>
+                <a href="{{ route('landing.testimoni') }}" class="block text-gray-700 hover:text-primary">Testimoni</a>
+                <a href="{{ route('landing.faq') }}" class="block text-gray-700 hover:text-primary">FAQ</a>
                 <div class="pt-4 border-t space-y-2">
                     @if (Route::has('login'))
-                        @auth
-                            <a href="{{ url('/dashboard') }}" class="block px-4 py-2.5 text-center text-primary border border-primary rounded-lg font-medium">
-                                Dashboard
+                        @if (auth()->check())
+                            @php
+                                $user = auth()->user();
+                                $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
+                            @endphp
+                            <a href="{{ $dashboardUrl }}" class="block px-4 py-2.5 text-center bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md font-medium flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span>Dashboard</span>
                             </a>
                         @else
                             <a href="{{ route('login') }}" class="block px-4 py-2.5 text-center text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
@@ -216,7 +230,7 @@
                                     Register
                                 </a>
                             @endif
-                        @endauth
+                        @endif
                     @else
                         <a href="#" class="block px-4 py-2.5 text-center text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
                             Login
@@ -304,7 +318,7 @@
                     <p class="text-gray-600 mb-6">
                         Menabung dengan aman dan nyaman dengan bunga kompetitif untuk masa depan yang lebih baik.
                     </p>
-                    <a href="#" class="inline-flex items-center text-primary font-semibold hover:underline">
+                    <a href="{{ route('landing.layanan') }}" class="inline-flex items-center text-primary font-semibold hover:underline">
                         Selengkapnya
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -323,7 +337,7 @@
                     <p class="text-gray-600 mb-6">
                         Pinjaman dengan proses cepat, bunga ringan, dan syarat yang mudah untuk berbagai kebutuhan.
                     </p>
-                    <a href="#" class="inline-flex items-center text-primary font-semibold hover:underline">
+                    <a href="{{ route('landing.layanan') }}" class="inline-flex items-center text-primary font-semibold hover:underline">
                         Selengkapnya
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -342,7 +356,7 @@
                     <p class="text-gray-600 mb-6">
                         Investasi aman dengan return yang menarik untuk jangka waktu tertentu sesuai kebutuhan Anda.
                     </p>
-                    <a href="#" class="inline-flex items-center text-primary font-semibold hover:underline">
+                    <a href="{{ route('landing.layanan') }}" class="inline-flex items-center text-primary font-semibold hover:underline">
                         Selengkapnya
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -361,7 +375,7 @@
                     <p class="text-gray-600 mb-6">
                         Solusi cepat untuk kebutuhan dana dengan jaminan barang berharga yang Anda miliki.
                     </p>
-                    <a href="#" class="inline-flex items-center text-primary font-semibold hover:underline">
+                    <a href="{{ route('landing.layanan') }}" class="inline-flex items-center text-primary font-semibold hover:underline">
                         Selengkapnya
                         <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

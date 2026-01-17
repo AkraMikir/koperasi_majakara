@@ -6,6 +6,7 @@
     $isTabunganPage = str_contains($currentRoute, 'tabungan');
 @endphp
 
+
 <header class="bg-white shadow-sm sticky top-0 z-40">
     <div class="w-full px-4 py-2 max-w-full">
         <div class="flex items-center justify-between">
@@ -36,12 +37,45 @@
                     <span class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
                 
-                <!-- Profile/Settings Icon -->
-                <a href="{{ route('nasabah.profile') }}" class="p-2 text-gray-600 hover:text-primary transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                    </svg>
-                </a>
+                <!-- Profile Dropdown -->
+                <div class="relative group">
+                    <button class="p-2 text-gray-600 hover:text-primary transition-colors focus:outline-none">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </button>
+                    
+                    <!-- Dropdown Menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 transform group-hover:translate-y-0 -translate-y-2">
+                        <div class="py-1">
+                            <!-- Profile Link -->
+                            <a href="{{ route('nasabah.profile') }}" class="block px-4 py-2.5 text-sm text-gray-700 hover:bg-[#674c1d] hover:text-white transition-colors">
+                                <div class="flex items-center space-x-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                    </svg>
+                                    <span>Profile</span>
+                                </div>
+                            </a>
+                            
+                            <!-- Divider -->
+                            <div class="border-t border-gray-200 my-1"></div>
+                            
+                            <!-- Logout Button -->
+                            <form action="{{ route('logout') }}" method="POST" class="block">
+                                @csrf
+                                <button type="submit" class="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
+                                    <div class="flex items-center space-x-2">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                        </svg>
+                                        <span>Logout</span>
+                                    </div>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
                 
                 <!-- Date and Time -->
                 <div class="hidden md:flex flex-col items-end text-right">
