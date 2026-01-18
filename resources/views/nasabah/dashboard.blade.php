@@ -64,7 +64,7 @@
 
                     <!-- Pengajuan Pending -->
                     @if(isset($stats['pengajuan_pending']) && $stats['pengajuan_pending'] > 0)
-                    <a href="{{ route('nasabah.pinjaman.status-pengajuan') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30 relative">
+                    <a href="{{ route('nasabah.pengajuan-pending') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30 relative">
                         <div class="absolute top-2 right-2 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
                             <span class="text-white text-xs font-bold">{{ $stats['pengajuan_pending'] }}</span>
                         </div>

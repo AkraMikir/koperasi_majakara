@@ -32,16 +32,19 @@ Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function () {
     Route::get('/dashboard', [NasabahDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
+    Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
     
     // Tabungan Routes
     Route::prefix('tabungan')->name('tabungan.')->group(function () {
         Route::get('/', [TabunganController::class, 'index'])->name('index');
         Route::get('/nabung-sekarang', [TabunganController::class, 'nabungSekarang'])->name('nabung-sekarang');
-        Route::post('/nabung-sekarang', [TabunganController::class, 'submitSetoran'])->name('submit-setoran');
+        Route::get('/pengajuan-transfer', [TabunganController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
+        Route::post('/pengajuan-transfer', [TabunganController::class, 'submitSetoran'])->name('submit-setoran');
         Route::get('/penarikan', [TabunganController::class, 'penarikanTabungan'])->name('penarikan');
         Route::post('/penarikan', [TabunganController::class, 'submitPenarikan'])->name('submit-penarikan');
         Route::get('/janji-temu', [TabunganController::class, 'janjiTemu'])->name('janji-temu');
         Route::post('/janji-temu', [TabunganController::class, 'submitJanjiTemu'])->name('submit-janji-temu');
+        Route::post('/verify-pin', [TabunganController::class, 'verifyPin'])->name('verify-pin');
         Route::get('/status-pengajuan-setor', [TabunganController::class, 'statusPengajuanSetor'])->name('status-pengajuan-setor');
         Route::get('/status-pengajuan-tarik', [TabunganController::class, 'statusPengajuanTarik'])->name('status-pengajuan-tarik');
         Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');

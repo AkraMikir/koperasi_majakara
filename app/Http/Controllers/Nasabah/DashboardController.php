@@ -11,6 +11,8 @@ use App\Models\Nasabah;
 use App\Models\PengajuanTabungan;
 use App\Models\PengajuanPenarikanTabungan;
 use App\Models\PengajuanPinjaman;
+use App\Models\PengajuanDeposito;
+use App\Models\PengajuanGadai;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
 use Illuminate\Http\Request;
@@ -127,6 +129,175 @@ class DashboardController extends Controller
     }
 
     /**
+     * Show unified pengajuan pending page.
+     */
+    public function pengajuanPending(Request $request)
+    {
+        $idAnggota = $this->getIdAnggota();
+        
+        $allPengajuan = [];
+        
+        // Get Pengajuan Tabungan (Setoran)
+        $tabunganSetor = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Pending
+            ->with(['buktiFoto', 'janjiTemu'])
+            ->latest()
+            ->get();
+        
+        foreach ($tabunganSetor as $t) {
+            // Calculate nominal
+            $nominal = 0;
+            if ($t->buktiFoto && $t->buktiFoto->count() > 0) {
+                $nominal = $t->buktiFoto->sum('nominal');
+            } elseif ($t->janjiTemu) {
+                $nominal = $t->janjiTemu->nominal ?? 0;
+            }
+            
+            $allPengajuan[] = [
+                'id' => $t->id,
+                'type' => 'tabungan_setor',
+                'jenis' => 'Setoran Tabungan',
+                'nominal' => $nominal,
+                'tanggal' => $t->created_at,
+                'status' => $this->getStatusText($t->status),
+                'detail_url' => route('nasabah.tabungan.detail-pengajuan-setor', $t->id),
+                'metode' => $t->foto_bukti_tf == 'transfer' ? 'Transfer' : ($t->foto_bukti_tf == 'tunai' ? 'Janji Temu' : 'N/A'),
+            ];
+        }
+        
+        // Get Pengajuan Penarikan Tabungan
+        $tabunganTarik = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Pending
+            ->latest()
+            ->get();
+        
+        foreach ($tabunganTarik as $t) {
+            $allPengajuan[] = [
+                'id' => $t->id,
+                'type' => 'tabungan_tarik',
+                'jenis' => 'Penarikan Tabungan',
+                'nominal' => $t->nominal ?? 0,
+                'tanggal' => $t->tgl_pengajuan ?? $t->created_at,
+                'status' => $this->getStatusText($t->status),
+                'detail_url' => route('nasabah.tabungan.detail-pengajuan-tarik', $t->id),
+                'metode' => 'Penarikan',
+            ];
+        }
+        
+        // Get Pengajuan Pinjaman
+        $pinjaman = PengajuanPinjaman::where('id_anggota', $idAnggota)
+            ->whereDoesntHave('pinjaman') // Belum disetujui
+            ->latest()
+            ->get();
+        
+        foreach ($pinjaman as $p) {
+            $allPengajuan[] = [
+                'id' => $p->id,
+                'type' => 'pinjaman',
+                'jenis' => 'Pinjaman',
+                'nominal' => $p->nominal ?? 0,
+                'tanggal' => $p->tgl_pengajuan ?? $p->created_at,
+                'status' => 'Menunggu Persetujuan',
+                'detail_url' => route('nasabah.pinjaman.detail-pengajuan', $p->id),
+                'metode' => $p->jenis ?? 'N/A',
+                'durasi' => $p->durasi ?? null,
+            ];
+        }
+        
+        // Get Pengajuan Deposito
+        $deposito = PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->whereDoesntHave('deposito') // Belum disetujui
+            ->with(['tenor', 'jenisDeposito'])
+            ->latest()
+            ->get();
+        
+        foreach ($deposito as $d) {
+            $allPengajuan[] = [
+                'id' => $d->id,
+                'type' => 'deposito',
+                'jenis' => 'Deposito',
+                'nominal' => $d->nominal ?? 0,
+                'tanggal' => $d->created_at,
+                'status' => $this->getStatusText($d->status),
+                'detail_url' => '#', // TODO: Add route when deposito detail page is ready
+                'metode' => $d->metode_setor ?? 'N/A',
+                'tenor' => $d->tenor ? $d->tenor->nama : null,
+            ];
+        }
+        
+        // Get Pengajuan Gadai
+        $gadai = PengajuanGadai::where('id_nasabah', $idAnggota)
+            ->where(function($query) {
+                $query->where('status', 'pending')
+                      ->orWhere('status', '1');
+            })
+            ->whereDoesntHave('gadai') // Belum disetujui
+            ->with('itemGadai')
+            ->latest()
+            ->get();
+        
+        foreach ($gadai as $g) {
+            $allPengajuan[] = [
+                'id' => $g->id,
+                'type' => 'gadai',
+                'jenis' => 'Gadai',
+                'nominal' => $g->nominal_diajukan ?? 0,
+                'tanggal' => $g->created_at,
+                'status' => $this->getStatusText($g->status),
+                'detail_url' => '#', // TODO: Add route when gadai detail page is ready
+                'metode' => $g->metode ?? 'N/A',
+                'item' => $g->itemGadai ? $g->itemGadai->nama_item : 'N/A',
+            ];
+        }
+        
+        // Sort by tanggal (newest first)
+        usort($allPengajuan, function($a, $b) {
+            return $b['tanggal']->timestamp - $a['tanggal']->timestamp;
+        });
+        
+        // Filter by type if requested
+        $filterType = $request->get('type');
+        if ($filterType) {
+            $allPengajuan = array_filter($allPengajuan, function($item) use ($filterType) {
+                return $item['type'] == $filterType;
+            });
+        }
+        
+        // Filter by status if requested
+        $filterStatus = $request->get('status');
+        if ($filterStatus) {
+            $allPengajuan = array_filter($allPengajuan, function($item) use ($filterStatus) {
+                return strtolower($item['status']) == strtolower($filterStatus);
+            });
+        }
+        
+        return view('nasabah.pengajuan-pending', [
+            'user' => auth()->user(),
+            'pengajuan' => $allPengajuan,
+            'filterType' => $filterType,
+            'filterStatus' => $filterStatus,
+        ]);
+    }
+
+    /**
+     * Get status text from status code.
+     */
+    private function getStatusText($status)
+    {
+        $statusMap = [
+            '1' => 'Menunggu Persetujuan',
+            '2' => 'Disetujui',
+            '3' => 'Ditolak',
+            'pending' => 'Menunggu Persetujuan',
+            'approved' => 'Disetujui',
+            'rejected' => 'Ditolak',
+        ];
+        
+        return $statusMap[$status] ?? 'Tidak Diketahui';
+    }
+
+    /**
      * Get angsuran terdekat (7 hari ke depan)
      */
     private function getAngsuranTerdekat($idAnggota)
@@ -175,7 +346,20 @@ class DashboardController extends Controller
             ->whereDoesntHave('pinjaman')
             ->count();
         
-        return $tabungan + $penarikan + $pinjaman;
+        $deposito = PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1')
+            ->whereDoesntHave('deposito')
+            ->count();
+        
+        $gadai = PengajuanGadai::where('id_nasabah', $idAnggota)
+            ->where(function($query) {
+                $query->where('status', 'pending')
+                      ->orWhere('status', '1');
+            })
+            ->whereDoesntHave('gadai')
+            ->count();
+        
+        return $tabungan + $penarikan + $pinjaman + $deposito + $gadai;
     }
 
     /**
