@@ -176,7 +176,101 @@
                     </div>
                 </div>
             </div>
+
+            <!-- Pelunasan Dipercepat -->
+            @if($pinjaman->lunas === 'belum')
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-primary font-display mb-4">Pelunasan Dipercepat</h3>
+                <button onclick="showPelunasanModal()" class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
+                    💰 Pelunasan Dipercepat
+                </button>
+            </div>
+
+            <!-- Modal Pelunasan Dipercepat -->
+            <div id="pelunasanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Pelunasan Dipercepat</h3>
+                    <form method="POST" action="{{ route('admin.pinjaman.pelunasan-dipercepat', $pinjaman->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin melakukan pelunasan dipercepat?')">
+                        @csrf
+                        @php
+                            $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
+                            $totalTerbayar = $angsuran->sum('jumlah_terbayar');
+                            $sisaTagihanPokok = $totalTagihan - $totalTerbayar;
+                            
+                            // Hitung total denda
+                            $totalDenda = 0;
+                            foreach ($angsuran as $a) {
+                                if ($a->status_bayar !== 'lunas') {
+                                    $hariTelat = $a->tgl_jatuh_tempo < now() ? now()->diffInDays($a->tgl_jatuh_tempo, false) : 0;
+                                    if ($hariTelat > 0) {
+                                        $sisaTagihanAngsuran = max(0, $a->jumlah_tagihan - ($a->jumlah_terbayar ?? 0));
+                                        $denda = $sisaTagihanAngsuran * ($pinjaman->denda_persen / 100) * $hariTelat;
+                                        $dendaMax = $a->jumlah_tagihan * 0.5;
+                                        $totalDenda += min($denda, $dendaMax);
+                                    }
+                                }
+                            }
+                            $totalBayar = $sisaTagihanPokok + $totalDenda;
+                        @endphp
+                        <div class="space-y-4 mb-4">
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <p class="text-sm text-gray-600 mb-2">Ringkasan:</p>
+                                <div class="space-y-1">
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Sisa Tagihan Pokok:</span>
+                                        <span class="text-sm font-semibold">Rp {{ number_format($sisaTagihanPokok, 0, ',', '.') }}</span>
+                                    </div>
+                                    @if($totalDenda > 0)
+                                    <div class="flex justify-between">
+                                        <span class="text-sm">Total Denda:</span>
+                                        <span class="text-sm font-semibold text-red-600">Rp {{ number_format($totalDenda, 0, ',', '.') }}</span>
+                                    </div>
+                                    @endif
+                                    <div class="flex justify-between pt-2 border-t border-gray-300">
+                                        <span class="font-semibold">Total Pembayaran:</span>
+                                        <span class="font-bold text-[#674c1d]">Rp {{ number_format($totalBayar, 0, ',', '.') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Potongan (Opsional, Rp)</label>
+                                <input type="number" name="potongan" step="0.01" min="0" max="{{ $totalBayar }}"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                                    placeholder="0.00"
+                                    value="0">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
+                                <textarea name="keterangan" rows="3"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                                    placeholder="Tambahkan keterangan..."></textarea>
+                            </div>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="button" onclick="hidePelunasanModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Konfirmasi
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
         </div>
     </div>
 </div>
+
+@if($pinjaman->lunas === 'belum')
+<script>
+    function showPelunasanModal() {
+        document.getElementById('pelunasanModal').classList.remove('hidden');
+    }
+    
+    function hidePelunasanModal() {
+        document.getElementById('pelunasanModal').classList.add('hidden');
+    }
+</script>
+@endif
 @endsection

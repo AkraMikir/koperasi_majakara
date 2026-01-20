@@ -51,7 +51,7 @@
                 <span class="text-sm font-semibold text-gray-700">{{ number_format($progress, 1) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                <div class="bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
+                <div class="bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
             </div>
             <div class="flex justify-between text-xs text-gray-500">
                 <span>{{ $angsuranLunas }} / {{ $totalAngsuran }} angsuran lunas</span>
@@ -168,6 +168,22 @@
             </div>
         </div>
     </div>
+
+    <!-- Action Buttons -->
+    @if($pinjaman->lunas === 'belum')
+    <div class="mx-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h3 class="text-lg font-bold text-[#8b6f2f] mb-4 font-display">Aksi</h3>
+            <a href="{{ route('nasabah.pinjaman.pembayaran', ['pinjaman_id' => $pinjaman->id]) }}" 
+                class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Bayar Pinjaman
+            </a>
+        </div>
+    </div>
+    @endif
 
     <!-- Back Button -->
     <div class="mx-4 mb-6">

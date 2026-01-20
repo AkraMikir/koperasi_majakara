@@ -26,6 +26,8 @@ class PinjamanH extends Model
         'ags_minggu',
         'tgl_pinjam',
         'saldo_lebih',
+        'foto_bukti_transfer',
+        'foto_serah_terima',
         'status',
         'lunas',
     ];
@@ -59,6 +61,11 @@ class PinjamanH extends Model
     public function tempoMingguan(): HasMany
     {
         return $this->hasMany(TempoPinjamanM::class, 'pinjaman_id');
+    }
+
+    public function buktiFoto(): HasMany
+    {
+        return $this->hasMany(BuktiFotoPinjaman::class, 'id_pinjaman');
     }
 }
 

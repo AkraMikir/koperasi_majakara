@@ -44,28 +44,31 @@
                             </div>
                         </div>
                     </a>
-                    <a href="{{ route('nasabah.pinjaman.angsuran') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
+                    <a href="{{ route('nasabah.pinjaman.pembayaran') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
                                 <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                                 </svg>
                             </div>
                             <div>
-                                <p class="text-white text-sm font-medium">Lihat Angsuran</p>
-                                <p class="text-white/80 text-xs">Jadwal Pembayaran</p>
+                                <p class="text-white text-sm font-medium">Bayar Pinjaman</p>
+                                <p class="text-white/80 text-xs">Transfer / Cash</p>
                             </div>
                         </div>
                     </a>
                 </div>
                 
                 <!-- Status Links -->
-                <div class="grid grid-cols-2 gap-3 mt-3">
+                <div class="grid grid-cols-3 gap-3 mt-3">
                     <a href="{{ route('nasabah.pinjaman.status-pengajuan') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
                         <p class="text-white text-xs font-medium">Status Pengajuan</p>
                     </a>
                     <a href="{{ route('nasabah.pinjaman.pinjaman-aktif') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
                         <p class="text-white text-xs font-medium">Pinjaman Aktif</p>
+                    </a>
+                    <a href="{{ route('nasabah.pinjaman.status-pembayaran') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
+                        <p class="text-white text-xs font-medium">Status Pembayaran</p>
                     </a>
                 </div>
             </div>
@@ -231,8 +234,10 @@
                         @php
                             $sisa = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
                             $isTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas';
+                            $jenisAngsuran = $angsuran->pinjaman->jenis ?? 'bulanan';
+                            $urlDetail = route('nasabah.pinjaman.detail-angsuran', ['id' => $angsuran->id, 'jenis' => $jenisAngsuran]);
                         @endphp
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-angsuran', ['id' => $angsuran->id, 'jenis' => $angsuran->pinjaman->jenis ?? 'bulanan']) }}'">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ $urlDetail }}'">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $angsuran->tgl_jatuh_tempo->format('d M Y') }}</p>
                                 <p class="text-xs text-gray-500">{{ $angsuran->tgl_jatuh_tempo->diffForHumans() }}</p>
