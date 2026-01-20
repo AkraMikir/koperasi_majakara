@@ -37,13 +37,19 @@ class RegisterController extends Controller
     public function showRegistrationForm(Request $request)
     {
         $step = $request->get('step', 1);
+        $subStep = $request->get('substep', 1); // Sub-step untuk Step 1 (1-6)
         
-        // Validate step (1 = Form data, 2 = OTP, 3 = PIN)
+        // Validate step (1 = Form data dengan sub-step, 2 = OTP, 3 = PIN)
         if (!in_array($step, [1, 2, 3])) {
             $step = 1;
         }
 
-        // Get session data for step 1
+        // Validate sub-step untuk Step 1 (1-6)
+        if ($step == 1 && (!in_array($subStep, [1, 2, 3, 4, 5, 6]))) {
+            $subStep = 1;
+        }
+
+        // Get session data
         $sessionData = [];
         if ($step == 1) {
             $sessionData = [
@@ -61,10 +67,84 @@ class RegisterController extends Controller
             $request->session()->put('register_session_id', Str::uuid()->toString());
         }
 
+        // Load data dari database jika sudah ada (untuk back navigation)
+        $formData = [];
+        if ($step == 1) {
+            $userTempId = $request->session()->get('register_user_temp_id');
+            $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+            
+            if ($userTempId) {
+                $userTemp = \App\Models\UserTemp::find($userTempId);
+                if ($userTemp) {
+                    $formData['nama'] = $userTemp->nama;
+                    $formData['email'] = $userTemp->email;
+                    $formData['nomor_hp'] = $userTemp->nomor_hp;
+                    $formData['foto'] = $userTemp->foto;
+                }
+            }
+            
+            if ($nasabahTempId) {
+                $nasabahTemp = NasabahTemp::find($nasabahTempId);
+                if ($nasabahTemp) {
+                    $formData['no_kk'] = $nasabahTemp->no_kk;
+                    $formData['tempat_lahir'] = $nasabahTemp->tempat_lahir;
+                    $formData['tanggal_lahir'] = $nasabahTemp->tanggal_lahir ? $nasabahTemp->tanggal_lahir->format('Y-m-d') : null;
+                    $formData['jenis_kelamin'] = $nasabahTemp->jenis_kelamin;
+                    $formData['alamat'] = $nasabahTemp->alamat;
+                    $formData['foto_ktp'] = $nasabahTemp->foto_ktp;
+                    $formData['foto_kk'] = $nasabahTemp->foto_kk;
+                    
+                    // Load pekerjaan
+                    $pekerjaanTemp = PekerjaanTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    if ($pekerjaanTemp) {
+                        $formData['pekerjaan'] = $pekerjaanTemp->pekerjaan;
+                        $formData['penghasilan'] = $pekerjaanTemp->penghasilan;
+                        $formData['nama_perusahaan'] = $pekerjaanTemp->nama_perusahaan;
+                        $formData['nama_bank'] = $pekerjaanTemp->nama_bank;
+                    }
+                    
+                    // Load rekening
+                    $dataRekTemp = DataRekTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    if ($dataRekTemp) {
+                        $formData['no_rekening'] = $dataRekTemp->no_rekening;
+                        $formData['nama_pemilik_rekening'] = $dataRekTemp->nama_pemilik_rekening;
+                        $formData['jenis_atm'] = $dataRekTemp->jenis_atm;
+                    }
+                    
+                    // Load KTP
+                    $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    if ($dataKtpTemp) {
+                        $formData['nik'] = $dataKtpTemp->nik;
+                        $formData['nama_lengkap_ktp'] = $dataKtpTemp->nama_lengkap;
+                        $formData['tempat_lahir_ktp'] = $dataKtpTemp->tempat_lahir;
+                        $formData['tanggal_lahir_ktp'] = $dataKtpTemp->tanggal_lahir ? $dataKtpTemp->tanggal_lahir->format('Y-m-d') : null;
+                        $formData['alamat_ktp'] = $dataKtpTemp->alamat;
+                        $formData['jenis_kelamin_ktp'] = $dataKtpTemp->jenis_kelamin;
+                        $formData['file_ktp'] = $dataKtpTemp->file_ktp;
+                    }
+                    
+                    // Load darurat
+                    $daruratTemp = DaruratTemp::where('id_nasabah', $nasabahTemp->id)->first();
+                    if ($daruratTemp) {
+                        $formData['darurat_nama_lengkap'] = $daruratTemp->nama_lengkap;
+                        $formData['hubungan_peminjam'] = $daruratTemp->hubungan_peminjam;
+                        $formData['darurat_no_telepon'] = $daruratTemp->no_telepon;
+                        $formData['darurat_alamat'] = $daruratTemp->alamat;
+                        $formData['darurat_pekerjaan'] = $daruratTemp->pekerjaan;
+                        $formData['darurat_email'] = $daruratTemp->email;
+                        $formData['darurat_no_ktp'] = $daruratTemp->no_ktp;
+                        $formData['darurat_foto_ktp'] = $daruratTemp->foto_ktp;
+                    }
+                }
+            }
+        }
+
         return view('auth.register', [
             'step' => $step,
+            'subStep' => $subStep,
             'sessionData' => $sessionData,
             'sessionId' => $request->session()->get('register_session_id'),
+            'formData' => $formData,
         ]);
     }
 
@@ -115,15 +195,16 @@ class RegisterController extends Controller
     public function register(Request $request)
     {
         $step = $request->input('step', 1);
+        $subStep = $request->input('substep', 1);
         
         // Validate step
         if (!in_array($step, [1, 2, 3])) {
             return redirect()->route('register')->with('error', 'Invalid step');
         }
 
-        // Step 1: Save all form data to temp tables
+        // Step 1: Save form data to temp tables (dengan sub-step)
         if ($step == 1) {
-            return $this->handleStep1($request);
+            return $this->handleStep1($request, $subStep);
         }
 
         // Step 2: Verify OTP
@@ -140,61 +221,94 @@ class RegisterController extends Controller
     }
 
     /**
-     * Handle Step 1: Save all form data to temp tables.
+     * Handle Step 1: Save form data to temp tables berdasarkan sub-step.
      */
-    private function handleStep1(Request $request)
+    private function handleStep1(Request $request, $subStep = 1)
     {
-        // Validasi semua data (field bisa nullable sesuai kebutuhan)
-        $validator = Validator::make($request->all(), [
-            // Step 1: Data Diri
-            'nama' => 'nullable|string|max:255',
-            'email' => 'nullable|string|email|max:255|unique:users,email|unique:users_temp,email',
-            'nomor_hp' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:8|confirmed',
-            'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+        // Validasi berdasarkan sub-step
+        $validationRules = [];
+        
+        // Sub-step 1: Data Diri
+        if ($subStep == 1) {
+            // Get user_temp_id dari session untuk exclude dari unique validation
+            $userTempId = $request->session()->get('register_user_temp_id');
+            $userTemp = $userTempId ? \App\Models\UserTemp::find($userTempId) : null;
+            $currentEmail = $userTemp ? $userTemp->email : null;
             
-            // Step 2: Detail Nasabah
-            'no_kk' => 'nullable|string|max:16',
-            'tempat_lahir' => 'nullable|string|max:255',
-            'tanggal_lahir' => 'nullable|date',
-            'jenis_kelamin' => 'nullable|in:L,P',
-            'alamat' => 'nullable|string',
-            'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            'foto_kk' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-            
-            // Step 3: Pekerjaan
-            'pekerjaan' => 'nullable|string|max:255',
-            'penghasilan' => 'nullable|numeric|min:0',
-            'nama_perusahaan' => 'nullable|string|max:255',
-            'nama_bank' => 'nullable|string|max:255',
-            
-            // Step 4: Rekening
-            'no_rekening' => 'nullable|string|max:16',
-            'nama_pemilik_rekening' => 'nullable|string|max:255',
-            'jenis_atm' => 'nullable|string|max:20',
-            
-            // Step 5: Data KTP
-            'nik' => 'nullable|string|max:16',
-            'nama_lengkap_ktp' => 'nullable|string|max:100',
-            'tempat_lahir_ktp' => 'nullable|string|max:100',
-            'tanggal_lahir_ktp' => 'nullable|date',
-            'alamat_ktp' => 'nullable|string',
-            'jenis_kelamin_ktp' => 'nullable|in:Laki-laki,Perempuan',
-            'file_ktp' => 'nullable|string', // Path dari OCR atau upload
-            
-            // Step 6: Kontak Darurat
-            'darurat_nama_lengkap' => 'nullable|string|max:255',
-            'hubungan_peminjam' => 'nullable|string|max:100',
-            'darurat_no_telepon' => 'nullable|string|max:20',
-            'darurat_alamat' => 'nullable|string',
-            'darurat_pekerjaan' => 'nullable|string|max:100',
-            'darurat_email' => 'nullable|string|email|max:255',
-            'darurat_no_ktp' => 'nullable|string|max:16',
-            'darurat_foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
-        ]);
+            $validationRules = [
+                'nama' => 'required|string|max:255',
+                'email' => [
+                    'required',
+                    'string',
+                    'email',
+                    'max:255',
+                    \Illuminate\Validation\Rule::unique('users', 'email'),
+                    \Illuminate\Validation\Rule::unique('users_temp', 'email')->ignore($userTempId),
+                ],
+                'nomor_hp' => 'required|string|max:20',
+                'password' => 'required|string|min:8|confirmed',
+                'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            ];
+        }
+        // Sub-step 2: Detail Nasabah
+        elseif ($subStep == 2) {
+            $validationRules = [
+                'no_kk' => 'nullable|string|max:16',
+                'tempat_lahir' => 'nullable|string|max:255',
+                'tanggal_lahir' => 'nullable|date',
+                'jenis_kelamin' => 'nullable|in:L,P',
+                'alamat' => 'nullable|string',
+                'foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+                'foto_kk' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            ];
+        }
+        // Sub-step 3: Pekerjaan
+        elseif ($subStep == 3) {
+            $validationRules = [
+                'pekerjaan' => 'nullable|string|max:255',
+                'penghasilan' => 'nullable|numeric|min:0',
+                'nama_perusahaan' => 'nullable|string|max:255',
+                'nama_bank' => 'nullable|string|max:255',
+            ];
+        }
+        // Sub-step 4: Rekening
+        elseif ($subStep == 4) {
+            $validationRules = [
+                'no_rekening' => 'nullable|string|max:16',
+                'nama_pemilik_rekening' => 'nullable|string|max:255',
+                'jenis_atm' => 'nullable|string|max:20',
+            ];
+        }
+        // Sub-step 5: Data KTP
+        elseif ($subStep == 5) {
+            $validationRules = [
+                'nik' => 'nullable|string|max:16',
+                'nama_lengkap_ktp' => 'nullable|string|max:100',
+                'tempat_lahir_ktp' => 'nullable|string|max:100',
+                'tanggal_lahir_ktp' => 'nullable|date',
+                'alamat_ktp' => 'nullable|string',
+                'jenis_kelamin_ktp' => 'nullable|in:Laki-laki,Perempuan',
+                'file_ktp' => 'nullable|string',
+            ];
+        }
+        // Sub-step 6: Kontak Darurat
+        elseif ($subStep == 6) {
+            $validationRules = [
+                'darurat_nama_lengkap' => 'nullable|string|max:255',
+                'hubungan_peminjam' => 'nullable|string|max:100',
+                'darurat_no_telepon' => 'nullable|string|max:20',
+                'darurat_alamat' => 'nullable|string',
+                'darurat_pekerjaan' => 'nullable|string|max:100',
+                'darurat_email' => 'nullable|string|email|max:255',
+                'darurat_no_ktp' => 'nullable|string|max:16',
+                'darurat_foto_ktp' => 'nullable|image|mimes:jpeg,png,jpg|max:5120',
+            ];
+        }
+
+        $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
-            return redirect()->route('register', ['step' => 1])
+            return redirect()->route('register', ['step' => 1, 'substep' => $subStep])
                 ->withErrors($validator)
                 ->withInput();
         }
@@ -209,9 +323,12 @@ class RegisterController extends Controller
                 $request->session()->put('register_session_id', $sessionId);
             }
 
-            // Step 1: Create UserTemp (jika ada data)
-            $userTemp = null;
-            if ($request->filled('nama') && $request->filled('email') && $request->filled('password')) {
+            // Get or create UserTemp (harus ada dari sub-step 1)
+            $userTempId = $request->session()->get('register_user_temp_id');
+            $userTemp = $userTempId ? \App\Models\UserTemp::find($userTempId) : null;
+
+            // Sub-step 1: Create UserTemp
+            if ($subStep == 1) {
                 // Check if user_temp already exists for this email
                 $userTemp = \App\Models\UserTemp::where('email', $request->email)->first();
                 
@@ -238,10 +355,16 @@ class RegisterController extends Controller
                         'password' => $request->password ? Hash::make($request->password) : $userTemp->password,
                     ]);
                 }
+                $request->session()->put('register_user_temp_id', $userTemp->id);
             }
 
-            // Step 2: Create/Update NasabahTemp
-            if ($userTemp && ($request->filled('no_kk') || $request->filled('tempat_lahir'))) {
+            // Pastikan userTemp ada untuk sub-step selanjutnya
+            if (!$userTemp && $subStep > 1) {
+                throw new \Exception('Silakan lengkapi data diri terlebih dahulu');
+            }
+
+            // Sub-step 2: Create/Update NasabahTemp
+            if ($subStep == 2) {
                 $nasabahTemp = NasabahTemp::where('user_id', $userTemp->id)->first();
                 
                 $nasabahData = [
@@ -268,122 +391,139 @@ class RegisterController extends Controller
                 } else {
                     $nasabahTemp = NasabahTemp::create($nasabahData);
                 }
-            } else {
-                $nasabahTemp = null;
+                $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id);
             }
 
-            // Step 3: Create/Update PekerjaanTemp
-            if ($nasabahTemp && ($request->filled('pekerjaan') || $request->filled('penghasilan'))) {
-                $pekerjaanTemp = PekerjaanTemp::where('nasabah_id', $nasabahTemp->id)->first();
+            // Sub-step 3: Create/Update PekerjaanTemp
+            if ($subStep == 3) {
+                $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+                $nasabahTemp = $nasabahTempId ? NasabahTemp::find($nasabahTempId) : null;
                 
-                $pekerjaanData = [
-                    'nasabah_id' => $nasabahTemp->id,
-                    'pekerjaan' => $request->pekerjaan,
-                    'penghasilan' => $request->penghasilan,
-                    'nama_perusahaan' => $request->nama_perusahaan,
-                    'nama_bank' => $request->nama_bank,
-                ];
+                if ($nasabahTemp) {
+                    $pekerjaanTemp = PekerjaanTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    
+                    $pekerjaanData = [
+                        'nasabah_id' => $nasabahTemp->id,
+                        'pekerjaan' => $request->pekerjaan,
+                        'penghasilan' => $request->penghasilan,
+                        'nama_perusahaan' => $request->nama_perusahaan,
+                        'nama_bank' => $request->nama_bank,
+                    ];
 
-                if ($pekerjaanTemp) {
-                    $pekerjaanTemp->update(array_filter($pekerjaanData));
-                } else {
-                    PekerjaanTemp::create($pekerjaanData);
-                }
-            }
-
-            // Step 4: Create/Update DataRekTemp
-            if ($nasabahTemp && $request->filled('no_rekening')) {
-                $dataRekTemp = DataRekTemp::where('nasabah_id', $nasabahTemp->id)->first();
-                
-                $rekData = [
-                    'nasabah_id' => $nasabahTemp->id,
-                    'no_rekening' => $request->no_rekening,
-                    'nama_pemilik_rekening' => $request->nama_pemilik_rekening,
-                    'jenis_atm' => $request->jenis_atm,
-                ];
-
-                if ($dataRekTemp) {
-                    $dataRekTemp->update(array_filter($rekData));
-                } else {
-                    DataRekTemp::create($rekData);
+                    if ($pekerjaanTemp) {
+                        $pekerjaanTemp->update(array_filter($pekerjaanData));
+                    } else {
+                        PekerjaanTemp::create($pekerjaanData);
+                    }
                 }
             }
 
-            // Step 5: Create/Update DataKtpTemp
-            if ($nasabahTemp && ($request->filled('nik') || $request->filled('file_ktp'))) {
-                $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
+            // Sub-step 4: Create/Update DataRekTemp
+            if ($subStep == 4) {
+                $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+                $nasabahTemp = $nasabahTempId ? NasabahTemp::find($nasabahTempId) : null;
                 
-                $ktpData = [
-                    'nasabah_id' => $nasabahTemp->id,
-                    'nik' => $request->nik,
-                    'nama_lengkap' => $request->nama_lengkap_ktp,
-                    'tempat_lahir' => $request->tempat_lahir_ktp,
-                    'tanggal_lahir' => $request->tanggal_lahir_ktp,
-                    'alamat' => $request->alamat_ktp,
-                    'jenis_kelamin' => $request->jenis_kelamin_ktp,
-                    'file_ktp' => $request->file_ktp, // Path dari OCR atau upload
-                ];
+                if ($nasabahTemp) {
+                    $dataRekTemp = DataRekTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    
+                    $rekData = [
+                        'nasabah_id' => $nasabahTemp->id,
+                        'no_rekening' => $request->no_rekening,
+                        'nama_pemilik_rekening' => $request->nama_pemilik_rekening,
+                        'jenis_atm' => $request->jenis_atm,
+                    ];
 
-                // Handle file KTP upload jika belum ada dari OCR
-                if ($request->hasFile('file_ktp_upload') && !$request->file_ktp) {
-                    $fileKtp = $request->file('file_ktp_upload');
-                    $ktpData['file_ktp'] = $fileKtp->store('ktp', 'public');
-                }
-
-                if ($dataKtpTemp) {
-                    $dataKtpTemp->update(array_filter($ktpData));
-                } else {
-                    DataKtpTemp::create($ktpData);
+                    if ($dataRekTemp) {
+                        $dataRekTemp->update(array_filter($rekData));
+                    } else {
+                        DataRekTemp::create($rekData);
+                    }
                 }
             }
 
-            // Step 6: Create/Update DaruratTemp
-            if ($nasabahTemp && $request->filled('darurat_nama_lengkap')) {
-                $daruratTemp = DaruratTemp::where('id_nasabah', $nasabahTemp->id)->first();
+            // Sub-step 5: Create/Update DataKtpTemp
+            if ($subStep == 5) {
+                $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+                $nasabahTemp = $nasabahTempId ? NasabahTemp::find($nasabahTempId) : null;
                 
-                $daruratData = [
-                    'id_nasabah' => $nasabahTemp->id,
-                    'nama_lengkap' => $request->darurat_nama_lengkap,
-                    'hubungan_peminjam' => $request->hubungan_peminjam,
-                    'no_telepon' => $request->darurat_no_telepon,
-                    'alamat' => $request->darurat_alamat,
-                    'pekerjaan' => $request->darurat_pekerjaan,
-                    'email' => $request->darurat_email,
-                    'no_ktp' => $request->darurat_no_ktp,
-                ];
+                if ($nasabahTemp) {
+                    $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                    
+                    $ktpData = [
+                        'nasabah_id' => $nasabahTemp->id,
+                        'nik' => $request->nik,
+                        'nama_lengkap' => $request->nama_lengkap_ktp,
+                        'tempat_lahir' => $request->tempat_lahir_ktp,
+                        'tanggal_lahir' => $request->tanggal_lahir_ktp,
+                        'alamat' => $request->alamat_ktp,
+                        'jenis_kelamin' => $request->jenis_kelamin_ktp,
+                        'file_ktp' => $request->file_ktp,
+                    ];
 
-                // Handle foto KTP darurat upload
-                if ($request->hasFile('darurat_foto_ktp')) {
-                    $daruratFotoKtp = $request->file('darurat_foto_ktp');
-                    $daruratData['foto_ktp'] = $daruratFotoKtp->store('ktp', 'public');
+                    // Handle file KTP upload jika belum ada dari OCR
+                    if ($request->hasFile('file_ktp_upload') && !$request->file_ktp) {
+                        $fileKtp = $request->file('file_ktp_upload');
+                        $ktpData['file_ktp'] = $fileKtp->store('ktp', 'public');
+                    }
+
+                    if ($dataKtpTemp) {
+                        $dataKtpTemp->update(array_filter($ktpData));
+                    } else {
+                        DataKtpTemp::create($ktpData);
+                    }
                 }
+            }
 
-                if ($daruratTemp) {
-                    $daruratTemp->update(array_filter($daruratData));
-                } else {
-                    DaruratTemp::create($daruratData);
+            // Sub-step 6: Create/Update DaruratTemp
+            if ($subStep == 6) {
+                $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+                $nasabahTemp = $nasabahTempId ? NasabahTemp::find($nasabahTempId) : null;
+                
+                if ($nasabahTemp) {
+                    $daruratTemp = DaruratTemp::where('id_nasabah', $nasabahTemp->id)->first();
+                    
+                    $daruratData = [
+                        'id_nasabah' => $nasabahTemp->id,
+                        'nama_lengkap' => $request->darurat_nama_lengkap,
+                        'hubungan_peminjam' => $request->hubungan_peminjam,
+                        'no_telepon' => $request->darurat_no_telepon,
+                        'alamat' => $request->darurat_alamat,
+                        'pekerjaan' => $request->darurat_pekerjaan,
+                        'email' => $request->darurat_email,
+                        'no_ktp' => $request->darurat_no_ktp,
+                    ];
+
+                    // Handle foto KTP darurat upload
+                    if ($request->hasFile('darurat_foto_ktp')) {
+                        $daruratFotoKtp = $request->file('darurat_foto_ktp');
+                        $daruratData['foto_ktp'] = $daruratFotoKtp->store('ktp', 'public');
+                    }
+
+                    if ($daruratTemp) {
+                        $daruratTemp->update(array_filter($daruratData));
+                    } else {
+                        DaruratTemp::create($daruratData);
+                    }
                 }
             }
 
             DB::commit();
 
-            // Store session data for next steps
-            $request->session()->put('register_user_temp_id', $userTemp->id ?? null);
-            $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id ?? null);
-
-            // Redirect to step 2 (OTP) jika data minimal sudah ada
-            if ($userTemp && $userTemp->nomor_hp) {
+            // Redirect berdasarkan sub-step
+            if ($subStep < 6) {
+                // Lanjut ke sub-step berikutnya
+                return redirect()->route('register', ['step' => 1, 'substep' => $subStep + 1])
+                    ->with('success', 'Data berhasil disimpan. Lanjutkan ke langkah berikutnya.');
+            } else {
+                // Sub-step 6 selesai, redirect ke Step 2 (OTP)
                 return redirect()->route('register', ['step' => 2])
                     ->with('success', 'Data berhasil disimpan. Silakan verifikasi nomor HP Anda.');
             }
-
-            return redirect()->route('register', ['step' => 1])
-                ->with('success', 'Data berhasil disimpan. Lanjutkan mengisi form.');
                 
         } catch (\Exception $e) {
             DB::rollBack();
             
-            return redirect()->route('register', ['step' => 1])
+            return redirect()->route('register', ['step' => 1, 'substep' => $subStep])
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
                 ->withInput();
         }
@@ -595,7 +735,7 @@ class RegisterController extends Controller
             ]);
 
             // Auto login user
-            auth()->login($user);
+            \Illuminate\Support\Facades\Auth::login($user);
 
             return redirect()->route('nasabah.dashboard')
                 ->with('success', 'Registrasi berhasil! Selamat datang di Koperasi Majakara.');
