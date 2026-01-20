@@ -821,7 +821,7 @@
             </div>
 
             <!-- Right Side - Image Placeholder -->
-            <div class="hidden lg:flex bg-gradient-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
+            <div class="hidden lg:flex bg-linear-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
                 <div class="text-center text-white">
                     <div class="mb-6">
                         <div
@@ -1274,6 +1274,28 @@
             });
         }
     });
+
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.368M6.223 6.223A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.964 9.964 0 01-4.132 5.135M15 12a3 3 0 00-4.243-2.829M3 3l18 18" />
+        `;
+        } else {
+            input.type = "password";
+            icon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+            </path>
+        `;
+        }
+    }
     </script>
 </body>
 
