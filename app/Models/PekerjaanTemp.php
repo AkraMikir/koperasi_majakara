@@ -20,9 +20,7 @@ class PekerjaanTemp extends Model
         'nama_bank',
     ];
 
-    protected $casts = [
-        'penghasilan' => 'decimal:2',
-    ];
+    // Penghasilan sekarang menggunakan string (range), tidak perlu cast
 
     /**
      * Get the nasabah temp that owns the pekerjaan temp.

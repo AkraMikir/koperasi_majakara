@@ -95,6 +95,29 @@
                     </p>
                 </div>
 
+                @if(session('success'))
+                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
+                    {{ session('success') }}
+                </div>
+                @endif
+
+                @if(session('error'))
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                    <strong>Error:</strong> {{ session('error') }}
+                </div>
+                @endif
+
+                @if($errors->any())
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
+                    <strong>Validasi Error:</strong>
+                    <ul class="list-disc list-inside mt-2">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+
                 <form method="POST" action="{{ route('register.submit') }}" enctype="multipart/form-data"
                     id="registerForm">
                     @csrf
@@ -210,8 +233,10 @@
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
                                 </label>
-                                <div id="fotoPreview" class="mt-2 hidden">
-                                    <img id="fotoPreviewImg" src="" alt="Preview"
+                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }}">
+                                    <img id="fotoPreviewImg" 
+                                        src="{{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? asset('storage/' . $formData['foto']) : '' }}" 
+                                        alt="Preview"
                                         class="h-20 w-20 rounded-lg object-cover">
                                 </div>
                             </div>
@@ -284,8 +309,10 @@
                                         <input type="file" name="foto_ktp" id="foto_ktp" accept="image/*" class="hidden"
                                             onchange="previewImage(this, 'fotoKtpPreview')">
                                     </label>
-                                    <div id="fotoKtpPreview" class="mt-2 hidden">
-                                        <img id="fotoKtpPreviewImg" src="" alt="Preview"
+                                    <div id="fotoKtpPreview" class="mt-2 {{ !empty($formData['foto_ktp']) ? '' : 'hidden' }}">
+                                        <img id="fotoKtpPreviewImg" 
+                                            src="{{ !empty($formData['foto_ktp']) ? asset('storage/' . $formData['foto_ktp']) : '' }}" 
+                                            alt="Preview"
                                             class="h-20 w-20 rounded-lg object-cover">
                                     </div>
                                 </div>
@@ -301,8 +328,10 @@
                                         <input type="file" name="foto_kk" id="foto_kk" accept="image/*" class="hidden"
                                             onchange="previewImage(this, 'fotoKkPreview')">
                                     </label>
-                                    <div id="fotoKkPreview" class="mt-2 hidden">
-                                        <img id="fotoKkPreviewImg" src="" alt="Preview"
+                                    <div id="fotoKkPreview" class="mt-2 {{ !empty($formData['foto_kk']) ? '' : 'hidden' }}">
+                                        <img id="fotoKkPreviewImg" 
+                                            src="{{ !empty($formData['foto_kk']) ? asset('storage/' . $formData['foto_kk']) : '' }}" 
+                                            alt="Preview"
                                             class="h-20 w-20 rounded-lg object-cover">
                                     </div>
                                 </div>
@@ -327,11 +356,31 @@
                                 <div>
                                     <label for="penghasilan"
                                         class="block text-sm font-medium text-gray-700 mb-2">Penghasilan</label>
-                                    <input type="number" name="penghasilan" id="penghasilan"
-                                        value="{{ old('penghasilan', $formData['penghasilan'] ?? '') }}" step="0.01"
-                                        min="0"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
-                                        placeholder="0">
+                                    <select name="penghasilan" id="penghasilan"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none">
+                                        <option value="">Pilih Range Penghasilan</option>
+                                        <option value="< Rp1.000.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == '< Rp1.000.000') ? 'selected' : '' }}>
+                                            < Rp1.000.000</option>
+                                        <option value="Rp1.000.000 – Rp2.500.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == 'Rp1.000.000 – Rp2.500.000') ? 'selected' : '' }}>
+                                            Rp1.000.000 – Rp2.500.000</option>
+                                        <option value="Rp2.500.000 – Rp5.000.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == 'Rp2.500.000 – Rp5.000.000') ? 'selected' : '' }}>
+                                            Rp2.500.000 – Rp5.000.000</option>
+                                        <option value="Rp5.000.000 – Rp7.500.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == 'Rp5.000.000 – Rp7.500.000') ? 'selected' : '' }}>
+                                            Rp5.000.000 – Rp7.500.000</option>
+                                        <option value="Rp7.500.000 – Rp10.000.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == 'Rp7.500.000 – Rp10.000.000') ? 'selected' : '' }}>
+                                            Rp7.500.000 – Rp10.000.000</option>
+                                        <option value="Rp10.000.000 – Rp15.000.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == 'Rp10.000.000 – Rp15.000.000') ? 'selected' : '' }}>
+                                            Rp10.000.000 – Rp15.000.000</option>
+                                        <option value=">Rp15.000.000"
+                                            {{ (old('penghasilan', $formData['penghasilan'] ?? '') == '>Rp15.000.000') ? 'selected' : '' }}>
+                                            >Rp15.000.000</option>
+                                    </select>
                                 </div>
 
                                 <div>
@@ -348,7 +397,7 @@
                     @elseif($subStep == 4)
                     <!-- Sub-step 4: Data Rekening Bank -->
                     <div class="space-y-6">
-                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data Rekening Bank (Optional)</h3>
+                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data Rekening Bank </h3>
                         <div class="space-y-4">
                             <div>
                                 <label for="no_rekening" class="block text-sm font-medium text-gray-700 mb-2">Nomor
@@ -356,7 +405,8 @@
                                 <input type="text" name="no_rekening" id="no_rekening"
                                     value="{{ old('no_rekening', $formData['no_rekening'] ?? '') }}" maxlength="16"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
-                                    placeholder="16 digit nomor rekening">
+                                    placeholder="16 digit nomor rekening" pattern="[0-9]*" inputmode="numeric"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -397,6 +447,18 @@
                     <!-- Sub-step 5: Data KTP dengan OCR -->
                     <div class="space-y-6">
                         <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data KTP (dengan OCR)</h3>
+                        
+                        <!-- Notes untuk OCR KTP -->
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <h4 class="text-sm font-semibold text-blue-900 mb-2">📋 Petunjuk Foto KTP untuk OCR:</h4>
+                            <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
+                                <li>Foto harus <strong>landscape</strong> (mendatar)</li>
+                                <li>Foto harus <strong>jelas</strong> dan tidak gelap</li>
+                                <li>Foto tidak boleh <strong>over pencahayaan</strong> (terlalu terang)</li>
+                                <li><strong>Mohon di check ulang</strong> setelah OCR jika ada data yang tidak terprocess dengan benar</li>
+                            </ul>
+                        </div>
+                        
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ambil/Upload Foto
@@ -560,12 +622,33 @@
                                 </select>
                             </div>
 
-                            <div>
-                                <label for="alamat_ktp" class="block text-sm font-medium text-gray-700 mb-2">Alamat
-                                    Lengkap (Sesuai KTP)</label>
-                                <textarea name="alamat_ktp" id="alamat_ktp" rows="3"
-                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
-                                    placeholder="Alamat lengkap sesuai KTP">{{ old('alamat_ktp', $formData['alamat_ktp'] ?? '') }}</textarea>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="rt_rw" class="block text-sm font-medium text-gray-700 mb-2">RT/RW</label>
+                                    <input type="text" name="rt_rw" id="rt_rw"
+                                        value="{{ old('rt_rw', $formData['rt_rw'] ?? '') }}"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
+                                        placeholder="Contoh: 001/002">
+                                </div>
+                                
+                                <div>
+                                    <label for="kel_desa" class="block text-sm font-medium text-gray-700 mb-2">Kel/Desa</label>
+                                    <input type="text" name="kel_desa" id="kel_desa"
+                                        value="{{ old('kel_desa', $formData['kel_desa'] ?? '') }}"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
+                                        placeholder="Nama Kelurahan/Desa">
+                                </div>
+                                
+                                <div>
+                                    <label for="kecamatan" class="block text-sm font-medium text-gray-700 mb-2">Kecamatan</label>
+                                    <input type="text" name="kecamatan" id="kecamatan"
+                                        value="{{ old('kecamatan', $formData['kecamatan'] ?? '') }}"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
+                                        placeholder="Nama Kecamatan">
+                                </div>
+                                
+                                <!-- Hidden field untuk fallback alamat lengkap (jika diperlukan) -->
+                                <input type="hidden" name="alamat_ktp" id="alamat_ktp" value="">
                             </div>
                         </div>
                     </div>
@@ -670,8 +753,10 @@
                                     <input type="file" name="darurat_foto_ktp" id="darurat_foto_ktp" accept="image/*"
                                         class="hidden" onchange="previewImage(this, 'daruratKtpPreview')">
                                 </label>
-                                <div id="daruratKtpPreview" class="mt-2 hidden">
-                                    <img id="daruratKtpPreviewImg" src="" alt="Preview"
+                                <div id="daruratKtpPreview" class="mt-2 {{ !empty($formData['darurat_foto_ktp']) ? '' : 'hidden' }}">
+                                    <img id="daruratKtpPreviewImg" 
+                                        src="{{ !empty($formData['darurat_foto_ktp']) ? asset('storage/' . $formData['darurat_foto_ktp']) : '' }}" 
+                                        alt="Preview"
                                         class="h-20 w-20 rounded-lg object-cover">
                                 </div>
                             </div>
@@ -1244,6 +1329,26 @@
                 });
             }
         });
+        
+        // Ensure nomor rekening only accepts numbers
+        const noRekeningInput = document.getElementById('no_rekening');
+        if (noRekeningInput) {
+            // Prevent non-numeric input
+            noRekeningInput.addEventListener('keypress', function(e) {
+                const char = String.fromCharCode(e.which);
+                if (!/[0-9]/.test(char)) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Also filter on paste
+            noRekeningInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const paste = (e.clipboardData || window.clipboardData).getData('text');
+                const numbersOnly = paste.replace(/[^0-9]/g, '');
+                this.value = numbersOnly;
+            });
+        }
     });
 
     function previewImage(input, previewId) {
@@ -1261,6 +1366,49 @@
         }
     }
 
+    // Load existing photos on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load foto profil if exists
+        @if(!empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg')
+            const fotoPreview = document.getElementById('fotoPreview');
+            const fotoPreviewImg = document.getElementById('fotoPreviewImg');
+            if (fotoPreview && fotoPreviewImg) {
+                fotoPreviewImg.src = '{{ asset("storage/" . $formData["foto"]) }}';
+                fotoPreview.classList.remove('hidden');
+            }
+        @endif
+
+        // Load foto KTP if exists
+        @if(!empty($formData['foto_ktp']))
+            const fotoKtpPreview = document.getElementById('fotoKtpPreview');
+            const fotoKtpPreviewImg = document.getElementById('fotoKtpPreviewImg');
+            if (fotoKtpPreview && fotoKtpPreviewImg) {
+                fotoKtpPreviewImg.src = '{{ asset("storage/" . $formData["foto_ktp"]) }}';
+                fotoKtpPreview.classList.remove('hidden');
+            }
+        @endif
+
+        // Load foto KK if exists
+        @if(!empty($formData['foto_kk']))
+            const fotoKkPreview = document.getElementById('fotoKkPreview');
+            const fotoKkPreviewImg = document.getElementById('fotoKkPreviewImg');
+            if (fotoKkPreview && fotoKkPreviewImg) {
+                fotoKkPreviewImg.src = '{{ asset("storage/" . $formData["foto_kk"]) }}';
+                fotoKkPreview.classList.remove('hidden');
+            }
+        @endif
+
+        // Load darurat foto KTP if exists
+        @if(!empty($formData['darurat_foto_ktp']))
+            const daruratKtpPreview = document.getElementById('daruratKtpPreview');
+            const daruratKtpPreviewImg = document.getElementById('daruratKtpPreviewImg');
+            if (daruratKtpPreview && daruratKtpPreviewImg) {
+                daruratKtpPreviewImg.src = '{{ asset("storage/" . $formData["darurat_foto_ktp"]) }}';
+                daruratKtpPreview.classList.remove('hidden');
+            }
+        @endif
+    });
+
     // Load saved form data
     document.addEventListener('DOMContentLoaded', function() {
         const savedData = sessionStorage.getItem('registerData');
@@ -1274,6 +1422,28 @@
             });
         }
     });
+
+    function togglePassword(inputId, iconId) {
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (input.type === "password") {
+            input.type = "text";
+            icon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.542-7a9.956 9.956 0 012.042-3.368M6.223 6.223A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.542 7a9.964 9.964 0 01-4.132 5.135M15 12a3 3 0 00-4.243-2.829M3 3l18 18" />
+        `;
+        } else {
+            input.type = "password";
+            icon.innerHTML = `
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+            </path>
+        `;
+        }
+    }
     </script>
 </body>
 
