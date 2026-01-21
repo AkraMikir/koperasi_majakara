@@ -73,6 +73,16 @@ class TabunganController extends Controller
     }
 
     /**
+     * Show the pengajuan transfer page.
+     */
+    public function pengajuanTransfer()
+    {
+        return view('nasabah.tabungan.pengajuan-transfer', [
+            'user' => auth()->user(),
+        ]);
+    }
+
+    /**
      * Show the penarikan tabungan page.
      */
     public function penarikanTabungan()
@@ -104,65 +114,134 @@ class TabunganController extends Controller
     }
 
     /**
+     * Verify PIN before submit.
+     */
+    public function verifyPin(Request $request)
+    {
+        $request->validate([
+            'pin' => 'required|numeric|digits:6',
+        ]);
+
+        $user = auth()->user();
+        
+        if (!$user->pin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN belum diatur. Silakan atur PIN terlebih dahulu.'
+            ], 400);
+        }
+
+        if ($user->pin != $request->pin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN yang Anda masukkan salah.'
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN berhasil diverifikasi.'
+        ]);
+    }
+
+    /**
      * Submit pengajuan setoran tabungan.
      */
     public function submitSetoran(Request $request)
     {
+        // Check authentication first
+        if (!auth()->check()) {
+            return redirect()->route('login')
+                ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
+        }
+
         $request->validate([
-            'metode' => 'required|in:tunai,transfer',
+            'pin' => 'required|numeric|digits:6',
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
-            'bukti_foto.*' => 'required_if:metode,transfer|image|max:5120',
-            'nominal_foto.*' => 'required_if:metode,transfer|string',
+            'bukti_foto.*' => 'required|image|max:5120',
+            'nominal_foto.*' => 'required|string',
             'keterangan_foto.*' => 'nullable|string|max:255',
         ]);
 
-        // Get nasabah ID from auth
-        $idAnggota = $this->getIdAnggota();
+        // Verify PIN
+        $user = auth()->user();
+        
+        // Check if user has PIN
+        if (!$user->pin) {
+            return redirect()->back()
+                ->with('error', 'PIN belum diatur. Silakan atur PIN terlebih dahulu di profil Anda.')
+                ->withInput($request->except('pin'));
+        }
 
-        if ($request->metode === 'transfer') {
-            // Validate bukti foto exists
-            if (!$request->hasFile('bukti_foto') || count($request->file('bukti_foto')) == 0) {
-                return redirect()->back()
-                    ->with('error', 'Minimal upload 1 bukti transfer')
-                    ->withInput();
-            }
+        // Convert both to integer for comparison (handles string/int mismatch)
+        $userPin = (int) $user->pin;
+        $inputPin = (int) $request->pin;
 
-            // Create pengajuan tabungan
-            $pengajuan = PengajuanTabungan::create([
-                'id_anggota' => $idAnggota,
-                'foto_bukti_tf' => 'transfer', // Indikator bahwa ini transfer
-                'keterangan' => $request->keterangan,
-                'status' => '1', // Pending
-            ]);
+        if ($userPin !== $inputPin) {
+            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+                ->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
+        }
 
-            // Handle multiple bukti foto
-            if ($request->hasFile('bukti_foto')) {
-                foreach ($request->file('bukti_foto') as $index => $file) {
-                    $path = $file->store('bukti_tabungan', 'public');
-                    
-                    // Parse nominal from formatted currency string
-                    $nominalStr = $request->nominal_foto[$index] ?? '0';
-                    $nominal = (float) str_replace(['.', ','], '', $nominalStr);
-                    
-                    BuktiFotoTabungan::create([
-                        'id_pengajuan' => $pengajuan->id,
-                        'file_photo' => $path,
-                        'jenis' => 'tabungan',
-                        'nominal' => $nominal > 0 ? $nominal : $request->nominal,
-                        'keterangan' => $request->keterangan_foto[$index] ?? 'Bukti transfer',
-                    ]);
+        try {
+            // Get nasabah ID from auth
+            $idAnggota = $this->getIdAnggota();
+
+            // This method is now only for transfer
+            if ($request->metode ?? 'transfer' === 'transfer') {
+                // Validate bukti foto exists
+                if (!$request->hasFile('bukti_foto') || count($request->file('bukti_foto')) == 0) {
+                    return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+                        ->with('error', 'Minimal upload 1 bukti transfer')
+                        ->withInput($request->except('pin'));
                 }
+
+                // Create pengajuan tabungan
+                $pengajuan = PengajuanTabungan::create([
+                    'id_anggota' => $idAnggota,
+                    'foto_bukti_tf' => 'transfer', // Indikator bahwa ini transfer
+                    'keterangan' => $request->keterangan,
+                    'status' => '1', // Pending
+                ]);
+
+                // Handle multiple bukti foto
+                if ($request->hasFile('bukti_foto')) {
+                    foreach ($request->file('bukti_foto') as $index => $file) {
+                        $path = $file->store('bukti_tabungan', 'public');
+                        
+                        // Parse nominal from formatted currency string
+                        $nominalStr = $request->nominal_foto[$index] ?? '0';
+                        $nominal = (float) str_replace(['.', ','], '', $nominalStr);
+                        
+                        BuktiFotoTabungan::create([
+                            'id_pengajuan' => $pengajuan->id,
+                            'file_photo' => $path,
+                            'jenis' => 'tabungan',
+                            'nominal' => $nominal > 0 ? $nominal : $request->nominal,
+                            'keterangan' => $request->keterangan_foto[$index] ?? 'Bukti transfer',
+                        ]);
+                    }
+                }
+
+                return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
+                    ->with('success', 'Pengajuan setoran via transfer berhasil dikirim!');
             }
 
-            return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
-                ->with('success', 'Pengajuan setoran berhasil dikirim!');
-        } else {
-            // For tunai, redirect to janji temu
-            return redirect()->route('nasabah.tabungan.janji-temu', [
-                'nominal' => $request->nominal,
-                'keterangan' => $request->keterangan,
-            ]);
+            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+                ->with('error', 'Metode tidak valid')
+                ->withInput($request->except('pin'));
+                
+        } catch (\Illuminate\Auth\AuthenticationException $e) {
+            return redirect()->route('login')
+                ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput($request->except('pin'));
         }
     }
 
@@ -185,37 +264,96 @@ class TabunganController extends Controller
      */
     public function submitJanjiTemu(Request $request)
     {
-        $request->validate([
-            'nominal' => 'required|numeric|min:10000',
-            'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
-            'tanggal_janji_temu' => 'required|date|after:today',
-            'waktu_janji_temu' => 'required|date_format:H:i',
-            'keterangan' => 'nullable|string|max:500',
-        ]);
+        // Check authentication first
+        if (!auth()->check()) {
+            return redirect()->route('login')
+                ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
+        }
 
-        $idAnggota = $this->getIdAnggota();
+        try {
+            $validated = $request->validate([
+                'pin' => 'required|numeric|digits:6',
+                'nominal' => 'required|numeric|min:10000',
+                'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
+                'tanggal_janji_temu' => 'required|date|after:today',
+                'waktu_janji_temu' => 'required|date_format:H:i',
+                'keterangan' => 'nullable|string|max:500',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return redirect()->route('nasabah.tabungan.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->withErrors($e->validator)
+                ->withInput($request->except('pin'));
+        }
 
-        // Create pengajuan tabungan
-        $pengajuan = PengajuanTabungan::create([
-            'id_anggota' => $idAnggota,
-            'foto_bukti_tf' => 'tunai',
-            'keterangan' => $request->keterangan,
-            'status' => '1', // Pending
-        ]);
-
-        // Create janji temu
-        $tanggalWaktu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
+        // Verify PIN
+        $user = auth()->user();
         
-        JanjiTemuTabungan::create([
-            'id_pengajuan' => $pengajuan->id,
-            'lokasi_temu' => $request->lokasi_temu,
-            'nominal' => $request->nominal,
-            'tanggal_janji_temu' => $tanggalWaktu,
-            'waktu_janji_temu' => $tanggalWaktu,
-        ]);
+        // Check if user has PIN
+        if (!$user->pin) {
+            return redirect()->route('nasabah.tabungan.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'PIN belum diatur. Silakan atur PIN terlebih dahulu di profil Anda.')
+                ->withInput($request->except('pin'));
+        }
 
-        return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
-            ->with('success', 'Janji temu berhasil dibuat!');
+        // Convert both to integer for comparison (handles string/int mismatch)
+        $userPin = (int) $user->pin;
+        $inputPin = (int) $request->pin;
+
+        if ($userPin !== $inputPin) {
+            return redirect()->route('nasabah.tabungan.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
+        }
+
+        try {
+            // Get ID anggota after PIN verification
+            $idAnggota = $this->getIdAnggota();
+
+            // Create pengajuan tabungan
+            $pengajuan = PengajuanTabungan::create([
+                'id_anggota' => $idAnggota,
+                'foto_bukti_tf' => 'tunai',
+                'keterangan' => $request->keterangan,
+                'status' => '1', // Pending
+            ]);
+
+            // Create janji temu
+            $tanggalWaktu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
+            
+            JanjiTemuTabungan::create([
+                'id_pengajuan' => $pengajuan->id,
+                'lokasi_temu' => $request->lokasi_temu,
+                'nominal' => $request->nominal,
+                'tanggal_janji_temu' => $tanggalWaktu,
+                'waktu_janji_temu' => $tanggalWaktu,
+            ]);
+
+            return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
+                ->with('success', 'Janji temu berhasil dibuat!');
+                
+        } catch (\Illuminate\Auth\AuthenticationException $e) {
+            return redirect()->route('login')
+                ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
+        } catch (\Illuminate\Auth\Access\AuthorizationException $e) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return redirect()->route('nasabah.tabungan.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput($request->except('pin'));
+        }
     }
 
     /**
@@ -393,13 +531,16 @@ class TabunganController extends Controller
         $user = auth()->user();
         
         if (!$user) {
-            abort(401, 'Unauthorized');
+            // Don't use abort here as it causes redirect issues
+            // Throw exception instead and handle in try-catch at caller
+            throw new \Illuminate\Auth\AuthenticationException('Unauthenticated');
         }
 
         $nasabah = $user->nasabah;
         
         if (!$nasabah) {
-            abort(403, 'User tidak memiliki data nasabah');
+            // Throw exception instead of abort
+            throw new \Illuminate\Auth\Access\AuthorizationException('User tidak memiliki data nasabah');
         }
 
         return $nasabah->id;

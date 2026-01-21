@@ -63,59 +63,12 @@
         </div>
     </div>
 
-    <!-- Form Section (akan muncul setelah pilih metode) -->
-    <div id="form-section" class="mx-4 mb-6 hidden">
+    <!-- Action Buttons -->
+    <div id="action-section" class="mx-4 mb-6 hidden">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-lg font-bold text-[#674c1d] font-display">Formulir Setoran</h2>
-            </div>
-
-            <form id="form-setoran" method="POST" action="{{ route('nasabah.tabungan.submit-setoran') }}" enctype="multipart/form-data" class="space-y-4">
-                @csrf
-                <input type="hidden" name="metode" id="metode-input" value="">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Setoran</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
-                        <input type="text" name="nominal" id="nominal" placeholder="0" 
-                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
-                            oninput="formatCurrency(this)">
-                    </div>
-                    <p class="text-xs text-gray-500 mt-2">Minimal setoran: Rp 10.000</p>
-                </div>
-
-                        <div id="bukti-section" class="hidden">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer</label>
-                    <div id="bukti-container" class="space-y-3">
-                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#674c1d] transition-colors cursor-pointer" onclick="addBuktiField()">
-                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                            <p class="text-sm text-gray-600">Klik untuk tambah bukti transfer</p>
-                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG (Max 5MB)</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
-                    <textarea name="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none"></textarea>
-                </div>
-
-                <div class="pt-4">
-                    <button type="submit" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                        Ajukan Setoran
-                    </button>
-                </div>
-            </form>
-            </div>
+            <div id="action-content"></div>
         </div>
+    </div>
 
     <!-- Riwayat Setoran -->
         <div class="mx-4 mb-6">
@@ -174,11 +127,8 @@
 <script>
     let selectedMethod = null;
 
-    let buktiCount = 0;
-
     function selectMethod(method) {
         selectedMethod = method;
-        document.getElementById('metode-input').value = method;
         
         // Update button styles
         document.querySelectorAll('[id^="btn-"]').forEach(btn => {
@@ -186,87 +136,58 @@
             btn.classList.add('border-gray-200');
         });
         
+        const actionSection = document.getElementById('action-section');
+        const actionContent = document.getElementById('action-content');
+        
         if (method === 'tunai') {
             document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
-            document.getElementById('bukti-section').classList.add('hidden');
+            
+            actionContent.innerHTML = `
+                <div class="text-center space-y-4">
+                    <div class="flex items-center justify-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Setor Tunai di Kantor</h3>
+                        <p class="text-sm text-gray-600 mb-4">Untuk setoran tunai, Anda perlu membuat janji temu terlebih dahulu</p>
+                        <a href="{{ route('nasabah.tabungan.janji-temu') }}" 
+                            class="inline-block px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                            Buat Janji Temu
+                        </a>
+                    </div>
+                </div>
+            `;
         } else {
             document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
-            document.getElementById('bukti-section').classList.remove('hidden');
+            
+            actionContent.innerHTML = `
+                <div class="text-center space-y-4">
+                    <div class="flex items-center justify-center">
+                        <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-2xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 mb-2">Setor via Transfer</h3>
+                        <p class="text-sm text-gray-600 mb-4">Upload bukti transfer untuk pengajuan setoran</p>
+                        <a href="{{ route('nasabah.tabungan.pengajuan-transfer') }}" 
+                            class="inline-block px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                            Buat Pengajuan Transfer
+                        </a>
+                    </div>
+                </div>
+            `;
         }
         
-        document.getElementById('form-section').classList.remove('hidden');
-        document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        actionSection.classList.remove('hidden');
+        actionSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-
-    function addBuktiField() {
-        buktiCount++;
-        const container = document.getElementById('bukti-container');
-        const div = document.createElement('div');
-        div.className = 'border-2 border-gray-200 rounded-xl p-4 space-y-3';
-        div.innerHTML = `
-            <div class="flex items-center justify-between mb-2">
-                <label class="text-sm font-semibold text-gray-700">Bukti Transfer ${buktiCount}</label>
-                <button type="button" onclick="this.parentElement.parentElement.remove()" class="text-red-600 hover:text-red-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-            <input type="file" name="bukti_foto[]" accept="image/*" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required onchange="previewBukti(this)">
-            <input type="text" name="nominal_foto[]" placeholder="Nominal (Rp)" class="w-full px-4 py-2 border border-gray-300 rounded-lg" required oninput="formatCurrency(this)">
-            <textarea name="keterangan_foto[]" rows="2" placeholder="Keterangan" class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
-            <div class="bukti-preview hidden">
-                <img src="" alt="Preview" class="max-w-full max-h-32 rounded-lg">
-            </div>
-        `;
-        container.appendChild(div);
-    }
-
-    function previewBukti(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = input.parentElement.querySelector('.bukti-preview');
-                preview.querySelector('img').src = e.target.result;
-                preview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function formatCurrency(input) {
-        let value = input.value.replace(/[^\d]/g, '');
-        if (value) {
-            input.value = new Intl.NumberFormat('id-ID').format(value);
-        }
-    }
-
-    document.getElementById('form-setoran').addEventListener('submit', function(e) {
-        if (!selectedMethod) {
-            e.preventDefault();
-            alert('Pilih metode setoran terlebih dahulu');
-            return;
-        }
-        if (selectedMethod === 'transfer' && buktiCount === 0) {
-            e.preventDefault();
-            alert('Minimal upload 1 bukti transfer');
-            return;
-        }
-
-        // Convert formatted currency to number before submit
-        const nominalInput = document.getElementById('nominal');
-        if (nominalInput) {
-            const value = nominalInput.value.replace(/[^\d]/g, '');
-            nominalInput.value = value;
-        }
-
-        // Convert all nominal_foto inputs
-        const nominalFotoInputs = document.querySelectorAll('input[name="nominal_foto[]"]');
-        nominalFotoInputs.forEach(input => {
-            const value = input.value.replace(/[^\d]/g, '');
-            input.value = value;
-        });
-    });
 </script>
 @endpush
 @endsection

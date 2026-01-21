@@ -11,6 +11,9 @@
             <p class="text-gray-600 mt-1">Kelola pengajuan dan pinjaman nasabah</p>
         </div>
         <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.pinjaman.pembayaran') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                Pengajuan Pembayaran
+            </a>
             <a href="{{ route('admin.pinjaman.angsuran') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 Lihat Angsuran
             </a>

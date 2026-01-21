@@ -48,6 +48,30 @@
                     <p class="text-sm text-gray-500 mb-1">Sisa Tagihan</p>
                     <p class="font-semibold text-gray-900 text-lg">Rp {{ number_format($sisaTagihan, 0, ',', '.') }}</p>
                 </div>
+                @if(isset($denda) && $denda > 0)
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Denda</p>
+                    <p class="font-semibold text-red-600 text-lg">Rp {{ number_format($denda, 0, ',', '.') }}</p>
+                    @php
+                        $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
+                            ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
+                            : 0;
+                    @endphp
+                    @if($hariTelat > 0)
+                    <p class="text-xs text-red-500 mt-1">Telat {{ $hariTelat }} hari</p>
+                    @endif
+                </div>
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Total Tagihan + Denda</p>
+                    <p class="font-semibold text-[#8b6f2f] text-lg">Rp {{ number_format($totalTagihanPlusDenda, 0, ',', '.') }}</p>
+                </div>
+                @endif
+                @if(isset($angsuran->tgl_bayar) && $angsuran->tgl_bayar)
+                <div>
+                    <p class="text-sm text-gray-500 mb-1">Tanggal Bayar</p>
+                    <p class="font-semibold text-gray-900 text-lg">{{ $angsuran->tgl_bayar->format('d M Y, H:i') }}</p>
+                </div>
+                @endif
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Status Pembayaran</p>
                     <span class="px-3 py-1 {{ $angsuran->status_bayar === 'lunas' ? 'bg-green-100 text-green-700' : ($isTelat ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700') }} rounded-full text-sm font-semibold">

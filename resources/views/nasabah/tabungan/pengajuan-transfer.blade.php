@@ -1,6 +1,6 @@
 @extends('layouts.nasabah')
 
-@section('title', 'Janji Temu')
+@section('title', 'Pengajuan Setoran Transfer')
 
 @section('content')
 <div class="w-full pb-6">
@@ -10,127 +10,68 @@
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-2xl font-bold text-white font-display mb-1">Buat Janji Temu</h1>
-                    <p class="text-white/90 text-sm">Atur waktu untuk setoran tunai di kantor</p>
+                    <h1 class="text-2xl font-bold text-white font-display mb-1">Pengajuan Setoran Transfer</h1>
+                    <p class="text-white/90 text-sm">Upload bukti transfer untuk pengajuan setoran</p>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Form Janji Temu -->
+    <!-- Form Section -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             @if(session('error'))
             <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p class="text-red-700 text-sm">{{ session('error') }}</p>
-                </div>
+                <p class="text-red-700 text-sm">{{ session('error') }}</p>
             </div>
             @endif
 
-            @if($errors->any())
-            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div class="flex-1">
-                        <p class="text-red-700 font-semibold mb-2">Terjadi kesalahan:</p>
-                        <ul class="list-disc list-inside space-y-1 text-red-700 text-sm">
-                            @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            @endif
-
-            @if(session('success'))
-            <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
-                <div class="flex items-center gap-3">
-                    <svg class="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p class="text-green-700 text-sm">{{ session('success') }}</p>
-                </div>
-            </div>
-            @endif
-
-            <form method="POST" action="{{ route('nasabah.tabungan.submit-janji-temu') }}" class="space-y-6" id="form-janji-temu">
+            <form id="form-transfer" method="POST" action="{{ route('nasabah.tabungan.submit-setoran') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
+                <input type="hidden" name="metode" value="transfer">
 
                 <!-- Nominal Setoran -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Setoran *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
-                        <input type="text" name="nominal" id="nominal" value="{{ old('nominal', request('nominal')) }}" placeholder="0" required
+                        <input type="text" name="nominal" id="nominal" placeholder="0" required
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
                             oninput="formatCurrency(this)">
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Minimal setoran: Rp 10.000</p>
-                    @error('nominal')
-                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
                 </div>
 
-                <!-- Pilih Lokasi -->
+                <!-- Upload Bukti Transfer -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor *</label>
-                    <select name="lokasi_temu" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
-                        <option value="">-- Pilih Lokasi --</option>
-                        @foreach($lokasi ?? [] as $loc)
-                        <option value="{{ $loc->id }}" {{ old('lokasi_temu') == $loc->id ? 'selected' : '' }}>{{ $loc->nama_lokasi }} - {{ $loc->kota }}, {{ $loc->provinsi }}</option>
-                        @endforeach
-                    </select>
-                    @if($lokasi && $lokasi->count() > 0)
-                    <div class="mt-3 space-y-2">
-                        @foreach($lokasi as $loc)
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <p class="font-semibold text-gray-900">{{ $loc->nama_lokasi }}</p>
-                            <p class="text-sm text-gray-600">{{ $loc->alamat_lengkap }}</p>
-                            <p class="text-xs text-gray-500">{{ $loc->kota }}, {{ $loc->provinsi }}</p>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer *</label>
+                    <div id="bukti-container" class="space-y-3">
+                        <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#674c1d] transition-colors cursor-pointer" onclick="addBuktiField()">
+                            <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                            </svg>
+                            <p class="text-sm text-gray-600">Klik untuk tambah bukti transfer</p>
+                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
                         </div>
-                        @endforeach
                     </div>
-                    @endif
-                </div>
-
-                <!-- Tanggal Janji Temu -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Janji Temu *</label>
-                    <input type="date" name="tanggal_janji_temu" value="{{ old('tanggal_janji_temu') }}" required min="{{ date('Y-m-d', strtotime('+1 day')) }}" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
-                    <p class="text-xs text-gray-500 mt-2">Pilih tanggal minimal besok</p>
-                </div>
-
-                <!-- Waktu Janji Temu -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu Janji Temu *</label>
-                    <input type="time" name="waktu_janji_temu" value="{{ old('waktu_janji_temu') }}" required 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
-                    <p class="text-xs text-gray-500 mt-2">Jam operasional: 08:00 - 16:00</p>
+                    <p class="text-xs text-gray-500 mt-2">Minimal upload 1 bukti transfer</p>
                 </div>
 
                 <!-- Keterangan -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan Tambahan</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
                     <textarea name="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none">{{ old('keterangan', request('keterangan')) }}</textarea>
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none"></textarea>
                 </div>
 
                 <!-- Submit Button -->
                 <div class="pt-4">
                     <button type="button" onclick="showPinModal()" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                        Buat Janji Temu
+                        Ajukan Setoran
                     </button>
                     <a href="{{ route('nasabah.tabungan.nabung-sekarang') }}" class="block w-full mt-3 py-3 text-center text-gray-600 hover:text-gray-800 transition-colors">
                         Kembali
@@ -188,37 +129,69 @@
 
 @push('scripts')
 <script>
+    let buktiCount = 0;
+
+    function addBuktiField() {
+        buktiCount++;
+        const container = document.getElementById('bukti-container');
+        const div = document.createElement('div');
+        div.className = 'border-2 border-gray-200 rounded-xl p-4 space-y-3';
+        div.innerHTML = `
+            <div class="flex items-center justify-between mb-2">
+                <label class="text-sm font-semibold text-gray-700">Bukti Transfer ${buktiCount}</label>
+                <button type="button" onclick="this.parentElement.parentElement.remove(); buktiCount--;" class="text-red-600 hover:text-red-700">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <input type="file" name="bukti_foto[]" accept="image/*" required 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg" 
+                onchange="previewBukti(this)">
+            <input type="text" name="nominal_foto[]" placeholder="Nominal dari bukti (Rp)" required 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg" 
+                oninput="formatCurrency(this)">
+            <textarea name="keterangan_foto[]" rows="2" placeholder="Keterangan (opsional)" 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
+            <div class="bukti-preview hidden">
+                <img src="" alt="Preview" class="max-w-full max-h-32 rounded-lg">
+            </div>
+        `;
+        container.appendChild(div);
+    }
+
+    function previewBukti(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = input.parentElement.querySelector('.bukti-preview');
+                preview.querySelector('img').src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     function formatCurrency(input) {
         let value = input.value.replace(/[^\d]/g, '');
         if (value) {
             input.value = new Intl.NumberFormat('id-ID').format(value);
-        } else {
-            input.value = '';
         }
     }
 
     function showPinModal() {
         // Validate form first
-        const form = document.getElementById('form-janji-temu');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-
-        // Check if nominal exists and valid
-        const nominalInput = form.querySelector('input[name="nominal"]');
-        const nominalRaw = nominalInput.value.replace(/[^\d]/g, '');
-        const nominal = parseFloat(nominalRaw);
-        
-        if (!nominal || isNaN(nominal) || nominal < 10000) {
+        const nominal = document.getElementById('nominal').value.replace(/[^\d]/g, '');
+        if (!nominal || parseInt(nominal) < 10000) {
             alert('Nominal minimal Rp 10.000');
-            nominalInput.focus();
             return;
         }
 
-        // Convert formatted currency to number before submit (update hidden value if needed)
-        // The actual conversion will be done in verifyAndSubmit
-        
+        if (buktiCount === 0) {
+            alert('Minimal upload 1 bukti transfer');
+            return;
+        }
+
         // Show modal
         document.getElementById('pin-modal').classList.remove('hidden');
         document.getElementById('pin-modal').classList.add('flex');
@@ -240,20 +213,27 @@
             return;
         }
 
-        // Get form
-        const form = document.getElementById('form-janji-temu');
-        
-        // Convert formatted currency to number before submit
-        const nominalInput = form.querySelector('input[name="nominal"]');
-        const nominalRaw = nominalInput.value.replace(/[^\d]/g, '');
-        nominalInput.value = nominalRaw; // Set as raw number for server processing
-
         // Add PIN to form
+        const form = document.getElementById('form-transfer');
         const pinInput = document.createElement('input');
         pinInput.type = 'hidden';
         pinInput.name = 'pin';
         pinInput.value = pin;
         form.appendChild(pinInput);
+
+        // Convert formatted currency to number before submit
+        const nominalInput = document.getElementById('nominal');
+        if (nominalInput) {
+            const value = nominalInput.value.replace(/[^\d]/g, '');
+            nominalInput.value = value;
+        }
+
+        // Convert all nominal_foto inputs
+        const nominalFotoInputs = document.querySelectorAll('input[name="nominal_foto[]"]');
+        nominalFotoInputs.forEach(input => {
+            const value = input.value.replace(/[^\d]/g, '');
+            input.value = value;
+        });
 
         // Submit form
         form.submit();
@@ -276,13 +256,6 @@
     document.getElementById('pin-modal').addEventListener('transitionend', function() {
         if (!this.classList.contains('hidden')) {
             document.getElementById('pin-input').focus();
-        }
-    });
-
-    // Submit on Enter key
-    document.getElementById('pin-input').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            verifyAndSubmit();
         }
     });
 </script>

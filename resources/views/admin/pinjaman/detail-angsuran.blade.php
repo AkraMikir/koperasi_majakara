@@ -93,6 +93,32 @@
                         <p class="text-sm text-gray-600">Sisa Tagihan</p>
                         <p class="font-semibold text-[#8b6f2f] text-xl">Rp {{ number_format($angsuran->jumlah_tagihan - $angsuran->jumlah_terbayar, 0, ',', '.') }}</p>
                     </div>
+                    @php
+                        $denda = $angsuran->denda ?? 0;
+                        $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
+                            ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
+                            : 0;
+                        $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
+                    @endphp
+                    @if($denda > 0 || ($hariTelat > 0 && $angsuran->status_bayar !== 'lunas'))
+                    <div>
+                        <p class="text-sm text-gray-600">Denda</p>
+                        <p class="font-semibold text-red-600 text-xl">Rp {{ number_format($denda, 0, ',', '.') }}</p>
+                        @if($hariTelat > 0)
+                        <p class="text-xs text-red-500 mt-1">Telat {{ $hariTelat }} hari</p>
+                        @endif
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Tagihan + Denda</p>
+                        <p class="font-semibold text-[#674c1d] text-xl">Rp {{ number_format($totalTagihanPlusDenda, 0, ',', '.') }}</p>
+                    </div>
+                    @endif
+                    @if($angsuran->tgl_bayar)
+                    <div>
+                        <p class="text-sm text-gray-600">Tanggal Bayar</p>
+                        <p class="font-semibold text-gray-900">{{ $angsuran->tgl_bayar->format('d M Y, H:i') }}</p>
+                    </div>
+                    @endif
                     <div>
                         <p class="text-sm text-gray-600">Status</p>
                         @php
@@ -121,13 +147,25 @@
                     @csrf
                     <input type="hidden" name="jenis" value="{{ $jenis }}">
                     <div class="space-y-4">
+                        @php
+                            $denda = $angsuran->denda ?? 0;
+                            $sisaTagihanPokok = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
+                            $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
+                            $sisaTotal = max(0, $totalTagihanPlusDenda - ($angsuran->jumlah_terbayar ?? 0));
+                        @endphp
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah Bayar (Rp)</label>
-                            <input type="number" name="jumlah_bayar" step="0.01" min="0" max="{{ $angsuran->jumlah_tagihan - $angsuran->jumlah_terbayar }}" required
+                            <input type="number" name="jumlah_bayar" step="0.01" min="0" max="{{ $sisaTotal }}" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
                                 placeholder="0.00"
-                                value="{{ $angsuran->jumlah_tagihan - $angsuran->jumlah_terbayar }}">
-                            <p class="text-xs text-gray-500 mt-1">Maksimal: Rp {{ number_format($angsuran->jumlah_tagihan - $angsuran->jumlah_terbayar, 0, ',', '.') }}</p>
+                                value="{{ $sisaTotal }}">
+                            <p class="text-xs text-gray-500 mt-1">
+                                Sisa tagihan pokok: Rp {{ number_format($sisaTagihanPokok, 0, ',', '.') }}
+                                @if($denda > 0)
+                                    <br>Denda: Rp {{ number_format($denda, 0, ',', '.') }}
+                                @endif
+                                <br><strong>Total yang harus dibayar: Rp {{ number_format($sisaTotal, 0, ',', '.') }}</strong>
+                            </p>
                         </div>
                         <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                             ✓ Konfirmasi Pembayaran
@@ -154,9 +192,12 @@
                         <p class="text-sm text-gray-600">Progress Pembayaran</p>
                         <div class="mt-2">
                             <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] h-3 rounded-full" style="width: {{ ($angsuran->jumlah_terbayar / $angsuran->jumlah_tagihan) * 100 }}%"></div>
+                                @php
+                                    $progressPercent = $angsuran->jumlah_tagihan > 0 ? ($angsuran->jumlah_terbayar / $angsuran->jumlah_tagihan) * 100 : 0;
+                                @endphp
+                                <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] h-3 rounded-full" style="width: {{ number_format($progressPercent, 2) }}%"></div>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">{{ number_format(($angsuran->jumlah_terbayar / $angsuran->jumlah_tagihan) * 100, 1) }}%</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ number_format($progressPercent, 1) }}%</p>
                         </div>
                     </div>
                 </div>

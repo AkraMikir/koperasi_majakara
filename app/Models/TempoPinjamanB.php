@@ -19,13 +19,17 @@ class TempoPinjamanB extends Model
         'tgl_jatuh_tempo',
         'jumlah_tagihan',
         'jumlah_terbayar',
+        'denda',
+        'tgl_bayar',
         'status_bayar',
     ];
 
     protected $casts = [
         'tgl_jatuh_tempo' => 'datetime',
+        'tgl_bayar' => 'datetime',
         'jumlah_tagihan' => 'decimal:2',
         'jumlah_terbayar' => 'decimal:2',
+        'denda' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
