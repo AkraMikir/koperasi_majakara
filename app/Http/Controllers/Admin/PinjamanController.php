@@ -123,15 +123,23 @@ class PinjamanController extends Controller
 
         $pengajuan = PengajuanPinjaman::findOrFail($id);
 
+        // Sistem bunga di awal:
+        // - Nominal yang diajukan = jumlah yang harus dibayar kembali
+        // - Bunga dipotong di awal, jadi jumlah_pinjam = nominal - bunga_rp
+        // - Total tagihan = nominal (bukan nominal + bunga_rp)
+        $nominal = $pengajuan->nominal;
+        $bungaRp = $request->bunga_rp;
+        $jumlahPinjam = $nominal - $bungaRp; // Jumlah yang diterima nasabah (setelah potong bunga)
+
         // Create pinjaman
         $pinjaman = PinjamanH::create([
             'id_anggota' => $pengajuan->id_anggota,
             'id_pengajuan' => $pengajuan->id,
-            'jumlah_pinjam' => $pengajuan->nominal,
+            'jumlah_pinjam' => $jumlahPinjam, // Jumlah yang diterima nasabah (setelah potong bunga)
             'lama_pinjam' => (int)$pengajuan->durasi,
             'jenis' => $pengajuan->jenis,
             'bunga' => $request->bunga / 100, // Convert to decimal
-            'bunga_rp' => $request->bunga_rp,
+            'bunga_rp' => $bungaRp,
             'denda_persen' => $request->denda_persen,
             'tgl_pinjam' => now(),
             'status' => 'pencairan',
@@ -267,13 +275,22 @@ class PinjamanController extends Controller
 
     /**
      * Generate jadwal angsuran untuk pinjaman.
+     * 
+     * Sistem bunga di awal:
+     * - jumlah_pinjam = nominal - bunga_rp (jumlah yang diterima nasabah)
+     * - total_tagihan = nominal (jumlah yang harus dibayar kembali)
+     * - Jadi: total_tagihan = jumlah_pinjam + bunga_rp
      */
     private function generateJadwalAngsuran(PinjamanH $pinjaman)
     {
         $jumlahAngsuran = $pinjaman->lama_pinjam;
-        $jumlahPinjam = $pinjaman->jumlah_pinjam;
+        $jumlahPinjam = $pinjaman->jumlah_pinjam; // Jumlah yang diterima nasabah (setelah potong bunga)
         $bungaRp = $pinjaman->bunga_rp;
-        $totalTagihan = $jumlahPinjam + $bungaRp;
+        
+        // Total tagihan = nominal (bukan nominal + bunga_rp)
+        // Karena jumlah_pinjam = nominal - bunga_rp, maka:
+        // total_tagihan = jumlah_pinjam + bunga_rp = nominal
+        $totalTagihan = $jumlahPinjam + $bungaRp; // Sama dengan nominal dari pengajuan
         $jumlahPerAngsuran = $totalTagihan / $jumlahAngsuran;
 
         $tanggalMulai = $pinjaman->tgl_pinjam;
@@ -497,6 +514,8 @@ class PinjamanController extends Controller
         }
 
         // Hitung sisa tagihan
+        // Sistem bunga di awal: jumlah_pinjam sudah dikurangi bunga_rp
+        // Total tagihan = nominal = jumlah_pinjam + bunga_rp
         $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
         $totalTerbayar = $pinjaman->jenis === 'bulanan' 
             ? $pinjaman->tempoBulanan->sum('jumlah_terbayar')
