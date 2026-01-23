@@ -224,7 +224,7 @@
 
                             <div>
                                 <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil
-                                    (Optional)</label>
+                                    </label>
                                 <label for="foto" class="cursor-pointer">
                                     <div
                                         class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">
@@ -300,7 +300,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
                                     <label for="foto_ktp" class="block text-sm font-medium text-gray-700 mb-2">Foto KTP
-                                        (Optional)</label>
+                                        </label>
                                     <label for="foto_ktp" class="cursor-pointer">
                                         <div
                                             class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">
@@ -319,7 +319,7 @@
 
                                 <div>
                                     <label for="foto_kk" class="block text-sm font-medium text-gray-700 mb-2">Foto KK
-                                        (Optional)</label>
+                                        </label>
                                     <label for="foto_kk" class="cursor-pointer">
                                         <div
                                             class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">
@@ -341,7 +341,7 @@
                     @elseif($subStep == 3)
                     <!-- Sub-step 3: Data Pekerjaan -->
                     <div class="space-y-6">
-                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data Pekerjaan (Optional)</h3>
+                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data Pekerjaan</h3>
                         <div class="space-y-4">
                             <div>
                                 <label for="pekerjaan"
@@ -744,7 +744,7 @@
 
                             <div>
                                 <label for="darurat_foto_ktp" class="block text-sm font-medium text-gray-700 mb-2">Foto
-                                    KTP (Optional)</label>
+                                    KTP </label>
                                 <label for="darurat_foto_ktp" class="cursor-pointer">
                                     <div
                                         class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">

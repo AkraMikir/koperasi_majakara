@@ -125,6 +125,14 @@ class TabunganSeeder extends Seeder
                 'status' => '1', // menunggu
             ]);
 
+                $pengajuanTarik = PengajuanPenarikanTabungan::create([
+                    'id_anggota' => $nasabah->id,
+                    'tgl_pengajuan' => now(),
+                    'nominal' => 50000,
+                    'keterangan' => 'Penarikan baru',
+                    'status' => '1', // menunggu
+            ]);
+
             // Jangan buat transaksi penarikan dulu, karena masih pending
             // Transaksi penarikan akan dibuat saat admin approve
         }
