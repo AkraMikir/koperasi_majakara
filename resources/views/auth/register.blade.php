@@ -906,7 +906,7 @@
             </div>
 
             <!-- Right Side - Image Placeholder -->
-            <div class="hidden lg:flex bg-gradient-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
+            <div class="hidden lg:flex bg-linear-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
                 <div class="text-center text-white">
                     <div class="mb-6">
                         <div
