@@ -32,6 +32,148 @@ class RegisterController extends Controller
     }
 
     /**
+     * Helper function: Move file from temporary storage to permanent storage
+     * Permanent path: public/user/{userId}/dataori/{filename}
+     */
+    private function moveFileToPermanent($tempPath, $userId, $filename = null)
+    {
+        if (!$tempPath || $tempPath === 'default-profile.jpg') {
+            return $tempPath; // Skip default or empty paths
+        }
+
+        // Skip if already in permanent storage
+        if (strpos($tempPath, "user/{$userId}/dataori") !== false) {
+            return $tempPath;
+        }
+
+        // Get filename from temp path if not provided
+        if (!$filename) {
+            $filename = basename($tempPath);
+        }
+
+        // Generate unique filename to avoid conflicts
+        $extension = pathinfo($filename, PATHINFO_EXTENSION);
+        $nameWithoutExt = pathinfo($filename, PATHINFO_FILENAME);
+        $uniqueFilename = $nameWithoutExt . '_' . time() . '.' . $extension;
+
+        // New permanent path
+        $permanentPath = "user/{$userId}/dataori/{$uniqueFilename}";
+
+        // Check if file exists in temp storage
+        if (Storage::disk('public')->exists($tempPath)) {
+            // Ensure directory exists
+            $directory = dirname($permanentPath);
+            if (!Storage::disk('public')->exists($directory)) {
+                Storage::disk('public')->makeDirectory($directory);
+            }
+            
+            // Copy file to permanent location
+            Storage::disk('public')->copy($tempPath, $permanentPath);
+            
+            // Delete temporary file
+            Storage::disk('public')->delete($tempPath);
+            
+            return $permanentPath;
+        }
+
+        return $tempPath; // Return original if file doesn't exist
+    }
+
+    /**
+     * Helper function: Move all registration photos to permanent storage
+     */
+    private function moveAllPhotosToPermanent($userTempId, $nasabahTempId = null)
+    {
+        $userTemp = \App\Models\UserTemp::find($userTempId);
+        if (!$userTemp) {
+            return;
+        }
+
+        $userId = $userTemp->id;
+
+        // Move foto profil (UserTemp)
+        if ($userTemp->foto && $userTemp->foto !== 'default-profile.jpg') {
+            $oldFotoPath = $userTemp->foto;
+            $extension = pathinfo($oldFotoPath, PATHINFO_EXTENSION);
+            $newFotoPath = $this->moveFileToPermanent($oldFotoPath, $userId, 'foto_profil.' . $extension);
+            if ($newFotoPath !== $oldFotoPath) {
+                $userTemp->update(['foto' => $newFotoPath]);
+            }
+        }
+
+        if ($nasabahTempId) {
+            $nasabahTemp = NasabahTemp::find($nasabahTempId);
+            if ($nasabahTemp) {
+                // Move foto KTP (NasabahTemp)
+                if ($nasabahTemp->foto_ktp) {
+                    $oldFotoKtpPath = $nasabahTemp->foto_ktp;
+                    $extension = pathinfo($oldFotoKtpPath, PATHINFO_EXTENSION);
+                    $newFotoKtpPath = $this->moveFileToPermanent($oldFotoKtpPath, $userId, 'foto_ktp.' . $extension);
+                    if ($newFotoKtpPath !== $oldFotoKtpPath) {
+                        $nasabahTemp->update(['foto_ktp' => $newFotoKtpPath]);
+                    }
+                }
+
+                // Move foto KK (NasabahTemp)
+                if ($nasabahTemp->foto_kk) {
+                    $oldFotoKkPath = $nasabahTemp->foto_kk;
+                    $extension = pathinfo($oldFotoKkPath, PATHINFO_EXTENSION);
+                    $newFotoKkPath = $this->moveFileToPermanent($oldFotoKkPath, $userId, 'foto_kk.' . $extension);
+                    if ($newFotoKkPath !== $oldFotoKkPath) {
+                        $nasabahTemp->update(['foto_kk' => $newFotoKkPath]);
+                    }
+                }
+
+                // Move file KTP (DataKtpTemp)
+                $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
+                if ($dataKtpTemp && $dataKtpTemp->file_ktp) {
+                    $oldFileKtpPath = $dataKtpTemp->file_ktp;
+                    $extension = pathinfo($oldFileKtpPath, PATHINFO_EXTENSION);
+                    $newFileKtpPath = $this->moveFileToPermanent($oldFileKtpPath, $userId, 'file_ktp.' . $extension);
+                    if ($newFileKtpPath !== $oldFileKtpPath) {
+                        $dataKtpTemp->update(['file_ktp' => $newFileKtpPath]);
+                    }
+                }
+
+                // Move foto KTP darurat (DaruratTemp)
+                $daruratTemp = DaruratTemp::where('id_nasabah', $nasabahTemp->id)->first();
+                if ($daruratTemp && $daruratTemp->foto_ktp) {
+                    $oldDaruratFotoKtpPath = $daruratTemp->foto_ktp;
+                    $extension = pathinfo($oldDaruratFotoKtpPath, PATHINFO_EXTENSION);
+                    $newDaruratFotoKtpPath = $this->moveFileToPermanent($oldDaruratFotoKtpPath, $userId, 'darurat_foto_ktp.' . $extension);
+                    if ($newDaruratFotoKtpPath !== $oldDaruratFotoKtpPath) {
+                        $daruratTemp->update(['foto_ktp' => $newDaruratFotoKtpPath]);
+                    }
+                }
+            }
+        }
+
+        // Clean up temporary directories if empty
+        $this->cleanupTempDirectories($userId);
+    }
+
+    /**
+     * Helper function: Clean up temporary directories
+     */
+    private function cleanupTempDirectories($userId)
+    {
+        // Clean up registrasi/temp/users_{id} directory
+        $tempUserDir = "registrasi/temp/users_{$userId}";
+        if (Storage::disk('public')->exists($tempUserDir)) {
+            Storage::disk('public')->deleteDirectory($tempUserDir);
+        }
+
+        // Clean up registrasi/temp/data_diri directory (only if empty)
+        $tempDataDiriDir = "registrasi/temp/data_diri";
+        if (Storage::disk('public')->exists($tempDataDiriDir)) {
+            $files = Storage::disk('public')->files($tempDataDiriDir);
+            if (empty($files)) {
+                Storage::disk('public')->deleteDirectory($tempDataDiriDir);
+            }
+        }
+    }
+
+    /**
      * Show the registration form.
      */
     public function showRegistrationForm(Request $request)
@@ -86,7 +228,16 @@ class RegisterController extends Controller
             if ($nasabahTempId) {
                 $nasabahTemp = NasabahTemp::find($nasabahTempId);
                 if ($nasabahTemp) {
-                    $formData['no_kk'] = $nasabahTemp->no_kk;
+                    // Filter out temporary no_kk values when loading for display
+                    // Don't show temporary value (TEMP...) to user - show empty instead
+                    $noKkValue = $nasabahTemp->no_kk;
+                    if ($noKkValue && (strpos($noKkValue, 'TEMP') === 0 || strpos($noKkValue, 'TEMP') !== false)) {
+                        $formData['no_kk'] = ''; // Don't show temporary value to user
+                        \Log::info('Filtered out temporary no_kk value for display', ['temp_value' => $noKkValue]);
+                    } else {
+                        $formData['no_kk'] = $noKkValue ?? '';
+                    }
+                    
                     $formData['tempat_lahir'] = $nasabahTemp->tempat_lahir;
                     $formData['tanggal_lahir'] = $nasabahTemp->tanggal_lahir ? $nasabahTemp->tanggal_lahir->format('Y-m-d') : null;
                     $formData['jenis_kelamin'] = $nasabahTemp->jenis_kelamin;
@@ -118,7 +269,21 @@ class RegisterController extends Controller
                         $formData['nama_lengkap_ktp'] = $dataKtpTemp->nama_lengkap;
                         $formData['tempat_lahir_ktp'] = $dataKtpTemp->tempat_lahir;
                         $formData['tanggal_lahir_ktp'] = $dataKtpTemp->tanggal_lahir ? $dataKtpTemp->tanggal_lahir->format('Y-m-d') : null;
-                        $formData['alamat_ktp'] = $dataKtpTemp->alamat;
+                        // Parse alamat jika format sesuai (RT/RW: xxx, Kel/Desa: xxx, Kecamatan: xxx)
+                        $alamat = $dataKtpTemp->alamat;
+                        if (preg_match('/RT\/RW:\s*([^,]+)/i', $alamat, $rtRwMatch)) {
+                            $formData['rt_rw'] = trim($rtRwMatch[1]);
+                        }
+                        if (preg_match('/Kel\/Desa:\s*([^,]+)/i', $alamat, $kelDesaMatch)) {
+                            $formData['kel_desa'] = trim($kelDesaMatch[1]);
+                        }
+                        if (preg_match('/Kecamatan:\s*([^,]+)/i', $alamat, $kecamatanMatch)) {
+                            $formData['kecamatan'] = trim($kecamatanMatch[1]);
+                        }
+                        // Fallback: jika tidak bisa di-parse, simpan sebagai alamat_ktp
+                        if (empty($formData['rt_rw']) && empty($formData['kel_desa']) && empty($formData['kecamatan'])) {
+                            $formData['alamat_ktp'] = $alamat;
+                        }
                         $formData['jenis_kelamin_ktp'] = $dataKtpTemp->jenis_kelamin;
                         $formData['file_ktp'] = $dataKtpTemp->file_ktp;
                     }
@@ -165,9 +330,9 @@ class RegisterController extends Controller
             ], 422);
         }
 
-        // Upload file
+        // Upload file - storage path: registrasi/temp/ocr/file_ktp (temporary untuk OCR)
         $fileKtp = $request->file('file_ktp');
-        $fileKtpPath = $fileKtp->store('ktp', 'public');
+        $fileKtpPath = $fileKtp->store('registrasi/temp/ocr/file_ktp', 'public');
 
         // Process OCR
         $ocrResult = $this->ocrService->extractKtpData($fileKtpPath);
@@ -225,6 +390,12 @@ class RegisterController extends Controller
      */
     private function handleStep1(Request $request, $subStep = 1)
     {
+        \Log::info('handleStep1 called', [
+            'substep' => $subStep,
+            'user_temp_id' => $request->session()->get('register_user_temp_id'),
+            'nasabah_temp_id' => $request->session()->get('register_nasabah_temp_id'),
+        ]);
+        
         // Validasi berdasarkan sub-step
         $validationRules = [];
         
@@ -252,8 +423,17 @@ class RegisterController extends Controller
         }
         // Sub-step 2: Detail Nasabah
         elseif ($subStep == 2) {
+            // Get nasabah_temp_id dari session untuk exclude dari unique validation
+            $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+            
             $validationRules = [
-                'no_kk' => 'nullable|string|max:16',
+                'no_kk' => [
+                    'nullable',
+                    'string',
+                    'max:16',
+                    // Unique validation: exclude current nasabah_temp record
+                    \Illuminate\Validation\Rule::unique('tbl_nasabah_temp', 'no_kk')->ignore($nasabahTempId),
+                ],
                 'tempat_lahir' => 'nullable|string|max:255',
                 'tanggal_lahir' => 'nullable|date',
                 'jenis_kelamin' => 'nullable|in:L,P',
@@ -266,7 +446,7 @@ class RegisterController extends Controller
         elseif ($subStep == 3) {
             $validationRules = [
                 'pekerjaan' => 'nullable|string|max:255',
-                'penghasilan' => 'nullable|numeric|min:0',
+                'penghasilan' => 'nullable|string|max:50', // Sekarang menggunakan string (range)
                 'nama_perusahaan' => 'nullable|string|max:255',
                 'nama_bank' => 'nullable|string|max:255',
             ];
@@ -274,7 +454,7 @@ class RegisterController extends Controller
         // Sub-step 4: Rekening
         elseif ($subStep == 4) {
             $validationRules = [
-                'no_rekening' => 'nullable|string|max:16',
+                'no_rekening' => 'nullable|regex:/^[0-9]+$/|max:16',
                 'nama_pemilik_rekening' => 'nullable|string|max:255',
                 'jenis_atm' => 'nullable|string|max:20',
             ];
@@ -286,7 +466,10 @@ class RegisterController extends Controller
                 'nama_lengkap_ktp' => 'nullable|string|max:100',
                 'tempat_lahir_ktp' => 'nullable|string|max:100',
                 'tanggal_lahir_ktp' => 'nullable|date',
-                'alamat_ktp' => 'nullable|string',
+                'rt_rw' => 'nullable|string|max:50',
+                'kel_desa' => 'nullable|string|max:100',
+                'kecamatan' => 'nullable|string|max:100',
+                'alamat_ktp' => 'nullable|string', // Fallback jika tidak menggunakan RT/RW format
                 'jenis_kelamin_ktp' => 'nullable|in:Laki-laki,Perempuan',
                 'file_ktp' => 'nullable|string',
             ];
@@ -305,13 +488,35 @@ class RegisterController extends Controller
             ];
         }
 
-        $validator = Validator::make($request->all(), $validationRules);
+        // Log request data for debugging
+        \Log::info('Validation rules for substep ' . $subStep, [
+            'rules' => $validationRules,
+            'request_data_keys' => array_keys($request->except(['password', 'password_confirmation', '_token'])),
+        ]);
+
+        // Custom validation messages
+        $customMessages = [];
+        if ($subStep == 4) {
+            $customMessages = [
+                'no_rekening.regex' => 'Nomor rekening hanya boleh berisi angka.',
+            ];
+        }
+        
+        $validator = Validator::make($request->all(), $validationRules, $customMessages);
 
         if ($validator->fails()) {
+            \Log::warning('Registration validation failed at Step 1, SubStep ' . $subStep, [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->except(['password', 'password_confirmation', '_token']),
+            ]);
+            
             return redirect()->route('register', ['step' => 1, 'substep' => $subStep])
                 ->withErrors($validator)
+                ->with('error', 'Terdapat kesalahan pada data yang Anda masukkan. Silakan periksa kembali.')
                 ->withInput();
         }
+        
+        \Log::info('Validation passed for substep ' . $subStep);
 
         try {
             DB::beginTransaction();
@@ -333,11 +538,11 @@ class RegisterController extends Controller
                 $userTemp = \App\Models\UserTemp::where('email', $request->email)->first();
                 
                 if (!$userTemp) {
-                    // Handle foto upload
+                    // Handle foto upload - storage path: registrasi/temp/data_diri/foto_profil
                     $fotoPath = 'default-profile.jpg';
                     if ($request->hasFile('foto')) {
                         $foto = $request->file('foto');
-                        $fotoPath = $foto->store('profiles', 'public');
+                        $fotoPath = $foto->store('registrasi/temp/data_diri/foto_profil', 'public');
                     }
 
                     $userTemp = \App\Models\UserTemp::create([
@@ -348,12 +553,25 @@ class RegisterController extends Controller
                         'foto' => $fotoPath,
                     ]);
                 } else {
-                    // Update existing
-                    $userTemp->update([
+                    // Update existing - handle foto update
+                    $updateData = [
                         'nama' => $request->nama ?? $userTemp->nama,
                         'nomor_hp' => $request->nomor_hp ?? $userTemp->nomor_hp,
                         'password' => $request->password ? Hash::make($request->password) : $userTemp->password,
-                    ]);
+                    ];
+                    
+                    // Update foto if new file uploaded
+                    if ($request->hasFile('foto')) {
+                        // Delete old foto if exists and not default
+                        if ($userTemp->foto && $userTemp->foto !== 'default-profile.jpg' && Storage::disk('public')->exists($userTemp->foto)) {
+                            Storage::disk('public')->delete($userTemp->foto);
+                        }
+                        
+                        $foto = $request->file('foto');
+                        $updateData['foto'] = $foto->store('registrasi/temp/data_diri/foto_profil', 'public');
+                    }
+                    
+                    $userTemp->update($updateData);
                 }
                 $request->session()->put('register_user_temp_id', $userTemp->id);
             }
@@ -369,29 +587,255 @@ class RegisterController extends Controller
                 
                 $nasabahData = [
                     'user_id' => $userTemp->id,
-                    'no_kk' => $request->no_kk,
-                    'tempat_lahir' => $request->tempat_lahir,
-                    'tanggal_lahir' => $request->tanggal_lahir,
-                    'jenis_kelamin' => $request->jenis_kelamin,
-                    'alamat' => $request->alamat,
                 ];
+                
+                // Only add fields that have values
+                if ($request->filled('no_kk')) {
+                    $nasabahData['no_kk'] = $request->no_kk;
+                }
+                if ($request->filled('tempat_lahir')) {
+                    $nasabahData['tempat_lahir'] = $request->tempat_lahir;
+                }
+                if ($request->filled('tanggal_lahir')) {
+                    $nasabahData['tanggal_lahir'] = $request->tanggal_lahir;
+                }
+                if ($request->filled('jenis_kelamin')) {
+                    $nasabahData['jenis_kelamin'] = $request->jenis_kelamin;
+                }
+                if ($request->filled('alamat')) {
+                    $nasabahData['alamat'] = $request->alamat;
+                }
 
-                // Handle foto uploads
+                // Handle foto uploads - storage path: registrasi/temp/users_{id}/foto_ktp dan foto_kk
+                $userId = $userTemp->id;
                 if ($request->hasFile('foto_ktp')) {
+                    // Delete old foto_ktp if exists
+                    if ($nasabahTemp && $nasabahTemp->foto_ktp && Storage::disk('public')->exists($nasabahTemp->foto_ktp)) {
+                        Storage::disk('public')->delete($nasabahTemp->foto_ktp);
+                    }
+                    
                     $fotoKtp = $request->file('foto_ktp');
-                    $nasabahData['foto_ktp'] = $fotoKtp->store('ktp', 'public');
+                    $nasabahData['foto_ktp'] = $fotoKtp->store("registrasi/temp/users_{$userId}/foto_ktp", 'public');
                 }
                 if ($request->hasFile('foto_kk')) {
+                    // Delete old foto_kk if exists
+                    if ($nasabahTemp && $nasabahTemp->foto_kk && Storage::disk('public')->exists($nasabahTemp->foto_kk)) {
+                        Storage::disk('public')->delete($nasabahTemp->foto_kk);
+                    }
+                    
                     $fotoKk = $request->file('foto_kk');
-                    $nasabahData['foto_kk'] = $fotoKk->store('kk', 'public');
+                    $nasabahData['foto_kk'] = $fotoKk->store("registrasi/temp/users_{$userId}/foto_kk", 'public');
                 }
 
                 if ($nasabahTemp) {
-                    $nasabahTemp->update(array_filter($nasabahData));
+                    // Update existing record - only update fields that have values
+                    $updateData = [];
+                    
+                    // Only update fields that are provided and different from current value
+                    if ($request->has('no_kk')) { // Use has() instead of filled() to detect empty string
+                        $newNoKk = trim($request->no_kk);
+                        // Get current no_kk, but filter out temporary values for comparison
+                        $currentNoKkRaw = $nasabahTemp->no_kk;
+                        $currentNoKk = ($currentNoKkRaw && strpos($currentNoKkRaw, 'TEMP') !== 0) ? trim($currentNoKkRaw) : '';
+                        
+                        // Only update if:
+                        // 1. User provided a value (not empty)
+                        // 2. Different from current value (excluding temporary values)
+                        // 3. Not a temporary value itself
+                        if ($newNoKk !== '' && $newNoKk !== $currentNoKk && strpos($newNoKk, 'TEMP') !== 0) {
+                            // Check if new no_kk already exists in another record
+                            $existingNoKk = NasabahTemp::where('no_kk', $newNoKk)
+                                ->where('id', '!=', $nasabahTemp->id)
+                                ->first();
+                            
+                            if ($existingNoKk) {
+                                // If exists in another record, don't update no_kk (keep current value)
+                                \Log::warning('no_kk already exists in another record, keeping current value', [
+                                    'current_no_kk' => $currentNoKkRaw,
+                                    'attempted_no_kk' => $newNoKk,
+                                    'existing_record_id' => $existingNoKk->id,
+                                ]);
+                                // Don't add no_kk to updateData - keep current value
+                            } else {
+                                // Safe to update
+                                $updateData['no_kk'] = $newNoKk;
+                                \Log::info('no_kk will be updated', [
+                                    'from' => $currentNoKkRaw,
+                                    'to' => $newNoKk,
+                                ]);
+                            }
+                        } else if ($newNoKk === '' && $currentNoKkRaw && strpos($currentNoKkRaw, 'TEMP') === 0) {
+                            // If user clears the field and current value is temporary, set to NULL
+                            $updateData['no_kk'] = null;
+                            \Log::info('Clearing temporary no_kk value, setting to NULL');
+                        } else {
+                            \Log::info('no_kk unchanged, skipping update', [
+                                'current_no_kk' => $currentNoKkRaw,
+                                'new_no_kk' => $newNoKk,
+                            ]);
+                        }
+                    }
+                    
+                    if ($request->filled('tempat_lahir') && $request->tempat_lahir !== $nasabahTemp->tempat_lahir) {
+                        $updateData['tempat_lahir'] = $request->tempat_lahir;
+                    }
+                    
+                    if ($request->filled('tanggal_lahir')) {
+                        $newTanggalLahir = $request->tanggal_lahir;
+                        $currentTanggalLahir = $nasabahTemp->tanggal_lahir ? $nasabahTemp->tanggal_lahir->format('Y-m-d') : null;
+                        if ($newTanggalLahir !== $currentTanggalLahir) {
+                            $updateData['tanggal_lahir'] = $request->tanggal_lahir;
+                        }
+                    }
+                    
+                    if ($request->filled('jenis_kelamin') && $request->jenis_kelamin !== $nasabahTemp->jenis_kelamin) {
+                        $updateData['jenis_kelamin'] = $request->jenis_kelamin;
+                    }
+                    
+                    if ($request->filled('alamat') && $request->alamat !== $nasabahTemp->alamat) {
+                        $updateData['alamat'] = $request->alamat;
+                    }
+                    
+                    // Add foto paths if they exist
+                    if (isset($nasabahData['foto_ktp'])) {
+                        $updateData['foto_ktp'] = $nasabahData['foto_ktp'];
+                    }
+                    if (isset($nasabahData['foto_kk'])) {
+                        $updateData['foto_kk'] = $nasabahData['foto_kk'];
+                    }
+                    
+                    if (!empty($updateData)) {
+                        \Log::info('Updating NasabahTemp', [
+                            'id' => $nasabahTemp->id,
+                            'update_data' => $updateData,
+                            'current_no_kk' => $nasabahTemp->no_kk,
+                        ]);
+                        
+                        try {
+                            $nasabahTemp->update($updateData);
+                            \Log::info('NasabahTemp updated successfully');
+                        } catch (\Illuminate\Database\QueryException $e) {
+                            \Log::error('Database error updating NasabahTemp', [
+                                'error' => $e->getMessage(),
+                                'code' => $e->getCode(),
+                                'sql_state' => $e->errorInfo[0] ?? null,
+                                'update_data' => $updateData,
+                            ]);
+                            
+                            // If unique constraint violation on no_kk, remove it from update and retry
+                            if (strpos($e->getMessage(), 'Duplicate entry') !== false || 
+                                strpos($e->getMessage(), 'UNIQUE constraint') !== false ||
+                                ($e->errorInfo[0] ?? '') === '23000') {
+                                if (isset($updateData['no_kk'])) {
+                                    \Log::warning('Unique constraint violation on no_kk, removing from update', [
+                                        'attempted_no_kk' => $updateData['no_kk'],
+                                        'current_no_kk' => $nasabahTemp->no_kk,
+                                    ]);
+                                    unset($updateData['no_kk']);
+                                    
+                                    // Retry update without no_kk
+                                    if (!empty($updateData)) {
+                                        $nasabahTemp->update($updateData);
+                                        \Log::info('NasabahTemp updated without no_kk');
+                                    } else {
+                                        \Log::info('No other fields to update, skipping update');
+                                    }
+                                } else {
+                                    throw $e; // Re-throw if it's a different unique constraint
+                                }
+                            } else {
+                                throw $e; // Re-throw if it's a different error
+                            }
+                        }
+                    } else {
+                        \Log::info('No changes to update for NasabahTemp', ['id' => $nasabahTemp->id]);
+                    }
                 } else {
-                    $nasabahTemp = NasabahTemp::create($nasabahData);
+                    // Create new record - ensure all required fields have default values
+                    // Handle no_kk: if empty, use NULL (database allows nullable, unique constraint allows multiple NULLs)
+                    $noKk = $request->no_kk;
+                    $noKkTrimmed = $noKk ? trim($noKk) : '';
+                    
+                    if (empty($noKkTrimmed) || strpos($noKkTrimmed, 'TEMP') === 0) {
+                        // Use NULL instead of temporary value - database allows nullable
+                        // Multiple NULL values are allowed in unique constraint (in most databases)
+                        $noKk = null;
+                        \Log::info('no_kk is empty or temporary, setting to NULL for create');
+                    } else {
+                        $noKk = $noKkTrimmed;
+                    }
+                    
+                    $createData = [
+                        'user_id' => $userTemp->id,
+                        'no_kk' => $noKk, // Can be null if user doesn't provide
+                        'tempat_lahir' => $request->tempat_lahir ?? null,
+                        'tanggal_lahir' => $request->tanggal_lahir ?? null,
+                        'jenis_kelamin' => $request->jenis_kelamin ?? 'L',
+                        'alamat' => $request->alamat ?? null,
+                    ];
+                    
+                    // Add foto paths if they exist
+                    if (isset($nasabahData['foto_ktp'])) {
+                        $createData['foto_ktp'] = $nasabahData['foto_ktp'];
+                    }
+                    if (isset($nasabahData['foto_kk'])) {
+                        $createData['foto_kk'] = $nasabahData['foto_kk'];
+                    }
+                    
+                    try {
+                        \Log::info('Creating NasabahTemp', [
+                            'data' => array_merge($createData, [
+                                'no_kk' => $createData['no_kk'] ? '***provided***' : 'NULL',
+                                'no_kk_length' => $createData['no_kk'] ? strlen($createData['no_kk']) : 0
+                            ])
+                        ]);
+                        $nasabahTemp = NasabahTemp::create($createData);
+                        \Log::info('NasabahTemp created successfully', ['id' => $nasabahTemp->id]);
+                    } catch (\Illuminate\Database\QueryException $e) {
+                        \Log::error('Database error creating NasabahTemp', [
+                            'error' => $e->getMessage(),
+                            'code' => $e->getCode(),
+                            'sql_state' => $e->errorInfo[0] ?? null,
+                        ]);
+                        
+                        // If unique constraint violation on no_kk and no_kk is not null
+                        if (strpos($e->getMessage(), 'Duplicate entry') !== false || 
+                            strpos($e->getMessage(), 'UNIQUE constraint') !== false ||
+                            ($e->errorInfo[0] ?? '') === '23000') {
+                            if (strpos($e->getMessage(), 'no_kk') !== false || strpos($e->getMessage(), 'tbl_nasabah_temp') !== false) {
+                                // If no_kk was provided and causes duplicate, set to NULL instead
+                                if ($createData['no_kk'] !== null) {
+                                    \Log::warning('no_kk duplicate, setting to NULL', [
+                                        'attempted_no_kk' => $createData['no_kk'],
+                                    ]);
+                                    $createData['no_kk'] = null;
+                                    $nasabahTemp = NasabahTemp::create($createData);
+                                } else {
+                                    throw $e; // If already null, re-throw
+                                }
+                            } else {
+                                throw $e; // Re-throw if it's a different unique constraint
+                            }
+                        } else {
+                            throw $e; // Re-throw if it's a different error
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('General error creating NasabahTemp', [
+                            'error' => $e->getMessage(),
+                            'trace' => $e->getTraceAsString(),
+                        ]);
+                        throw $e;
+                    }
                 }
-                $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id);
+                
+                // Ensure session is set
+                if (isset($nasabahTemp) && $nasabahTemp) {
+                    $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id);
+                    \Log::info('Session updated with nasabah_temp_id', ['id' => $nasabahTemp->id]);
+                } else {
+                    \Log::error('NasabahTemp is null after create/update');
+                    throw new \Exception('Gagal menyimpan data nasabah. Silakan coba lagi.');
+                }
             }
 
             // Sub-step 3: Create/Update PekerjaanTemp
@@ -449,21 +893,40 @@ class RegisterController extends Controller
                 if ($nasabahTemp) {
                     $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
                     
+                    // Gabungkan alamat dari RT/RW, Kel/Desa, Kecamatan menjadi satu alamat lengkap
+                    $alamatParts = [];
+                    if ($request->rt_rw) {
+                        $alamatParts[] = 'RT/RW: ' . $request->rt_rw;
+                    }
+                    if ($request->kel_desa) {
+                        $alamatParts[] = 'Kel/Desa: ' . $request->kel_desa;
+                    }
+                    if ($request->kecamatan) {
+                        $alamatParts[] = 'Kecamatan: ' . $request->kecamatan;
+                    }
+                    $alamatLengkap = !empty($alamatParts) ? implode(', ', $alamatParts) : ($request->alamat_ktp ?? '');
+                    
                     $ktpData = [
                         'nasabah_id' => $nasabahTemp->id,
                         'nik' => $request->nik,
                         'nama_lengkap' => $request->nama_lengkap_ktp,
                         'tempat_lahir' => $request->tempat_lahir_ktp,
                         'tanggal_lahir' => $request->tanggal_lahir_ktp,
-                        'alamat' => $request->alamat_ktp,
+                        'alamat' => $alamatLengkap,
                         'jenis_kelamin' => $request->jenis_kelamin_ktp,
                         'file_ktp' => $request->file_ktp,
                     ];
 
-                    // Handle file KTP upload jika belum ada dari OCR
+                    // Handle file KTP upload - storage path: registrasi/temp/users_{id}/file_ktp
+                    $userId = $userTemp->id;
                     if ($request->hasFile('file_ktp_upload') && !$request->file_ktp) {
+                        // Delete old file_ktp if exists
+                        if ($dataKtpTemp && $dataKtpTemp->file_ktp && Storage::disk('public')->exists($dataKtpTemp->file_ktp)) {
+                            Storage::disk('public')->delete($dataKtpTemp->file_ktp);
+                        }
+                        
                         $fileKtp = $request->file('file_ktp_upload');
-                        $ktpData['file_ktp'] = $fileKtp->store('ktp', 'public');
+                        $ktpData['file_ktp'] = $fileKtp->store("registrasi/temp/users_{$userId}/file_ktp", 'public');
                     }
 
                     if ($dataKtpTemp) {
@@ -493,10 +956,16 @@ class RegisterController extends Controller
                         'no_ktp' => $request->darurat_no_ktp,
                     ];
 
-                    // Handle foto KTP darurat upload
+                    // Handle foto KTP darurat upload - storage path: registrasi/temp/users_{id}/darurat_foto_ktp
+                    $userId = $userTemp->id;
                     if ($request->hasFile('darurat_foto_ktp')) {
+                        // Delete old darurat_foto_ktp if exists
+                        if ($daruratTemp && $daruratTemp->foto_ktp && Storage::disk('public')->exists($daruratTemp->foto_ktp)) {
+                            Storage::disk('public')->delete($daruratTemp->foto_ktp);
+                        }
+                        
                         $daruratFotoKtp = $request->file('darurat_foto_ktp');
-                        $daruratData['foto_ktp'] = $daruratFotoKtp->store('ktp', 'public');
+                        $daruratData['foto_ktp'] = $daruratFotoKtp->store("registrasi/temp/users_{$userId}/darurat_foto_ktp", 'public');
                     }
 
                     if ($daruratTemp) {
@@ -509,19 +978,54 @@ class RegisterController extends Controller
 
             DB::commit();
 
+            // Log success for debugging
+            \Log::info('Registration Step 1, SubStep ' . $subStep . ' completed successfully', [
+                'user_temp_id' => $request->session()->get('register_user_temp_id'),
+                'nasabah_temp_id' => $request->session()->get('register_nasabah_temp_id'),
+            ]);
+
             // Redirect berdasarkan sub-step
             if ($subStep < 6) {
                 // Lanjut ke sub-step berikutnya
-                return redirect()->route('register', ['step' => 1, 'substep' => $subStep + 1])
+                $nextSubStep = $subStep + 1;
+                \Log::info('Redirecting to Step 1, SubStep ' . $nextSubStep, [
+                    'current_substep' => $subStep,
+                    'next_substep' => $nextSubStep,
+                    'url' => route('register', ['step' => 1, 'substep' => $nextSubStep]),
+                ]);
+                
+                // Use full URL redirect to ensure it works
+                $redirectUrl = route('register', ['step' => 1, 'substep' => $nextSubStep]);
+                return redirect($redirectUrl)
                     ->with('success', 'Data berhasil disimpan. Lanjutkan ke langkah berikutnya.');
             } else {
-                // Sub-step 6 selesai, redirect ke Step 2 (OTP)
+                // Sub-step 6 selesai - Move all photos to permanent storage before redirect
+                $userTempId = $request->session()->get('register_user_temp_id');
+                $nasabahTempId = $request->session()->get('register_nasabah_temp_id');
+                
+                if ($userTempId) {
+                    try {
+                        $this->moveAllPhotosToPermanent($userTempId, $nasabahTempId);
+                    } catch (\Exception $e) {
+                        // Log error but don't block registration
+                        \Log::error('Error moving photos to permanent storage: ' . $e->getMessage());
+                    }
+                }
+                
+                // Redirect ke Step 2 (OTP)
                 return redirect()->route('register', ['step' => 2])
                     ->with('success', 'Data berhasil disimpan. Silakan verifikasi nomor HP Anda.');
             }
                 
         } catch (\Exception $e) {
             DB::rollBack();
+            
+            // Log error for debugging
+            \Log::error('Registration Error at Step 1, SubStep ' . $subStep . ': ' . $e->getMessage(), [
+                'exception' => $e,
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['password', 'password_confirmation']),
+            ]);
             
             return redirect()->route('register', ['step' => 1, 'substep' => $subStep])
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
@@ -635,6 +1139,12 @@ class RegisterController extends Controller
                 throw new \Exception('Data user tidak ditemukan');
             }
 
+            // Ensure all photos are in permanent storage before creating user
+            $this->moveAllPhotosToPermanent($userTempId, $nasabahTempId);
+            
+            // Reload userTemp to get updated photo paths
+            $userTemp->refresh();
+
             // Create User di tabel users dengan PIN
             $user = User::create([
                 'nama' => $userTemp->nama,
@@ -650,7 +1160,11 @@ class RegisterController extends Controller
             $userTemp->update(['user_id' => $user->id]);
 
             // Move data from temp to original tables
+            // Photos should already be in permanent storage from moveAllPhotosToPermanent above
             if ($nasabahTemp) {
+                // Reload nasabahTemp to get updated photo paths
+                $nasabahTemp->refresh();
+                
                 // Create Nasabah
                 $nasabah = Nasabah::create([
                     'user_id' => $user->id,
@@ -689,6 +1203,9 @@ class RegisterController extends Controller
                 // Move DataKtp
                 $dataKtpTemp = DataKtpTemp::where('nasabah_id', $nasabahTemp->id)->first();
                 if ($dataKtpTemp) {
+                    // Reload to get updated file path
+                    $dataKtpTemp->refresh();
+                    
                     DataKtp::create([
                         'nasabah_id' => $nasabah->id,
                         'nik' => $dataKtpTemp->nik,
@@ -701,20 +1218,80 @@ class RegisterController extends Controller
                     ]);
                 }
 
-                // Move Darurat
+                // Move Darurat - only if nama_lengkap is provided (required field)
+                // Data darurat is optional, so we skip if not filled
                 $daruratTemp = DaruratTemp::where('id_nasabah', $nasabahTemp->id)->first();
                 if ($daruratTemp) {
-                    Darurat::create([
-                        'id_nasabah' => $nasabah->id,
-                        'nama_lengkap' => $daruratTemp->nama_lengkap,
-                        'hubungan_peminjam' => $daruratTemp->hubungan_peminjam,
-                        'no_telepon' => $daruratTemp->no_telepon,
-                        'alamat' => $daruratTemp->alamat,
-                        'pekerjaan' => $daruratTemp->pekerjaan,
-                        'email' => $daruratTemp->email,
-                        'no_ktp' => $daruratTemp->no_ktp,
-                        'foto_ktp' => $daruratTemp->foto_ktp,
-                    ]);
+                    // Reload to get updated photo path
+                    $daruratTemp->refresh();
+                    
+                    // Only create Darurat if nama_lengkap is provided and not empty
+                    // This is the minimum required field for tbl_darurat
+                    if (!empty($daruratTemp->nama_lengkap) && trim($daruratTemp->nama_lengkap) !== '') {
+                        // Generate unique values for unique fields if empty to avoid constraint violations
+                        // For no_telepon (char 12, unique): use nasabah_id + timestamp
+                        $noTelepon = !empty($daruratTemp->no_telepon) && trim($daruratTemp->no_telepon) !== '' 
+                            ? trim($daruratTemp->no_telepon) 
+                            : str_pad($nasabah->id, 12, '0', STR_PAD_LEFT);
+                        
+                        // For no_ktp (char 16, unique): use nasabah_id + timestamp
+                        $noKtp = !empty($daruratTemp->no_ktp) && trim($daruratTemp->no_ktp) !== '' 
+                            ? trim($daruratTemp->no_ktp) 
+                            : str_pad($nasabah->id . time(), 16, '0', STR_PAD_LEFT);
+                        
+                        $daruratData = [
+                            'id_nasabah' => $nasabah->id,
+                            'nama_lengkap' => trim($daruratTemp->nama_lengkap),
+                            'hubungan_peminjam' => !empty($daruratTemp->hubungan_peminjam) ? trim($daruratTemp->hubungan_peminjam) : '-',
+                            'no_telepon' => $noTelepon,
+                            'alamat' => !empty($daruratTemp->alamat) ? trim($daruratTemp->alamat) : '-',
+                            'pekerjaan' => !empty($daruratTemp->pekerjaan) ? trim($daruratTemp->pekerjaan) : '-',
+                            'email' => !empty($daruratTemp->email) ? trim($daruratTemp->email) : '-',
+                            'no_ktp' => $noKtp,
+                            'foto_ktp' => !empty($daruratTemp->foto_ktp) ? $daruratTemp->foto_ktp : '',
+                        ];
+                        
+                        try {
+                            Darurat::create($daruratData);
+                            \Log::info('Darurat created successfully', ['nasabah_id' => $nasabah->id]);
+                        } catch (\Illuminate\Database\QueryException $e) {
+                            // Handle unique constraint violations
+                            if (strpos($e->getMessage(), 'Duplicate entry') !== false || 
+                                strpos($e->getMessage(), 'UNIQUE constraint') !== false) {
+                                // Retry with more unique values
+                                $daruratData['no_telepon'] = str_pad($nasabah->id . microtime(true), 12, '0', STR_PAD_LEFT);
+                                $daruratData['no_ktp'] = str_pad($nasabah->id . microtime(true) . rand(100, 999), 16, '0', STR_PAD_LEFT);
+                                try {
+                                    Darurat::create($daruratData);
+                                    \Log::info('Darurat created successfully after retry', ['nasabah_id' => $nasabah->id]);
+                                } catch (\Exception $e2) {
+                                    \Log::error('Error creating Darurat after retry', [
+                                        'error' => $e2->getMessage(),
+                                        'nasabah_id' => $nasabah->id,
+                                    ]);
+                                    // Don't throw - data darurat is optional, continue registration
+                                }
+                            } else {
+                                \Log::error('Error creating Darurat', [
+                                    'error' => $e->getMessage(),
+                                    'nasabah_id' => $nasabah->id,
+                                ]);
+                                // Don't throw - data darurat is optional, continue registration
+                            }
+                        } catch (\Exception $e) {
+                            \Log::error('Error creating Darurat', [
+                                'error' => $e->getMessage(),
+                                'nasabah_id' => $nasabah->id,
+                            ]);
+                            // Don't throw - data darurat is optional, continue registration
+                        }
+                    } else {
+                        \Log::info('Skipping Darurat creation: nama_lengkap is empty', [
+                            'darurat_temp_id' => $daruratTemp->id,
+                        ]);
+                    }
+                } else {
+                    \Log::info('Skipping Darurat creation: no darurat data found');
                 }
             }
 

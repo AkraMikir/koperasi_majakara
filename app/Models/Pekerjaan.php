@@ -19,9 +19,7 @@ class Pekerjaan extends Model
         'nama_perusahaan',
     ];
 
-    protected $casts = [
-        'penghasilan' => 'decimal:2',
-    ];
+    // Penghasilan sekarang menggunakan string (range), tidak perlu cast
 
     /**
      * Get the nasabah that owns the pekerjaan.
