@@ -37,6 +37,8 @@ class PinjamanController extends Controller
         $totalPinjamanAktif = $pinjamanAktif->sum('jumlah_pinjam') ?? 0;
 
         // Calculate sisa pinjaman (total pinjaman - total terbayar)
+        // Sistem bunga di awal: jumlah_pinjam sudah dikurangi bunga_rp
+        // Total tagihan = nominal = jumlah_pinjam + bunga_rp
         $sisaPinjaman = 0;
         foreach ($pinjamanAktif as $pinjaman) {
             $totalTerbayar = 0;
@@ -45,6 +47,7 @@ class PinjamanController extends Controller
             } else {
                 $totalTerbayar = $pinjaman->tempoMingguan->sum('jumlah_terbayar') ?? 0;
             }
+            // Total tagihan = nominal = jumlah_pinjam + bunga_rp (karena bunga sudah dipotong di awal)
             $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
             $sisaPinjaman += max(0, $totalTagihan - $totalTerbayar);
         }
@@ -121,7 +124,7 @@ class PinjamanController extends Controller
     }
 
     /**
-     * Show the pengajuan pinjaman page.
+     * Show the pengajuan pinjaman page (pilihan metode).
      */
     public function pengajuanPinjaman()
     {
@@ -134,32 +137,63 @@ class PinjamanController extends Controller
             ->take(10)
             ->get();
 
-        // Get lokasi untuk janji temu
-        $lokasi = JnsLokasiPerusahaan::all();
-
         return view('nasabah.pinjaman.pengajuan-pinjaman', [
             'riwayatPengajuan' => $riwayatPengajuan,
-            'lokasi' => $lokasi,
         ]);
     }
 
     /**
-     * Submit pengajuan pinjaman.
+     * Show the pengajuan transfer page.
      */
-    public function submitPengajuan(Request $request)
+    public function pengajuanTransfer()
     {
-        $validated = $request->validate([
-            'nominal' => 'required|numeric|min:100000',
-            'jenis' => 'required|in:bulanan,mingguan',
-            'durasi' => 'required|integer|min:1|max:12',
-            'jenis_pencairan' => 'required|in:transfer,cash',
-            'pin' => 'required|numeric|digits:6',
-            'keterangan' => 'nullable|string|max:500',
-            // Fields untuk janji temu (jika cash)
-            'lokasi_temu' => 'required_if:jenis_pencairan,cash|exists:jns_lokasi_perusahaan,id',
-            'tanggal_janji_temu' => 'required_if:jenis_pencairan,cash|date|after:today',
-            'waktu_janji_temu' => 'required_if:jenis_pencairan,cash|date_format:H:i',
+        return view('nasabah.pinjaman.pengajuan-transfer');
+    }
+
+    /**
+     * Show the janji temu pinjaman page.
+     */
+    public function janjiTemuPinjaman(Request $request)
+    {
+        $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
+        
+        return view('nasabah.pinjaman.janji-temu', [
+            'lokasi' => $lokasi,
+            'nominal' => $request->nominal,
+            'keterangan' => $request->keterangan,
         ]);
+    }
+
+    /**
+     * Submit pengajuan pinjaman via transfer.
+     */
+    public function submitPengajuanTransfer(Request $request)
+    {
+        \Log::info('Submit pengajuan request received', [
+            'all_data' => $request->except('pin'),
+            'has_pin' => $request->has('pin'),
+        ]);
+
+        // Validasi durasi berdasarkan jenis pinjaman
+        $maxDurasi = $request->jenis === 'mingguan' ? 52 : 12;
+        
+        try {
+            $validated = $request->validate([
+                'nominal' => 'required|numeric|min:100000',
+                'jenis' => 'required|in:bulanan,mingguan',
+                'durasi' => "required|integer|min:1|max:{$maxDurasi}",
+                'pin' => 'required|numeric|digits:6',
+                'keterangan' => 'nullable|string|max:500',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors(),
+                'request' => $request->except('pin'),
+            ]);
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput($request->except('pin'));
+        }
 
         // Verify PIN
         $user = auth()->user();
@@ -182,34 +216,43 @@ class PinjamanController extends Controller
 
         $idAnggota = $this->getIdAnggota();
 
+        \Log::info('Submitting pengajuan pinjaman', [
+            'user_id' => $user->id,
+            'id_anggota' => $idAnggota,
+            'nominal' => $request->nominal,
+            'jenis' => $request->jenis,
+            'durasi' => $request->durasi,
+            'jenis_pencairan' => $request->jenis_pencairan,
+        ]);
+
         try {
-            // Create pengajuan
+            // Create pengajuan (transfer)
             $pengajuan = PengajuanPinjaman::create([
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
                 'jenis' => $request->jenis,
-                'durasi' => (string)$request->durasi,
-                'jenis_pencairan' => $request->jenis_pencairan,
+                'durasi' => (int)$request->durasi,
+                'jenis_pencairan' => 'transfer',
                 'status' => '1', // Pending
                 'keterangan' => $request->keterangan,
             ]);
 
-            // Jika jenis pencairan = cash, buat janji temu
-            if ($request->jenis_pencairan === 'cash') {
-                JanjiTemuPinjaman::create([
-                    'id_pengajuan' => $pengajuan->id,
-                    'lokasi_temu' => $request->lokasi_temu,
-                    'nominal' => $request->nominal,
-                    'tanggal_janji_temu' => $request->tanggal_janji_temu,
-                    'waktu_janji_temu' => $request->waktu_janji_temu,
-                    'keterangan' => $request->keterangan,
-                ]);
-            }
+            \Log::info('Pengajuan transfer created successfully', [
+                'pengajuan_id' => $pengajuan->id,
+                'id_anggota' => $pengajuan->id_anggota,
+            ]);
 
-            return redirect()->route('nasabah.pinjaman.status-pengajuan')
+            return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
+            \Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'id_anggota' => $idAnggota,
+                'request' => $request->except('pin'),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
                 ->withInput($request->except('pin'));
@@ -221,33 +264,182 @@ class PinjamanController extends Controller
      */
     public function verifyPin(Request $request)
     {
-        $request->validate([
-            'pin' => 'required|numeric|digits:6',
+        try {
+            $request->validate([
+                'pin' => 'required|numeric|digits:6',
+            ]);
+
+            $user = auth()->user();
+            
+            if (!$user) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User tidak terautentikasi.'
+                ], 401);
+            }
+            
+            if (!$user->pin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PIN belum diatur. Silakan atur PIN terlebih dahulu.'
+                ], 400);
+            }
+
+            $userPin = (int) $user->pin;
+            $inputPin = (int) $request->pin;
+
+            \Log::info('Verifying PIN', [
+                'user_id' => $user->id,
+                'user_pin' => $userPin,
+                'input_pin' => $inputPin,
+                'match' => $userPin === $inputPin
+            ]);
+
+            if ($userPin !== $inputPin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PIN yang Anda masukkan salah.'
+                ], 400);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PIN berhasil diverifikasi.'
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error verifying PIN: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat verifikasi PIN.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Submit pengajuan pinjaman via janji temu (tunai).
+     */
+    public function submitJanjiTemuPinjaman(Request $request)
+    {
+        \Log::info('Submit janji temu pinjaman request received', [
+            'all_data' => $request->except('pin'),
+            'has_pin' => $request->has('pin'),
         ]);
 
+        // Validasi durasi berdasarkan jenis pinjaman
+        $maxDurasi = $request->jenis === 'mingguan' ? 52 : 12;
+        
+        try {
+            $validated = $request->validate([
+                'nominal' => 'required|numeric|min:100000',
+                'jenis' => 'required|in:bulanan,mingguan',
+                'durasi' => "required|integer|min:1|max:{$maxDurasi}",
+                'pin' => 'required|numeric|digits:6',
+                'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
+                'tanggal_janji_temu' => 'required|date|after:today',
+                'waktu_janji_temu' => 'required|date_format:H:i',
+                'keterangan' => 'nullable|string|max:500',
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('Validation failed', [
+                'errors' => $e->errors(),
+                'request' => $request->except('pin'),
+            ]);
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->withErrors($e->errors())
+                ->withInput($request->except('pin'));
+        }
+
+        // Verify PIN
         $user = auth()->user();
         
         if (!$user->pin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'PIN belum diatur. Silakan atur PIN terlebih dahulu.'
-            ], 400);
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'PIN belum diatur. Silakan atur PIN terlebih dahulu di profil Anda.')
+                ->withInput($request->except('pin'));
         }
 
         $userPin = (int) $user->pin;
         $inputPin = (int) $request->pin;
 
         if ($userPin !== $inputPin) {
-            return response()->json([
-                'success' => false,
-                'message' => 'PIN yang Anda masukkan salah.'
-            ], 400);
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'PIN berhasil diverifikasi.'
+        $idAnggota = $this->getIdAnggota();
+
+        \Log::info('Submitting janji temu pinjaman', [
+            'user_id' => $user->id,
+            'id_anggota' => $idAnggota,
+            'nominal' => $request->nominal,
+            'jenis' => $request->jenis,
+            'durasi' => $request->durasi,
         ]);
+
+        try {
+            // Create pengajuan (cash)
+            $pengajuan = PengajuanPinjaman::create([
+                'id_anggota' => $idAnggota,
+                'tgl_pengajuan' => now(),
+                'nominal' => $request->nominal,
+                'jenis' => $request->jenis,
+                'durasi' => (int)$request->durasi,
+                'jenis_pencairan' => 'cash',
+                'status' => '1', // Pending
+                'keterangan' => $request->keterangan,
+            ]);
+
+            \Log::info('Pengajuan cash created successfully', [
+                'pengajuan_id' => $pengajuan->id,
+                'id_anggota' => $pengajuan->id_anggota,
+            ]);
+
+            // Create janji temu
+            JanjiTemuPinjaman::create([
+                'id_pengajuan' => $pengajuan->id,
+                'lokasi_temu' => $request->lokasi_temu,
+                'nominal' => $request->nominal,
+                'tanggal_janji_temu' => $request->tanggal_janji_temu,
+                'waktu_janji_temu' => $request->waktu_janji_temu,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            return redirect()->route('nasabah.pinjaman.pengajuan')
+                ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
+        } catch (\Exception $e) {
+            \Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
+                'user_id' => $user->id,
+                'id_anggota' => $idAnggota,
+                'request' => $request->except('pin'),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput($request->except('pin'));
+        }
     }
 
     /**
@@ -350,6 +542,8 @@ class PinjamanController extends Controller
             : $pinjaman->tempoMingguan()->orderBy('no_urut')->get();
 
         // Calculate statistics
+        // Sistem bunga di awal: jumlah_pinjam sudah dikurangi bunga_rp
+        // Total tagihan = nominal = jumlah_pinjam + bunga_rp
         $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
         $totalTerbayar = $angsuran->sum('jumlah_terbayar') ?? 0;
         $sisaPinjaman = max(0, $totalTagihan - $totalTerbayar);

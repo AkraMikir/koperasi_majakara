@@ -4,125 +4,99 @@
 
 @section('content')
 <div class="w-full pb-6">
+    <!-- Alert Messages -->
+    @if(session('success'))
+    <div class="mx-4 mt-4 mb-4">
+        <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 rounded-lg shadow-md">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="font-semibold">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mx-4 mt-4 mb-4">
+        <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-lg shadow-md">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+                </svg>
+                <p class="font-semibold">{{ session('error') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Hero Section -->
     <div class="mx-4 mt-4 mb-6">
         <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Ajukan Pinjaman</h1>
-                <p class="text-white/90 text-sm">Isi form di bawah untuk mengajukan pinjaman baru</p>
+                <p class="text-white/90 text-sm">Pilih metode pencairan pinjaman Anda</p>
             </div>
         </div>
     </div>
 
-    <!-- Form Pengajuan -->
+    <!-- Pilihan Metode -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h2 class="text-lg font-bold text-[#8b6f2f] mb-6 font-display">Form Pengajuan Pinjaman</h2>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-lg font-bold text-[#8b6f2f] font-display">Pilih Metode Pencairan</h2>
+            </div>
             
-            <form action="{{ route('nasabah.pinjaman.submit-pengajuan') }}" method="POST" id="formPengajuan">
-                @csrf
-                
-                <!-- Nominal -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pinjaman</label>
-                    <div class="relative">
-                        <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                        <input type="number" name="nominal" id="nominal" 
-                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
-                            placeholder="Masukkan nominal pinjaman" min="100000" step="10000" required>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-1">Minimum: Rp 100.000</p>
-                </div>
-
-                <!-- Jenis Pinjaman -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Angsuran</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="bulanan" class="peer hidden" checked required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Bulanan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per bulan</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="mingguan" class="peer hidden" required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Mingguan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per minggu</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Durasi -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman</label>
-                    <select name="durasi" id="durasi" 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all" required>
-                        <option value="">Pilih durasi</option>
-                        @for($i = 1; $i <= 12; $i++)
-                            <option value="{{ $i }}">{{ $i }} {{ $i == 1 ? 'bulan' : 'bulan' }}</option>
-                        @endfor
-                    </select>
-                    <p class="text-xs text-gray-500 mt-1">Pilih jangka waktu pinjaman</p>
-                </div>
-
-                <!-- Keterangan -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
-                    <textarea name="keterangan" id="keterangan" rows="3"
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
-                        placeholder="Tambahkan keterangan jika diperlukan"></textarea>
-                </div>
-
-                <!-- Kalkulator Estimasi -->
-                <div class="mb-6 p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
-                    <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiNominal">Rp 0</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Metode Transfer -->
+                <a href="{{ route('nasabah.pinjaman.pengajuan-transfer') }}" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Estimasi Bunga (5%):</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBunga">Rp 0</span>
-                        </div>
-                        <div class="border-t border-gray-300 pt-3 flex justify-between items-center">
-                            <span class="font-semibold text-[#8b6f2f]">Total Pinjaman:</span>
-                            <span class="text-xl font-bold text-[#8b6f2f]" id="estimasiTotal">Rp 0</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Angsuran per periode:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiAngsuran">Rp 0</span>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-1">Transfer</h3>
+                            <p class="text-sm text-gray-600">Via rekening bank</p>
                         </div>
                     </div>
-                </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Pencairan via transfer bank</span>
+                    </div>
+                </a>
 
-                <!-- Submit Button -->
-                <button type="submit" 
-                    class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
-                    Ajukan Pinjaman
-                </button>
-            </form>
+                <!-- Metode Tunai -->
+                <a href="{{ route('nasabah.pinjaman.janji-temu') }}" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 mb-1">Tunai</h3>
+                            <p class="text-sm text-gray-600">Janji temu di lokasi</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2 text-sm text-gray-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                        </svg>
+                        <span>Pencairan tunai di kantor</span>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
@@ -156,7 +130,7 @@
                                     {{ ucfirst($pengajuan->jenis) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $pengajuan->durasi }} bulan</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $pengajuan->durasi }} {{ $pengajuan->jenis == 'mingguan' ? 'minggu' : 'bulan' }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-between">
                                     <span class="px-3 py-1 {{ $pengajuan->pinjaman ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
@@ -186,38 +160,4 @@
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const nominalInput = document.getElementById('nominal');
-    const durasiSelect = document.getElementById('durasi');
-    const jenisInputs = document.querySelectorAll('input[name="jenis"]');
-    
-    function updateEstimasi() {
-        const nominal = parseFloat(nominalInput.value) || 0;
-        const durasi = parseInt(durasiSelect.value) || 1;
-        const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'bulanan';
-        
-        // Estimasi bunga 5% dari nominal
-        const estimasiBunga = nominal * 0.05;
-        const totalPinjaman = nominal + estimasiBunga;
-        const angsuranPerPeriode = durasi > 0 ? totalPinjaman / durasi : 0;
-        
-        // Update display
-        document.getElementById('estimasiNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
-        document.getElementById('estimasiBunga').textContent = 'Rp ' + estimasiBunga.toLocaleString('id-ID');
-        document.getElementById('estimasiTotal').textContent = 'Rp ' + totalPinjaman.toLocaleString('id-ID');
-        document.getElementById('estimasiAngsuran').textContent = 'Rp ' + Math.ceil(angsuranPerPeriode).toLocaleString('id-ID') + ' / ' + jenis;
-    }
-    
-    nominalInput.addEventListener('input', updateEstimasi);
-    durasiSelect.addEventListener('change', updateEstimasi);
-    jenisInputs.forEach(input => {
-        input.addEventListener('change', updateEstimasi);
-    });
-    
-    // Initial calculation
-    updateEstimasi();
-});
-</script>
 @endsection
