@@ -12,6 +12,8 @@ use App\Models\JnsLokasiPerusahaan;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFotoPembayaranPinjaman;
+use App\Models\MasterBungaPinjaman;
+use App\Models\MasterDendaPinjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -147,7 +149,77 @@ class PinjamanController extends Controller
      */
     public function pengajuanTransfer()
     {
-        return view('nasabah.pinjaman.pengajuan-transfer');
+        // Get master data bunga untuk info
+        $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        
+        return view('nasabah.pinjaman.pengajuan-transfer', [
+            'masterBunga' => $masterBunga,
+        ]);
+    }
+
+    /**
+     * Get simulasi angsuran (AJAX).
+     */
+    public function simulasiAngsuran(Request $request)
+    {
+        $request->validate([
+            'nominal' => 'required|numeric|min:100000',
+            'durasi' => 'required|integer|min:1|max:24',
+        ]);
+
+        $nominal = $request->nominal;
+        $durasi = (int) $request->durasi;
+
+        // Get bunga berdasarkan durasi
+        $masterBunga = MasterBungaPinjaman::getBungaByDurasi($durasi);
+        
+        if (!$masterBunga) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bunga untuk durasi ini belum diatur'
+            ], 400);
+        }
+
+        $bungaPersen = $masterBunga->bunga_persen;
+        $bungaRp = ($nominal * $bungaPersen) / 100;
+        
+        // Bunga dibagi ke setiap angsuran
+        $bungaPerBulan = $bungaRp / $durasi;
+        
+        // Pokok per bulan
+        $pokokPerBulan = $nominal / $durasi;
+        
+        // Total per angsuran (pokok + bunga)
+        $totalPerAngsuran = $pokokPerBulan + $bungaPerBulan;
+
+        // Generate simulasi per bulan
+        $simulasi = [];
+        $tanggalMulai = now();
+        
+        for ($i = 1; $i <= $durasi; $i++) {
+            $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
+            
+            $simulasi[] = [
+                'bulan' => $i,
+                'tanggal' => $tanggalJatuhTempo->format('d/m/Y'),
+                'pokok' => round($pokokPerBulan, 2),
+                'bunga' => round($bungaPerBulan, 2),
+                'total' => round($totalPerAngsuran, 2),
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'nominal' => $nominal,
+                'durasi' => $durasi,
+                'bunga_persen' => $bungaPersen,
+                'bunga_total' => round($bungaRp, 2),
+                'total_yang_harus_dibayar' => round($nominal + $bungaRp, 2),
+                'angsuran_per_bulan' => round($totalPerAngsuran, 2),
+                'simulasi' => $simulasi,
+            ]
+        ]);
     }
 
     /**
@@ -174,14 +246,10 @@ class PinjamanController extends Controller
             'has_pin' => $request->has('pin'),
         ]);
 
-        // Validasi durasi berdasarkan jenis pinjaman
-        $maxDurasi = $request->jenis === 'mingguan' ? 52 : 12;
-        
         try {
             $validated = $request->validate([
                 'nominal' => 'required|numeric|min:100000',
-                'jenis' => 'required|in:bulanan,mingguan',
-                'durasi' => "required|integer|min:1|max:{$maxDurasi}",
+                'durasi' => 'required|integer|min:1|max:24',
                 'pin' => 'required|numeric|digits:6',
                 'keterangan' => 'nullable|string|max:500',
             ]);
@@ -226,12 +294,12 @@ class PinjamanController extends Controller
         ]);
 
         try {
-            // Create pengajuan (transfer)
+            // Create pengajuan (transfer) - hanya bulanan
             $pengajuan = PengajuanPinjaman::create([
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
-                'jenis' => $request->jenis,
+                'jenis' => 'bulanan', // Hanya bulanan
                 'durasi' => (int)$request->durasi,
                 'jenis_pencairan' => 'transfer',
                 'status' => '1', // Pending
@@ -334,14 +402,10 @@ class PinjamanController extends Controller
             'has_pin' => $request->has('pin'),
         ]);
 
-        // Validasi durasi berdasarkan jenis pinjaman
-        $maxDurasi = $request->jenis === 'mingguan' ? 52 : 12;
-        
         try {
             $validated = $request->validate([
                 'nominal' => 'required|numeric|min:100000',
-                'jenis' => 'required|in:bulanan,mingguan',
-                'durasi' => "required|integer|min:1|max:{$maxDurasi}",
+                'durasi' => 'required|integer|min:1|max:24',
                 'pin' => 'required|numeric|digits:6',
                 'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
                 'tanggal_janji_temu' => 'required|date|after:today',
@@ -396,12 +460,12 @@ class PinjamanController extends Controller
         ]);
 
         try {
-            // Create pengajuan (cash)
+            // Create pengajuan (cash) - hanya bulanan
             $pengajuan = PengajuanPinjaman::create([
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
-                'jenis' => $request->jenis,
+                'jenis' => 'bulanan', // Hanya bulanan
                 'durasi' => (int)$request->durasi,
                 'jenis_pencairan' => 'cash',
                 'status' => '1', // Pending
@@ -642,6 +706,11 @@ class PinjamanController extends Controller
 
     /**
      * Hitung denda untuk angsuran yang telat (untuk nasabah).
+     * 
+     * Aturan:
+     * - Denda 0.3% per hari dari jumlah tagihan angsuran
+     * - Denda mulai dihitung 1 hari setelah tanggal jatuh tempo
+     * - Denda berhenti jika sudah ada pembayaran (walaupun sedikit)
      */
     private function hitungDenda($angsuran)
     {
@@ -650,15 +719,16 @@ class PinjamanController extends Controller
             return $angsuran->denda ?? 0;
         }
 
-        // Jika denda sudah dihitung sebelumnya, gunakan nilai tersebut
-        if ($angsuran->denda && $angsuran->denda > 0) {
-            return $angsuran->denda;
+        // Jika sudah ada pembayaran, denda berhenti (gunakan denda yang sudah ada)
+        if ($angsuran->jumlah_terbayar > 0) {
+            return $angsuran->denda ?? 0;
         }
 
-        // Hitung hari telat
-        $hariTelat = now()->diffInDays($angsuran->tgl_jatuh_tempo, false);
+        // Hitung hari telat (1 hari setelah jatuh tempo)
+        $tanggalMulaiDenda = $angsuran->tgl_jatuh_tempo->copy()->addDay();
+        $hariTelat = now()->diffInDays($tanggalMulaiDenda, false);
         
-        // Jika belum telat, tidak ada denda
+        // Jika belum telat (belum 1 hari setelah jatuh tempo), tidak ada denda
         if ($hariTelat <= 0) {
             return 0;
         }
@@ -668,18 +738,11 @@ class PinjamanController extends Controller
             return 0;
         }
 
-        // Hitung denda berdasarkan persentase dari pinjaman
-        $dendaPersen = $pinjaman->denda_persen ?? 0.02; // Default 2% per hari
+        // Get denda persen dari pinjaman
+        $dendaPersen = $pinjaman->denda_persen ?? 0.30; // Default 0.3% per hari
         
-        // Sisa tagihan yang belum dibayar
-        $sisaTagihan = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
-        
-        // Hitung denda: sisa tagihan * (denda persen * hari telat)
-        $denda = $sisaTagihan * ($dendaPersen / 100) * $hariTelat;
-        
-        // Batasi denda maksimal 50% dari jumlah tagihan
-        $dendaMax = $angsuran->jumlah_tagihan * 0.5;
-        $denda = min($denda, $dendaMax);
+        // Denda dihitung dari jumlah tagihan angsuran
+        $denda = $angsuran->jumlah_tagihan * ($dendaPersen / 100) * $hariTelat;
 
         return round($denda, 2);
     }

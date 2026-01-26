@@ -91,56 +91,17 @@
                     @enderror
                 </div>
 
-                <!-- Jenis Pinjaman -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Angsuran *</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="bulanan" class="peer hidden" {{ old('jenis', 'bulanan') == 'bulanan' ? 'checked' : '' }} required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Bulanan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per bulan</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="mingguan" class="peer hidden" {{ old('jenis') == 'mingguan' ? 'checked' : '' }} required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Mingguan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per minggu</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    @error('jenis')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Durasi -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman (Bulan) *</label>
                     <select name="durasi" id="durasi" required
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 outline-none">
                         <option value="">Pilih durasi</option>
-                        <!-- Options akan di-generate oleh JavaScript -->
+                        @for($i = 1; $i <= 24; $i++)
+                            <option value="{{ $i }}" {{ old('durasi') == $i ? 'selected' : '' }}>{{ $i }} {{ $i == 1 ? 'bulan' : 'bulan' }}</option>
+                        @endfor
                     </select>
+                    <p class="text-xs text-gray-500 mt-1">Pilih jangka waktu pinjaman (1-24 bulan)</p>
                     <p class="text-xs text-gray-500 mt-2">Pilih jangka waktu pinjaman</p>
                     @error('durasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
@@ -296,65 +257,37 @@
 document.addEventListener('DOMContentLoaded', function() {
     const nominalInput = document.getElementById('nominal');
     const durasiSelect = document.getElementById('durasi');
-    const jenisInputs = document.querySelectorAll('input[name="jenis"]');
-    
-    function updateDurasiOptions() {
-        const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'bulanan';
-        const currentValue = durasiSelect.value;
-        
-        durasiSelect.innerHTML = '<option value="">Pilih durasi</option>';
-        
-        if (jenis === 'mingguan') {
-            for (let i = 1; i <= 52; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i + (i === 1 ? ' minggu' : ' minggu');
-                durasiSelect.appendChild(option);
-            }
-        } else {
-            for (let i = 1; i <= 12; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i + (i === 1 ? ' bulan' : ' bulan');
-                durasiSelect.appendChild(option);
-            }
-        }
-        
-        if (currentValue && durasiSelect.querySelector(`option[value="${currentValue}"]`)) {
-            durasiSelect.value = currentValue;
-        }
-        
-        updateEstimasi();
-    }
     
     function updateEstimasi() {
         const nominal = parseFloat(nominalInput.value) || 0;
-        const durasi = parseInt(durasiSelect.value) || 1;
-        const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'bulanan';
+        const durasi = parseInt(durasiSelect.value) || 0;
         
-        const estimasiBunga = nominal * 0.05;
-        const yangDiterima = nominal - estimasiBunga;
-        const totalYangHarusDibayar = nominal;
-        const angsuranPerPeriode = durasi > 0 ? totalYangHarusDibayar / durasi : 0;
+        if (nominal < 100000 || durasi < 1) {
+            document.getElementById('estimasiNominal').textContent = 'Rp 0';
+            document.getElementById('estimasiBunga').textContent = '-';
+            document.getElementById('estimasiDiterima').textContent = 'Rp 0';
+            document.getElementById('estimasiTotal').textContent = 'Rp 0';
+            document.getElementById('estimasiAngsuran').textContent = 'Rp 0';
+            return;
+        }
+        
+        // Estimasi sederhana (akan dihitung lebih akurat di backend)
+        const estimasiBungaPersen = 10; // Default, akan disesuaikan berdasarkan durasi
+        const estimasiBunga = (nominal * estimasiBungaPersen) / 100;
+        const yangDiterima = nominal; // Tidak dipotong di awal
+        const totalYangHarusDibayar = nominal + estimasiBunga;
+        const angsuranPerBulan = durasi > 0 ? totalYangHarusDibayar / durasi : 0;
         
         document.getElementById('estimasiNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
-        document.getElementById('estimasiBunga').textContent = 'Rp ' + estimasiBunga.toLocaleString('id-ID');
+        document.getElementById('estimasiBunga').textContent = estimasiBungaPersen + '% (Rp ' + estimasiBunga.toLocaleString('id-ID') + ')';
         document.getElementById('estimasiDiterima').textContent = 'Rp ' + yangDiterima.toLocaleString('id-ID');
         document.getElementById('estimasiTotal').textContent = 'Rp ' + totalYangHarusDibayar.toLocaleString('id-ID');
-        
-        const periodeText = jenis === 'mingguan' ? 'minggu' : 'bulan';
-        document.getElementById('estimasiAngsuran').textContent = 'Rp ' + Math.ceil(angsuranPerPeriode).toLocaleString('id-ID') + ' / ' + periodeText;
+        document.getElementById('estimasiAngsuran').textContent = 'Rp ' + Math.ceil(angsuranPerBulan).toLocaleString('id-ID') + ' / bulan';
     }
     
     nominalInput.addEventListener('input', updateEstimasi);
     durasiSelect.addEventListener('change', updateEstimasi);
-    jenisInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            updateDurasiOptions();
-        });
-    });
     
-    updateDurasiOptions();
     updateEstimasi();
 });
 

@@ -59,6 +59,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
         Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
         Route::post('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPengajuanTransfer'])->name('submit-pengajuan-transfer');
+        Route::post('/simulasi-angsuran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'simulasiAngsuran'])->name('simulasi-angsuran');
         Route::get('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'janjiTemuPinjaman'])->name('janji-temu');
         Route::post('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPinjaman'])->name('submit-janji-temu');
         Route::post('/verify-pin', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'verifyPin'])->name('verify-pin');
@@ -109,7 +110,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\PinjamanController::class, 'approvePengajuan'])->name('approve-pengajuan');
         Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPengajuan'])->name('reject-pengajuan');
         Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
+        Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
         Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
+        Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
+        Route::put('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePinjaman'])->name('update-pinjaman');
+        Route::delete('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'deletePinjaman'])->name('delete-pinjaman');
         Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
         Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
         Route::post('/angsuran/{id}/bayar', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePembayaranAngsuran'])->name('update-pembayaran-angsuran');
@@ -121,6 +127,98 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/pembayaran/{id}/konfirmasi', [\App\Http\Controllers\Admin\PinjamanController::class, 'konfirmasiPembayaran'])->name('konfirmasi-pembayaran');
         Route::post('/pembayaran/{id}/upload-serah-terima', [\App\Http\Controllers\Admin\PinjamanController::class, 'uploadSerahTerima'])->name('upload-serah-terima');
     });
+    
+    // Master Data Routes
+    Route::prefix('master-data')->name('master-data.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'index'])->name('index');
+        
+        // Bunga Pinjaman
+        Route::prefix('bunga-pinjaman')->name('bunga-pinjaman.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanToggleStatus'])->name('toggle-status');
+        });
+        
+        // Denda Pinjaman
+        Route::prefix('denda-pinjaman')->name('denda-pinjaman.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanToggleStatus'])->name('toggle-status');
+        });
+        
+        // Suku Bunga Tabungan
+        Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganDestroy'])->name('destroy');
+        });
+        
+        // Tenor Deposito
+        Route::prefix('tenor-deposito')->name('tenor-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoToggleStatus'])->name('toggle-status');
+        });
+        
+        // Suku Bunga Deposito
+        Route::prefix('suku-bunga-deposito')->name('suku-bunga-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoToggleStatus'])->name('toggle-status');
+        });
+        
+        // Barang Gadai
+        Route::prefix('barang-gadai')->name('barang-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiDestroy'])->name('destroy');
+        });
+        
+        // Lokasi Perusahaan
+        Route::prefix('lokasi-perusahaan')->name('lokasi-perusahaan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanToggleStatus'])->name('toggle-status');
+        });
+        
+        // Jenis Deposito
+        Route::prefix('jenis-deposito')->name('jenis-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
+        });
+    });
+    
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');

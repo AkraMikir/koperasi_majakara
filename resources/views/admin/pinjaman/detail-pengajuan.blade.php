@@ -101,32 +101,48 @@
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan</h3>
                 
                 <!-- Approve Form -->
+                @if(!$pengajuan->pinjaman)
+                <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <h4 class="font-semibold text-blue-900 mb-2">Informasi Bunga & Denda</h4>
+                    @if($masterBunga)
+                        <p class="text-sm text-blue-800 mb-1">
+                            <strong>Bunga:</strong> {{ $masterBunga->bunga_persen }}% 
+                            (Durasi {{ $masterBunga->durasi_min }}-{{ $masterBunga->durasi_max }} bulan)
+                        </p>
+                        <p class="text-sm text-blue-800 mb-1">
+                            <strong>Bunga Total:</strong> Rp {{ number_format(($pengajuan->nominal * $masterBunga->bunga_persen) / 100, 0, ',', '.') }}
+                        </p>
+                    @else
+                        <p class="text-sm text-red-600">Bunga untuk durasi {{ $pengajuan->durasi }} bulan belum diatur di master data!</p>
+                    @endif
+                    @if($masterDenda)
+                        <p class="text-sm text-blue-800">
+                            <strong>Denda:</strong> {{ $masterDenda->denda_persen }}% per hari
+                        </p>
+                    @else
+                        <p class="text-sm text-red-600">Denda belum diatur di master data!</p>
+                    @endif
+                </div>
                 <form method="POST" action="{{ route('admin.pinjaman.approve-pengajuan', $pengajuan->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pengajuan ini?')">
                     @csrf
-                    <div class="space-y-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bunga (%)</label>
-                            <input type="number" name="bunga" step="0.01" min="0" max="100" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
-                                placeholder="Contoh: 2.5">
+                    @if(!$masterBunga || !$masterDenda)
+                        <div class="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                            <p class="text-sm text-red-600">Tidak dapat menyetujui pengajuan karena master data belum lengkap!</p>
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bunga (Rp)</label>
-                            <input type="number" name="bunga_rp" step="0.01" min="0" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
-                                placeholder="Contoh: 50000">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Denda (%)</label>
-                            <input type="number" name="denda_persen" step="0.01" min="0" max="100" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
-                                placeholder="Contoh: 1.5">
-                        </div>
-                    </div>
-                    <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md mb-3">
-                        ✓ Setujui Pengajuan
-                    </button>
+                        <button type="submit" disabled class="w-full px-4 py-3 bg-gray-400 text-white rounded-lg cursor-not-allowed font-medium shadow-md mb-3">
+                            ✓ Setujui Pengajuan
+                        </button>
+                    @else
+                        <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md mb-3">
+                            ✓ Setujui Pengajuan
+                        </button>
+                    @endif
                 </form>
+                @else
+                <div class="p-4 bg-green-50 border border-green-200 rounded-lg">
+                    <p class="text-sm text-green-800 font-semibold">Pengajuan sudah disetujui dan pinjaman sudah dibuat.</p>
+                </div>
+                @endif
                 
                 <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                     ✗ Tolak Pengajuan

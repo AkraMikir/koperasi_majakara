@@ -12,6 +12,8 @@ use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFotoPembayaranPinjaman;
 use App\Models\JnsLokasiPerusahaan;
+use App\Models\MasterBungaPinjaman;
+use App\Models\MasterDendaPinjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -107,7 +109,11 @@ class PinjamanController extends Controller
         $pengajuan = PengajuanPinjaman::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.pekerjaan', 'pinjaman'])
             ->findOrFail($id);
 
-        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan'));
+        // Get bunga dari master data berdasarkan durasi
+        $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
+        $masterDenda = MasterDendaPinjaman::getDendaAktif();
+
+        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan', 'masterBunga', 'masterDenda'));
     }
 
     /**
@@ -115,32 +121,41 @@ class PinjamanController extends Controller
      */
     public function approvePengajuan(Request $request, $id)
     {
-        $request->validate([
-            'bunga' => 'required|numeric|min:0|max:100',
-            'bunga_rp' => 'required|numeric|min:0',
-            'denda_persen' => 'required|numeric|min:0|max:100',
-        ]);
-
         $pengajuan = PengajuanPinjaman::findOrFail($id);
 
-        // Sistem bunga di awal:
-        // - Nominal yang diajukan = jumlah yang harus dibayar kembali
-        // - Bunga dipotong di awal, jadi jumlah_pinjam = nominal - bunga_rp
-        // - Total tagihan = nominal (bukan nominal + bunga_rp)
+        // Get bunga dari master data berdasarkan durasi
+        $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
+        if (!$masterBunga) {
+            return redirect()->back()
+                ->with('error', 'Bunga untuk durasi ' . $pengajuan->durasi . ' bulan belum diatur di master data');
+        }
+
+        // Get denda dari master data
+        $masterDenda = MasterDendaPinjaman::getDendaAktif();
+        if (!$masterDenda) {
+            return redirect()->back()
+                ->with('error', 'Denda belum diatur di master data');
+        }
+
+        // Sistem baru: Bunga tidak dipotong di awal
+        // - Nominal yang diajukan = jumlah yang diterima nasabah
+        // - Bunga dibagi ke setiap angsuran bulanan
+        // - Total tagihan = nominal + bunga_rp
         $nominal = $pengajuan->nominal;
-        $bungaRp = $request->bunga_rp;
-        $jumlahPinjam = $nominal - $bungaRp; // Jumlah yang diterima nasabah (setelah potong bunga)
+        $bungaPersen = $masterBunga->bunga_persen;
+        $bungaRp = ($nominal * $bungaPersen) / 100;
+        $jumlahPinjam = $nominal; // Jumlah yang diterima nasabah (sama dengan nominal)
 
         // Create pinjaman
         $pinjaman = PinjamanH::create([
             'id_anggota' => $pengajuan->id_anggota,
             'id_pengajuan' => $pengajuan->id,
-            'jumlah_pinjam' => $jumlahPinjam, // Jumlah yang diterima nasabah (setelah potong bunga)
+            'jumlah_pinjam' => $jumlahPinjam, // Jumlah yang diterima nasabah (sama dengan nominal)
             'lama_pinjam' => (int)$pengajuan->durasi,
-            'jenis' => $pengajuan->jenis,
-            'bunga' => $request->bunga / 100, // Convert to decimal
+            'jenis' => 'bulanan', // Hanya bulanan
+            'bunga' => $bungaPersen / 100, // Convert to decimal
             'bunga_rp' => $bungaRp,
-            'denda_persen' => $request->denda_persen,
+            'denda_persen' => $masterDenda->denda_persen,
             'tgl_pinjam' => now(),
             'status' => 'pencairan',
             'lunas' => 'belum',
@@ -276,49 +291,45 @@ class PinjamanController extends Controller
     /**
      * Generate jadwal angsuran untuk pinjaman.
      * 
-     * Sistem bunga di awal:
-     * - jumlah_pinjam = nominal - bunga_rp (jumlah yang diterima nasabah)
-     * - total_tagihan = nominal (jumlah yang harus dibayar kembali)
-     * - Jadi: total_tagihan = jumlah_pinjam + bunga_rp
+     * Sistem baru: Bunga tidak dipotong di awal, tapi dibagi ke setiap angsuran
+     * - jumlah_pinjam = nominal (jumlah yang diterima nasabah)
+     * - bunga_rp = total bunga yang harus dibayar
+     * - Pokok per bulan = jumlah_pinjam / durasi
+     * - Bunga per bulan = bunga_rp / durasi
+     * - Total per angsuran = pokok per bulan + bunga per bulan
      */
     private function generateJadwalAngsuran(PinjamanH $pinjaman)
     {
         $jumlahAngsuran = $pinjaman->lama_pinjam;
-        $jumlahPinjam = $pinjaman->jumlah_pinjam; // Jumlah yang diterima nasabah (setelah potong bunga)
-        $bungaRp = $pinjaman->bunga_rp;
+        $jumlahPinjam = $pinjaman->jumlah_pinjam; // Jumlah yang diterima nasabah
+        $bungaRp = $pinjaman->bunga_rp; // Total bunga
         
-        // Total tagihan = nominal (bukan nominal + bunga_rp)
-        // Karena jumlah_pinjam = nominal - bunga_rp, maka:
-        // total_tagihan = jumlah_pinjam + bunga_rp = nominal
-        $totalTagihan = $jumlahPinjam + $bungaRp; // Sama dengan nominal dari pengajuan
-        $jumlahPerAngsuran = $totalTagihan / $jumlahAngsuran;
+        // Pokok per bulan
+        $pokokPerBulan = $jumlahPinjam / $jumlahAngsuran;
+        
+        // Bunga per bulan
+        $bungaPerBulan = $bungaRp / $jumlahAngsuran;
+        
+        // Total per angsuran
+        $totalPerAngsuran = $pokokPerBulan + $bungaPerBulan;
 
         $tanggalMulai = $pinjaman->tgl_pinjam;
 
         for ($i = 1; $i <= $jumlahAngsuran; $i++) {
-            $tanggalJatuhTempo = clone $tanggalMulai;
-            
-            if ($pinjaman->jenis === 'bulanan') {
-                $tanggalJatuhTempo->addMonths($i);
-            } else {
-                $tanggalJatuhTempo->addWeeks($i);
-            }
+            $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
 
             $data = [
                 'pinjaman_id' => $pinjaman->id,
                 'anggota_id' => $pinjaman->id_anggota,
                 'no_urut' => $i,
                 'tgl_jatuh_tempo' => $tanggalJatuhTempo,
-                'jumlah_tagihan' => $jumlahPerAngsuran,
+                'jumlah_tagihan' => round($totalPerAngsuran, 2),
                 'jumlah_terbayar' => 0,
+                'denda' => 0,
                 'status_bayar' => 'belum',
             ];
 
-            if ($pinjaman->jenis === 'bulanan') {
-                TempoPinjamanB::create($data);
-            } else {
-                TempoPinjamanM::create($data);
-            }
+            TempoPinjamanB::create($data);
         }
     }
 
@@ -384,35 +395,38 @@ class PinjamanController extends Controller
 
     /**
      * Hitung denda untuk angsuran yang telat.
+     * 
+     * Aturan:
+     * - Denda 0.3% per hari dari jumlah tagihan angsuran
+     * - Denda mulai dihitung 1 hari setelah tanggal jatuh tempo
+     * - Denda berhenti jika sudah ada pembayaran (walaupun sedikit)
      */
     private function hitungDenda($angsuran, $pinjaman)
     {
         // Jika sudah lunas, tidak ada denda
         if ($angsuran->status_bayar === 'lunas') {
-            return 0;
+            return $angsuran->denda ?? 0;
         }
 
-        // Hitung hari telat
-        $hariTelat = now()->diffInDays($angsuran->tgl_jatuh_tempo, false);
+        // Jika sudah ada pembayaran, denda berhenti (gunakan denda yang sudah ada)
+        if ($angsuran->jumlah_terbayar > 0) {
+            return $angsuran->denda ?? 0;
+        }
+
+        // Hitung hari telat (1 hari setelah jatuh tempo)
+        $tanggalMulaiDenda = $angsuran->tgl_jatuh_tempo->copy()->addDay();
+        $hariTelat = now()->diffInDays($tanggalMulaiDenda, false);
         
-        // Jika belum telat, tidak ada denda
+        // Jika belum telat (belum 1 hari setelah jatuh tempo), tidak ada denda
         if ($hariTelat <= 0) {
             return 0;
         }
 
-        // Hitung denda berdasarkan persentase dari pinjaman
-        // denda_persen adalah persentase per hari (dalam format decimal, misal 0.02 = 2%)
-        $dendaPersen = $pinjaman->denda_persen ?? 0.02; // Default 2% per hari jika tidak ada
+        // Get denda persen dari master data atau pinjaman
+        $dendaPersen = $pinjaman->denda_persen ?? 0.30; // Default 0.3% per hari
         
-        // Sisa tagihan yang belum dibayar
-        $sisaTagihan = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
-        
-        // Hitung denda: sisa tagihan * (denda persen * hari telat)
-        $denda = $sisaTagihan * ($dendaPersen / 100) * $hariTelat;
-        
-        // Batasi denda maksimal 50% dari jumlah tagihan
-        $dendaMax = $angsuran->jumlah_tagihan * 0.5;
-        $denda = min($denda, $dendaMax);
+        // Denda dihitung dari jumlah tagihan angsuran
+        $denda = $angsuran->jumlah_tagihan * ($dendaPersen / 100) * $hariTelat;
 
         return round($denda, 2);
     }
@@ -850,6 +864,197 @@ class PinjamanController extends Controller
 
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Foto serah terima berhasil diupload dan pembayaran dikonfirmasi');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show form create pinjaman (untuk yang janji temu/ketemu langsung).
+     */
+    public function createPinjaman()
+    {
+        $nasabah = Nasabah::with('user')->get();
+        $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        
+        return view('admin.pinjaman.create-pinjaman', compact('nasabah', 'masterBunga'));
+    }
+
+    /**
+     * Store pinjaman baru (untuk yang janji temu/ketemu langsung).
+     */
+    public function storePinjaman(Request $request)
+    {
+        $request->validate([
+            'id_anggota' => 'required|exists:tbl_nasabah,id',
+            'nominal' => 'required|numeric|min:100000',
+            'durasi' => 'required|integer|min:1|max:24',
+            'tgl_pinjam' => 'required|date',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Get bunga dari master data
+            $masterBunga = MasterBungaPinjaman::getBungaByDurasi($request->durasi);
+            if (!$masterBunga) {
+                return redirect()->back()
+                    ->with('error', 'Bunga untuk durasi ' . $request->durasi . ' bulan belum diatur di master data')
+                    ->withInput();
+            }
+
+            // Get denda dari master data
+            $masterDenda = MasterDendaPinjaman::getDendaAktif();
+            if (!$masterDenda) {
+                return redirect()->back()
+                    ->with('error', 'Denda belum diatur di master data')
+                    ->withInput();
+            }
+
+            $nominal = $request->nominal;
+            $bungaPersen = $masterBunga->bunga_persen;
+            $bungaRp = ($nominal * $bungaPersen) / 100;
+
+            // Create pinjaman langsung (tanpa pengajuan)
+            $pinjaman = PinjamanH::create([
+                'id_anggota' => $request->id_anggota,
+                'id_pengajuan' => null, // Tidak ada pengajuan
+                'jumlah_pinjam' => $nominal,
+                'lama_pinjam' => (int)$request->durasi,
+                'jenis' => 'bulanan',
+                'bunga' => $bungaPersen / 100,
+                'bunga_rp' => $bungaRp,
+                'denda_persen' => $masterDenda->denda_persen,
+                'tgl_pinjam' => $request->tgl_pinjam,
+                'status' => 'telaksana', // Langsung terlaksana karena ketemu langsung
+                'lunas' => 'belum',
+            ]);
+
+            // Generate jadwal angsuran
+            $this->generateJadwalAngsuran($pinjaman);
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.pinjaman-aktif')
+                ->with('success', 'Pinjaman berhasil dibuat');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Show form edit pinjaman.
+     */
+    public function editPinjaman($id)
+    {
+        $pinjaman = PinjamanH::with(['nasabah.user'])->findOrFail($id);
+        $nasabah = Nasabah::with('user')->get();
+        $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        
+        return view('admin.pinjaman.edit-pinjaman', compact('pinjaman', 'nasabah', 'masterBunga'));
+    }
+
+    /**
+     * Update pinjaman.
+     */
+    public function updatePinjaman(Request $request, $id)
+    {
+        $pinjaman = PinjamanH::findOrFail($id);
+
+        // Cek apakah pinjaman sudah ada angsuran yang dibayar
+        $hasPayment = TempoPinjamanB::where('pinjaman_id', $id)
+            ->where('jumlah_terbayar', '>', 0)
+            ->exists();
+
+        if ($hasPayment) {
+            return redirect()->back()
+                ->with('error', 'Pinjaman tidak dapat diubah karena sudah ada pembayaran')
+                ->withInput();
+        }
+
+        $request->validate([
+            'id_anggota' => 'required|exists:tbl_nasabah,id',
+            'nominal' => 'required|numeric|min:100000',
+            'durasi' => 'required|integer|min:1|max:24',
+            'tgl_pinjam' => 'required|date',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            // Get bunga dari master data
+            $masterBunga = MasterBungaPinjaman::getBungaByDurasi($request->durasi);
+            if (!$masterBunga) {
+                return redirect()->back()
+                    ->with('error', 'Bunga untuk durasi ' . $request->durasi . ' bulan belum diatur di master data')
+                    ->withInput();
+            }
+
+            $nominal = $request->nominal;
+            $bungaPersen = $masterBunga->bunga_persen;
+            $bungaRp = ($nominal * $bungaPersen) / 100;
+
+            // Update pinjaman
+            $pinjaman->update([
+                'id_anggota' => $request->id_anggota,
+                'jumlah_pinjam' => $nominal,
+                'lama_pinjam' => (int)$request->durasi,
+                'bunga' => $bungaPersen / 100,
+                'bunga_rp' => $bungaRp,
+                'tgl_pinjam' => $request->tgl_pinjam,
+            ]);
+
+            // Hapus angsuran lama dan buat baru
+            TempoPinjamanB::where('pinjaman_id', $id)->delete();
+            $this->generateJadwalAngsuran($pinjaman->fresh());
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.detail-pinjaman', $id)
+                ->with('success', 'Pinjaman berhasil diupdate');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
+        }
+    }
+
+    /**
+     * Delete pinjaman.
+     */
+    public function deletePinjaman($id)
+    {
+        $pinjaman = PinjamanH::findOrFail($id);
+
+        // Cek apakah pinjaman sudah ada angsuran yang dibayar
+        $hasPayment = TempoPinjamanB::where('pinjaman_id', $id)
+            ->where('jumlah_terbayar', '>', 0)
+            ->exists();
+
+        if ($hasPayment) {
+            return redirect()->back()
+                ->with('error', 'Pinjaman tidak dapat dihapus karena sudah ada pembayaran');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Hapus angsuran
+            TempoPinjamanB::where('pinjaman_id', $id)->delete();
+            
+            // Hapus pinjaman
+            $pinjaman->delete();
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.pinjaman-aktif')
+                ->with('success', 'Pinjaman berhasil dihapus');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()

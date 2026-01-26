@@ -104,6 +104,17 @@
                 </div>
                 <span class="font-medium">Pengajuan</span>
             </a>
+            
+            <!-- Master Data -->
+            <a href="{{ route('admin.master-data.index') }}" 
+                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.master-data') }}">
+                <div class="w-10 h-10 flex items-center justify-center mr-3">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path>
+                    </svg>
+                </div>
+                <span class="font-medium">Master Data</span>
+            </a>
         </nav>
         
         <!-- User Profile Section -->

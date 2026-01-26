@@ -11,6 +11,9 @@
             <p class="text-gray-600 mt-1">Daftar semua pinjaman yang sedang aktif</p>
         </div>
         <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.pinjaman.create-pinjaman') }}" class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md text-sm font-medium">
+                + Tambah Pinjaman
+            </a>
             <a href="{{ route('admin.pinjaman.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>

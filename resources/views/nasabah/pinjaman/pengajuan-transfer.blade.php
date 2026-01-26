@@ -92,57 +92,17 @@
                     @enderror
                 </div>
 
-                <!-- Jenis Pinjaman -->
-                <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Angsuran</label>
-                    <div class="grid grid-cols-2 gap-4">
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="bulanan" class="peer hidden" {{ old('jenis', 'bulanan') == 'bulanan' ? 'checked' : '' }} required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Bulanan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per bulan</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                        <label class="relative">
-                            <input type="radio" name="jenis" value="mingguan" class="peer hidden" {{ old('jenis') == 'mingguan' ? 'checked' : '' }} required>
-                            <div class="border-2 border-gray-200 rounded-xl p-4 cursor-pointer peer-checked:border-[#8b6f2f] peer-checked:bg-[#8b6f2f]/5 transition-all">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 bg-[#8b6f2f]/10 rounded-lg flex items-center justify-center">
-                                        <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900">Mingguan</p>
-                                        <p class="text-xs text-gray-500">Angsuran per minggu</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </label>
-                    </div>
-                    @error('jenis')
-                        <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
-                    @enderror
-                </div>
-
                 <!-- Durasi -->
                 <div class="mb-6">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman (Bulan)</label>
                     <select name="durasi" id="durasi" 
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all" required>
                         <option value="">Pilih durasi</option>
-                        <!-- Options akan di-generate oleh JavaScript berdasarkan jenis pinjaman -->
+                        @for($i = 1; $i <= 24; $i++)
+                            <option value="{{ $i }}" {{ old('durasi') == $i ? 'selected' : '' }}>{{ $i }} {{ $i == 1 ? 'bulan' : 'bulan' }}</option>
+                        @endfor
                     </select>
-                    <p class="text-xs text-gray-500 mt-1">Pilih jangka waktu pinjaman</p>
+                    <p class="text-xs text-gray-500 mt-1">Pilih jangka waktu pinjaman (1-24 bulan)</p>
                     @error('durasi')
                         <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
                     @enderror
@@ -159,26 +119,51 @@
                 <!-- Kalkulator Estimasi -->
                 <div class="mb-6 p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
-                    <div class="space-y-3">
+                    <div class="space-y-3" id="estimasiSection">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominal">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Estimasi Bunga (5%):</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBunga">Rp 0</span>
+                            <span class="text-sm text-gray-600">Bunga:</span>
+                            <span class="font-semibold text-gray-900" id="estimasiBunga">-</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Yang Diterima:</span>
-                            <span class="font-semibold" id="estimasiDiterima">Rp 0</span>
+                            <span class="font-semibold text-green-600" id="estimasiDiterima">Rp 0</span>
                         </div>
                         <div class="border-t border-gray-300 pt-3 flex justify-between items-center">
                             <span class="font-semibold text-[#8b6f2f]">Total yang Harus Dibayar:</span>
                             <span class="text-xl font-bold text-[#8b6f2f]" id="estimasiTotal">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Angsuran per periode:</span>
+                            <span class="text-sm text-gray-600">Angsuran per bulan:</span>
                             <span class="font-semibold text-gray-900" id="estimasiAngsuran">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simulasi Tabel Angsuran -->
+                <div class="mb-6" id="simulasiTableSection" style="display: none;">
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
+                            <h3 class="text-lg font-bold">Simulasi Angsuran Per Bulan</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Bulan</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Tanggal</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Pokok</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Bunga</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="simulasiTableBody" class="divide-y divide-gray-200">
+                                    <!-- Data akan diisi oleh JavaScript -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -242,7 +227,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const nominalInput = document.getElementById('nominal');
     const durasiSelect = document.getElementById('durasi');
-    const jenisInputs = document.querySelectorAll('input[name="jenis"]');
     const formPengajuan = document.getElementById('formPengajuan');
     const btnSubmitPengajuan = document.getElementById('btnSubmitPengajuan');
     const pinModal = document.getElementById('pinModal');
@@ -253,63 +237,79 @@ document.addEventListener('DOMContentLoaded', function() {
     const verifyPinButton = document.getElementById('verifyPinButton');
     const verifyPinButtonText = document.getElementById('verifyPinButtonText');
     const verifyPinButtonLoading = document.getElementById('verifyPinButtonLoading');
+    const simulasiTableSection = document.getElementById('simulasiTableSection');
+    const simulasiTableBody = document.getElementById('simulasiTableBody');
     
-    // Update dropdown durasi berdasarkan jenis pinjaman
-    function updateDurasiOptions() {
-        const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'bulanan';
-        const currentValue = durasiSelect.value;
-        
-        durasiSelect.innerHTML = '<option value="">Pilih durasi</option>';
-        
-        if (jenis === 'mingguan') {
-            for (let i = 1; i <= 52; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i + (i === 1 ? ' minggu' : ' minggu');
-                durasiSelect.appendChild(option);
-            }
-        } else {
-            for (let i = 1; i <= 12; i++) {
-                const option = document.createElement('option');
-                option.value = i;
-                option.textContent = i + (i === 1 ? ' bulan' : ' bulan');
-                durasiSelect.appendChild(option);
-            }
-        }
-        
-        if (currentValue && durasiSelect.querySelector(`option[value="${currentValue}"]`)) {
-            durasiSelect.value = currentValue;
-        }
-        
-        updateEstimasi();
-    }
+    let debounceTimer;
     
+    // Update estimasi dan simulasi
     function updateEstimasi() {
         const nominal = parseFloat(nominalInput.value) || 0;
-        const durasi = parseInt(durasiSelect.value) || 1;
-        const jenis = document.querySelector('input[name="jenis"]:checked')?.value || 'bulanan';
+        const durasi = parseInt(durasiSelect.value) || 0;
         
-        const estimasiBunga = nominal * 0.05;
-        const yangDiterima = nominal - estimasiBunga;
-        const totalYangHarusDibayar = nominal;
-        const angsuranPerPeriode = durasi > 0 ? totalYangHarusDibayar / durasi : 0;
+        if (nominal < 100000 || durasi < 1) {
+            document.getElementById('estimasiNominal').textContent = 'Rp 0';
+            document.getElementById('estimasiBunga').textContent = '-';
+            document.getElementById('estimasiDiterima').textContent = 'Rp 0';
+            document.getElementById('estimasiTotal').textContent = 'Rp 0';
+            document.getElementById('estimasiAngsuran').textContent = 'Rp 0';
+            simulasiTableSection.style.display = 'none';
+            return;
+        }
         
-        document.getElementById('estimasiNominal').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
-        document.getElementById('estimasiBunga').textContent = 'Rp ' + estimasiBunga.toLocaleString('id-ID');
-        document.getElementById('estimasiDiterima').textContent = 'Rp ' + yangDiterima.toLocaleString('id-ID');
-        document.getElementById('estimasiTotal').textContent = 'Rp ' + totalYangHarusDibayar.toLocaleString('id-ID');
-        
-        const periodeText = jenis === 'mingguan' ? 'minggu' : 'bulan';
-        document.getElementById('estimasiAngsuran').textContent = 'Rp ' + Math.ceil(angsuranPerPeriode).toLocaleString('id-ID') + ' / ' + periodeText;
+        // Get simulasi dari server
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            fetch('{{ route("nasabah.pinjaman.simulasi-angsuran") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    nominal: nominal,
+                    durasi: durasi
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Update estimasi
+                    document.getElementById('estimasiNominal').textContent = 'Rp ' + data.data.nominal.toLocaleString('id-ID');
+                    document.getElementById('estimasiBunga').textContent = data.data.bunga_persen + '% (Rp ' + data.data.bunga_total.toLocaleString('id-ID') + ')';
+                    document.getElementById('estimasiDiterima').textContent = 'Rp ' + data.data.nominal.toLocaleString('id-ID');
+                    document.getElementById('estimasiTotal').textContent = 'Rp ' + data.data.total_yang_harus_dibayar.toLocaleString('id-ID');
+                    document.getElementById('estimasiAngsuran').textContent = 'Rp ' + data.data.angsuran_per_bulan.toLocaleString('id-ID');
+                    
+                    // Update tabel simulasi
+                    simulasiTableBody.innerHTML = '';
+                    data.data.simulasi.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-gray-50';
+                        row.innerHTML = `
+                            <td class="px-4 py-3 text-sm text-gray-900">${item.bulan}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700">${item.tanggal}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">Rp ${item.pokok.toLocaleString('id-ID')}</td>
+                            <td class="px-4 py-3 text-sm text-gray-700 text-right">Rp ${item.bunga.toLocaleString('id-ID')}</td>
+                            <td class="px-4 py-3 text-sm font-semibold text-[#8b6f2f] text-right">Rp ${item.total.toLocaleString('id-ID')}</td>
+                        `;
+                        simulasiTableBody.appendChild(row);
+                    });
+                    
+                    simulasiTableSection.style.display = 'block';
+                } else {
+                    alert(data.message || 'Terjadi kesalahan saat menghitung simulasi');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }, 500);
     }
     
     nominalInput.addEventListener('input', updateEstimasi);
     durasiSelect.addEventListener('change', updateEstimasi);
-    jenisInputs.forEach(input => {
-        input.addEventListener('change', function() {
-            updateDurasiOptions();
-        });
-    });
     
     btnSubmitPengajuan.addEventListener('click', function(e) {
         e.preventDefault();
