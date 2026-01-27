@@ -117,11 +117,18 @@ class PinjamanController extends Controller
     }
 
     /**
-     * Approve pengajuan pinjaman.
+     * Approve pengajuan pinjaman (Status 1 -> 3).
+     * Hanya update status dan bunga_persen, BELUM buat pinjaman.
      */
     public function approvePengajuan(Request $request, $id)
     {
         $pengajuan = PengajuanPinjaman::findOrFail($id);
+
+        // Cek status harus '1' (pending)
+        if ($pengajuan->status !== '1') {
+            return redirect()->back()
+                ->with('error', 'Pengajuan ini tidak bisa disetujui karena statusnya bukan pending');
+        }
 
         // Get bunga dari master data berdasarkan durasi
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
@@ -130,46 +137,114 @@ class PinjamanController extends Controller
                 ->with('error', 'Bunga untuk durasi ' . $pengajuan->durasi . ' bulan belum diatur di master data');
         }
 
-        // Get denda dari master data
+        // Get denda dari master data (validasi)
         $masterDenda = MasterDendaPinjaman::getDendaAktif();
         if (!$masterDenda) {
             return redirect()->back()
                 ->with('error', 'Denda belum diatur di master data');
         }
 
-        // Sistem baru: Bunga tidak dipotong di awal
-        // - Nominal yang diajukan = jumlah yang diterima nasabah
-        // - Bunga dibagi ke setiap angsuran bulanan
-        // - Total tagihan = nominal + bunga_rp
-        $nominal = $pengajuan->nominal;
-        $bungaPersen = $masterBunga->bunga_persen;
-        $bungaRp = ($nominal * $bungaPersen) / 100;
-        $jumlahPinjam = $nominal; // Jumlah yang diterima nasabah (sama dengan nominal)
-
-        // Create pinjaman
-        $pinjaman = PinjamanH::create([
-            'id_anggota' => $pengajuan->id_anggota,
-            'id_pengajuan' => $pengajuan->id,
-            'jumlah_pinjam' => $jumlahPinjam, // Jumlah yang diterima nasabah (sama dengan nominal)
-            'lama_pinjam' => (int)$pengajuan->durasi,
-            'jenis' => 'bulanan', // Hanya bulanan
-            'bunga' => $bungaPersen / 100, // Convert to decimal
-            'bunga_rp' => $bungaRp,
-            'denda_persen' => $masterDenda->denda_persen,
-            'tgl_pinjam' => now(),
-            'status' => 'pencairan',
-            'lunas' => 'belum',
+        // Update status menjadi '3' (Disetujui) dan simpan bunga_persen
+        $pengajuan->update([
+            'status' => '3',
+            'bunga_persen' => $masterBunga->bunga_persen,
         ]);
 
-        // Generate jadwal angsuran
-        $this->generateJadwalAngsuran($pinjaman);
-
-        return redirect()->route('admin.pinjaman.pengajuan')
-            ->with('success', 'Pengajuan pinjaman berhasil disetujui');
+        return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
+            ->with('success', 'Pengajuan berhasil disetujui. Silakan klik "Cairkan" untuk melanjutkan pencairan dana.');
     }
 
     /**
-     * Reject pengajuan pinjaman.
+     * Cairkan pinjaman (Status 3 -> 4).
+     * Buat pinjaman dan generate jadwal angsuran.
+     */
+    public function cairkanPinjaman(Request $request, $id)
+    {
+        $request->validate([
+            'tgl_cair' => 'required|date',
+            'bukti_transfer' => 'nullable|image|max:5120',
+        ]);
+
+        $pengajuan = PengajuanPinjaman::findOrFail($id);
+
+        // Cek status harus '3' (disetujui)
+        if ($pengajuan->status !== '3') {
+            return redirect()->back()
+                ->with('error', 'Pengajuan ini tidak bisa dicairkan karena statusnya bukan disetujui');
+        }
+
+        // Cek apakah sudah punya pinjaman
+        if ($pengajuan->pinjaman) {
+            return redirect()->back()
+                ->with('error', 'Pengajuan ini sudah dicairkan sebelumnya');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Get bunga dan denda dari master data
+            $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
+            if (!$masterBunga) {
+                return redirect()->back()
+                    ->with('error', 'Bunga untuk durasi ' . $pengajuan->durasi . ' bulan belum diatur di master data');
+            }
+
+            $masterDenda = MasterDendaPinjaman::getDendaAktif();
+            if (!$masterDenda) {
+                return redirect()->back()
+                    ->with('error', 'Denda belum diatur di master data');
+            }
+
+            // Hitung bunga
+            $nominal = $pengajuan->nominal;
+            $bungaPersen = $masterBunga->bunga_persen;
+            $bungaRp = ($nominal * $bungaPersen) / 100;
+            $jumlahPinjam = $nominal; // Jumlah yang diterima nasabah (sama dengan nominal)
+
+            // Create pinjaman
+            $pinjaman = PinjamanH::create([
+                'id_anggota' => $pengajuan->id_anggota,
+                'id_pengajuan' => $pengajuan->id,
+                'jumlah_pinjam' => $jumlahPinjam,
+                'lama_pinjam' => (int)$pengajuan->durasi,
+                'jenis' => 'bulanan', // Hanya bulanan
+                'bunga' => $bungaPersen / 100, // Convert to decimal
+                'bunga_rp' => $bungaRp,
+                'denda_persen' => $masterDenda->denda_persen,
+                'tgl_pinjam' => $request->tgl_cair,
+                'status' => 'telaksana',
+                'lunas' => 'belum',
+            ]);
+
+            // Generate jadwal angsuran
+            $this->generateJadwalAngsuran($pinjaman);
+
+            // Upload bukti transfer jika ada
+            if ($request->hasFile('bukti_transfer')) {
+                $file = $request->file('bukti_transfer');
+                $path = $file->store('bukti-pencairan-pinjaman', 'public');
+                // Simpan path ke pinjaman atau tabel lain jika perlu
+            }
+
+            // Update status pengajuan menjadi '4' (Terlaksana)
+            $pengajuan->update([
+                'status' => '4',
+                'tgl_cair' => $request->tgl_cair,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
+                ->with('success', 'Pinjaman berhasil dicairkan dan jadwal angsuran telah dibuat');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject pengajuan pinjaman (Status 1 -> 2).
      */
     public function rejectPengajuan(Request $request, $id)
     {
@@ -178,14 +253,21 @@ class PinjamanController extends Controller
         ]);
 
         $pengajuan = PengajuanPinjaman::findOrFail($id);
-        // Update status pengajuan jika ada field status
-        // Note: Sesuai struktur, pengajuan tidak punya status field, jadi kita skip atau update keterangan
+        
+        // Cek status harus '1' (pending)
+        if ($pengajuan->status !== '1') {
+            return redirect()->back()
+                ->with('error', 'Pengajuan ini tidak bisa ditolak karena statusnya bukan pending');
+        }
+
+        // Update status menjadi '2' (Ditolak)
         $pengajuan->update([
+            'status' => '2',
             'keterangan' => $request->keterangan
         ]);
 
         return redirect()->route('admin.pinjaman.pengajuan')
-            ->with('success', 'Pengajuan pinjaman ditolak');
+            ->with('success', 'Pengajuan pinjaman berhasil ditolak');
     }
 
     /**
@@ -396,37 +478,60 @@ class PinjamanController extends Controller
     /**
      * Hitung denda untuk angsuran yang telat.
      * 
-     * Aturan:
-     * - Denda 0.3% per hari dari jumlah tagihan angsuran
-     * - Denda mulai dihitung 1 hari setelah tanggal jatuh tempo
-     * - Denda berhenti jika sudah ada pembayaran (walaupun sedikit)
+     * Aturan REVISI TERBARU:
+     * - Denda 0.3% per hari dari POKOK ANGSURAN per bulan (bukan total tagihan)
+     * - Denda mulai dihitung 1 hari SETELAH tanggal jatuh tempo (H+1)
+     * - Denda BERHENTI jika sudah ada pembayaran (walaupun Rp 1)
+     * 
+     * Perhitungan:
+     * - Pokok per bulan = jumlah_pinjam / lama_pinjam
+     * - Denda = pokok per bulan × (denda_persen / 100) × hari_telat
+     * 
+     * Contoh:
+     * Pinjaman 3 juta, 3 bulan
+     * Pokok per bulan = 1 juta
+     * Denda = 1.000.000 × 0.3% × hari_telat
+     * Jika telat 1 hari = Rp 3.000
+     * Jika telat 2 hari = Rp 6.000
      */
     private function hitungDenda($angsuran, $pinjaman)
     {
-        // Jika sudah lunas, tidak ada denda
+        // Jika sudah lunas, return denda yang tersimpan
         if ($angsuran->status_bayar === 'lunas') {
             return $angsuran->denda ?? 0;
         }
 
-        // Jika sudah ada pembayaran, denda berhenti (gunakan denda yang sudah ada)
+        // Jika sudah ada pembayaran (walaupun sebagian), denda BERHENTI
+        // Return denda yang sudah tersimpan
         if ($angsuran->jumlah_terbayar > 0) {
             return $angsuran->denda ?? 0;
         }
 
-        // Hitung hari telat (1 hari setelah jatuh tempo)
+        // Hitung hari telat mulai dari H+1 setelah jatuh tempo
         $tanggalMulaiDenda = $angsuran->tgl_jatuh_tempo->copy()->addDay();
+        
+        // Jika belum mencapai H+1, tidak ada denda
+        if (now() < $tanggalMulaiDenda) {
+            return 0;
+        }
+        
+        // Hitung jumlah hari telat (dari H+1 sampai sekarang)
         $hariTelat = now()->diffInDays($tanggalMulaiDenda, false);
         
-        // Jika belum telat (belum 1 hari setelah jatuh tempo), tidak ada denda
-        if ($hariTelat <= 0) {
+        // Jika belum ada hari telat, return 0
+        if ($hariTelat < 0) {
             return 0;
         }
 
-        // Get denda persen dari master data atau pinjaman
+        // Get denda persen dari pinjaman
         $dendaPersen = $pinjaman->denda_persen ?? 0.30; // Default 0.3% per hari
         
-        // Denda dihitung dari jumlah tagihan angsuran
-        $denda = $angsuran->jumlah_tagihan * ($dendaPersen / 100) * $hariTelat;
+        // **PENTING:** Hitung POKOK per bulan (bukan total tagihan!)
+        // Pokok per bulan = jumlah_pinjam / lama_pinjam
+        $pokokPerBulan = $pinjaman->jumlah_pinjam / $pinjaman->lama_pinjam;
+        
+        // Denda = POKOK per bulan × (denda_persen / 100) × hari_telat
+        $denda = $pokokPerBulan * ($dendaPersen / 100) * $hariTelat;
 
         return round($denda, 2);
     }

@@ -160,7 +160,25 @@
                     <input type="hidden" name="pinjaman_id" value="{{ $selectedPinjaman->id }}">
                     <input type="hidden" name="tempo_id" value="{{ $selectedAngsuran->id }}">
                     <input type="hidden" name="jenis_tempo" value="{{ $selectedPinjaman->jenis }}">
-                    <input type="hidden" name="nominal" value="{{ $totalBayar }}">
+                    <input type="hidden" name="pin" id="pin-transfer">
+                    
+                    <!-- Input Nominal Pembayaran -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran *</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                            <input type="text" name="nominal_display" id="nominal-transfer" required
+                                class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                placeholder="Masukkan nominal pembayaran">
+                            <input type="hidden" name="nominal" id="nominal-transfer-raw">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                        </p>
+                        <p class="text-xs text-yellow-600 mt-1">
+                            💡 Anda bisa membayar sebagian (minimal Rp 1). Denda akan berhenti setelah ada pembayaran pertama.
+                        </p>
+                    </div>
 
                     <!-- Rekening Tujuan -->
                     <div class="mb-6">
@@ -206,7 +224,25 @@
                     <input type="hidden" name="pinjaman_id" value="{{ $selectedPinjaman->id }}">
                     <input type="hidden" name="tempo_id" value="{{ $selectedAngsuran->id }}">
                     <input type="hidden" name="jenis_tempo" value="{{ $selectedPinjaman->jenis }}">
-                    <input type="hidden" name="nominal" value="{{ $totalBayar }}">
+                    <input type="hidden" name="pin" id="pin-cash">
+                    
+                    <!-- Input Nominal Pembayaran -->
+                    <div class="mb-6">
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran *</label>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
+                            <input type="text" name="nominal_display" id="nominal-cash" required
+                                class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                placeholder="Masukkan nominal pembayaran">
+                            <input type="hidden" name="nominal" id="nominal-cash-raw">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                        </p>
+                        <p class="text-xs text-yellow-600 mt-1">
+                            💡 Anda bisa membayar sebagian (minimal Rp 1). Denda akan berhenti setelah ada pembayaran pertama.
+                        </p>
+                    </div>
 
                     <!-- Pilih Lokasi -->
                     <div class="mb-6">
@@ -293,6 +329,57 @@
 <script>
 let buktiCount = 0;
 let currentFormType = 'transfer';
+const maxNominal = {{ $totalBayar }};
+
+// Format Rupiah untuk nominal transfer
+const nominalTransfer = document.getElementById('nominal-transfer');
+const nominalTransferRaw = document.getElementById('nominal-transfer-raw');
+
+if (nominalTransfer) {
+    nominalTransfer.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            value = parseInt(value).toLocaleString('id-ID');
+            this.value = value;
+            nominalTransferRaw.value = value.replace(/\./g, '');
+        } else {
+            this.value = '';
+            nominalTransferRaw.value = '';
+        }
+    });
+    
+    nominalTransfer.addEventListener('keypress', function(e) {
+        const charCode = (e.which) ? e.which : e.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            e.preventDefault();
+        }
+    });
+}
+
+// Format Rupiah untuk nominal cash
+const nominalCash = document.getElementById('nominal-cash');
+const nominalCashRaw = document.getElementById('nominal-cash-raw');
+
+if (nominalCash) {
+    nominalCash.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            value = parseInt(value).toLocaleString('id-ID');
+            this.value = value;
+            nominalCashRaw.value = value.replace(/\./g, '');
+        } else {
+            this.value = '';
+            nominalCashRaw.value = '';
+        }
+    });
+    
+    nominalCash.addEventListener('keypress', function(e) {
+        const charCode = (e.which) ? e.which : e.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            e.preventDefault();
+        }
+    });
+}
 
 function showTransferForm() {
     document.getElementById('form-transfer-section').classList.remove('hidden');
@@ -335,6 +422,30 @@ function addBuktiField() {
 }
 
 function showPinModal(formType) {
+    // Validate form first
+    const form = formType === 'transfer' ? document.getElementById('form-transfer') : document.getElementById('form-cash');
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Validate nominal
+    const nominalRaw = formType === 'transfer' 
+        ? document.getElementById('nominal-transfer-raw').value 
+        : document.getElementById('nominal-cash-raw').value;
+    
+    const nominal = parseFloat(nominalRaw) || 0;
+    
+    if (nominal < 1) {
+        alert('Nominal pembayaran minimal Rp 1');
+        return;
+    }
+    
+    if (nominal > maxNominal) {
+        alert('Nominal pembayaran maksimal Rp ' + maxNominal.toLocaleString('id-ID'));
+        return;
+    }
+    
     currentFormType = formType;
     document.getElementById('pin-modal').classList.remove('hidden');
     document.getElementById('pin-modal').classList.add('flex');
@@ -356,31 +467,16 @@ function verifyAndSubmit() {
         return;
     }
 
-    // Verify PIN via AJAX
-    fetch('{{ route("nasabah.pinjaman.verify-pin") }}', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-        },
-        body: JSON.stringify({ pin: pin })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Submit form
-            if (currentFormType === 'transfer') {
-                document.getElementById('form-transfer').submit();
-            } else {
-                document.getElementById('form-cash').submit();
-            }
-        } else {
-            showPinError(data.message || 'PIN yang Anda masukkan salah');
-        }
-    })
-    .catch(error => {
-        showPinError('Terjadi kesalahan. Silakan coba lagi.');
-    });
+    // Add PIN to form
+    if (currentFormType === 'transfer') {
+        document.getElementById('pin-transfer').value = pin;
+        closePinModal();
+        document.getElementById('form-transfer').submit();
+    } else {
+        document.getElementById('pin-cash').value = pin;
+        closePinModal();
+        document.getElementById('form-cash').submit();
+    }
 }
 
 function showPinError(message) {
