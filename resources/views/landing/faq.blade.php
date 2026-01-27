@@ -17,7 +17,6 @@
             --primary-light: #8b6f2f;
             --primary-dark: #4a3514;
             --accent: #d4af37;
-            --bg-light: #faf9f6;
         }
         
         body {
@@ -28,38 +27,34 @@
             font-family: 'Playfair Display', serif;
         }
         
-        .gradient-primary {
-            background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
-        }
-        
-        .text-primary {
-            color: #674c1d;
-        }
-        
-        .bg-primary {
-            background-color: #674c1d;
-        }
-        
-        .bg-primary-dark {
-            background-color: #4a3514;
-        }
-        
-        .border-primary {
-            border-color: #674c1d;
-        }
-        
         .faq-item {
             transition: all 0.3s ease;
+        }
+        
+        .faq-item:hover {
+            transform: translateX(8px);
         }
         
         .faq-content {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s ease;
+            transition: max-height 0.4s ease, padding 0.4s ease;
         }
         
         .faq-item.active .faq-content {
-            max-height: 500px;
+            max-height: 800px;
+            padding-top: 1rem;
+        }
+        
+        .faq-item.active {
+            background: linear-gradient(135deg, rgba(103, 76, 29, 0.05) 0%, rgba(212, 175, 55, 0.05) 100%);
+            border-color: var(--primary);
+        }
+        
+        .category-btn.active {
+            background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
+            color: white;
+            box-shadow: 0 10px 25px rgba(103, 76, 29, 0.3);
         }
     </style>
 </head>
@@ -68,7 +63,6 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('welcome') }}">
                         <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Kospin Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
@@ -76,16 +70,14 @@
                     <a href="{{ route('welcome') }}" class="text-xl font-bold text-primary">Kospin Majakara</a>
                 </div>
                 
-                <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ route('welcome') }}#beranda" class="text-gray-700 hover:text-primary transition">Beranda</a>
                     <a href="{{ route('landing.layanan') }}" class="text-gray-700 hover:text-primary transition">Layanan</a>
                     <a href="{{ route('landing.keuntungan') }}" class="text-gray-700 hover:text-primary transition">Keuntungan</a>
                     <a href="{{ route('landing.testimoni') }}" class="text-gray-700 hover:text-primary transition">Testimoni</a>
-                    <a href="{{ route('landing.faq') }}" class="text-primary font-semibold">FAQ</a>
+                    <a href="{{ route('landing.faq') }}" class="text-primary font-semibold border-b-2 border-primary">FAQ</a>
                 </div>
                 
-                <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center space-x-4">
                     @if (Route::has('login'))
                         @if (auth()->check())
@@ -93,26 +85,21 @@
                                 $user = auth()->user();
                                 $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
                             @endphp
-                            <a href="{{ $dashboardUrl }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-medium flex items-center space-x-2 group">
+                            <a href="{{ $dashboardUrl }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md font-medium flex items-center space-x-2 group">
                                 <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                 </svg>
                                 <span>Dashboard</span>
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
-                                Login
-                            </a>
+                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition shadow-md font-medium">
-                                    Register
-                                </a>
+                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
                             @endif
                         @endif
                     @endif
                 </div>
                 
-                <!-- Mobile Menu Button -->
                 <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -129,380 +116,643 @@
                 <a href="{{ route('landing.keuntungan') }}" class="block text-gray-700 hover:text-primary">Keuntungan</a>
                 <a href="{{ route('landing.testimoni') }}" class="block text-gray-700 hover:text-primary">Testimoni</a>
                 <a href="{{ route('landing.faq') }}" class="block text-primary font-semibold">FAQ</a>
-                <div class="pt-4 border-t space-y-2">
-                    @if (Route::has('login'))
-                        @if (auth()->check())
-                            @php
-                                $user = auth()->user();
-                                $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
-                            @endphp
-                            <a href="{{ $dashboardUrl }}" class="block px-4 py-2.5 text-center bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium shadow-md flex items-center justify-center space-x-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                </svg>
-                                <span>Dashboard</span>
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="block px-4 py-2.5 text-center text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
-                                Login
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="block px-4 py-2.5 text-center bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium shadow-md">
-                                    Register
-                                </a>
-                            @endif
-                        @endif
-                    @endif
-                </div>
             </div>
         </div>
     </nav>
     
     <!-- Hero Section -->
-    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div class="max-w-7xl mx-auto text-center">
-            <h1 class="font-display text-5xl md:text-6xl font-bold text-primary mb-6">
-                Pertanyaan yang Sering Diajukan
-            </h1>
-            <p class="text-xl text-gray-700 max-w-3xl mx-auto">
-                Temukan jawaban untuk pertanyaan Anda tentang Koperasi Majakara dan layanan yang kami sediakan
-            </p>
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background: linear-gradient(135deg, #faf9f6 0%, #ffffff 100%);">
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-20 left-10 w-96 h-96 bg-primary rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full filter blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-12">
+                <div class="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
+                    <span class="text-primary font-semibold text-sm">❓ Pertanyaan Umum</span>
+                </div>
+                <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6">
+                    Pertanyaan yang<br>
+                    <span style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Sering Diajukan</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                    Temukan jawaban untuk pertanyaan Anda tentang Koperasi Majakara dan layanan yang kami sediakan
+                </p>
+            </div>
+
+            <!-- Search Box -->
+            <div class="max-w-2xl mx-auto mb-12">
+                <div class="relative">
+                    <input type="text" id="searchFaq" placeholder="Cari pertanyaan..." 
+                        class="w-full px-6 py-4 pl-14 border-2 border-gray-200 rounded-2xl focus:border-[#674c1d] focus:ring-4 focus:ring-[#674c1d]/10 outline-none text-lg shadow-lg">
+                    <svg class="w-6 h-6 text-gray-400 absolute left-4 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Category Filter -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12">
+                <button onclick="filterCategory('all')" class="category-btn active px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#674c1d] transition-all" data-category="all">
+                    Semua
+                </button>
+                <button onclick="filterCategory('pendaftaran')" class="category-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#674c1d] transition-all" data-category="pendaftaran">
+                    📝 Pendaftaran
+                </button>
+                <button onclick="filterCategory('layanan')" class="category-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#674c1d] transition-all" data-category="layanan">
+                    🏦 Layanan
+                </button>
+                <button onclick="filterCategory('keamanan')" class="category-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#674c1d] transition-all" data-category="keamanan">
+                    🛡️ Keamanan
+                </button>
+                <button onclick="filterCategory('teknis')" class="category-btn px-6 py-3 bg-white border-2 border-gray-200 rounded-xl font-semibold text-gray-700 hover:border-[#674c1d] transition-all" data-category="teknis">
+                    ⚙️ Teknis
+                </button>
+            </div>
         </div>
     </section>
     
     <!-- FAQ Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
-        <div class="max-w-4xl mx-auto">
-            <div class="space-y-4">
+    <section class="pb-20 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-5xl mx-auto">
+            <div class="space-y-4" id="faqContainer">
                 <!-- FAQ 1: Pendaftaran -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana cara mendaftar menjadi anggota?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="pendaftaran" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana cara mendaftar menjadi anggota?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed mb-3">
-                            Anda dapat mendaftar melalui website kami dengan mengikuti langkah-langkah berikut:
-                        </p>
-                        <ol class="list-decimal list-inside space-y-2 text-gray-600">
-                            <li>Klik tombol "Daftar" di halaman utama</li>
-                            <li>Isi formulir registrasi dengan data lengkap (nama, email, nomor HP, password)</li>
-                            <li>Upload foto KTP untuk verifikasi (sistem akan otomatis membaca data dari KTP)</li>
-                            <li>Verifikasi OTP yang dikirim ke nomor HP Anda</li>
-                            <li>Buat PIN 6 digit untuk keamanan akun</li>
-                            <li>Tunggu verifikasi dari admin (biasanya 1-2 hari kerja)</li>
-                        </ol>
-                        <p class="text-gray-600 leading-relaxed mt-3">
-                            Setelah verifikasi selesai, Anda akan mendapatkan akses penuh ke semua layanan koperasi.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 leading-relaxed mb-4">
+                                Anda dapat mendaftar melalui website kami dengan mengikuti langkah-langkah berikut:
+                            </p>
+                            <ol class="list-decimal list-inside space-y-3 text-gray-600 mb-4">
+                                <li class="pl-2">Klik tombol "Register" di halaman utama</li>
+                                <li class="pl-2">Isi formulir dengan data lengkap (nama, email, nomor HP, password)</li>
+                                <li class="pl-2">Upload foto KTP - sistem akan otomatis membaca data KTP (OCR)</li>
+                                <li class="pl-2">Verifikasi nomor HP dengan OTP WhatsApp</li>
+                                <li class="pl-2">Buat PIN 6 digit untuk keamanan transaksi</li>
+                                <li class="pl-2">Tunggu verifikasi admin (biasanya 1-2 hari kerja)</li>
+                            </ol>
+                            <div class="p-4 bg-[#674c1d]/5 rounded-xl">
+                                <p class="text-sm text-gray-700">
+                                    💡 <strong>Tips:</strong> Pastikan foto KTP jelas dan tidak blur agar proses OCR berhasil!
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- FAQ 2: Bunga Tabungan -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Berapa bunga yang diberikan untuk tabungan?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Berapa bunga yang diberikan untuk tabungan?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed">
-                            Bunga tabungan kami sangat kompetitif dan dihitung berdasarkan saldo rata-rata harian. Bunga akan ditambahkan ke saldo tabungan Anda secara berkala. Untuk informasi detail mengenai suku bunga terkini, silakan hubungi customer service kami atau login ke dashboard untuk melihat informasi terbaru.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 leading-relaxed mb-4">
+                                Bunga tabungan kami sangat kompetitif dan dihitung berdasarkan saldo rata-rata harian. Keuntungan bunga tabungan:
+                            </p>
+                            <ul class="list-disc list-inside space-y-2 text-gray-600 mb-4">
+                                <li class="pl-2">Dihitung setiap hari untuk maksimalkan return</li>
+                                <li class="pl-2">Otomatis ditambahkan ke saldo Anda</li>
+                                <li class="pl-2">Transparan dan dapat dilihat di dashboard</li>
+                                <li class="pl-2">Tanpa biaya administrasi bulanan</li>
+                            </ul>
+                            <p class="text-sm text-gray-600">
+                                Untuk informasi detail suku bunga terkini, silakan login ke dashboard atau hubungi customer service kami.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- FAQ 3: Syarat Pinjaman -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Apa saja syarat untuk mengajukan pinjaman?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Apa saja syarat untuk mengajukan pinjaman?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed mb-3">
-                            Syarat utama untuk mengajukan pinjaman:
-                        </p>
-                        <ul class="list-disc list-inside space-y-2 text-gray-600">
-                            <li>Menjadi anggota aktif minimal 6 bulan</li>
-                            <li>Memiliki penghasilan tetap</li>
-                            <li>Menyiapkan dokumen: slip gaji, KTP, dan dokumen pendukung lainnya</li>
-                            <li>Memiliki riwayat tabungan yang baik</li>
-                            <li>Mengisi form pengajuan dengan lengkap</li>
-                        </ul>
-                        <p class="text-gray-600 leading-relaxed mt-3">
-                            Setelah pengajuan, admin akan melakukan review dan verifikasi. Proses approval biasanya memakan waktu 2-3 hari kerja.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Syarat untuk mengajukan pinjaman:</p>
+                            <div class="grid md:grid-cols-2 gap-4 mb-4">
+                                <div class="bg-[#674c1d]/5 rounded-xl p-4">
+                                    <h4 class="font-semibold text-[#674c1d] mb-2">✓ Syarat Umum</h4>
+                                    <ul class="space-y-1 text-sm text-gray-600">
+                                        <li>• Anggota aktif Koperasi</li>
+                                        <li>• Memiliki KTP aktif</li>
+                                        <li>• Memiliki penghasilan tetap</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-[#674c1d]/5 rounded-xl p-4">
+                                    <h4 class="font-semibold text-[#674c1d] mb-2">✓ Dokumen</h4>
+                                    <ul class="space-y-1 text-sm text-gray-600">
+                                        <li>• Foto KTP</li>
+                                        <li>• Slip gaji (jika ada)</li>
+                                        <li>• Dokumen pendukung lain</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                                ⏱️ Proses approval biasanya 1-2 hari kerja setelah pengajuan lengkap.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- FAQ 4: Biaya Administrasi -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Apakah ada biaya administrasi?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Apakah ada biaya administrasi?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed">
-                            Ada biaya administrasi yang sangat terjangkau untuk berbagai layanan. Biaya ini transparan dan akan diinformasikan sebelum Anda menggunakan layanan. Untuk anggota aktif dengan riwayat transaksi yang baik, beberapa biaya administrasi dapat dikurangi atau dihapuskan. Detail biaya administrasi dapat dilihat di dashboard setelah login.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 leading-relaxed mb-4">
+                                Kami menerapkan biaya administrasi yang transparan dan terjangkau:
+                            </p>
+                            <div class="space-y-3">
+                                <div class="flex items-start space-x-3">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <p class="text-gray-700"><strong>Tabungan:</strong> Tanpa biaya admin bulanan</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <p class="text-gray-700"><strong>Pinjaman:</strong> Biaya diinformasikan di awal, tidak ada biaya tersembunyi</p>
+                                </div>
+                                <div class="flex items-start space-x-3">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                    <p class="text-gray-700"><strong>Deposito:</strong> Sesuai dengan jenis dan tenor yang dipilih</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <!-- FAQ 5: Transaksi Online -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana cara melakukan transaksi online?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="teknis" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana cara melakukan transaksi online?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed mb-3">
-                            Setelah menjadi anggota dan verifikasi selesai, Anda dapat melakukan transaksi online melalui dashboard:
-                        </p>
-                        <ul class="list-disc list-inside space-y-2 text-gray-600">
-                            <li><strong>Setoran Tabungan:</strong> Pilih metode transfer (upload bukti) atau tunai (janji temu)</li>
-                            <li><strong>Penarikan Tabungan:</strong> Ajukan penarikan melalui dashboard, admin akan approve</li>
-                            <li><strong>Pengajuan Pinjaman:</strong> Isi form pengajuan online dengan nominal dan durasi</li>
-                            <li><strong>Deposito:</strong> Ajukan deposito dengan pilihan tenor yang tersedia</li>
-                            <li><strong>Gadai:</strong> Ajukan gadai dengan detail barang yang akan digadaikan</li>
-                        </ul>
-                        <p class="text-gray-600 leading-relaxed mt-3">
-                            Semua transaksi dapat dilakukan secara online 24/7 melalui dashboard Anda. Status pengajuan dapat dilacak secara real-time.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Setelah verifikasi selesai, Anda dapat melakukan transaksi melalui dashboard:</p>
+                            <div class="grid gap-4">
+                                <div class="flex items-start space-x-3 bg-[#674c1d]/5 p-4 rounded-xl">
+                                    <div class="w-8 h-8 bg-[#674c1d] rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-900 mb-1">Setoran Tabungan</h5>
+                                        <p class="text-sm text-gray-600">Via transfer (upload bukti) atau tunai (janji temu)</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3 bg-[#8b6f2f]/5 p-4 rounded-xl">
+                                    <div class="w-8 h-8 bg-[#8b6f2f] rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-900 mb-1">Pengajuan Pinjaman</h5>
+                                        <p class="text-sm text-gray-600">Isi form, lihat simulasi, submit dengan PIN</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start space-x-3 bg-[#d4af37]/5 p-4 rounded-xl">
+                                    <div class="w-8 h-8 bg-[#d4af37] rounded-lg flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-900 mb-1">Deposito</h5>
+                                        <p class="text-sm text-gray-600">Pilih tenor dan nominal, ajukan online</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 mt-4 bg-green-50 p-3 rounded-lg">
+                                ✅ Semua transaksi dapat dilacak status-nya secara real-time di dashboard!
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- FAQ 6: Deposito -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana cara kerja deposito?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- FAQ 6: Keamanan -->
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="keamanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana keamanan data dan dana saya?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed">
-                            Deposito adalah investasi dengan jangka waktu tertentu. Anda menyetor sejumlah dana untuk periode tertentu (tenor), dan akan mendapatkan bunga yang lebih tinggi dibanding tabungan biasa. Bunga dihitung harian dan dapat dicairkan saat jatuh tempo. Tersedia berbagai pilihan tenor sesuai kebutuhan investasi Anda.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Keamanan adalah prioritas utama kami:</p>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-3">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">Enkripsi SSL/TLS 256-bit</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">PIN verification 6 digit</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">OTP WhatsApp verification</p>
+                                    </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">Admin approval untuk transaksi</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">Monitoring sistem 24/7</p>
+                                    </div>
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                            <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        </div>
+                                        <p class="text-sm text-gray-700">Backup data berkala</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- FAQ 7: Gadai -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana sistem gadai bekerja?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- FAQ 7: Deposito -->
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana cara kerja deposito?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed mb-3">
-                            Sistem gadai memungkinkan Anda mendapatkan pinjaman cepat dengan jaminan barang berharga:
-                        </p>
-                        <ul class="list-disc list-inside space-y-2 text-gray-600">
-                            <li>Pilih jenis barang yang akan digadaikan</li>
-                            <li>Ajukan pengajuan dengan nominal yang diinginkan</li>
-                            <li>Admin akan menilai barang dan menentukan nilai pinjaman</li>
-                            <li>Setelah approve, barang disimpan aman di tempat kami</li>
-                            <li>Dana dicairkan ke rekening Anda</li>
-                            <li>Bayar bunga sesuai jadwal atau lunasi sebelum jatuh tempo</li>
-                            <li>Barang dapat ditebus setelah pelunasan</li>
-                        </ul>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">
+                                Deposito adalah investasi dengan jangka waktu tertentu (tenor) yang memberikan return lebih tinggi:
+                            </p>
+                            <div class="space-y-3 mb-4">
+                                <div class="flex items-center space-x-3 p-3 bg-[#d4af37]/10 rounded-lg">
+                                    <div class="text-2xl font-bold text-[#d4af37]">1</div>
+                                    <p class="text-gray-700">Pilih tenor (jangka waktu) yang sesuai</p>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-[#d4af37]/10 rounded-lg">
+                                    <div class="text-2xl font-bold text-[#d4af37]">2</div>
+                                    <p class="text-gray-700">Setor dana sesuai nominal yang dipilih</p>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-[#d4af37]/10 rounded-lg">
+                                    <div class="text-2xl font-bold text-[#d4af37]">3</div>
+                                    <p class="text-gray-700">Bunga dihitung harian selama tenor</p>
+                                </div>
+                                <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg border-2 border-green-200">
+                                    <div class="text-2xl font-bold text-green-600">✓</div>
+                                    <p class="text-gray-700">Cairkan saat jatuh tempo dengan bunga</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- FAQ 8: Keamanan -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana keamanan data dan dana saya?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- FAQ 8: Sistem Gadai -->
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana sistem gadai bekerja?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed mb-3">
-                            Keamanan adalah prioritas utama kami:
-                        </p>
-                        <ul class="list-disc list-inside space-y-2 text-gray-600">
-                            <li>Semua data dienkripsi dengan standar keamanan tinggi</li>
-                            <li>Sistem verifikasi multi-layer untuk setiap transaksi penting</li>
-                            <li>PIN verification untuk login dan transaksi sensitif</li>
-                            <li>OTP verification untuk registrasi dan perubahan data penting</li>
-                            <li>Monitoring sistem 24/7 untuk mendeteksi aktivitas mencurigakan</li>
-                            <li>Backup data secara berkala untuk mencegah kehilangan data</li>
-                        </ul>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Sistem gadai kami mudah dan aman:</p>
+                            <ol class="list-decimal list-inside space-y-2 text-gray-600 mb-4">
+                                <li class="pl-2">Pilih jenis barang yang akan digadaikan</li>
+                                <li class="pl-2">Ajukan dengan nominal yang diinginkan + upload foto barang</li>
+                                <li class="pl-2">Admin menilai barang dan approve</li>
+                                <li class="pl-2">Barang disimpan aman di tempat kami</li>
+                                <li class="pl-2">Dana dicairkan ke rekening Anda</li>
+                                <li class="pl-2">Bayar bunga sesuai jadwal atau lunasi lebih awal</li>
+                                <li class="pl-2">Tebus barang setelah pelunasan</li>
+                            </ol>
+                            <div class="p-4 bg-[#674c1d]/5 rounded-xl border-l-4 border-[#674c1d]">
+                                <p class="text-sm text-gray-700">
+                                    <strong>Keamanan Barang:</strong> Semua barang gadai disimpan di tempat yang aman dan diasuransikan. Anda dapat tebus kapan saja setelah pelunasan.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- FAQ 9: Angsuran -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana sistem angsuran pinjaman?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- FAQ 9: Angsuran Pinjaman -->
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana sistem angsuran pinjaman?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed">
-                            Sistem angsuran kami sangat fleksibel. Anda dapat memilih antara angsuran bulanan atau mingguan sesuai kemampuan finansial. Setiap angsuran terdiri dari pokok pinjaman dan bunga. Jadwal angsuran dapat dilihat di dashboard, dan Anda akan mendapat notifikasi sebelum jatuh tempo. Pembayaran dapat dilakukan melalui transfer atau datang langsung ke kantor.
-                        </p>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Sistem angsuran bulanan yang fleksibel dan transparan:</p>
+                            <div class="grid gap-3 mb-4">
+                                <div class="p-4 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5 rounded-xl">
+                                    <h5 class="font-semibold text-[#674c1d] mb-2">💵 Bunga Tidak Dipotong Di Awal</h5>
+                                    <p class="text-sm text-gray-600">Nominal yang Anda terima = nominal yang diajukan. Bunga dibagi ke setiap angsuran bulanan.</p>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-[#8b6f2f]/5 to-[#d4af37]/5 rounded-xl">
+                                    <h5 class="font-semibold text-[#8b6f2f] mb-2">📊 Simulasi Real-time</h5>
+                                    <p class="text-sm text-gray-600">Lihat tabel simulasi angsuran per bulan sebelum mengajukan.</p>
+                                </div>
+                                <div class="p-4 bg-gradient-to-r from-[#d4af37]/5 to-[#8b6f2f]/5 rounded-xl">
+                                    <h5 class="font-semibold text-[#d4af37] mb-2">⏰ Denda Ringan</h5>
+                                    <p class="text-sm text-gray-600">Hanya 0,3% per hari jika telat, dan denda berhenti jika sudah ada pembayaran.</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
+                                💡 Jadwal angsuran dapat dilihat di dashboard dan Anda akan mendapat notifikasi sebelum jatuh tempo.
+                            </p>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- FAQ 10: Kontak -->
-                <div class="faq-item bg-white rounded-xl p-6 shadow-lg border border-gray-100">
-                    <button class="faq-toggle w-full flex justify-between items-center text-left" onclick="toggleFaq(this)">
-                        <span class="font-semibold text-lg text-primary">Bagaimana cara menghubungi customer service?</span>
-                        <svg class="w-6 h-6 text-primary transform transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <!-- FAQ 10: Kontak Customer Service -->
+                <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="teknis" onclick="toggleFaq(this)">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4 flex-1">
+                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold text-lg text-primary pr-4">Bagaimana cara menghubungi customer service?</span>
+                        </div>
+                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
-                    </button>
-                    <div class="faq-content mt-4">
-                        <p class="text-gray-600 leading-relaxed">
-                            Anda dapat menghubungi customer service kami melalui berbagai cara:
-                        </p>
-                        <ul class="list-disc list-inside space-y-2 text-gray-600 mt-3">
-                            <li>Email: support@koperasimajakara.com</li>
-                            <li>Telepon: (021) 1234-5678</li>
-                            <li>WhatsApp: 0812-3456-7890</li>
-                            <li>Kunjungi kantor kami di jam kerja (Senin-Jumat: 08:00-17:00)</li>
-                            <li>Chat support melalui dashboard (jika sudah menjadi anggota)</li>
-                        </ul>
+                    </div>
+                    <div class="faq-content">
+                        <div class="pl-16">
+                            <p class="text-gray-600 mb-4">Kami siap membantu Anda melalui berbagai kanal:</p>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="p-4 bg-green-50 rounded-xl border border-green-200">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.304-1.654a11.881 11.881 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">WhatsApp</p>
+                                            <p class="text-sm text-gray-600">0812-3456-7890</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Email</p>
+                                            <p class="text-sm text-gray-600">support@majakara.com</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-purple-600 rounded-lg flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Telepon</p>
+                                            <p class="text-sm text-gray-600">(021) 1234-5678</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="p-4 bg-orange-50 rounded-xl border border-orange-200">
+                                    <div class="flex items-center space-x-3 mb-2">
+                                        <div class="w-10 h-10 bg-orange-600 rounded-lg flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold text-gray-900">Kantor</p>
+                                            <p class="text-sm text-gray-600">Sen-Jum: 08:00-17:00</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    
-    <!-- CTA Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 relative" style="background: linear-gradient(135deg, #4a3514 0%, #674c1d 100%);">
-        <div class="max-w-4xl mx-auto text-center relative z-10">
-            <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-6">
-                Masih Ada Pertanyaan?
-            </h2>
-            <p class="text-xl text-white mb-8">
-                Hubungi customer service kami untuk mendapatkan jawaban lebih detail
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="mailto:support@koperasimajakara.com" class="px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg">
-                    Hubungi Kami
-                </a>
-                @if (!auth()->check())
-                    <a href="{{ route('register') }}" class="px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/20 transition">
-                        Daftar Sekarang
+
+    <!-- Quick Help Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-12 text-white text-center shadow-2xl">
+                <h2 class="font-display text-3xl md:text-4xl font-bold mb-4">
+                    Tidak Menemukan Jawaban?
+                </h2>
+                <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+                    Tim customer service kami siap membantu menjawab pertanyaan Anda
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="https://wa.me/6281234567890" class="px-8 py-4 bg-white text-primary rounded-xl font-bold hover:bg-gray-100 transition shadow-lg inline-flex items-center justify-center space-x-2">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.304-1.654a11.881 11.881 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path>
+                        </svg>
+                        <span>Hubungi via WhatsApp</span>
                     </a>
-                @endif
+                    <a href="mailto:support@majakara.com" class="px-8 py-4 border-2 border-white text-white rounded-xl font-bold hover:bg-white/10 transition inline-flex items-center justify-center space-x-2">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                        <span>Kirim Email</span>
+                    </a>
+                </div>
             </div>
         </div>
     </section>
     
     <!-- Footer -->
-    <footer class="bg-primary text-white py-16 px-4 sm:px-6 lg:px-8 relative z-10" style="background-color: #4a3514;">
+    <footer class="bg-primary text-white py-16 px-4 sm:px-6 lg:px-8" style="background-color: #4a3514;">
         <div class="max-w-7xl mx-auto">
             <div class="grid md:grid-cols-4 gap-8 mb-12">
-                <!-- Logo & Description -->
-                <div class="md:col-span-1">
+                <div>
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-16 w-auto">
                         <span class="text-xl font-bold">Koperasi Majakara</span>
                     </div>
-                    <p class="text-white/80 text-sm leading-relaxed">
-                        Solusi keuangan terpercaya untuk mewujudkan impian finansial Anda.
-                    </p>
+                    <p class="text-white/80 text-sm">Solusi keuangan terpercaya untuk mewujudkan impian finansial Anda.</p>
                 </div>
-                
-                <!-- Syarat dan Ketentuan -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Syarat dan Ketentuan</h3>
+                    <h3 class="font-bold text-lg mb-4">Layanan</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Ketentuan Umum</a></li>
-                        <li><a href="#" class="hover:text-white transition">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-white transition">Syarat Keanggotaan</a></li>
-                        <li><a href="#" class="hover:text-white transition">Ketentuan Layanan</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Tabungan</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Pinjaman</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Deposito</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Gadai</a></li>
                     </ul>
                 </div>
-                
-                <!-- Info Seabank -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Info Seabank</h3>
+                    <h3 class="font-bold text-lg mb-4">Perusahaan</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Tentang Kami</a></li>
-                        <li><a href="#" class="hover:text-white transition">Berita & Update</a></li>
-                        <li><a href="#" class="hover:text-white transition">Karir</a></li>
-                        <li><a href="#" class="hover:text-white transition">Laporan Tahunan</a></li>
+                        <li><a href="{{ route('landing.keuntungan') }}" class="hover:text-white transition">Keuntungan</a></li>
+                        <li><a href="{{ route('landing.testimoni') }}" class="hover:text-white transition">Testimoni</a></li>
+                        <li><a href="{{ route('landing.faq') }}" class="hover:text-white transition">FAQ</a></li>
+                        <li><a href="{{ route('welcome') }}" class="hover:text-white transition">Beranda</a></li>
                     </ul>
                 </div>
-                
-                <!-- Hubungi Kami -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Hubungi Kami</h3>
+                    <h3 class="font-bold text-lg mb-4">Kontak</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Customer Service</a></li>
-                        <li><a href="#" class="hover:text-white transition">Email Support</a></li>
-                        <li><a href="#" class="hover:text-white transition">Lokasi Kantor</a></li>
-                        <li><a href="#" class="hover:text-white transition">Kontak Darurat</a></li>
+                        <li>Email: info@majakara.com</li>
+                        <li>Telp: (021) 1234-5678</li>
+                        <li>WA: 0812-3456-7890</li>
                     </ul>
                 </div>
             </div>
-            
-            <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-white/80 text-sm mb-4 md:mb-0">
-                    Copyright © 2025 Koperasi Majakara. All rights reserved.
-                </p>
-                <div class="flex items-center space-x-4">
-                    <span class="text-white/80 text-sm">Ikuti Kami:</span>
-                    <div class="flex space-x-3">
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.246 1.805-.413 2.227-.217.562-.677.96-.896 1.382-.42.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.413-.569-.224-.96-.479-1.379-.896-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
+            <div class="border-t border-white/20 pt-8 text-center">
+                <p class="text-white/80 text-sm">Copyright © 2026 Koperasi Majakara. All rights reserved.</p>
             </div>
         </div>
     </footer>
     
     <script>
-        // Mobile Menu Toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
         
         // FAQ Toggle
         function toggleFaq(button) {
-            const faqItem = button.closest('.faq-item');
-            const icon = button.querySelector('svg');
+            const faqItem = button;
+            const icon = button.querySelector('svg:last-child');
             const isActive = faqItem.classList.contains('active');
             
             // Close all FAQs
             document.querySelectorAll('.faq-item').forEach(item => {
                 item.classList.remove('active');
-                item.querySelector('svg').classList.remove('rotate-180');
+                item.querySelectorAll('svg:last-child').forEach(svg => svg.classList.remove('rotate-180'));
             });
             
             // Toggle current FAQ
@@ -511,6 +761,46 @@
                 icon.classList.add('rotate-180');
             }
         }
+
+        // Category Filter
+        function filterCategory(category) {
+            const faqs = document.querySelectorAll('.faq-item');
+            const buttons = document.querySelectorAll('.category-btn');
+            
+            // Update active button
+            buttons.forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category || (category === 'all' && !btn.dataset.category)) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Filter FAQs
+            faqs.forEach(faq => {
+                if (category === 'all' || faq.dataset.category === category) {
+                    faq.style.display = 'block';
+                } else {
+                    faq.style.display = 'none';
+                }
+                faq.classList.remove('active');
+                faq.querySelectorAll('svg:last-child').forEach(svg => svg.classList.remove('rotate-180'));
+            });
+        }
+
+        // Search FAQ
+        document.getElementById('searchFaq').addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const faqs = document.querySelectorAll('.faq-item');
+            
+            faqs.forEach(faq => {
+                const text = faq.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    faq.style.display = 'block';
+                } else {
+                    faq.style.display = 'none';
+                }
+            });
+        });
     </script>
 </body>
 </html>

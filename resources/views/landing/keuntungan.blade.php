@@ -28,33 +28,25 @@
             font-family: 'Playfair Display', serif;
         }
         
-        .gradient-primary {
-            background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
-        }
-        
-        .text-primary {
-            color: #674c1d;
-        }
-        
-        .bg-primary {
-            background-color: #674c1d;
-        }
-        
-        .bg-primary-dark {
-            background-color: #4a3514;
-        }
-        
-        .border-primary {
-            border-color: #674c1d;
-        }
-        
         .card-hover {
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
         }
         
         .card-hover:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(103, 76, 29, 0.15);
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 30px 60px rgba(103, 76, 29, 0.25);
+        }
+        
+        .counter {
+            font-variant-numeric: tabular-nums;
+        }
+        
+        .benefit-icon {
+            transition: all 0.3s ease;
+        }
+        
+        .benefit-icon:hover {
+            transform: rotate(5deg) scale(1.1);
         }
     </style>
 </head>
@@ -63,7 +55,6 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-20">
-                <!-- Logo -->
                 <div class="flex items-center space-x-3">
                     <a href="{{ route('welcome') }}">
                         <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Kospin Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
@@ -71,16 +62,14 @@
                     <a href="{{ route('welcome') }}" class="text-xl font-bold text-primary">Kospin Majakara</a>
                 </div>
                 
-                <!-- Desktop Navigation -->
                 <div class="hidden md:flex items-center space-x-8">
                     <a href="{{ route('welcome') }}#beranda" class="text-gray-700 hover:text-primary transition">Beranda</a>
                     <a href="{{ route('landing.layanan') }}" class="text-gray-700 hover:text-primary transition">Layanan</a>
-                    <a href="{{ route('landing.keuntungan') }}" class="text-primary font-semibold">Keuntungan</a>
+                    <a href="{{ route('landing.keuntungan') }}" class="text-primary font-semibold border-b-2 border-primary">Keuntungan</a>
                     <a href="{{ route('landing.testimoni') }}" class="text-gray-700 hover:text-primary transition">Testimoni</a>
                     <a href="{{ route('landing.faq') }}" class="text-gray-700 hover:text-primary transition">FAQ</a>
                 </div>
                 
-                <!-- Auth Buttons -->
                 <div class="hidden md:flex items-center space-x-4">
                     @if (Route::has('login'))
                         @if (auth()->check())
@@ -88,26 +77,21 @@
                                 $user = auth()->user();
                                 $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
                             @endphp
-                            <a href="{{ $dashboardUrl }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md hover:shadow-lg font-medium flex items-center space-x-2 group">
+                            <a href="{{ $dashboardUrl }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all shadow-md font-medium flex items-center space-x-2 group">
                                 <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
                                 </svg>
                                 <span>Dashboard</span>
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
-                                Login
-                            </a>
+                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition shadow-md font-medium">
-                                    Register
-                                </a>
+                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
                             @endif
                         @endif
                     @endif
                 </div>
                 
-                <!-- Mobile Menu Button -->
                 <button id="mobile-menu-btn" class="md:hidden p-2 text-gray-700">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
@@ -124,390 +108,564 @@
                 <a href="{{ route('landing.keuntungan') }}" class="block text-primary font-semibold">Keuntungan</a>
                 <a href="{{ route('landing.testimoni') }}" class="block text-gray-700 hover:text-primary">Testimoni</a>
                 <a href="{{ route('landing.faq') }}" class="block text-gray-700 hover:text-primary">FAQ</a>
-                <div class="pt-4 border-t space-y-2">
-                    @if (Route::has('login'))
-                        @if (auth()->check())
-                            @php
-                                $user = auth()->user();
-                                $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
-                            @endphp
-                            <a href="{{ $dashboardUrl }}" class="block px-4 py-2.5 text-center bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium shadow-md flex items-center justify-center space-x-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                                </svg>
-                                <span>Dashboard</span>
-                            </a>
-                        @else
-                            <a href="{{ route('login') }}" class="block px-4 py-2.5 text-center text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">
-                                Login
-                            </a>
-                            @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="block px-4 py-2.5 text-center bg-primary text-white rounded-lg hover:bg-primary-dark transition font-medium shadow-md">
-                                    Register
-                                </a>
-                            @endif
-                        @endif
-                    @endif
-                </div>
             </div>
         </div>
     </nav>
     
     <!-- Hero Section -->
-    <section class="pt-32 pb-16 px-4 sm:px-6 lg:px-8 bg-white">
-        <div class="max-w-7xl mx-auto text-center">
-            <h1 class="font-display text-5xl md:text-6xl font-bold text-primary mb-6">
-                Keuntungan Bergabung dengan Koperasi Majakara
-            </h1>
-            <p class="text-xl text-gray-700 max-w-3xl mx-auto">
-                Mengapa ribuan anggota mempercayakan kebutuhan keuangan mereka kepada kami? Temukan berbagai keuntungan yang bisa Anda dapatkan
-            </p>
+    <section class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background: linear-gradient(135deg, #faf9f6 0%, #ffffff 100%);">
+        <!-- Background Decoration -->
+        <div class="absolute inset-0 opacity-5">
+            <div class="absolute top-20 left-10 w-96 h-96 bg-primary rounded-full filter blur-3xl"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-accent rounded-full filter blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-16">
+                <div class="inline-block px-4 py-2 bg-primary/10 rounded-full mb-6">
+                    <span class="text-primary font-semibold text-sm">⭐ Mengapa Memilih Kami?</span>
+                </div>
+                <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6">
+                    Keuntungan Memaka<br>
+                    <span style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Koperasi Majakara</span>
+                </h1>
+                <p class="text-xl md:text-2xl text-gray-700 max-w-3xl mx-auto leading-relaxed">
+                    Mengapa ribuan anggota mempercayakan kebutuhan keuangan mereka kepada kami? Temukan berbagai keuntungan yang bisa Anda dapatkan
+                </p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center card-hover border border-gray-100">
+                    <div class="text-5xl md:text-6xl font-bold mb-2" style="background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">100%</div>
+                    <p class="text-gray-700 font-semibold">Terpercaya</p>
+                    <p class="text-sm text-gray-500 mt-1">Keamanan Dana</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center card-hover border border-gray-100">
+                    <div class="text-5xl md:text-6xl font-bold mb-2" style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">24/7</div>
+                    <p class="text-gray-700 font-semibold">Layanan</p>
+                    <p class="text-sm text-gray-500 mt-1">Akses Kapan Saja</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center card-hover border border-gray-100">
+                    <div class="text-5xl md:text-6xl font-bold mb-2" style="background: linear-gradient(135deg, #8b6f2f 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">10K+</div>
+                    <p class="text-gray-700 font-semibold">Anggota Aktif</p>
+                    <p class="text-sm text-gray-500 mt-1">Mempercayai Kami</p>
+                </div>
+                <div class="bg-white rounded-2xl p-8 shadow-lg text-center card-hover border border-gray-100">
+                    <div class="text-5xl md:text-6xl font-bold mb-2" style="background: linear-gradient(135deg, #674c1d 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">98%</div>
+                    <p class="text-gray-700 font-semibold">Kepuasan</p>
+                    <p class="text-sm text-gray-500 mt-1">Rating Anggota</p>
+                </div>
+            </div>
         </div>
     </section>
     
-    <!-- Benefits Detail Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-white">
+    <!-- Benefit 1: Aman & Terpercaya -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-white">
         <div class="max-w-7xl mx-auto">
-            <!-- Benefit 1: Aman & Terpercaya -->
-            <div class="mb-20">
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                        <div class="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                            </svg>
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-block px-4 py-2 bg-green-100 rounded-full mb-6">
+                        <span class="text-green-700 font-semibold text-sm">🛡️ Keamanan Terjamin</span>
+                    </div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
+                        Aman & Terpercaya
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        Keamanan dana Anda adalah prioritas utama kami. Sistem keamanan berlapis dan telah terpercaya oleh ribuan anggota selama bertahun-tahun.
+                    </p>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Enkripsi Data</h4>
+                                <p class="text-gray-600 text-sm">Semua data dienkripsi dengan standar keamanan tinggi SSL/TLS</p>
+                            </div>
                         </div>
-                        <h2 class="text-3xl font-bold text-primary mb-4">Aman & Terpercaya</h2>
-                        <p class="text-gray-600 mb-6 leading-relaxed">
-                            Keamanan dana Anda adalah prioritas utama kami. Kami menggunakan sistem keamanan berlapis dan telah terpercaya oleh ribuan anggota selama bertahun-tahun.
-                        </p>
-                        <div class="space-y-3">
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-xl">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                 </svg>
-                                <p class="text-gray-700">Sistem keamanan berlapis dengan enkripsi data</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Verifikasi admin untuk setiap transaksi penting</p>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Verifikasi Multi-Layer</h4>
+                                <p class="text-gray-600 text-sm">PIN + OTP untuk transaksi penting, approval admin untuk setiap pengajuan</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </div>
+                        <div class="flex items-start space-x-4 p-4 bg-purple-50 rounded-xl">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                                 </svg>
-                                <p class="text-gray-700">PIN verification untuk keamanan ekstra</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Transparansi penuh dalam setiap transaksi</p>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Monitoring 24/7</h4>
+                                <p class="text-gray-600 text-sm">Sistem dipantau terus-menerus untuk mencegah aktivitas mencurigakan</p>
                             </div>
                         </div>
                     </div>
-                    <div class="relative">
-                        <div class="bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl p-8">
-                            <div class="bg-white rounded-2xl p-8 shadow-xl">
-                                <h3 class="text-xl font-bold text-primary mb-6">Standar Keamanan</h3>
-                                <div class="space-y-4">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Enkripsi Data</h4>
-                                            <p class="text-gray-600 text-sm">Semua data dienkripsi dengan standar tinggi</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Verifikasi Multi-Layer</h4>
-                                            <p class="text-gray-600 text-sm">Setiap transaksi melalui proses verifikasi</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Monitoring 24/7</h4>
-                                            <p class="text-gray-600 text-sm">Sistem dipantau secara terus-menerus</p>
-                                        </div>
-                                    </div>
+                </div>
+                
+                <div>
+                    <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl">
+                        <h3 class="text-2xl font-bold mb-6">Standar Keamanan Kami</h3>
+                        <div class="space-y-6">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-white/80">Enkripsi Data</span>
+                                    <span class="text-white font-bold">256-bit SSL</span>
+                                </div>
+                                <div class="w-full bg-white/20 rounded-full h-2">
+                                    <div class="bg-[#d4af37] h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-white/80">Verifikasi Admin</span>
+                                    <span class="text-white font-bold">100%</span>
+                                </div>
+                                <div class="w-full bg-white/20 rounded-full h-2">
+                                    <div class="bg-[#d4af37] h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <span class="text-white/80">Backup Data</span>
+                                    <span class="text-white font-bold">Real-time</span>
+                                </div>
+                                <div class="w-full bg-white/20 rounded-full h-2">
+                                    <div class="bg-[#d4af37] h-2 rounded-full" style="width: 100%"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Benefit 2: Proses Cepat -->
-            <div class="mb-20">
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="relative order-2 lg:order-1">
-                        <div class="bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl p-8">
-                            <div class="bg-white rounded-2xl p-8 shadow-xl">
-                                <h3 class="text-xl font-bold text-primary mb-6">Efisiensi Proses</h3>
-                                <div class="space-y-4">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Pengajuan Online</h4>
-                                            <p class="text-gray-600 text-sm">Ajukan dari mana saja, kapan saja</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Approval Cepat</h4>
-                                            <p class="text-gray-600 text-sm">Tim admin siap memproses dengan cepat</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Notifikasi Real-time</h4>
-                                            <p class="text-gray-600 text-sm">Dapatkan update status secara langsung</p>
-                                        </div>
+        </div>
+    </section>
+    
+    <!-- Benefit 2: Proses Cepat -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div class="order-2 lg:order-1">
+                    <div class="bg-white rounded-3xl p-10 shadow-2xl">
+                        <h3 class="text-3xl font-bold text-primary mb-8 text-center">Efisiensi Waktu</h3>
+                        <div class="space-y-6">
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
                                     </div>
                                 </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg text-gray-900 mb-1">Pengajuan Online</h4>
+                                    <p class="text-gray-600">Ajukan dari mana saja, kapan saja melalui dashboard</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-[#674c1d]">24/7</div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100 order-1 lg:order-2">
-                        <div class="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-3xl font-bold text-primary mb-4">Proses Cepat</h2>
-                        <p class="text-gray-600 mb-6 leading-relaxed">
-                            Layanan cepat dan efisien dengan proses yang mudah tanpa ribet. Semua pengajuan dapat dilakukan secara online dengan sistem yang terintegrasi.
-                        </p>
-                        <div class="space-y-3">
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Pengajuan online 24/7 tanpa perlu datang ke kantor</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Proses approval yang cepat dan transparan</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Tracking status pengajuan secara real-time</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Sistem janji temu untuk layanan yang memerlukan pertemuan</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Benefit 3: Bunga Kompetitif -->
-            <div class="mb-20">
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100">
-                        <div class="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <h2 class="text-3xl font-bold text-primary mb-4">Bunga Kompetitif</h2>
-                        <p class="text-gray-600 mb-6 leading-relaxed">
-                            Bunga yang menarik dan kompetitif untuk tabungan dan investasi Anda. Kami memberikan return terbaik untuk membantu dana Anda berkembang.
-                        </p>
-                        <div class="space-y-3">
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Bunga tabungan dihitung harian untuk maksimalkan return</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Bunga deposito lebih tinggi dengan pilihan tenor fleksibel</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Bunga pinjaman ringan dan transparan</p>
-                            </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Tidak ada biaya tersembunyi</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="relative">
-                        <div class="bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl p-8">
-                            <div class="bg-white rounded-2xl p-8 shadow-xl">
-                                <h3 class="text-xl font-bold text-primary mb-6">Perbandingan Bunga</h3>
-                                <div class="space-y-4">
-                                    <div class="border-l-4 border-primary pl-4">
-                                        <h4 class="font-semibold text-gray-900 mb-1">Tabungan</h4>
-                                        <p class="text-2xl font-bold text-primary">Bunga Harian</p>
-                                        <p class="text-gray-600 text-sm">Dihitung berdasarkan saldo rata-rata</p>
+                            
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-2xl flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
                                     </div>
-                                    <div class="border-l-4 border-accent pl-4">
-                                        <h4 class="font-semibold text-gray-900 mb-1">Deposito</h4>
-                                        <p class="text-2xl font-bold text-primary">Return Lebih Tinggi</p>
-                                        <p class="text-gray-600 text-sm">Bunga lebih tinggi dengan tenor tertentu</p>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg text-gray-900 mb-1">Approval Cepat</h4>
+                                    <p class="text-gray-600">Admin siap memproses pengajuan Anda dengan cepat</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-[#8b6f2f]">< 24j</div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center space-x-4">
+                                <div class="flex-shrink-0">
+                                    <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
+                                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                        </svg>
                                     </div>
-                                    <div class="border-l-4 border-primary/50 pl-4">
-                                        <h4 class="font-semibold text-gray-900 mb-1">Pinjaman</h4>
-                                        <p class="text-2xl font-bold text-primary">Bunga Ringan</p>
-                                        <p class="text-gray-600 text-sm">Bunga kompetitif dengan proses mudah</p>
-                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <h4 class="font-bold text-lg text-gray-900 mb-1">Notifikasi Real-time</h4>
+                                    <p class="text-gray-600">Update status langsung ke dashboard Anda</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-3xl font-bold text-[#d4af37]">Instant</div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+                
+                <div class="order-1 lg:order-2">
+                    <div class="inline-block px-4 py-2 bg-blue-100 rounded-full mb-6">
+                        <span class="text-blue-700 font-semibold text-sm">⚡ Kecepatan & Efisiensi</span>
+                    </div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
+                        Proses Cepat & Efisien
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        Tidak perlu antri lama atau datang ke kantor. Semua proses dapat dilakukan secara online dengan sistem yang terintegrasi dan otomatis.
+                    </p>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-8">
+                        <div class="bg-white rounded-xl p-6 shadow-lg text-center border border-gray-100">
+                            <div class="text-4xl font-bold text-[#674c1d] mb-2">5 Menit</div>
+                            <p class="text-sm text-gray-600">Pengajuan Online</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-6 shadow-lg text-center border border-gray-100">
+                            <div class="text-4xl font-bold text-[#8b6f2f] mb-2">1 Hari</div>
+                            <p class="text-sm text-gray-600">Proses Approval</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-6 h-6 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <p class="text-gray-700 font-medium">Tanpa perlu datang ke kantor untuk pengajuan</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-6 h-6 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <p class="text-gray-700 font-medium">Tracking status real-time di dashboard</p>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <svg class="w-6 h-6 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <p class="text-gray-700 font-medium">Upload dokumen digital, tidak perlu fotokopi</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Benefit 3: Bunga Kompetitif -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="inline-block px-4 py-2 bg-[#d4af37]/10 rounded-full mb-6">
+                    <span class="text-[#674c1d] font-semibold text-sm">💰 Keuntungan Finansial</span>
+                </div>
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
+                    Bunga Kompetitif
+                </h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Return terbaik untuk investasi dan tabungan Anda
+                </p>
             </div>
             
-            <!-- Benefit 4: Layanan 24/7 -->
-            <div class="mb-20">
-                <div class="grid lg:grid-cols-2 gap-12 items-center">
-                    <div class="relative order-2 lg:order-1">
-                        <div class="bg-gradient-to-br from-primary/10 to-accent/10 rounded-3xl p-8">
-                            <div class="bg-white rounded-2xl p-8 shadow-xl">
-                                <h3 class="text-xl font-bold text-primary mb-6">Akses Digital</h3>
-                                <div class="space-y-4">
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Platform Web</h4>
-                                            <p class="text-gray-600 text-sm">Akses dari browser, kapan saja</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Dashboard Interaktif</h4>
-                                            <p class="text-gray-600 text-sm">Monitor semua transaksi dan saldo</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-center space-x-4">
-                                        <div class="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <h4 class="font-semibold text-gray-900">Notifikasi Real-time</h4>
-                                            <p class="text-gray-600 text-sm">Update status langsung di dashboard</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Tabungan Comparison -->
+                <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
                     </div>
-                    <div class="card-hover bg-white rounded-2xl p-8 shadow-lg border border-gray-100 order-1 lg:order-2">
-                        <div class="w-20 h-20 gradient-primary rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                    <h3 class="text-2xl font-bold mb-2">Bunga Tabungan</h3>
+                    <div class="text-5xl font-bold mb-4">Harian</div>
+                    <p class="text-white/80 mb-6">Dihitung berdasarkan saldo rata-rata harian Anda</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                             </svg>
+                            <span class="text-sm">Tanpa biaya admin bulanan</span>
                         </div>
-                        <h2 class="text-3xl font-bold text-primary mb-4">Layanan 24/7</h2>
-                        <p class="text-gray-600 mb-6 leading-relaxed">
-                            Akses layanan kapan saja dan di mana saja melalui platform digital kami. Tidak perlu menunggu jam kerja untuk mengakses layanan koperasi.
-                        </p>
-                        <div class="space-y-3">
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-sm">Gratis tarik tunai</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposito Comparison -->
+                <div class="bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Bunga Deposito</h3>
+                    <div class="text-5xl font-bold mb-4">Tinggi</div>
+                    <p class="text-white/80 mb-6">Return lebih tinggi dengan pilihan tenor fleksibel</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-sm">Bunga lebih tinggi dari tabungan</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-sm">Multiple pilihan tenor</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pinjaman Comparison -->
+                <div class="bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-2">Bunga Pinjaman</h3>
+                    <div class="text-5xl font-bold mb-4">10-24%</div>
+                    <p class="text-white/80 mb-6">Bunga kompetitif berdasarkan durasi pinjaman</p>
+                    <div class="space-y-2">
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-sm">Tidak dipotong di awal</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            <span class="text-sm">Denda hanya 0,3% per hari</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Benefit 4: Layanan Digital -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-[#faf9f6]">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <div class="inline-block px-4 py-2 bg-purple-100 rounded-full mb-6">
+                        <span class="text-purple-700 font-semibold text-sm">🚀 Teknologi Modern</span>
+                    </div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-6">
+                        Layanan Digital 24/7
+                    </h2>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        Akses seluruh layanan kapan saja, di mana saja melalui platform digital kami yang modern dan mudah digunakan.
+                    </p>
+                    
+                    <div class="space-y-4 mb-8">
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                 </svg>
-                                <p class="text-gray-700">Akses dashboard 24 jam sehari, 7 hari seminggu</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                <p class="text-gray-700">Pengajuan online tersedia setiap saat</p>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Platform Web Responsif</h4>
+                                <p class="text-gray-600 text-sm">Akses dari HP, tablet, atau komputer</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
-                                <p class="text-gray-700">Riwayat transaksi dapat diakses kapan saja</p>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <svg class="w-5 h-5 text-primary mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Dashboard Interaktif</h4>
+                                <p class="text-gray-600 text-sm">Monitor saldo dan transaksi real-time</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
-                                <p class="text-gray-700">Support customer service yang responsif</p>
+                            </div>
+                            <div>
+                                <h4 class="font-semibold text-gray-900">Notifikasi Smart</h4>
+                                <p class="text-gray-600 text-sm">Pengingat jatuh tempo & update status</p>
                             </div>
                         </div>
                     </div>
+                </div>
+                
+                <div>
+                    <div class="bg-white rounded-3xl p-10 shadow-2xl border border-gray-100">
+                        <h3 class="text-2xl font-bold text-primary mb-8 text-center">Fitur Dashboard</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between p-4 bg-[#674c1d]/5 rounded-xl">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-[#674c1d]/10 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium text-gray-900">Lihat Saldo Real-time</span>
+                                </div>
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-[#674c1d]/5 rounded-xl">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-[#674c1d]/10 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium text-gray-900">Riwayat Transaksi Lengkap</span>
+                                </div>
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-[#674c1d]/5 rounded-xl">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-[#674c1d]/10 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium text-gray-900">Jadwal Angsuran</span>
+                                </div>
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <div class="flex items-center justify-between p-4 bg-[#674c1d]/5 rounded-xl">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 bg-[#674c1d]/10 rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <span class="font-medium text-gray-900">Pengingat Jatuh Tempo</span>
+                                </div>
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Benefits Grid -->
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">
+                    Semua Keuntungan untuk Anda
+                </h2>
+                <p class="text-xl text-gray-600">Bergabung sekarang dan nikmati semua benefit ini</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Tanpa Biaya Tersembunyi</h3>
+                    <p class="text-gray-600 leading-relaxed">Semua biaya transparan dan dijelaskan di awal. Tidak ada biaya mengejutkan di kemudian hari.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Customer Service Responsif</h3>
+                    <p class="text-gray-600 leading-relaxed">Tim kami siap membantu menjawab pertanyaan dan menyelesaikan masalah Anda dengan cepat.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Fleksibilitas Maksimal</h3>
+                    <p class="text-gray-600 leading-relaxed">Setor, tarik, ajukan pinjaman kapan saja. Pilih metode yang paling nyaman untuk Anda.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Return Maksimal</h3>
+                    <p class="text-gray-600 leading-relaxed">Bunga tabungan dihitung harian, deposito dengan return tinggi, pinjaman dengan bunga ringan.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Terdaftar & Diawasi</h3>
+                    <p class="text-gray-600 leading-relaxed">Koperasi resmi yang terdaftar dan diawasi oleh pemerintah untuk keamanan Anda.</p>
+                </div>
+
+                <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
+                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">Proses Super Cepat</h3>
+                    <p class="text-gray-600 leading-relaxed">Pengajuan hanya 5 menit, approval dalam 1 hari. Tidak perlu menunggu lama.</p>
                 </div>
             </div>
         </div>
     </section>
     
     <!-- CTA Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 relative" style="background: linear-gradient(135deg, #4a3514 0%, #674c1d 100%);">
+    <section class="py-24 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background: linear-gradient(135deg, #4a3514 0%, #674c1d 50%, #8b6f2f 100%);">
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-0 left-0 w-full h-full" style="background-image: radial-gradient(circle, #d4af37 1px, transparent 1px); background-size: 30px 30px;"></div>
+        </div>
+        
         <div class="max-w-4xl mx-auto text-center relative z-10">
             <h2 class="font-display text-4xl md:text-5xl font-bold text-white mb-6">
                 Dapatkan Semua Keuntungan Ini Sekarang
             </h2>
-            <p class="text-xl text-white mb-8">
+            <p class="text-xl text-white/90 mb-10">
                 Bergabunglah dengan Koperasi Majakara dan nikmati berbagai keuntungan yang telah dirasakan ribuan anggota
             </p>
             @if (!auth()->check())
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register') }}" class="px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg">
-                        Daftar Sekarang
+                    <a href="{{ route('register') }}" class="px-10 py-5 bg-white text-primary rounded-xl font-bold hover:bg-gray-100 transition shadow-2xl hover:shadow-3xl text-lg">
+                        Daftar Sekarang - Gratis!
                     </a>
-                    <a href="{{ route('login') }}" class="px-8 py-4 border-2 border-white text-white rounded-lg font-semibold hover:bg-white/20 transition">
-                        Masuk ke Akun
+                    <a href="{{ route('login') }}" class="px-10 py-5 border-2 border-white text-white rounded-xl font-bold hover:bg-white/10 transition text-lg">
+                        Sudah Punya Akun?
                     </a>
                 </div>
             @else
@@ -515,100 +673,60 @@
                     $user = auth()->user();
                     $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
                 @endphp
-                <a href="{{ $dashboardUrl }}" class="inline-block px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg">
-                    Masuk ke Dashboard
+                <a href="{{ $dashboardUrl }}" class="inline-block px-10 py-5 bg-white text-primary rounded-xl font-bold hover:bg-gray-100 transition shadow-2xl text-lg">
+                    Akses Dashboard Saya
                 </a>
             @endif
         </div>
     </section>
     
     <!-- Footer -->
-    <footer class="bg-primary text-white py-16 px-4 sm:px-6 lg:px-8 relative z-10" style="background-color: #4a3514;">
+    <footer class="bg-primary text-white py-16 px-4 sm:px-6 lg:px-8" style="background-color: #4a3514;">
         <div class="max-w-7xl mx-auto">
             <div class="grid md:grid-cols-4 gap-8 mb-12">
-                <!-- Logo & Description -->
                 <div class="md:col-span-1">
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-16 w-auto object-contain" style="mix-blend-mode: multiply; filter: brightness(1.1) contrast(1.2);">
+                        <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="h-16 w-auto object-contain">
                         <span class="text-xl font-bold">Koperasi Majakara</span>
                     </div>
-                    <p class="text-white/80 text-sm leading-relaxed">
-                        Solusi keuangan terpercaya untuk mewujudkan impian finansial Anda.
-                    </p>
+                    <p class="text-white/80 text-sm">Solusi keuangan terpercaya untuk mewujudkan impian finansial Anda.</p>
                 </div>
-                
-                <!-- Syarat dan Ketentuan -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Syarat dan Ketentuan</h3>
+                    <h3 class="font-bold text-lg mb-4">Layanan</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Ketentuan Umum</a></li>
-                        <li><a href="#" class="hover:text-white transition">Kebijakan Privasi</a></li>
-                        <li><a href="#" class="hover:text-white transition">Syarat Keanggotaan</a></li>
-                        <li><a href="#" class="hover:text-white transition">Ketentuan Layanan</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Tabungan</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Pinjaman</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Deposito</a></li>
+                        <li><a href="{{ route('landing.layanan') }}" class="hover:text-white transition">Gadai</a></li>
                     </ul>
                 </div>
-                
-                <!-- Info Seabank -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Info Seabank</h3>
+                    <h3 class="font-bold text-lg mb-4">Perusahaan</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Tentang Kami</a></li>
-                        <li><a href="#" class="hover:text-white transition">Berita & Update</a></li>
-                        <li><a href="#" class="hover:text-white transition">Karir</a></li>
-                        <li><a href="#" class="hover:text-white transition">Laporan Tahunan</a></li>
+                        <li><a href="{{ route('landing.keuntungan') }}" class="hover:text-white transition">Keuntungan</a></li>
+                        <li><a href="{{ route('landing.testimoni') }}" class="hover:text-white transition">Testimoni</a></li>
+                        <li><a href="{{ route('landing.faq') }}" class="hover:text-white transition">FAQ</a></li>
+                        <li><a href="{{ route('welcome') }}" class="hover:text-white transition">Tentang Kami</a></li>
                     </ul>
                 </div>
-                
-                <!-- Hubungi Kami -->
                 <div>
-                    <h3 class="font-bold text-lg mb-4">Hubungi Kami</h3>
+                    <h3 class="font-bold text-lg mb-4">Kontak</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Customer Service</a></li>
-                        <li><a href="#" class="hover:text-white transition">Email Support</a></li>
-                        <li><a href="#" class="hover:text-white transition">Lokasi Kantor</a></li>
-                        <li><a href="#" class="hover:text-white transition">Kontak Darurat</a></li>
+                        <li>Email: info@majakara.com</li>
+                        <li>Telp: (021) 1234-5678</li>
+                        <li>WA: 0812-3456-7890</li>
                     </ul>
                 </div>
             </div>
-            
-            <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
-                <p class="text-white/80 text-sm mb-4 md:mb-0">
-                    Copyright © 2025 Koperasi Majakara. All rights reserved.
-                </p>
-                <div class="flex items-center space-x-4">
-                    <span class="text-white/80 text-sm">Ikuti Kami:</span>
-                    <div class="flex space-x-3">
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.246 1.805-.413 2.227-.217.562-.677.96-.896 1.382-.42.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.413-.569-.224-.96-.479-1.379-.896-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
+            <div class="border-t border-white/20 pt-8 text-center">
+                <p class="text-white/80 text-sm">Copyright © 2026 Koperasi Majakara. All rights reserved.</p>
             </div>
         </div>
     </footer>
     
     <script>
-        // Mobile Menu Toggle
         document.getElementById('mobile-menu-btn').addEventListener('click', function() {
-            const menu = document.getElementById('mobile-menu');
-            menu.classList.toggle('hidden');
+            document.getElementById('mobile-menu').classList.toggle('hidden');
         });
     </script>
 </body>
