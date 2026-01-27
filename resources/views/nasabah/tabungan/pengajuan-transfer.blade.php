@@ -40,6 +40,7 @@
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                         <input type="text" name="nominal" id="nominal" placeholder="0" required
+                            value="{{ old('nominal') }}"
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
                             oninput="formatCurrency(this)">
                     </div>
@@ -54,18 +55,18 @@
                             <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
-                            <p class="text-sm text-gray-600">Klik untuk tambah bukti transfer</p>
-                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
+                            <p class="text-sm text-gray-600 font-semibold">Klik untuk tambah bukti transfer</p>
+                            <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG, JPEG (Max 5MB per file)</p>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Minimal upload 1 bukti transfer</p>
+                    <p class="text-xs text-gray-500 mt-2">Minimal upload 1 bukti transfer. Anda bisa upload beberapa bukti jika melakukan transfer bertahap.</p>
                 </div>
 
                 <!-- Keterangan -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
                     <textarea name="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none"></textarea>
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none">{{ old('keterangan') }}</textarea>
                 </div>
 
                 <!-- Submit Button -->
@@ -135,26 +136,22 @@
         buktiCount++;
         const container = document.getElementById('bukti-container');
         const div = document.createElement('div');
-        div.className = 'border-2 border-gray-200 rounded-xl p-4 space-y-3';
+        div.className = 'border-2 border-gray-200 rounded-xl p-4 space-y-3 bg-gray-50';
         div.innerHTML = `
-            <div class="flex items-center justify-between mb-2">
+            <div class="flex items-center justify-between">
                 <label class="text-sm font-semibold text-gray-700">Bukti Transfer ${buktiCount}</label>
-                <button type="button" onclick="this.parentElement.parentElement.remove(); buktiCount--;" class="text-red-600 hover:text-red-700">
+                <button type="button" onclick="this.closest('.border-2').remove(); buktiCount--;" 
+                    class="text-red-600 hover:text-red-700 p-2 hover:bg-red-50 rounded-lg transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                     </svg>
                 </button>
             </div>
-            <input type="file" name="bukti_foto[]" accept="image/*" required 
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg" 
+            <input type="file" name="bukti_foto[]" accept="image/jpeg,image/png,image/jpg" required 
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer" 
                 onchange="previewBukti(this)">
-            <input type="text" name="nominal_foto[]" placeholder="Nominal dari bukti (Rp)" required 
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg" 
-                oninput="formatCurrency(this)">
-            <textarea name="keterangan_foto[]" rows="2" placeholder="Keterangan (opsional)" 
-                class="w-full px-4 py-2 border border-gray-300 rounded-lg"></textarea>
-            <div class="bukti-preview hidden">
-                <img src="" alt="Preview" class="max-w-full max-h-32 rounded-lg">
+            <div class="bukti-preview hidden mt-2">
+                <img src="" alt="Preview" class="max-w-full max-h-48 rounded-lg border border-gray-200 shadow-sm">
             </div>
         `;
         container.appendChild(div);
@@ -163,8 +160,9 @@
     function previewBukti(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
+            const preview = input.closest('.border-2').querySelector('.bukti-preview');
+            
             reader.onload = function(e) {
-                const preview = input.parentElement.querySelector('.bukti-preview');
                 preview.querySelector('img').src = e.target.result;
                 preview.classList.remove('hidden');
             };
@@ -227,13 +225,6 @@
             const value = nominalInput.value.replace(/[^\d]/g, '');
             nominalInput.value = value;
         }
-
-        // Convert all nominal_foto inputs
-        const nominalFotoInputs = document.querySelectorAll('input[name="nominal_foto[]"]');
-        nominalFotoInputs.forEach(input => {
-            const value = input.value.replace(/[^\d]/g, '');
-            input.value = value;
-        });
 
         // Submit form
         form.submit();

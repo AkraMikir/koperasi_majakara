@@ -55,7 +55,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">ID Transaksi</p>
-                        <p class="font-semibold text-gray-900 font-mono">TRX{{ str_pad($transaksi->id, 3, '0', STR_PAD_LEFT) }}</p>
+                        <p class="font-semibold text-gray-900 font-mono">{{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
                     </div>
                 </div>
 

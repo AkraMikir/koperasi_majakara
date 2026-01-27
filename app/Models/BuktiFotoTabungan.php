@@ -16,12 +16,9 @@ class BuktiFotoTabungan extends Model
         'id_pengajuan',
         'file_photo',
         'jenis',
-        'nominal',
-        'keterangan',
     ];
 
     protected $casts = [
-        'nominal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

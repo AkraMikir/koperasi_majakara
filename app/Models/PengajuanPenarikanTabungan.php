@@ -17,6 +17,10 @@ class PengajuanPenarikanTabungan extends Model
         'id_anggota',
         'tgl_pengajuan',
         'nominal',
+        'metode_transfer',
+        'no_rekening',
+        'nama_bank',
+        'foto_bukti_tf_admin',
         'keterangan',
         'status',
     ];

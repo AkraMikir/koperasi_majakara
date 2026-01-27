@@ -131,7 +131,7 @@
                             <td class="px-4 py-3 text-sm text-gray-600">{{ ucfirst($transaksi->via) }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-500 font-mono">TRX{{ str_pad($transaksi->id, 3, '0', STR_PAD_LEFT) }}</span>
+                                    <span class="text-sm text-gray-500 font-mono">{{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</span>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>

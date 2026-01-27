@@ -8,9 +8,21 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Transaksi Tabungan</h1>
-            <p class="text-gray-600 mt-1">ID Transaksi: #{{ $transaksi->id }}</p>
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
         </div>
         <div class="flex items-center space-x-3">
+            @if(!$transaksi->id_pengajuan_setor && !$transaksi->id_pengajuan_tarik)
+            <a href="{{ route('admin.tabungan.edit-transaksi', $transaksi->id) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                Edit Transaksi
+            </a>
+            <form method="POST" action="{{ route('admin.tabungan.destroy-transaksi', $transaksi->id) }}" class="inline" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                @csrf
+                @method('DELETE')
+                <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                    Hapus
+                </button>
+            </form>
+            @endif
             <a href="{{ route('admin.tabungan.transaksi') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>

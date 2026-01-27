@@ -95,7 +95,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/pengajuan-tarik/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveTarik'])->name('approve-tarik');
         Route::post('/pengajuan-tarik/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectTarik'])->name('reject-tarik');
         Route::get('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'transaksi'])->name('transaksi');
+        Route::get('/transaksi/create', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransaksi'])->name('create-transaksi');
+        Route::post('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'storeTransaksi'])->name('store-transaksi');
         Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+        Route::get('/transaksi/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editTransaksi'])->name('edit-transaksi');
+        Route::put('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'updateTransaksi'])->name('update-transaksi');
+        Route::delete('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'destroyTransaksi'])->name('destroy-transaksi');
         Route::get('/janji-temu', [\App\Http\Controllers\Admin\TabunganController::class, 'janjiTemu'])->name('janji-temu');
         Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
         Route::post('/janji-temu/{id}/create-trans', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransFromJanjiTemu'])->name('create-trans-from-janji-temu');
@@ -217,6 +222,28 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoUpdate'])->name('update');
             Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoDestroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
+        });
+
+        // Jenis Akun
+        Route::prefix('jns-akun')->name('jns-akun.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunToggleStatus'])->name('toggle-status');
+        });
+
+        // Biaya Transfer
+        Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferToggleStatus'])->name('toggle-status');
         });
     });
     
