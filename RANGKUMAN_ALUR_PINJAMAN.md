@@ -331,3 +331,5 @@ Struktur sama dengan `tempo_pinjaman_b`, hanya berbeda periode.
 4. **Status angsuran:** Update otomatis saat pembayaran dikonfirmasi
 5. **Pinjaman lunas:** Update otomatis jika semua angsuran lunas
 
+
+
