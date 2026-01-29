@@ -106,7 +106,7 @@ class TabunganController extends Controller
         $pengajuan = PengajuanTabungan::with(['buktiFoto', 'janjiTemu', 'transTabungan'])->findOrFail($id);
         
         // Update status to approved (status '2')
-        $pengajuan->update(['status' => '3']);
+        $pengajuan->update(['status' => '2']);
 
         // Get nominal from pengajuan (or janji temu for tunai)
         $nominal = $pengajuan->nominal ?? 0;
@@ -157,7 +157,7 @@ class TabunganController extends Controller
 
         $pengajuan = PengajuanTabungan::findOrFail($id);
         $pengajuan->update([
-            'status' => '2',
+            'status' => '3',
             'keterangan' => $request->keterangan
         ]);
 
@@ -704,3 +704,4 @@ class TabunganController extends Controller
             ->with('success', 'Transaksi berhasil dihapus');
     }
 }
+
