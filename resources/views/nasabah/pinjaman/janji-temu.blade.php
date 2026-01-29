@@ -82,8 +82,9 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pinjaman *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
-                        <input type="number" name="nominal" id="nominal" value="{{ old('nominal', request('nominal')) }}" placeholder="0" required min="100000" step="10000"
+                        <input type="text" name="nominal" id="nominal" value="{{ old('nominal', request('nominal')) }}" placeholder="Masukkan nominal pinjaman" required
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 outline-none text-lg font-semibold">
+                        <input type="hidden" name="nominal_raw" id="nominal_raw" value="{{ old('nominal_raw') }}">
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Minimal pinjaman: Rp 100.000</p>
                     @error('nominal')
@@ -256,10 +257,35 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const nominalInput = document.getElementById('nominal');
+    const nominalRawInput = document.getElementById('nominal_raw');
     const durasiSelect = document.getElementById('durasi');
     
+    // Format Rupiah saat input
+    nominalInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            // Format dengan titik pemisah ribuan
+            value = parseInt(value).toLocaleString('id-ID');
+            this.value = value;
+            nominalRawInput.value = value.replace(/\./g, '');
+        } else {
+            this.value = '';
+            nominalRawInput.value = '';
+        }
+        updateEstimasi();
+    });
+    
+    // Validasi hanya angka
+    nominalInput.addEventListener('keypress', function(e) {
+        const charCode = (e.which) ? e.which : e.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            e.preventDefault();
+        }
+    });
+    
     function updateEstimasi() {
-        const nominal = parseFloat(nominalInput.value) || 0;
+        const nominalRaw = nominalRawInput.value;
+        const nominal = parseFloat(nominalRaw) || 0;
         const durasi = parseInt(durasiSelect.value) || 0;
         
         if (nominal < 100000 || durasi < 1) {
@@ -285,7 +311,6 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('estimasiAngsuran').textContent = 'Rp ' + Math.ceil(angsuranPerBulan).toLocaleString('id-ID') + ' / bulan';
     }
     
-    nominalInput.addEventListener('input', updateEstimasi);
     durasiSelect.addEventListener('change', updateEstimasi);
     
     updateEstimasi();

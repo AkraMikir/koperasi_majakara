@@ -56,8 +56,24 @@
                         <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Saldo Saat Ini</p>
-                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+                        <p class="text-sm text-gray-600">Metode</p>
+                        <span class="inline-block mt-1 px-3 py-1 {{ $pengajuan->metode_transfer == 'transfer' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }} rounded-full text-sm font-semibold">
+                            {{ ucfirst($pengajuan->metode_transfer ?? 'Tunai') }}
+                        </span>
+                    </div>
+                    @if($pengajuan->metode_transfer == 'transfer')
+                    <div>
+                        <p class="text-sm text-gray-600">Bank Tujuan</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->nama_bank ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Nomor Rekening</p>
+                        <p class="font-semibold text-gray-900 font-mono">{{ $pengajuan->no_rekening ?? 'N/A' }}</p>
+                    </div>
+                    @endif
+                    <div>
+                        <p class="text-sm text-gray-600">Saldo Nasabah</p>
+                        <p class="font-semibold text-[#674c1d] text-xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
                         @if($saldo < $pengajuan->nominal)
                             <p class="text-sm text-red-600 mt-1 font-semibold">⚠ Saldo tidak mencukupi</p>
                             <p class="text-xs text-gray-500 mt-1">Kekurangan: Rp {{ number_format($pengajuan->nominal - $saldo, 0, ',', '.') }}</p>
@@ -65,39 +81,6 @@
                             <p class="text-sm text-green-600 mt-1 font-semibold">✓ Saldo mencukupi</p>
                             <p class="text-xs text-gray-500 mt-1">Sisa setelah penarikan: Rp {{ number_format($saldo - $pengajuan->nominal, 0, ',', '.') }}</p>
                         @endif
-                        @php
-                            // Debug info untuk melihat detail saldo
-                            $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $pengajuan->id_anggota)
-                                ->where('jenis', 'setoran')
-                                ->sum('nominal') ?? 0;
-                            $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $pengajuan->id_anggota)
-                                ->where('jenis', 'penarikan')
-                                ->sum('nominal') ?? 0;
-                            $pengajuanApproved = \App\Models\PengajuanTabungan::where('id_anggota', $pengajuan->id_anggota)
-                                ->where('status', '2')
-                                ->whereDoesntHave('transTabungan')
-                                ->with('buktiFoto', 'janjiTemu')
-                                ->get();
-                            $totalSetoranPending = 0;
-                            foreach ($pengajuanApproved as $p) {
-                                if ($p->buktiFoto && $p->buktiFoto->count() > 0) {
-                                    $totalSetoranPending += $p->buktiFoto->sum('nominal');
-                                } elseif ($p->janjiTemu) {
-                                    $totalSetoranPending += $p->janjiTemu->nominal ?? 0;
-                                }
-                            }
-                        @endphp
-                        <div class="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <p class="text-xs font-semibold text-gray-700 mb-2">Detail Saldo:</p>
-                            <div class="space-y-1 text-xs text-gray-600">
-                                <p>Total Setoran (Transaksi): Rp {{ number_format($totalSetoranTrans, 0, ',', '.') }}</p>
-                                <p>Total Penarikan (Transaksi): Rp {{ number_format($totalPenarikanTrans, 0, ',', '.') }}</p>
-                                @if($totalSetoranPending > 0)
-                                <p class="text-blue-600">Setoran Pending (Belum Transaksi): Rp {{ number_format($totalSetoranPending, 0, ',', '.') }}</p>
-                                @endif
-                                <p class="font-semibold text-gray-900 pt-1 border-t border-gray-300">Saldo Akhir: Rp {{ number_format($saldo, 0, ',', '.') }}</p>
-                            </div>
-                        </div>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Status</p>
@@ -126,32 +109,76 @@
         <!-- Sidebar Actions -->
         <div class="space-y-6">
             @if($pengajuan->status == '1')
-            <!-- Action Buttons -->
+            <!-- Approve Form with Bank Selection -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan</h3>
-                <div class="space-y-3">
+                <h3 class="text-lg font-bold text-primary font-display mb-4">Setujui Penarikan</h3>
+                <form method="POST" action="{{ route('admin.tabungan.approve-tarik', $pengajuan->id) }}" enctype="multipart/form-data" class="space-y-4" id="approve-form">
+                    @csrf
+
+                    @if($pengajuan->metode_transfer == 'transfer')
+                    <!-- Bank Pengirim (Koperasi) -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Bank Pengirim (Koperasi)</label>
+                        <select name="bank_pengirim" id="bank_pengirim" required 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                            onchange="calculateBiaya()">
+                            <option value="">Pilih Bank</option>
+                            <option value="BCA">BCA</option>
+                            <option value="BNI">BNI</option>
+                            <option value="Mandiri">Mandiri</option>
+                            <option value="BRI">BRI</option>
+                        </select>
+                    </div>
+
+                    <!-- Biaya Admin (Auto Calculate) -->
+                    <div id="biaya-section" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-semibold text-gray-700">Biaya Transfer:</p>
+                            <p class="font-bold text-blue-600" id="biaya-display">Rp 0</p>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <p class="text-sm font-semibold text-gray-700">Total Diterima Nasabah:</p>
+                            <p class="font-bold text-green-600" id="total-display">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Biaya admin akan ditanggung koperasi</p>
+                    </div>
+
+                    <!-- Upload Bukti TF Admin -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer *</label>
+                        <input type="file" name="foto_bukti_tf_admin" accept="image/jpeg,image/png,image/jpg" required
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
+                            onchange="previewFoto(this)">
+                        <div id="foto-preview" class="hidden mt-3">
+                            <img src="" alt="Preview" class="max-w-full max-h-48 rounded-lg border border-gray-200 shadow-sm">
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Max 5MB, Format: JPG, PNG</p>
+                    </div>
+                    @endif
+
                     @if($saldo >= $pengajuan->nominal)
-                    <form method="POST" action="{{ route('admin.tabungan.approve-tarik', $pengajuan->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pengajuan penarikan ini?')">
-                        @csrf
-                        <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
-                            ✓ Setujui Penarikan
-                        </button>
-                    </form>
+                    <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                        ✓ Setujui Penarikan
+                    </button>
                     @else
                     <button disabled class="w-full px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
                         Saldo Tidak Mencukupi
                     </button>
                     @endif
-                    
-                    <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
-                        ✗ Tolak Pengajuan
-                    </button>
-                </div>
+                </form>
+            </div>
+
+            <!-- Reject Button -->
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan Lain</h3>
+                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                    ✗ Tolak Pengajuan
+                </button>
             </div>
 
             <!-- Reject Modal -->
-            <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
+            <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Tolak Pengajuan</h3>
                     <form method="POST" action="{{ route('admin.tabungan.reject-tarik', $pengajuan->id) }}">
                         @csrf
@@ -175,7 +202,61 @@
     </div>
 </div>
 
+@push('scripts')
 <script>
+    // Biaya transfer data (from database)
+    const biayaData = @json(\App\Models\BiayaTransfer::where('is_active', true)->get()->groupBy('bank_pengirim'));
+
+    function calculateBiaya() {
+        const bankPengirim = document.getElementById('bank_pengirim').value;
+        const bankPenerima = '{{ $pengajuan->nama_bank }}';
+        const nominal = {{ $pengajuan->nominal }};
+
+        if (!bankPengirim || !bankPenerima) {
+            return;
+        }
+
+        // Find biaya from data
+        let biaya = 0;
+        if (biayaData[bankPengirim]) {
+            const found = biayaData[bankPengirim].find(b => b.bank_penerima === bankPenerima);
+            if (found) {
+                biaya = parseFloat(found.biaya_admin);
+            } else {
+                // Default ke "Bank Lainnya"
+                const foundLainnya = biayaData[bankPengirim].find(b => b.bank_penerima === 'Bank Lainnya');
+                if (foundLainnya) {
+                    biaya = parseFloat(foundLainnya.biaya_admin);
+                }
+            }
+        }
+
+        // Show biaya section
+        const biayaSection = document.getElementById('biaya-section');
+        biayaSection.classList.remove('hidden');
+
+        // Update display
+        document.getElementById('biaya-display').textContent = 
+            'Rp ' + new Intl.NumberFormat('id-ID').format(biaya);
+        
+        // Nasabah tetap terima full (biaya ditanggung koperasi)
+        document.getElementById('total-display').textContent = 
+            'Rp ' + new Intl.NumberFormat('id-ID').format(nominal);
+    }
+
+    function previewFoto(input) {
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            const preview = document.getElementById('foto-preview');
+            
+            reader.onload = function(e) {
+                preview.querySelector('img').src = e.target.result;
+                preview.classList.remove('hidden');
+            };
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+
     function showRejectModal() {
         document.getElementById('rejectModal').classList.remove('hidden');
     }
@@ -184,6 +265,5 @@
         document.getElementById('rejectModal').classList.add('hidden');
     }
 </script>
+@endpush
 @endsection
-
-

@@ -150,6 +150,28 @@
     .delay-500 {
         transition-delay: 0.5s;
     }
+    
+    @keyframes shimmer {
+        0% { background-position: -1000px 0; }
+        100% { background-position: 1000px 0; }
+    }
+    
+    @keyframes float-slow {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-15px) rotate(2deg); }
+    }
+    
+    .animate-float {
+        animation: float-slow 6s ease-in-out infinite;
+    }
+    
+    .shadow-3xl {
+        box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .hover\:shadow-3xl:hover {
+        box-shadow: 0 35px 70px -15px rgba(103, 76, 29, 0.4);
+    }
     </style>
 
 </head>
@@ -284,60 +306,198 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="beranda" class="pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <section id="beranda" class="pt-24 pb-32 px-4 sm:px-6 lg:px-8 relative overflow-hidden" style="background: linear-gradient(135deg, #faf9f6 0%, #ffffff 50%, #faf9f6 100%);">
+        <!-- Animated Background Pattern -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 2px 2px, #674c1d 1px, transparent 1px); background-size: 40px 40px;"></div>
+        </div>
+        
+        <!-- Floating Gradient Circles -->
+        <div class="absolute top-20 right-10 w-72 h-72 bg-gradient-to-br from-[#674c1d]/20 to-[#8b6f2f]/20 rounded-full filter blur-3xl animate-pulse"></div>
+        <div class="absolute bottom-20 left-10 w-96 h-96 bg-gradient-to-tr from-[#d4af37]/20 to-[#8b6f2f]/20 rounded-full filter blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-r from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-full filter blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <!-- Hero Content -->
-                <div class="text-center lg:text-left fade-in-up visible">
-                    <h1 class="font-display text-5xl md:text-6xl lg:text-7xl font-bold text-primary mb-6 leading-tight">
-                        Solusi Keuangan<br>
-                        <span class="gradient-text">Terpercaya</span>
+                <div class="text-center lg:text-left space-y-8">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center space-x-2 px-4 py-2 bg-white rounded-full shadow-lg border border-[#674c1d]/20 animate-bounce">
+                        <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span class="text-sm font-semibold text-[#674c1d]">Dipercaya 10,000+ Anggota</span>
+                        <svg class="w-4 h-4 text-[#d4af37]" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                    </div>
+                    
+                    <!-- Main Heading -->
+                    <h1 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+                        <span class="text-[#674c1d]">Bangun</span><br>
+                        <span class="text-[#8b6f2f]">Kepercayaan</span> untuk<br>
+                        <span class="inline-block" style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 50%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; animation: shimmer 3s infinite;">
+                            Koperasi Majakara
+                        </span>
                     </h1>
-                    <p class="text-xl text-gray-600 mb-8 leading-relaxed">
-                        Koperasi Majakara hadir untuk membantu mewujudkan impian finansial Anda dengan layanan terbaik
-                        dan terpercaya.
+                    
+                    <!-- Subtitle -->
+                    <p class="text-lg md:text-xl text-gray-600 leading-relaxed max-w-2xl">
+                        Dengarkan pengalaman nyata dari <span class="font-bold text-[#674c1d]">anggota kami</span> yang telah mempercayakan kebutuhan keuangan mereka kepada kami
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="#layanan"
-                            class="px-8 py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition shadow-lg hover:shadow-xl">
-                            Jelajahi Layanan
-                        </a>
-                        <a href="#keuntungan"
-                            class="px-8 py-4 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary hover:text-white transition">
-                            Pelajari Lebih Lanjut
-                        </a>
+                    
+                    <!-- Trust Indicators -->
+                    <div class="flex flex-wrap gap-4 md:gap-6 justify-center lg:justify-start">
+                        <div class="flex items-center space-x-2 text-gray-700">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <span class="text-sm md:text-base font-semibold">Aman & Terpercaya</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-700">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <span class="text-sm md:text-base font-semibold">Proses Cepat</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-gray-700">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-sm md:text-base font-semibold">Bunga Kompetitif</span>
+                        </div>
+                    </div>
+                    
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-4">
+                        @if (auth()->check())
+                            @php
+                                $user = auth()->user();
+                                $dashboardUrl = $user->role === 'nasabah' ? route('nasabah.dashboard') : '/admin/dashboard';
+                            @endphp
+                            <a href="{{ $dashboardUrl }}" class="group px-8 py-4 bg-gradient-to-r from-[#674c1d] via-[#8b6f2f] to-[#d4af37] text-white rounded-xl font-bold shadow-2xl hover:shadow-3xl transition-all hover:scale-105 flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span>Masuk Dashboard</span>
+                            </a>
+                        @else
+                            <a href="{{ route('register') }}" class="group px-8 py-4 bg-gradient-to-r from-[#674c1d] via-[#8b6f2f] to-[#d4af37] text-white rounded-xl font-bold shadow-2xl hover:shadow-3xl transition-all hover:scale-105 flex items-center justify-center space-x-2">
+                                <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                                </svg>
+                                <span>Daftar Sekarang - Gratis!</span>
+                            </a>
+                            <a href="#layanan" class="px-8 py-4 bg-white border-2 border-[#674c1d] text-[#674c1d] rounded-xl font-semibold hover:bg-[#674c1d] hover:text-white transition-all shadow-lg flex items-center justify-center space-x-2">
+                                <span>Jelajahi Layanan</span>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                                </svg>
+                            </a>
+                        @endif
                     </div>
                 </div>
 
-                <!-- Hero Image/Illustration -->
-                <div class="relative scale-in visible delay-200">
-                    <div class="relative z-10 rounded-3xl p-8 backdrop-blur-sm"
-                        style="background: linear-gradient(135deg, rgba(103, 76, 29, 0.1) 0%, rgba(212, 175, 55, 0.1) 100%);">
-                        <div class="bg-white rounded-2xl p-8 shadow-2xl">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="gradient-primary rounded-xl p-6 text-white">
-                                    <div class="text-3xl font-bold mb-2">100%</div>
-                                    <div class="text-sm opacity-90">Terpercaya</div>
+                <!-- Hero Visual -->
+                <div class="relative mt-12 lg:mt-0">
+                    <!-- Main Card Container -->
+                    <div class="relative">
+                        <!-- Floating Card 1 - Main Stats -->
+                        <div class="bg-white rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-100 mb-4 md:mb-6 hover:shadow-3xl transition-all duration-500">
+                            <div class="grid grid-cols-3 gap-3 md:gap-6">
+                                <div class="text-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-2xl md:text-3xl font-bold mb-1" style="background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">100%</div>
+                                    <div class="text-xs md:text-sm text-gray-600 font-medium">Terpercaya</div>
                                 </div>
-                                <div class="gradient-accent rounded-xl p-6 text-white">
-                                    <div class="text-3xl font-bold mb-2">24/7</div>
-                                    <div class="text-sm opacity-90">Layanan</div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-br from-[#d4af37] to-[#f4d03f] rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-2xl md:text-3xl font-bold mb-1" style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">24/7</div>
+                                    <div class="text-xs md:text-sm text-gray-600 font-medium">Layanan</div>
                                 </div>
-                                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);"
-                                    class="rounded-xl p-6 text-white col-span-2">
-                                    <div class="text-3xl font-bold mb-2">10K+</div>
-                                    <div class="text-sm opacity-90">Anggota Aktif</div>
+                                <div class="text-center">
+                                    <div class="w-12 h-12 md:w-16 md:h-16 mx-auto mb-2 md:mb-3 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-2xl flex items-center justify-center shadow-lg">
+                                        <svg class="w-6 h-6 md:w-8 md:h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="text-2xl md:text-3xl font-bold mb-1" style="background: linear-gradient(135deg, #8b6f2f 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">10K+</div>
+                                    <div class="text-xs md:text-sm text-gray-600 font-medium">Anggota</div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Floating Card 2 - Services Quick Access -->
+                        <div class="grid grid-cols-2 gap-3 md:gap-4">
+                            <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-4 md:p-6 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer">
+                                <div class="flex items-center justify-between mb-2 md:mb-3">
+                                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                    <span class="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">POPULER</span>
+                                </div>
+                                <div class="text-xl md:text-2xl font-bold mb-1">Pinjaman</div>
+                                <div class="text-xs md:text-sm opacity-90">Bunga 10-24%</div>
+                            </div>
+                            <div class="bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-2xl p-4 md:p-6 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer">
+                                <div class="flex items-center justify-between mb-2 md:mb-3">
+                                    <svg class="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                    </svg>
+                                    <span class="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">TINGGI</span>
+                                </div>
+                                <div class="text-xl md:text-2xl font-bold mb-1">Deposito</div>
+                                <div class="text-xs md:text-sm opacity-90">Return Maksimal</div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="absolute -top-4 -right-4 w-64 h-64 rounded-full blur-3xl"
-                        style="background-color: rgba(103, 76, 29, 0.2);"></div>
-                    <div class="absolute -bottom-4 -left-4 w-64 h-64 rounded-full blur-3xl"
-                        style="background-color: rgba(212, 175, 55, 0.2);"></div>
+                    
+                    <!-- Decorative Elements -->
+                    <div class="hidden lg:block absolute -top-6 -right-6 w-24 h-24 bg-gradient-to-br from-[#d4af37] to-[#f4d03f] rounded-full opacity-20 blur-2xl animate-pulse"></div>
+                    <div class="hidden lg:block absolute -bottom-6 -left-6 w-32 h-32 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full opacity-20 blur-2xl animate-pulse" style="animation-delay: 0.5s;"></div>
+                </div>
+            </div>
+            
+            <!-- Bottom Trust Bar -->
+            <div class="mt-16 bg-white/80 backdrop-blur-lg rounded-3xl p-6 md:p-8 shadow-2xl border border-gray-100">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 text-center">
+                    <div class="group cursor-pointer">
+                        <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #674c1d 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">98%</div>
+                        <div class="text-xs md:text-sm text-gray-600 font-medium">Tingkat Kepuasan</div>
+                    </div>
+                    <div class="group cursor-pointer">
+                        <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #8b6f2f 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">< 24j</div>
+                        <div class="text-xs md:text-sm text-gray-600 font-medium">Proses Approval</div>
+                    </div>
+                    <div class="group cursor-pointer">
+                        <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">5+</div>
+                        <div class="text-xs md:text-sm text-gray-600 font-medium">Tahun Berpengalaman</div>
+                    </div>
+                    <div class="group cursor-pointer">
+                        <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">1.2K+</div>
+                        <div class="text-xs md:text-sm text-gray-600 font-medium">Testimoni Positif</div>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <style>
+            @keyframes shimmer {
+                0% { background-position: -1000px 0; }
+                100% { background-position: 1000px 0; }
+            }
+            
+            @keyframes float {
+                0%, 100% { transform: translateY(0px); }
+                50% { transform: translateY(-20px); }
+            }
+        </style>
     </section>
 
     <!-- Services Section -->

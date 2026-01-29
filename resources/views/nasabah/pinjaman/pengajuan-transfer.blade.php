@@ -82,9 +82,10 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pinjaman</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">Rp</span>
-                        <input type="number" name="nominal" id="nominal" 
+                        <input type="text" name="nominal" id="nominal" 
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
-                            placeholder="Masukkan nominal pinjaman" min="100000" step="10000" required value="{{ old('nominal') }}">
+                            placeholder="Masukkan nominal pinjaman" required value="{{ old('nominal') }}">
+                        <input type="hidden" name="nominal_raw" id="nominal_raw" value="{{ old('nominal_raw') }}">
                     </div>
                     <p class="text-xs text-gray-500 mt-1">Minimum: Rp 100.000</p>
                     @error('nominal')
@@ -242,9 +243,33 @@ document.addEventListener('DOMContentLoaded', function() {
     
     let debounceTimer;
     
+    // Format Rupiah saat input
+    nominalInput.addEventListener('input', function(e) {
+        let value = this.value.replace(/[^0-9]/g, '');
+        if (value) {
+            // Format dengan titik pemisah ribuan
+            value = parseInt(value).toLocaleString('id-ID');
+            this.value = value;
+            document.getElementById('nominal_raw').value = value.replace(/\./g, '');
+        } else {
+            this.value = '';
+            document.getElementById('nominal_raw').value = '';
+        }
+        updateEstimasi();
+    });
+    
+    // Validasi hanya angka
+    nominalInput.addEventListener('keypress', function(e) {
+        const charCode = (e.which) ? e.which : e.keyCode;
+        if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+            e.preventDefault();
+        }
+    });
+    
     // Update estimasi dan simulasi
     function updateEstimasi() {
-        const nominal = parseFloat(nominalInput.value) || 0;
+        const nominalRaw = document.getElementById('nominal_raw').value;
+        const nominal = parseFloat(nominalRaw) || 0;
         const durasi = parseInt(durasiSelect.value) || 0;
         
         if (nominal < 100000 || durasi < 1) {
@@ -308,7 +333,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
     
-    nominalInput.addEventListener('input', updateEstimasi);
     durasiSelect.addEventListener('change', updateEstimasi);
     
     btnSubmitPengajuan.addEventListener('click', function(e) {

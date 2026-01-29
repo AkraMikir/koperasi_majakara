@@ -11,6 +11,9 @@
             <p class="text-gray-600 mt-1">Riwayat semua transaksi tabungan nasabah</p>
         </div>
         <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.tabungan.create-transaksi') }}" class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all text-sm font-medium shadow-md">
+                + Buat Transaksi Manual
+            </a>
             <a href="{{ route('admin.tabungan.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>
@@ -66,7 +69,7 @@
                 <tbody>
                     @forelse($transaksi as $item)
                     <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
-                        <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>
+                        <td class="px-6 py-4 text-sm font-medium font-mono">{{ $item->id_transaksi ?? 'TRX-' . str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-6 py-4 text-sm">{{ $item->tgl_transaksi->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
                             <div>
@@ -87,10 +90,25 @@
                         <td class="px-6 py-4 text-sm">{{ ucfirst($item->via) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $item->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('admin.tabungan.detail-transaksi', $item->id) }}" 
-                                class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-xs font-medium">
-                                Detail
-                            </a>
+                            <div class="flex items-center gap-2">
+                                <a href="{{ route('admin.tabungan.detail-transaksi', $item->id) }}" 
+                                    class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-xs font-medium">
+                                    Detail
+                                </a>
+                                @if(!$item->id_pengajuan_setor && !$item->id_pengajuan_tarik)
+                                <a href="{{ route('admin.tabungan.edit-transaksi', $item->id) }}" 
+                                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
+                                    Edit
+                                </a>
+                                <form method="POST" action="{{ route('admin.tabungan.destroy-transaksi', $item->id) }}" class="inline" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-medium">
+                                        Hapus
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty

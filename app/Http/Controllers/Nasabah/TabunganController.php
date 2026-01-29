@@ -160,8 +160,6 @@ class TabunganController extends Controller
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
             'bukti_foto.*' => 'required|image|max:5120',
-            'nominal_foto.*' => 'required|string',
-            'keterangan_foto.*' => 'nullable|string|max:255',
         ]);
 
         // Verify PIN
@@ -197,29 +195,24 @@ class TabunganController extends Controller
                         ->withInput($request->except('pin'));
                 }
 
-                // Create pengajuan tabungan
+                // Create pengajuan tabungan with nominal
                 $pengajuan = PengajuanTabungan::create([
                     'id_anggota' => $idAnggota,
+                    'nominal' => $request->nominal,
                     'foto_bukti_tf' => 'transfer', // Indikator bahwa ini transfer
                     'keterangan' => $request->keterangan,
                     'status' => '1', // Pending
                 ]);
 
-                // Handle multiple bukti foto
+                // Handle multiple bukti foto (hanya file, no nominal/keterangan)
                 if ($request->hasFile('bukti_foto')) {
-                    foreach ($request->file('bukti_foto') as $index => $file) {
+                    foreach ($request->file('bukti_foto') as $file) {
                         $path = $file->store('bukti_tabungan', 'public');
-                        
-                        // Parse nominal from formatted currency string
-                        $nominalStr = $request->nominal_foto[$index] ?? '0';
-                        $nominal = (float) str_replace(['.', ','], '', $nominalStr);
                         
                         BuktiFotoTabungan::create([
                             'id_pengajuan' => $pengajuan->id,
                             'file_photo' => $path,
                             'jenis' => 'tabungan',
-                            'nominal' => $nominal > 0 ? $nominal : $request->nominal,
-                            'keterangan' => $request->keterangan_foto[$index] ?? 'Bukti transfer',
                         ]);
                     }
                 }
@@ -365,6 +358,7 @@ class TabunganController extends Controller
             'metode' => 'required|in:tunai,transfer',
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
+            'nama_bank' => 'required_if:metode,transfer|string|max:100',
             'no_rekening' => 'required_if:metode,transfer|string|max:50',
         ]);
 
@@ -383,7 +377,10 @@ class TabunganController extends Controller
             'id_anggota' => $idAnggota,
             'tgl_pengajuan' => now(),
             'nominal' => $request->nominal,
-            'keterangan' => $request->keterangan . ($request->metode === 'transfer' ? ' | Rekening: ' . $request->no_rekening : ''),
+            'metode_transfer' => $request->metode,
+            'nama_bank' => $request->metode === 'transfer' ? $request->nama_bank : null,
+            'no_rekening' => $request->metode === 'transfer' ? $request->no_rekening : null,
+            'keterangan' => $request->keterangan,
             'status' => '1', // Pending
         ]);
 
@@ -507,16 +504,18 @@ class TabunganController extends Controller
         $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->with('buktiFoto', 'janjiTemu')
+            ->with('janjiTemu')
             ->get();
 
         foreach ($pengajuanApproved as $pengajuan) {
-            $nominal = 0;
-            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
-                $nominal = $pengajuan->buktiFoto->sum('nominal');
-            } elseif ($pengajuan->janjiTemu) {
+            // Gunakan nominal dari pengajuan (bukan dari bukti foto)
+            $nominal = $pengajuan->nominal ?? 0;
+            
+            // Jika nominal masih 0, coba ambil dari janji temu (untuk backward compatibility)
+            if ($nominal == 0 && $pengajuan->janjiTemu) {
                 $nominal = $pengajuan->janjiTemu->nominal ?? 0;
             }
+            
             $totalSetoran += $nominal;
         }
 

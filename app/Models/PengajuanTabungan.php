@@ -16,12 +16,14 @@ class PengajuanTabungan extends Model
 
     protected $fillable = [
         'id_anggota',
+        'nominal',
         'foto_bukti_tf',
         'keterangan',
         'status',
     ];
 
     protected $casts = [
+        'nominal' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

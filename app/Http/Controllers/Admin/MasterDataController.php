@@ -29,6 +29,8 @@ class MasterDataController extends Controller
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => JnsDeposito::where('status_aktif', true)->count(),
+            'total_jns_akun' => \App\Models\JnsAkun::where('is_active', true)->count(),
+            'total_biaya_transfer' => \App\Models\BiayaTransfer::where('is_active', true)->count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -560,6 +562,142 @@ class MasterDataController extends Controller
     {
         $data = JnsDeposito::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
+        $data->save();
+
+        return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ===== JNS AKUN =====
+
+    public function jnsAkunIndex()
+    {
+        $data = \App\Models\JnsAkun::latest()->paginate(15);
+        return view('admin.master-data.jns-akun.index', compact('data'));
+    }
+
+    public function jnsAkunCreate()
+    {
+        return view('admin.master-data.jns-akun.create');
+    }
+
+    public function jnsAkunStore(Request $request)
+    {
+        $request->validate([
+            'kode_akun' => 'required|string|max:20|unique:jns_akun,kode_akun',
+            'nama_akun' => 'required|string|max:100',
+            'prefix_id' => 'required|string|max:10',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        \App\Models\JnsAkun::create($request->all());
+
+        return redirect()->route('admin.master-data.jns-akun.index')
+            ->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function jnsAkunEdit($id)
+    {
+        $data = \App\Models\JnsAkun::findOrFail($id);
+        return view('admin.master-data.jns-akun.edit', compact('data'));
+    }
+
+    public function jnsAkunUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'kode_akun' => 'required|string|max:20|unique:jns_akun,kode_akun,' . $id,
+            'nama_akun' => 'required|string|max:100',
+            'prefix_id' => 'required|string|max:10',
+            'deskripsi' => 'nullable|string',
+        ]);
+
+        $data = \App\Models\JnsAkun::findOrFail($id);
+        $data->update($request->all());
+
+        return redirect()->route('admin.master-data.jns-akun.index')
+            ->with('success', 'Data berhasil diupdate');
+    }
+
+    public function jnsAkunDestroy($id)
+    {
+        $data = \App\Models\JnsAkun::findOrFail($id);
+        $data->delete();
+
+        return redirect()->route('admin.master-data.jns-akun.index')
+            ->with('success', 'Data berhasil dihapus');
+    }
+
+    public function jnsAkunToggleStatus($id)
+    {
+        $data = \App\Models\JnsAkun::findOrFail($id);
+        $data->is_active = !$data->is_active;
+        $data->save();
+
+        return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ===== BIAYA TRANSFER =====
+
+    public function biayaTransferIndex()
+    {
+        $data = \App\Models\BiayaTransfer::latest()->paginate(15);
+        return view('admin.master-data.biaya-transfer.index', compact('data'));
+    }
+
+    public function biayaTransferCreate()
+    {
+        return view('admin.master-data.biaya-transfer.create');
+    }
+
+    public function biayaTransferStore(Request $request)
+    {
+        $request->validate([
+            'bank_pengirim' => 'required|string|max:50',
+            'bank_penerima' => 'required|string|max:50',
+            'biaya_admin' => 'required|numeric|min:0',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        \App\Models\BiayaTransfer::create($request->all());
+
+        return redirect()->route('admin.master-data.biaya-transfer.index')
+            ->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function biayaTransferEdit($id)
+    {
+        $data = \App\Models\BiayaTransfer::findOrFail($id);
+        return view('admin.master-data.biaya-transfer.edit', compact('data'));
+    }
+
+    public function biayaTransferUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'bank_pengirim' => 'required|string|max:50',
+            'bank_penerima' => 'required|string|max:50',
+            'biaya_admin' => 'required|numeric|min:0',
+            'keterangan' => 'nullable|string',
+        ]);
+
+        $data = \App\Models\BiayaTransfer::findOrFail($id);
+        $data->update($request->all());
+
+        return redirect()->route('admin.master-data.biaya-transfer.index')
+            ->with('success', 'Data berhasil diupdate');
+    }
+
+    public function biayaTransferDestroy($id)
+    {
+        $data = \App\Models\BiayaTransfer::findOrFail($id);
+        $data->delete();
+
+        return redirect()->route('admin.master-data.biaya-transfer.index')
+            ->with('success', 'Data berhasil dihapus');
+    }
+
+    public function biayaTransferToggleStatus($id)
+    {
+        $data = \App\Models\BiayaTransfer::findOrFail($id);
+        $data->is_active = !$data->is_active;
         $data->save();
 
         return redirect()->back()->with('success', 'Status berhasil diubah');

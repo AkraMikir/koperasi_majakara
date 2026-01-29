@@ -102,7 +102,7 @@
                         <div class="text-right flex items-center gap-2">
                             <div>
                                 <p class="font-bold text-green-600">+Rp {{ number_format($riwayat->nominal, 0, ',', '.') }}</p>
-                                <p class="text-xs text-gray-500 font-mono">TRX{{ str_pad($riwayat->id, 3, '0', STR_PAD_LEFT) }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ $riwayat->id_transaksi ?? 'TRX-' . str_pad($riwayat->id, 5, '0', STR_PAD_LEFT) }}</p>
                     </div>
                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
