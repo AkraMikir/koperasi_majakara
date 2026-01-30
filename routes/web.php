@@ -252,3 +252,59 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');
     Route::get('/pengajuan', function () { return view('admin.pengajuan.index'); })->name('pengajuan.index');
 });
+
+// ============================================
+// TEST ROUTE - Remove in production
+// ===========================================
+Route::get('/test-whatsapp', function () {
+    $whatsAppService = app(\App\Services\WhatsAppService::class);
+    
+    try {
+        echo "<h1>Test Fonnte WhatsApp API</h1>";
+        
+        // Test connection first
+        echo "<h2>1. Test Connection</h2>";
+        $connectionTest = $whatsAppService->testConnection();
+        echo "<pre>";
+        print_r($connectionTest);
+        echo "</pre>";
+        
+        // Test send OTP
+        $testPhone = '089512543086'; // Nomor dari screenshot
+        $testOTP = '123456';
+        
+        echo "<h2>2. Test Send OTP</h2>";
+        echo "<p>Sending to: <strong>$testPhone</strong></p>";
+        echo "<p>OTP Code: <strong>$testOTP</strong></p>";
+        
+        $result = $whatsAppService->sendOTP($testPhone, $testOTP);
+        
+        echo "<h3>Result:</h3>";
+        echo "<pre>";
+        print_r($result);
+        echo "</pre>";
+        
+        if ($result['success']) {
+            echo "<p style='color: green; font-weight: bold; font-size: 20px;'>✅ SUCCESS! Check WhatsApp!</p>";
+        } else {
+            echo "<p style='color: red; font-weight: bold; font-size: 20px;'>❌ FAILED: " . $result['message'] . "</p>";
+        }
+        
+        // Show config
+        echo "<h2>3. Configuration</h2>";
+        echo "<pre>";
+        echo "API Key: " . (config('services.fonnte.api_key') ? substr(config('services.fonnte.api_key'), 0, 15) . '...' : 'NOT SET') . "\n";
+        echo "API URL: " . config('services.fonnte.api_url') . "\n";
+        echo "Sender: " . config('services.fonnte.sender_number') . "\n";
+        echo "</pre>";
+        
+        // Check Laravel Log
+        echo "<h2>4. Check Logs</h2>";
+        echo "<p>Check <code>storage/logs/laravel.log</code> for detailed API response</p>";
+        
+    } catch (\Exception $e) {
+        echo "<h2 style='color: red;'>Exception</h2>";
+        echo "<p style='color: red;'>" . $e->getMessage() . "</p>";
+        echo "<pre>" . $e->getTraceAsString() . "</pre>";
+    }
+});

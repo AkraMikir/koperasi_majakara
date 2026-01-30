@@ -25,10 +25,12 @@ use Illuminate\Support\Str;
 class RegisterController extends Controller
 {
     protected $ocrService;
+    protected $otpService;
 
-    public function __construct(OcrService $ocrService)
+    public function __construct(OcrService $ocrService, \App\Services\OtpService $otpService)
     {
         $this->ocrService = $ocrService;
+        $this->otpService = $otpService;
     }
 
     /**
@@ -1036,67 +1038,170 @@ class RegisterController extends Controller
     /**
      * Handle Step 2: Verify OTP.
      * 
-     * TODO: Implement OTP verification logic here
-     * Structure maintained for future implementation
+     * Alur:
+     * 1. First landing → Tampilkan konfirmasi nomor WA + button "Kirim OTP"
+     * 2. User klik "Kirim OTP" → Generate & send OTP
+     * 3. User input OTP → Verify
      */
     private function handleStep2Otp(Request $request)
     {
         // Check if step 1 data exists
         $userTempId = $request->session()->get('register_user_temp_id');
         if (!$userTempId) {
-            return redirect()->route('register', ['step' => 1])
+            return redirect()->route('register', ['step' => 1, 'substep' => 1])
                 ->with('error', 'Silakan lengkapi data diri terlebih dahulu');
         }
 
         $userTemp = \App\Models\UserTemp::find($userTempId);
         if (!$userTemp || !$userTemp->nomor_hp) {
-            return redirect()->route('register', ['step' => 1])
+            return redirect()->route('register', ['step' => 1, 'substep' => 1])
                 ->with('error', 'Nomor HP belum diisi');
         }
 
+        $sessionId = $request->session()->get('register_session_id');
+        
         // Store phone in session for display
         $request->session()->put('register_phone', $userTemp->nomor_hp);
 
-        // TODO: Implement OTP generation and sending logic here
-        // Example structure:
-        // 1. Generate OTP code
-        // 2. Save to database (tbl_otp)
-        // 3. Send OTP via WhatsApp/SMS/Email
-        // 4. Return success/error message
+        // === CASE 1: User submit OTP code untuk verifikasi ===
+        if ($request->has('otp_code') && $request->isMethod('post')) {
+            \Log::info('User submitting OTP for verification', [
+                'user_temp_id' => $userTempId,
+                'phone' => $userTemp->nomor_hp,
+            ]);
 
-        // If OTP not sent yet, send it automatically
-        if (!$request->has('otp_code')) {
-            // TODO: Generate and send OTP
-            // For now, skip OTP verification and go to step 3
+            // Validate OTP code
+            $validator = Validator::make($request->all(), [
+                'otp_code' => 'required|string|size:6',
+            ], [
+                'otp_code.required' => 'Kode OTP harus diisi',
+                'otp_code.size' => 'Kode OTP harus 6 digit',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->route('register', ['step' => 2])
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            // Verify OTP using OtpService
+            $verifyResult = $this->otpService->verify(
+                $request->otp_code,
+                $userTemp->nomor_hp,
+                $sessionId
+            );
+
+            if (!$verifyResult['success']) {
+                \Log::warning('OTP verification failed', [
+                    'user_temp_id' => $userTempId,
+                    'phone' => $userTemp->nomor_hp,
+                    'message' => $verifyResult['message'],
+                ]);
+
+                return redirect()->route('register', ['step' => 2])
+                    ->with('error', $verifyResult['message'])
+                    ->withInput();
+            }
+
+            // OTP verified successfully
+            \Log::info('OTP verified successfully', [
+                'user_temp_id' => $userTempId,
+                'phone' => $userTemp->nomor_hp,
+            ]);
+
+            // Set session verified
             $request->session()->put('register_otp_verified', true);
             
             return redirect()->route('register', ['step' => 3])
-                ->with('success', 'Silakan buat PIN Anda.');
+                ->with('success', 'Nomor HP berhasil diverifikasi. Silakan buat PIN Anda.');
         }
 
-        // Verify OTP
-        $validator = Validator::make($request->all(), [
-            'otp_code' => 'required|string|size:6',
+        // === CASE 2: User click button "Kirim OTP" atau "Kirim Ulang" ===
+        if ($request->has('send_otp') && $request->send_otp == '1' && $request->isMethod('post')) {
+            \Log::info('User requesting to send OTP', [
+                'user_temp_id' => $userTempId,
+                'phone' => $userTemp->nomor_hp,
+                'is_resend' => $request->session()->has('otp_sent_at'),
+            ]);
+
+            // Cek apakah ini resend (OTP sudah pernah dikirim)
+            $isResend = $request->session()->has('otp_sent_at');
+
+            if ($isResend) {
+                // Resend OTP - invalidate old OTP first
+                $otpResult = $this->otpService->resend(
+                    $userTemp->nomor_hp,
+                    $sessionId,
+                    null, // user_id null karena masih temp
+                    'registration'
+                );
+            } else {
+                // First time send OTP
+                $otpResult = $this->otpService->generateAndSend(
+                    $userTemp->nomor_hp,
+                    $sessionId,
+                    null, // user_id null karena masih registration  
+                    'registration'
+                );
+            }
+
+            if ($otpResult['success']) {
+                // Mark that OTP has been sent
+                $request->session()->put('otp_sent_at', now()->toDateTimeString());
+                
+                \Log::info('OTP sent successfully', [
+                    'user_temp_id' => $userTempId,
+                    'phone' => $userTemp->nomor_hp,
+                    'is_resend' => $isResend,
+                ]);
+
+                $message = $isResend 
+                    ? 'Kode OTP baru telah dikirim ke WhatsApp Anda.' 
+                    : 'Kode OTP telah dikirim ke WhatsApp nomor ' . $userTemp->nomor_hp . '. Silakan cek pesan masuk Anda.';
+
+                return redirect()->route('register', ['step' => 2])
+                    ->with('success', $message)
+                    ->with('otp_sent', true); // Flag untuk tampilkan form input OTP
+            } else {
+                \Log::error('Failed to send OTP', [
+                    'user_temp_id' => $userTempId,
+                    'phone' => $userTemp->nomor_hp,
+                    'error' => $otpResult['message'],
+                ]);
+
+                return redirect()->route('register', ['step' => 2])
+                    ->with('error', 'Gagal mengirim OTP: ' . $otpResult['message']);
+            }
+        }
+
+        // === CASE 3: Default - Tampilkan halaman Step 2 ===
+        // Cek apakah OTP sudah pernah dikirim
+        $otpSent = $request->session()->has('otp_sent_at');
+        
+        // Get remaining cooldown if OTP already sent
+        $remainingCooldown = 0;
+        if ($otpSent) {
+            $remainingCooldown = $this->otpService->getRemainingCooldown($userTemp->nomor_hp);
+        }
+
+        \Log::info('Displaying Step 2 OTP page', [
+            'user_temp_id' => $userTempId,
+            'phone' => $userTemp->nomor_hp,
+            'otp_sent' => $otpSent,
+            'remaining_cooldown' => $remainingCooldown,
         ]);
 
-        if ($validator->fails()) {
-            return redirect()->route('register', ['step' => 2])
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        // TODO: Implement OTP verification logic here
-        // Example structure:
-        // 1. Check OTP code from database (tbl_otp)
-        // 2. Verify OTP is valid and not expired
-        // 3. Mark OTP as verified
-        // 4. Set session register_otp_verified = true
-
-        // For now, accept any 6-digit code (temporary)
-        $request->session()->put('register_otp_verified', true);
-        
-        return redirect()->route('register', ['step' => 3])
-            ->with('success', 'OTP berhasil diverifikasi. Silakan buat PIN Anda.');
+        // Tampilkan view dengan data
+        return view('auth.register', [
+            'step' => 2,
+            'subStep' => null,
+            'sessionData' => [],
+            'sessionId' => $sessionId,
+            'formData' => [],
+            'phone' => $userTemp->nomor_hp,
+            'otpSent' => $otpSent, // Flag apakah OTP sudah dikirim
+            'remainingCooldown' => $remainingCooldown, // Seconds remaining for resend
+        ]);
     }
 
     /**
@@ -1309,6 +1414,8 @@ class RegisterController extends Controller
                 'register_nasabah_temp_id',
                 'register_otp_verified',
                 'register_session_id',
+                'otp_sent_at',
+                'register_phone',
             ]);
 
             // Auto login user

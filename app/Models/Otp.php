@@ -11,6 +11,12 @@ class Otp extends Model
     use HasFactory;
 
     protected $table = 'tbl_otp';
+    
+    // Disable updated_at since table only has created_at
+    public $timestamps = false;
+    
+    // Set created_at manually
+    const CREATED_AT = 'created_at';
 
     protected $fillable = [
         'user_id',
@@ -21,12 +27,17 @@ class Otp extends Model
         'channel',
         'phone_number',
         'session_id',
+        'created_at',
     ];
 
     protected $casts = [
-        'expired_at' => 'datetime',
         'is_verified' => 'boolean',
-        'created_at' => 'datetime',
+    ];
+    
+    // Set dates for date handling
+    protected $dates = [
+        'expired_at',
+        'created_at',
     ];
 
     /**
