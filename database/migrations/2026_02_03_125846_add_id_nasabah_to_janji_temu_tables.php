@@ -11,34 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Add id_nasabah and keterangan to all janji temu tables
-        
-        // 1. tbl_janji_temu_tabungan
-        Schema::table('tbl_janji_temu_tabungan', function (Blueprint $table) {
-            $table->unsignedBigInteger('id_nasabah')->after('id_pengajuan');
-            $table->text('keterangan')->nullable()->after('waktu_janji_temu');
-            
-            $table->foreign('id_nasabah')->references('id')->on('tbl_nasabah')->onDelete('cascade');
-            $table->index('id_nasabah');
-        });
-
-        // 2. tbl_janji_temu_pinjaman
-        Schema::table('tbl_janji_temu_pinjaman', function (Blueprint $table) {
-            $table->unsignedBigInteger('id_nasabah')->after('id_pengajuan');
-            // keterangan already exists in this table
-            
-            $table->foreign('id_nasabah')->references('id')->on('tbl_nasabah')->onDelete('cascade');
-            $table->index('id_nasabah');
-        });
-
-        // 3. tbl_janji_temu_pembayaran_pinjaman
-        Schema::table('tbl_janji_temu_pembayaran_pinjaman', function (Blueprint $table) {
-            $table->unsignedBigInteger('id_nasabah')->after('id_pengajuan');
-            // keterangan already exists in this table
-            
-            $table->foreign('id_nasabah')->references('id')->on('tbl_nasabah')->onDelete('cascade');
-            $table->index('id_nasabah');
-        });
+        // Add id_nasabah and keterangan to janji temu tables
+        // Note: tbl_janji_temu_tabungan, tbl_janji_temu_pinjaman, and tbl_janji_temu_pembayaran_pinjaman 
+        // are created with id_nasabah already in 2026_02_03_131000_create_janji_temu_tables.php
+        // This migration only handles deposito and gadai tables
 
         // 4. tbl_janji_temu_deposito (if exists)
         if (Schema::hasTable('tbl_janji_temu_deposito')) {
@@ -78,28 +54,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Remove added columns
-        if (Schema::hasTable('tbl_janji_temu_tabungan')) {
-            Schema::table('tbl_janji_temu_tabungan', function (Blueprint $table) {
-                $table->dropForeign(['id_nasabah']);
-                $table->dropColumn('id_nasabah');
-                $table->dropColumn('keterangan');
-            });
-        }
-
-        if (Schema::hasTable('tbl_janji_temu_pinjaman')) {
-            Schema::table('tbl_janji_temu_pinjaman', function (Blueprint $table) {
-                $table->dropForeign(['id_nasabah']);
-                $table->dropColumn('id_nasabah');
-            });
-        }
-
-        if (Schema::hasTable('tbl_janji_temu_pembayaran_pinjaman')) {
-            Schema::table('tbl_janji_temu_pembayaran_pinjaman', function (Blueprint $table) {
-                $table->dropForeign(['id_nasabah']);
-                $table->dropColumn('id_nasabah');
-            });
-        }
+        // tbl_janji_temu_tabungan, tbl_janji_temu_pinjaman, and tbl_janji_temu_pembayaran_pinjaman 
+        // not handled here as they're created in separate migration (2026_02_03_131000_create_janji_temu_tables.php)
 
         if (Schema::hasTable('tbl_janji_temu_deposito')) {
             Schema::table('tbl_janji_temu_deposito', function (Blueprint $table) {

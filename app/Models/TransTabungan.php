@@ -19,8 +19,9 @@ class TransTabungan extends Model
         'id_pengajuan_setor',
         'id_pengajuan_tarik',
         'id_anggota',
-        'id_via',
-        'id_jns_trans',
+        'id_jns_fitur',
+        'id_jns_via',
+        'id_jns_transaksi',
         'nominal',
         'keterangan',
         'tgl_transaksi',
@@ -59,12 +60,12 @@ class TransTabungan extends Model
     
     public function jnsVia(): BelongsTo
     {
-        return $this->belongsTo(JnsVia::class, 'id_via');
+        return $this->belongsTo(JnsVia::class, 'id_jns_via');
     }
     
     public function jnsTransaksi(): BelongsTo
     {
-        return $this->belongsTo(JnsTransaksi::class, 'id_jns_trans');
+        return $this->belongsTo(JnsTransaksi::class, 'id_jns_transaksi');
     }
 }
 

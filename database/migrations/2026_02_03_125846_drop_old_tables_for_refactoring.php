@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Drop old bukti foto tables
+        // Drop old bukti foto tables that have been replaced by tbl_bukti_foto_universal
         Schema::dropIfExists('tbl_bukti_foto_pembayaran_pinjaman');
         Schema::dropIfExists('tbl_bukti_foto_pinjaman');
         Schema::dropIfExists('tbl_bukti_foto_tabungan');
         
-        // Drop old master tables
-        Schema::dropIfExists('jns_akun');
-        Schema::dropIfExists('jns_deposito');
-        Schema::dropIfExists('suku_bunga');
+        // Note: jns_akun, jns_deposito, and suku_bunga are NOT dropped here 
+        // because they may still be referenced by other tables (deposito, gadai).
+        // They will be replaced gradually as those modules are refactored.
     }
 
     /**
