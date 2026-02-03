@@ -34,6 +34,21 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
     
+    // PIN Management Routes
+    Route::prefix('pin')->name('pin.')->group(function () {
+        Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
+        Route::post('/send-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'sendOtpLupaPin'])->name('send-otp-lupa');
+        Route::post('/resend-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'resendOtpLupaPin'])->name('resend-otp-lupa');
+        Route::post('/verify-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'verifyOtpLupaPin'])->name('verify-otp-lupa');
+        Route::get('/get-cooldown', [\App\Http\Controllers\Nasabah\PinController::class, 'getCooldown'])->name('get-cooldown');
+    });
+    
+    // Profile Update Routes
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::post('/update-request', [\App\Http\Controllers\Nasabah\ProfileController::class, 'submitUpdateRequest'])->name('update-request');
+        Route::delete('/cancel-request/{id}', [\App\Http\Controllers\Nasabah\ProfileController::class, 'cancelUpdateRequest'])->name('cancel-request');
+    });
+    
     // Tabungan Routes
     Route::prefix('tabungan')->name('tabungan.')->group(function () {
         Route::get('/', [TabunganController::class, 'index'])->name('index');
@@ -247,9 +262,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
     
+    // Nasabah Management Routes
+    Route::prefix('nasabah')->name('nasabah.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'index'])->name('index');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
+        Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
+        Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
+        Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
+        Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
+    });
+    
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
-    Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');
     Route::get('/pengajuan', function () { return view('admin.pengajuan.index'); })->name('pengajuan.index');
 });
 

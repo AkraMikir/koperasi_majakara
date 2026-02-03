@@ -18,15 +18,110 @@
         --primary: #674c1d;
         --primary-light: #8b6f2f;
         --primary-dark: #4a3514;
+        --gold: #d4af37;
     }
 
     body {
         font-family: 'Inter', sans-serif;
     }
+
+    .font-display {
+        font-family: 'Playfair Display', serif;
+    }
+
+    /* Gradient animation */
+    @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+
+    .gradient-animate {
+        background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 25%, #d4af37 50%, #8b6f2f 75%, #674c1d 100%);
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+    }
+
+    /* Animations for OTP page */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+        20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+
+    @keyframes bounce-slow {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+    }
+
+    @keyframes pulse-border {
+        0%, 100% { border-color: rgb(209 213 219); }
+        50% { border-color: rgb(103 76 29); }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-15px); }
+    }
+
+    .animate-shake {
+        animation: shake 0.5s ease-in-out;
+    }
+
+    .animate-bounce-slow {
+        animation: bounce-slow 2s ease-in-out infinite;
+    }
+
+    .float-animation {
+        animation: float 4s ease-in-out infinite;
+    }
+
+    .fade-in-up {
+        animation: fadeInUp 0.6s ease-out;
+    }
+
+    .otp-input:focus {
+        animation: pulse-border 1s ease-in-out;
+    }
+
+    /* Smooth transitions */
+    .otp-input {
+        transition: all 0.2s ease;
+    }
+
+    .otp-input:focus {
+        transform: scale(1.05);
+    }
+
+    /* Background pattern */
+    .pattern-bg {
+        background-image: 
+            radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.1) 0%, transparent 50%),
+            radial-gradient(circle at 80% 80%, rgba(103, 76, 29, 0.1) 0%, transparent 50%);
+    }
+
+    /* Progress step animation */
+    .progress-step {
+        transition: all 0.3s ease;
+    }
+
+    .progress-step.active {
+        transform: scale(1.1);
+    }
     </style>
 </head>
 
-<body class="bg-gray-50 min-h-screen">
+<body class="bg-gradient-to-br from-gray-50 via-amber-50/30 to-gray-50 min-h-screen pattern-bg">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl w-full">
             @php
@@ -36,85 +131,179 @@
 
             @if($step == 1)
             <!-- Progress Indicator untuk Sub-step Step 1 -->
-            <div class="mb-8 max-w-5xl mx-auto">
-                <div class="flex items-center justify-between">
-                    @php
-                    $subStepLabels = [
-                    1 => 'Data Diri',
-                    2 => 'Detail Nasabah',
-                    3 => 'Pekerjaan',
-                    4 => 'Rekening',
-                    5 => 'Data KTP',
-                    6 => 'Kontak Darurat'
-                    ];
-                    @endphp
-                    @for($i = 1; $i <= 6; $i++) <div class="flex items-center {{ $i < 6 ? 'flex-1' : '' }}">
-                        <div class="flex flex-col items-center">
-                            <div
-                                class="flex items-center justify-center w-10 h-10 rounded-full {{ $subStep >= $i ? 'bg-[#674c1d] text-white' : 'bg-gray-200 text-gray-500' }} transition-all duration-300">
-                                <span class="text-sm font-semibold">{{ $i }}</span>
-                            </div>
-                            <span
-                                class="mt-2 text-xs text-center {{ $subStep >= $i ? 'text-[#674c1d] font-medium' : 'text-gray-500' }} max-w-[80px]">
-                                {{ $subStepLabels[$i] }}
-                            </span>
-                        </div>
-                        @if($i < 6) <div
-                            class="flex-1 h-1 mx-2 {{ $subStep > $i ? 'bg-[#674c1d]' : 'bg-gray-200' }} transition-all duration-300">
+            <div class="mb-8 max-w-5xl mx-auto fade-in-up">
+                <!-- Logo -->
+                <div class="text-center mb-6">
+                    <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Koperasi Majakara" class="h-16 w-auto mx-auto mb-2">
+                    <h2 class="text-2xl font-bold text-[#674c1d] font-display">Registrasi Nasabah Baru</h2>
+                    <p class="text-gray-600 text-sm mt-1">Lengkapi semua langkah untuk melanjutkan</p>
                 </div>
-                @endif
+
+                <!-- Progress Steps -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200/50">
+                    <div class="flex items-center justify-between">
+                        @php
+                        $subStepLabels = [
+                            1 => 'Data Diri',
+                            2 => 'Detail Nasabah',
+                            3 => 'Pekerjaan',
+                            4 => 'Rekening',
+                            5 => 'Data KTP',
+                            6 => 'Kontak Darurat'
+                        ];
+                        $subStepIcons = [
+                            1 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>',
+                            2 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>',
+                            3 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>',
+                            4 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>',
+                            5 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>',
+                            6 => '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>',
+                        ];
+                        @endphp
+                        @for($i = 1; $i <= 6; $i++)
+                        <div class="flex items-center {{ $i < 6 ? 'flex-1' : '' }}">
+                            <div class="flex flex-col items-center progress-step {{ $subStep == $i ? 'active' : '' }}">
+                                <div class="relative">
+                                    <!-- Circle with icon -->
+                                    <div class="flex items-center justify-center w-12 h-12 rounded-full {{ $subStep > $i ? 'bg-gradient-to-br from-green-500 to-green-600' : ($subStep == $i ? 'bg-gradient-to-br from-[#674c1d] to-[#8b6f2f]' : 'bg-gray-200') }} text-white transition-all duration-300 shadow-md {{ $subStep == $i ? 'ring-4 ring-[#d4af37]/30' : '' }}">
+                                        @if($subStep > $i)
+                                            <!-- Checkmark for completed -->
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                            </svg>
+                                        @else
+                                            <!-- Icon for current/upcoming -->
+                                            <svg class="w-5 h-5 {{ $subStep < $i ? 'text-gray-500' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                {!! $subStepIcons[$i] !!}
+                                            </svg>
+                                        @endif
+                                    </div>
+                                    
+                                    <!-- Step number badge -->
+                                    @if($subStep >= $i)
+                                    <div class="absolute -top-1 -right-1 w-5 h-5 bg-[#d4af37] rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm">
+                                        {{ $i }}
+                                    </div>
+                                    @endif
+                                </div>
+                                <span class="mt-2 text-xs text-center {{ $subStep >= $i ? 'text-[#674c1d] font-semibold' : 'text-gray-500' }} max-w-[90px] leading-tight">
+                                    {{ $subStepLabels[$i] }}
+                                </span>
+                            </div>
+                            @if($i < 6)
+                            <!-- Progress line -->
+                            <div class="flex-1 h-1 mx-2 rounded-full relative overflow-hidden bg-gray-200">
+                                <div class="absolute inset-0 {{ $subStep > $i ? 'bg-gradient-to-r from-green-500 to-green-600' : ($subStep == $i ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] w-1/2' : 'w-0') }} transition-all duration-500"></div>
+                            </div>
+                            @endif
+                        </div>
+                        @endfor
+                    </div>
+                </div>
             </div>
-            @endfor
-        </div>
-    </div>
-    @endif
+            @endif
 
     <!-- Main Card -->
-    <div class="bg-white rounded-2xl shadow-xl overflow-hidden max-w-6xl mx-auto">
+    <div class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden max-w-6xl mx-auto border border-gray-200/50 fade-in-up">
         <div class="lg:grid lg:grid-cols-2">
             <!-- Left Side - Form -->
             <div class="p-8 lg:p-12">
+                <!-- Header with Icon -->
                 <div class="mb-8">
-                    <h2 class="text-3xl font-bold text-gray-900 mb-2">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center shadow-lg">
+                            @if($step == 1)
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            @elseif($step == 2)
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            @else
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                            @endif
+                        </div>
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900 font-display">
+                                @if($step == 1)
+                                Registrasi Akun
+                                @elseif($step == 2)
+                                Verifikasi Nomor HP
+                                @else
+                                Buat PIN
+                                @endif
+                            </h2>
+                            <p class="text-gray-600 text-sm">
+                                @if($step == 1)
+                                Langkah {{ $subStep }} dari 6
+                                @elseif($step == 2)
+                                Langkah 2 dari 3
+                                @else
+                                Langkah terakhir
+                                @endif
+                            </p>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm">
                         @if($step == 1)
-                        Registrasi Akun
+                        Lengkapi data dengan benar untuk mempercepat proses verifikasi
                         @elseif($step == 2)
-                        Verifikasi Nomor HP
+                        Kode OTP telah dikirim ke WhatsApp Anda
                         @else
-                        Buat PIN
-                        @endif
-                    </h2>
-                    <p class="text-gray-600">
-                        @if($step == 1)
-                        Lengkapi semua data diri Anda (Data Diri, Nasabah, Pekerjaan, Rekening, KTP, Kontak Darurat)
-                        @elseif($step == 2)
-                        Masukkan kode OTP yang dikirim ke WhatsApp Anda
-                        @else
-                        Buat PIN 6 digit untuk keamanan akun Anda
+                        Buat PIN 6 digit untuk keamanan transaksi Anda
                         @endif
                     </p>
                 </div>
 
+                <!-- Success Message -->
                 @if(session('success'))
-                <div class="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                    {{ session('success') }}
+                <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-xl fade-in-up shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-green-800 font-medium text-sm">{{ session('success') }}</p>
+                    </div>
                 </div>
                 @endif
 
+                <!-- Error Message -->
                 @if(session('error'))
-                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                    <strong>Error:</strong> {{ session('error') }}
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl fade-in-up shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-red-800 font-semibold text-sm">Error</p>
+                            <p class="text-red-700 text-sm">{{ session('error') }}</p>
+                        </div>
+                    </div>
                 </div>
                 @endif
 
+                <!-- Validation Errors -->
                 @if($errors->any())
-                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                    <strong>Validasi Error:</strong>
-                    <ul class="list-disc list-inside mt-2">
-                        @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
+                <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl fade-in-up shadow-sm">
+                    <div class="flex items-start gap-3">
+                        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-red-800 font-semibold text-sm mb-2">Terdapat kesalahan pada data:</p>
+                            <ul class="space-y-1">
+                                @foreach($errors->all() as $error)
+                                <li class="text-red-700 text-sm flex items-start gap-2">
+                                    <span class="text-red-500 mt-1">•</span>
+                                    <span>{{ $error }}</span>
+                                </li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
                 </div>
                 @endif
 
@@ -768,25 +957,34 @@
                     <div class="space-y-6">
                         {{-- Error Messages --}}
                         @if(session('error'))
-                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800">
-                            <strong>Error:</strong> {{ session('error') }}
+                        <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-start gap-3 animate-shake">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <div>
+                                <strong class="font-semibold">Error:</strong>
+                                <p class="mt-0.5">{{ session('error') }}</p>
+                            </div>
                         </div>
                         @endif
 
                         {{-- Success Messages --}}
                         @if(session('success'))
-                        <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800">
-                            {{ session('success') }}
+                        <div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 flex items-start gap-3">
+                            <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            <p>{{ session('success') }}</p>
                         </div>
                         @endif
 
                         {{-- STATE 1: Belum kirim OTP - Tampilkan konfirmasi nomor --}}
                         @if(!($otpSent ?? false))
                             <div class="text-center space-y-6">
-                                {{-- WhatsApp Icon --}}
+                                {{-- WhatsApp Icon with Animation --}}
                                 <div class="flex justify-center">
-                                    <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center">
-                                        <svg class="w-10 h-10 text-green-600" fill="currentColor" viewBox="0 0 24 24">
+                                    <div class="w-24 h-24 bg-gradient-to-br from-green-100 to-green-50 rounded-full flex items-center justify-center shadow-lg animate-bounce-slow">
+                                        <svg class="w-12 h-12 text-green-600" fill="currentColor" viewBox="0 0 24 24">
                                             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.890-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
                                         </svg>
                                     </div>
@@ -794,14 +992,14 @@
 
                                 {{-- Confirmation Text --}}
                                 <div>
-                                    <h3 class="text-lg font-semibold text-gray-900 mb-2">
+                                    <h3 class="text-xl font-bold text-gray-900 mb-2">
                                         Verifikasi Nomor WhatsApp
                                     </h3>
                                     <p class="text-gray-600 mb-4">
                                         Kode OTP akan dikirim ke nomor WhatsApp:
                                     </p>
-                                    <div class="inline-block bg-green-50 border-2 border-green-500 rounded-lg px-6 py-3">
-                                        <p class="text-2xl font-bold text-green-700">
+                                    <div class="inline-block bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-500 rounded-xl px-8 py-4 shadow-md">
+                                        <p class="text-3xl font-bold text-green-700 tracking-wide">
                                             {{ session('register_phone') ?? $phone ?? 'Nomor tidak ditemukan' }}
                                         </p>
                                     </div>
@@ -809,32 +1007,48 @@
 
                                 {{-- Info --}}
                                 <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
-                                    <p class="text-sm text-blue-800">
-                                        <strong>📱 Pastikan:</strong>
+                                    <p class="text-sm text-blue-800 font-semibold mb-2">
+                                        📱 Pastikan:
                                     </p>
-                                    <ul class="text-sm text-blue-700 mt-2 space-y-1 list-disc list-inside">
-                                        <li>Nomor WhatsApp Anda <strong>aktif</strong> dan dapat menerima pesan</li>
-                                        <li>Aplikasi WhatsApp sudah terinstal di HP Anda</li>
-                                        <li>Nomor di atas sudah <strong>benar</strong></li>
+                                    <ul class="text-sm text-blue-700 space-y-1.5 list-none">
+                                        <li class="flex items-start gap-2">
+                                            <span class="text-blue-500 flex-shrink-0">✓</span>
+                                            <span>Nomor WhatsApp Anda <strong>aktif</strong> dan dapat menerima pesan</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="text-blue-500 flex-shrink-0">✓</span>
+                                            <span>Aplikasi WhatsApp sudah terinstal di HP Anda</span>
+                                        </li>
+                                        <li class="flex items-start gap-2">
+                                            <span class="text-blue-500 flex-shrink-0">✓</span>
+                                            <span>Nomor di atas sudah <strong>benar</strong></span>
+                                        </li>
                                     </ul>
                                 </div>
 
-                                {{-- Button Kirim OTP --}}
+                                {{-- Button Kirim OTP with Loading State --}}
                                 <div class="mt-6">
-                                    <button type="submit" name="send_otp" value="1"
-                                        class="w-full px-6 py-4 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all font-semibold text-lg flex items-center justify-center gap-2 shadow-lg">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <button type="submit" name="send_otp" value="1" id="btnSendOtp"
+                                        onclick="showLoadingOtp(this)"
+                                        class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
+                                        <svg class="w-6 h-6" id="iconSend" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
                                         </svg>
-                                        Kirim Kode OTP ke WhatsApp
+                                        <svg class="w-6 h-6 animate-spin hidden" id="iconLoading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                        </svg>
+                                        <span id="textSendOtp">Kirim Kode OTP ke WhatsApp</span>
                                     </button>
                                 </div>
 
                                 {{-- Link Kembali --}}
                                 <div class="mt-4">
                                     <a href="{{ route('register', ['step' => 1, 'substep' => 1]) }}" 
-                                        class="text-sm text-gray-600 hover:text-[#674c1d] hover:underline">
-                                        ← Nomor salah? Kembali ke Step 1 untuk mengubah
+                                        class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-[#674c1d] hover:underline transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                                        </svg>
+                                        Nomor salah? Kembali ke Step 1 untuk mengubah
                                     </a>
                                 </div>
                             </div>
@@ -843,74 +1057,117 @@
                         @else
                             <div class="space-y-6">
                                 {{-- Info OTP Terkirim --}}
-                                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                                <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-4 shadow-sm">
                                     <div class="flex items-start gap-3">
-                                        <svg class="w-6 h-6 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                        </svg>
-                                        <div>
-                                            <p class="text-sm text-green-800 font-medium">
-                                                Kode OTP telah dikirim ke WhatsApp Anda
+                                        <div class="flex-shrink-0 w-10 h-10 bg-green-500 rounded-full flex items-center justify-center">
+                                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        </div>
+                                        <div class="flex-1">
+                                            <p class="text-sm text-green-900 font-bold">
+                                                Kode OTP Berhasil Dikirim! 🎉
                                             </p>
-                                            <p class="text-xs text-green-700 mt-1">
-                                                Nomor HP: <strong>{{ session('register_phone') ?? $phone ?? 'Nomor tidak ditemukan' }}</strong>
+                                            <p class="text-xs text-green-800 mt-1">
+                                                Nomor WhatsApp: <strong class="font-semibold">{{ session('register_phone') ?? $phone ?? 'Nomor tidak ditemukan' }}</strong>
                                             </p>
-                                            <p class="text-xs text-green-600 mt-2">
-                                                Silakan cek pesan WhatsApp dan masukkan kode OTP 6 digit yang diterima.
+                                            <p class="text-xs text-green-700 mt-2 flex items-center gap-1">
+                                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                                </svg>
+                                                Buka aplikasi WhatsApp Anda dan masukkan 6 digit kode OTP di bawah ini
                                             </p>
                                         </div>
                                     </div>
                                 </div>
 
-                                {{-- Input OTP --}}
+                                {{-- Input OTP - 6 Boxes Style --}}
                                 <div>
-                                    <label for="otp_code" class="block text-sm font-medium text-gray-700 mb-2">
-                                        Kode OTP <span class="text-red-500">*</span>
+                                    <label class="block text-sm font-medium text-gray-700 mb-3 text-center">
+                                        Masukkan Kode OTP <span class="text-red-500">*</span>
                                     </label>
-                                    <input type="text" name="otp_code" id="otp_code" maxlength="6" required
-                                        class="w-full px-4 py-4 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none text-center text-3xl tracking-[1em] font-mono font-bold"
-                                        placeholder="000000" 
-                                        autocomplete="off"
-                                        inputmode="numeric"
-                                        pattern="[0-9]{6}"
-                                        autofocus>
+                                    
+                                    {{-- Hidden input untuk form submission --}}
+                                    <input type="hidden" name="otp_code" id="otp_code_hidden" required>
+                                    
+                                    {{-- 6 OTP Input Boxes --}}
+                                    <div class="flex justify-center gap-2 sm:gap-3" id="otpBoxes">
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="0">
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="1">
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="2">
+                                        <span class="flex items-center text-2xl text-gray-400 font-bold">-</span>
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="3">
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="4">
+                                        <input type="text" maxlength="1" 
+                                            class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                            inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="5">
+                                    </div>
+                                    
                                     @error('otp_code')
-                                    <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                    <p class="mt-3 text-sm text-red-600 text-center font-medium">{{ $message }}</p>
                                     @enderror
                                 </div>
 
-                                {{-- Button Kirim Ulang --}}
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        @if(($remainingCooldown ?? 0) > 0)
-                                            <button type="button" disabled
-                                                class="text-sm text-gray-400 cursor-not-allowed flex items-center gap-2">
-                                                <svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                </svg>
-                                                <span>Kirim Ulang (<span id="cooldownTimer">{{ $remainingCooldown ?? 0 }}</span>s)</span>
-                                            </button>
-                                        @else
-                                            <button type="submit" name="send_otp" value="1"
-                                                class="text-sm text-[#674c1d] hover:underline font-medium flex items-center gap-2">
-                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                                </svg>
-                                                Kirim Ulang Kode OTP
-                                            </button>
-                                        @endif
+                                {{-- Expiry Timer --}}
+                                <div class="text-center">
+                                    <div class="inline-flex items-center gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2">
+                                        <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span class="text-sm text-yellow-800">
+                                            Kode berlaku: <strong id="expiryTimer" class="font-bold text-yellow-900">5:00</strong>
+                                        </span>
                                     </div>
-                                    <span class="text-xs text-gray-500">
-                                        Kode berlaku 5 menit
-                                    </span>
+                                </div>
+
+                                {{-- Button Kirim Ulang --}}
+                                <div class="flex items-center justify-center">
+                                    @if(($remainingCooldown ?? 0) > 0)
+                                        <button type="button" disabled
+                                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed border border-gray-200">
+                                            <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            <span class="text-sm font-medium">
+                                                Tunggu <span id="cooldownTimer" class="font-bold">{{ $remainingCooldown ?? 0 }}</span> detik
+                                            </span>
+                                        </button>
+                                    @else
+                                        <button type="submit" name="send_otp" value="1"
+                                            class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                            </svg>
+                                            <span class="text-sm">Kirim Ulang Kode OTP</span>
+                                        </button>
+                                    @endif
                                 </div>
 
                                 {{-- Info Bantuan --}}
-                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                    <p class="text-xs text-blue-700">
-                                        <strong>💡 Tips:</strong> Jika belum menerima kode OTP, pastikan nomor WhatsApp Anda aktif. 
-                                        Tunggu {{ $remainingCooldown ?? 0 }} detik untuk kirim ulang.
-                                    </p>
+                                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                    <div class="flex items-start gap-3">
+                                        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                                        </svg>
+                                        <div class="text-xs text-blue-700">
+                                            <p class="font-semibold mb-1">💡 Tips:</p>
+                                            <ul class="space-y-1 list-disc list-inside">
+                                                <li>Pastikan koneksi internet Anda stabil</li>
+                                                <li>Cek folder <strong>Spam/Archive</strong> di WhatsApp</li>
+                                                <li>Tunggu {{ $remainingCooldown ?? 60 }} detik untuk kirim ulang</li>
+                                            </ul>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         @endif
@@ -1011,32 +1268,122 @@
                 </form>
             </div>
 
-            <!-- Right Side - Image Placeholder -->
-            <div class="hidden lg:flex bg-linear-to-br from-[#674c1d] to-[#4a3514] p-12 items-center justify-center">
-                <div class="text-center text-white">
-                    <div class="mb-6">
-                        <div
-                            class="w-64 h-64 mx-auto bg-white/10 rounded-2xl flex items-center justify-center backdrop-blur-sm border border-white/20">
-                            <svg class="w-32 h-32 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                                </path>
-                            </svg>
+            <!-- Right Side - Illustration -->
+            <div class="hidden lg:flex gradient-animate p-12 items-center justify-center relative overflow-hidden">
+                <!-- Decorative circles -->
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full -ml-24 -mb-24 blur-3xl"></div>
+                
+                <div class="relative z-10 text-center text-white">
+                    <!-- Logo with animation -->
+                    <div class="mb-8 float-animation">
+                        <div class="w-64 h-64 mx-auto bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-sm border border-white/20 shadow-2xl">
+                            <img src="{{ asset('images/logo/logo_putih.png') }}" alt="Logo Koperasi Majakara" class="w-48 h-auto">
                         </div>
                     </div>
-                    <h3 class="text-2xl font-bold mb-2">Koperasi Majakara</h3>
-                    <p class="text-white/80">Solusi Keuangan Terpercaya</p>
+                    
+                    <h3 class="text-3xl font-bold mb-3 font-display">Bergabung Bersama Kami</h3>
+                    <p class="text-white/90 text-lg mb-8">Mulai perjalanan keuangan Anda</p>
+                    
+                    <!-- Step Indicators -->
+                    @if($step == 1)
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-5 border border-white/20 mb-6">
+                        <h4 class="font-semibold mb-4">Proses Registrasi:</h4>
+                        <div class="space-y-3 text-left">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold">1</span>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="font-semibold">Lengkapi Data</p>
+                                    <p class="text-white/70 text-xs">6 langkah data pribadi</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold">2</span>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="font-semibold">Verifikasi OTP</p>
+                                    <p class="text-white/70 text-xs">Via WhatsApp</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0">
+                                    <span class="font-bold">3</span>
+                                </div>
+                                <div class="text-sm">
+                                    <p class="font-semibold">Buat PIN</p>
+                                    <p class="text-white/70 text-xs">Keamanan transaksi</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    @elseif($step == 2)
+                    <!-- OTP Step Illustration -->
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <svg class="w-24 h-24 mx-auto mb-4 text-white animate-bounce-slow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-sm">Periksa WhatsApp Anda untuk mendapatkan kode verifikasi 6 digit</p>
+                    </div>
+                    @else
+                    <!-- PIN Step Illustration -->
+                    <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+                        <svg class="w-24 h-24 mx-auto mb-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        <p class="text-sm">PIN akan digunakan untuk verifikasi setiap transaksi Anda</p>
+                    </div>
+                    @endif
+                    
+                    <!-- Benefits -->
+                    <div class="mt-6 space-y-3 text-left">
+                        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            <p class="text-sm font-medium">Data Anda Aman & Terenkripsi</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                            <p class="text-sm font-medium">Proses Cepat & Mudah</p>
+                        </div>
+                        <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <svg class="w-5 h-5 text-white flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                            </svg>
+                            <p class="text-sm font-medium">Gratis Tanpa Biaya Pendaftaran</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Login Link -->
-    <div class="text-center mt-6">
-        <p class="text-gray-600">
-            Sudah punya akun?
-            <a href="{{ route('login') }}" class="text-[#674c1d] font-medium hover:underline">Masuk di sini</a>
-        </p>
+    <div class="text-center mt-8 fade-in-up">
+        <div class="relative inline-block">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-gray-300"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-gradient-to-br from-gray-50 via-amber-50/30 to-gray-50 text-gray-500">Sudah punya akun?</span>
+            </div>
+        </div>
+        <a href="{{ route('login') }}" class="mt-4 inline-flex items-center gap-2 text-[#674c1d] font-semibold hover:text-[#8b6f2f] transition-colors">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
+            </svg>
+            Masuk ke Akun Saya
+        </a>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="text-center mt-6 text-gray-600 text-sm">
+        <p>© 2026 Koperasi Majakara. Semua data Anda dilindungi.</p>
     </div>
     </div>
     </div>
@@ -1394,11 +1741,106 @@
             });
     }
 
-    // Resend OTP
-    // TODO: Implement OTP resend functionality
-    function resendOtp() {
-        // Form sudah handle resend via PHP, ini hanya fallback jika JS digunakan
-        document.querySelector('form').submit();
+    // Show Loading OTP
+    function showLoadingOtp(button) {
+        const iconSend = document.getElementById('iconSend');
+        const iconLoading = document.getElementById('iconLoading');
+        const textSendOtp = document.getElementById('textSendOtp');
+        
+        if (iconSend && iconLoading && textSendOtp) {
+            button.disabled = true;
+            iconSend.classList.add('hidden');
+            iconLoading.classList.remove('hidden');
+            textSendOtp.textContent = 'Mengirim OTP...';
+        }
+    }
+
+    // OTP Boxes Handler
+    function initOtpBoxes() {
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const hiddenInput = document.getElementById('otp_code_hidden');
+        
+        if (otpInputs.length === 0) return;
+
+        // Focus first box
+        otpInputs[0].focus();
+
+        otpInputs.forEach((input, index) => {
+            // Handle input
+            input.addEventListener('input', function(e) {
+                // Only allow numbers
+                this.value = this.value.replace(/[^0-9]/g, '');
+                
+                if (this.value.length === 1) {
+                    // Move to next box
+                    if (index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus();
+                    }
+                }
+                
+                // Update hidden input
+                updateHiddenOtp();
+                
+                // Auto-submit if all boxes filled
+                checkAutoSubmit();
+            });
+
+            // Handle backspace
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && this.value === '' && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+
+            // Handle paste
+            input.addEventListener('paste', function(e) {
+                e.preventDefault();
+                const pasteData = e.clipboardData.getData('text').replace(/[^0-9]/g, '');
+                
+                // Fill boxes with pasted data
+                for (let i = 0; i < pasteData.length && (index + i) < otpInputs.length; i++) {
+                    otpInputs[index + i].value = pasteData[i];
+                }
+                
+                // Focus last filled box or last box
+                const lastFilledIndex = Math.min(index + pasteData.length - 1, otpInputs.length - 1);
+                otpInputs[lastFilledIndex].focus();
+                
+                // Update hidden input
+                updateHiddenOtp();
+                
+                // Auto-submit if all boxes filled
+                checkAutoSubmit();
+            });
+        });
+
+        function updateHiddenOtp() {
+            if (!hiddenInput) return;
+            let otpValue = '';
+            otpInputs.forEach(input => {
+                otpValue += input.value;
+            });
+            hiddenInput.value = otpValue;
+        }
+
+        function checkAutoSubmit() {
+            let allFilled = true;
+            otpInputs.forEach(input => {
+                if (input.value === '') {
+                    allFilled = false;
+                }
+            });
+            
+            // Auto-submit when all 6 boxes filled
+            if (allFilled) {
+                setTimeout(() => {
+                    const form = document.getElementById('registerForm');
+                    if (form) {
+                        form.submit();
+                    }
+                }, 300); // Small delay for better UX
+            }
+        }
     }
 
     // OTP Cooldown Timer
@@ -1425,21 +1867,64 @@
         }, 1000);
     }
 
+    // OTP Expiry Timer (5 minutes countdown)
+    function startExpiryTimer() {
+        const expiryElement = document.getElementById('expiryTimer');
+        if (!expiryElement) return;
+        
+        let totalSeconds = 5 * 60; // 5 minutes
+        
+        function updateDisplay() {
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            expiryElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // Change color when < 1 minute
+            if (totalSeconds < 60) {
+                expiryElement.classList.add('text-red-600');
+                expiryElement.classList.remove('text-yellow-900');
+            }
+        }
+        
+        updateDisplay();
+        
+        const countdown = setInterval(function() {
+            totalSeconds--;
+            updateDisplay();
+            
+            if (totalSeconds <= 0) {
+                clearInterval(countdown);
+                expiryElement.textContent = 'Kadaluarsa';
+                expiryElement.classList.add('text-red-600', 'font-bold');
+                
+                // Show expired message
+                const otpBoxes = document.getElementById('otpBoxes');
+                if (otpBoxes) {
+                    otpBoxes.innerHTML = `
+                        <div class="col-span-6 text-center py-4">
+                            <p class="text-red-600 font-medium">Kode OTP sudah kadaluarsa.</p>
+                            <p class="text-sm text-gray-600 mt-2">Silakan klik "Kirim Ulang" untuk mendapatkan kode baru.</p>
+                        </div>
+                    `;
+                }
+            }
+        }, 1000);
+    }
+
     // Auto-start timer jika di step 2 dan ada countdown
     var currentStep = parseInt('{{ $step }}');
     if (currentStep === 2) {
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize OTP boxes
+            initOtpBoxes();
+            
+            // Start cooldown timer
             startCooldownTimer();
             
-            // Auto-focus on OTP input if it exists
-            const otpInput = document.getElementById('otp_code');
-            if (otpInput) {
-                otpInput.focus();
-                
-                // Only allow digits in OTP input
-                otpInput.addEventListener('input', function(e) {
-                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                });
+            // Start expiry timer (only if OTP sent)
+            const otpSent = {{ ($otpSent ?? false) ? 'true' : 'false' }};
+            if (otpSent) {
+                startExpiryTimer();
             }
         });
     }

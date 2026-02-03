@@ -82,13 +82,39 @@
             
             <!-- Nasabah -->
             <a href="{{ route('admin.nasabah.index') }}" 
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.nasabah') }}">
+                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.nasabah.index') }}">
                 <div class="w-10 h-10 flex items-center justify-center mr-3">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
                 </div>
                 <span class="font-medium">Nasabah</span>
+            </a>
+
+            <!-- Pengajuan Perubahan Data -->
+            @php
+                $pendingCount = \App\Models\PengajuanPerubahanData::where('status', 'pending')->count();
+            @endphp
+            <a href="{{ route('admin.nasabah.pending-changes') }}" 
+                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.nasabah.pending-changes') }}">
+                <div class="w-10 h-10 flex items-center justify-center mr-3 relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    @if($pendingCount > 0)
+                        <span class="absolute -top-1 -right-1 w-5 h-5 bg-yellow-500 rounded-full flex items-center justify-center">
+                            <span class="text-xs text-white font-bold">{{ $pendingCount }}</span>
+                        </span>
+                    @endif
+                </div>
+                <div class="flex-1 flex items-center justify-between">
+                    <span class="font-medium">Perubahan Data</span>
+                    @if($pendingCount > 0)
+                        <span class="ml-2 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded-full">
+                            {{ $pendingCount }}
+                        </span>
+                    @endif
+                </div>
             </a>
             
             <!-- Pengajuan -->

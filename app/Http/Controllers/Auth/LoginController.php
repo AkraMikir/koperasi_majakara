@@ -25,6 +25,10 @@ class LoginController extends Controller
         $validator = Validator::make($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string',
+        ], [
+            'email.required' => 'Email harus diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Password harus diisi.',
         ]);
 
         if ($validator->fails()) {
@@ -36,48 +40,48 @@ class LoginController extends Controller
         $credentials = $request->only('email', 'password');
         $remember = $request->filled('remember');
 
-        // Verify credentials without logging in first
-        if (Auth::validate($credentials)) {
-            // Get user without logging in
-            $user = \App\Models\User::where('email', $credentials['email'])->first();
+        // First, check if user exists
+        $user = \App\Models\User::where('email', $credentials['email'])->first();
 
-            if (!$user) {
-                return back()->withErrors([
-                    'email' => 'Email atau password yang Anda masukkan salah.',
-                ])->withInput();
-            }
-
-            // Check if user has PIN
-            // If PIN exists, require PIN verification before login
-            if ($user->pin !== null && $user->pin !== '') {
-                // Store user ID and remember flag in session for PIN verification
-                $request->session()->put('login_user_id', $user->id);
-                $request->session()->put('login_remember', $remember);
-                
-                // Return JSON response for AJAX to show PIN modal
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json([
-                        'success' => true,
-                        'requires_pin' => true,
-                        'message' => 'Silakan masukkan PIN Anda'
-                    ]);
-                }
-                
-                // For non-AJAX, redirect back with flag to show PIN modal
-                return redirect()->route('login')
-                    ->with('requires_pin', true)
-                    ->with('user_id', $user->id);
-            }
-
-            // No PIN required, login and redirect directly
-            Auth::login($user, $remember);
-            $request->session()->regenerate();
-            return $this->redirectAfterLogin($user);
+        if (!$user) {
+            return back()->withErrors([
+                'email' => 'Email tidak terdaftar. Silakan periksa kembali atau daftar terlebih dahulu.',
+            ])->withInput($request->only('email'));
         }
 
-        return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->withInput();
+        // User exists, now verify password
+        if (!Auth::validate($credentials)) {
+            return back()->withErrors([
+                'password' => 'Password yang Anda masukkan salah.',
+            ])->withInput($request->only('email'));
+        }
+
+        // Email and password are correct
+        // Check if user has PIN
+        if ($user->pin !== null && $user->pin !== '') {
+            // Store user ID and remember flag in session for PIN verification
+            $request->session()->put('login_user_id', $user->id);
+            $request->session()->put('login_remember', $remember);
+            
+            // Return JSON response for AJAX to show PIN modal
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'requires_pin' => true,
+                    'message' => 'Silakan masukkan PIN Anda'
+                ]);
+            }
+            
+            // For non-AJAX, redirect back with flag to show PIN modal
+            return redirect()->route('login')
+                ->with('requires_pin', true)
+                ->with('user_id', $user->id);
+        }
+
+        // No PIN required, login and redirect directly
+        Auth::login($user, $remember);
+        $request->session()->regenerate();
+        return $this->redirectAfterLogin($user);
     }
 
     /**

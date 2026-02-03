@@ -15,6 +15,7 @@ use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
+use App\Models\PengajuanPerubahanData;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -125,7 +126,13 @@ class DashboardController extends Controller
         // Calculate saldo tabungan using same method as Admin
         $saldoTabungan = $this->getSaldoNasabah($idAnggota);
 
-        return view('nasabah.profile', compact('nasabah', 'saldoTabungan'));
+        // Get pending profile update requests
+        $pendingRequests = PengajuanPerubahanData::where('id_nasabah', $idAnggota)
+            ->where('status', 'pending')
+            ->get()
+            ->keyBy('jenis_data'); // Key by jenis_data for easy access
+
+        return view('nasabah.profile', compact('nasabah', 'saldoTabungan', 'pendingRequests'));
     }
 
     /**
