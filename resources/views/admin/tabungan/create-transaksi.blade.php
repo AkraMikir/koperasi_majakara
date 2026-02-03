@@ -36,16 +36,7 @@
                     </select>
                 </div>
 
-                <!-- Jenis Akun -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Akun *</label>
-                    <select name="id_jns_akun" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
-                        <option value="">Pilih Jenis Akun</option>
-                        @foreach($jnsAkun as $akun)
-                        <option value="{{ $akun->id }}">{{ $akun->nama_akun }}</option>
-                        @endforeach
-                    </select>
-                </div>
+
 
                 <!-- Jenis Transaksi -->
                 <div>
@@ -57,8 +48,17 @@
                     </select>
                 </div>
 
-                <!-- Nominal -->
+                <!-- Via -->
                 <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Via *</label>
+                    <select name="via" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        <option value="transfer">Transfer</option>
+                        <option value="cash">Cash</option>
+                    </select>
+                </div>
+
+                <!-- Nominal (Full Width for emphasis) -->
+                <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
@@ -70,15 +70,6 @@
                     <div id="saldo-warning" class="hidden mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
                         <p class="text-sm text-red-600 font-medium">⚠ Saldo nasabah tidak mencukupi!</p>
                     </div>
-                </div>
-
-                <!-- Via -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Via *</label>
-                    <select name="via" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
-                        <option value="transfer">Transfer</option>
-                        <option value="cash">Cash</option>
-                    </select>
                 </div>
 
                 <!-- Tanggal Transaksi -->

@@ -11,10 +11,12 @@ class TempoPinjamanB extends Model
     use HasFactory;
 
     protected $table = 'tempo_pinjaman_b';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'pinjaman_id',
-        'anggota_id',
         'no_urut',
         'tgl_jatuh_tempo',
         'jumlah_tagihan',
@@ -37,11 +39,6 @@ class TempoPinjamanB extends Model
     public function pinjaman(): BelongsTo
     {
         return $this->belongsTo(PinjamanH::class, 'pinjaman_id');
-    }
-
-    public function nasabah(): BelongsTo
-    {
-        return $this->belongsTo(Nasabah::class, 'anggota_id');
     }
 }
 

@@ -14,13 +14,20 @@ class MasterDataSeeder extends Seeder
     {
         // Bersihkan tabel master data untuk mencegah duplikasi saat seeding ulang
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('suku_bunga')->truncate();
+        
+        // Truncate tables if exist
+        DB::table('jns_lokasi_perusahaan')->truncate();
         DB::table('jns_angsuran_minggu')->truncate();
         DB::table('jns_angsuran_bulan')->truncate();
-        DB::table('jns_lokasi_perusahaan')->truncate();
+        
+        // New Master Tables
+        DB::table('jns_fitur')->truncate();
+        DB::table('jns_via')->truncate();
+        DB::table('jns_transaksi')->truncate();
+        
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Seed Lokasi Perusahaan
+        // 1. Seed Lokasi Perusahaan
         DB::table('jns_lokasi_perusahaan')->insert([
             [
                 'nama_lokasi' => 'Kantor Pusat',
@@ -54,7 +61,7 @@ class MasterDataSeeder extends Seeder
             ],
         ]);
 
-        // Seed Angsuran Bulan (ket harus 1 karakter)
+        // 2. Seed Angsuran Bulan (ket harus 1 karakter)
         DB::table('jns_angsuran_bulan')->insert([
             ['ket' => '1', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 1 bulan
             ['ket' => '3', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 3 bulan
@@ -63,7 +70,7 @@ class MasterDataSeeder extends Seeder
             ['ket' => 'B', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 24 bulan
         ]);
 
-        // Seed Angsuran Minggu (ket harus 1 karakter)
+        // 3. Seed Angsuran Minggu (ket harus 1 karakter)
         DB::table('jns_angsuran_minggu')->insert([
             ['ket' => '4', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 4 minggu
             ['ket' => '8', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 8 minggu
@@ -72,26 +79,29 @@ class MasterDataSeeder extends Seeder
             ['ket' => 'C', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()], // 20 minggu
         ]);
 
-        // Seed Suku Bunga
-        DB::table('suku_bunga')->insert([
-            [
-                'jenis_bunga' => 'Bunga Pinjaman Reguler',
-                'opsi_val' => 0.0150, // 1.5% per bulan
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'jenis_bunga' => 'Bunga Pinjaman Khusus',
-                'opsi_val' => 0.0200, // 2% per bulan
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'jenis_bunga' => 'Bunga Tabungan',
-                'opsi_val' => 0.0025, // 0.25% per bulan
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+        // 4. Seed jns_fitur
+        DB::table('jns_fitur')->insert([
+            ['kode' => 'T', 'nama' => 'Tabungan', 'deskripsi' => 'Fitur tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'P', 'nama' => 'Pinjaman', 'deskripsi' => 'Fitur pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'D', 'nama' => 'Deposito', 'deskripsi' => 'Fitur deposito', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'G', 'nama' => 'Gadai', 'deskripsi' => 'Fitur gadai', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        // 5. Seed jns_via
+        DB::table('jns_via')->insert([
+            ['kode' => 'T', 'nama' => 'Transfer', 'deskripsi' => 'Via transfer bank', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'C', 'nama' => 'Cash', 'deskripsi' => 'Via tunai/cash', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+        ]);
+
+        // 6. Seed jns_transaksi
+        DB::table('jns_transaksi')->insert([
+            ['kode' => 'STR', 'nama' => 'Setoran', 'deskripsi' => 'Setoran tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNR', 'nama' => 'Penarikan', 'deskripsi' => 'Penarikan tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TRKT', 'nama' => 'Transaksi Tabungan', 'deskripsi' => 'Transaksi tabungan final', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNJ', 'nama' => 'Pengajuan Pinjaman', 'deskripsi' => 'Pengajuan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PMB', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran angsuran', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'DPNJM', 'nama' => 'Data Pinjaman', 'deskripsi' => 'Header pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TPNJM', 'nama' => 'Tempo Pinjaman', 'deskripsi' => 'Jadwal angsuran', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
     }
 }

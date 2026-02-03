@@ -13,12 +13,15 @@ class PengajuanTabungan extends Model
     use HasFactory;
 
     protected $table = 'tbl_pengajuan_tabungan';
+    public $incrementing = false; // Karena pakai ID custom string
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'id_anggota',
         'nominal',
-        'foto_bukti_tf',
         'keterangan',
+        'keterangan_admin',
         'status',
     ];
 
@@ -28,14 +31,21 @@ class PengajuanTabungan extends Model
         'updated_at' => 'datetime',
     ];
 
+    protected static function boot()
+    {
+        parent::boot();
+        // ID generated manual via Controller/Service using IdGenerator
+    }
+
     public function nasabah(): BelongsTo
     {
         return $this->belongsTo(Nasabah::class, 'id_anggota');
     }
 
-    public function buktiFoto(): HasMany
+    // Relationship ke Universal BuktiFoto
+    public function buktiFoto()
     {
-        return $this->hasMany(BuktiFotoTabungan::class, 'id_pengajuan');
+        return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
     }
 
     public function janjiTemu(): HasOne

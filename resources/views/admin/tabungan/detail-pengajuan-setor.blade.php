@@ -101,10 +101,10 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($pengajuan->buktiFoto as $index => $bukti)
                     <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow">
-                        <a href="{{ Storage::url($bukti->file_photo) }}" class="glightbox" data-gallery="bukti-transfer" data-title="Bukti Transfer {{ $index + 1 }}">
+                        <a href="{{ Storage::url($bukti->file_path) }}" class="glightbox" data-gallery="bukti-transfer" data-title="Bukti Transfer {{ $index + 1 }}">
                             <div class="w-full h-64 bg-gray-100 overflow-hidden cursor-pointer group">
-                                @if(Storage::disk('public')->exists($bukti->file_photo))
-                                    <img src="{{ Storage::url($bukti->file_photo) }}?v={{ time() }}" 
+                                @if(Storage::disk('public')->exists($bukti->file_path))
+                                    <img src="{{ Storage::url($bukti->file_path) }}?v={{ time() }}" 
                                          alt="Bukti Transfer" 
                                          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                          onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22200%22 height=%22200%22><text x=%2250%22 y=%22100%22 font-size=%2220%22 fill=%22%23999%22>Image Error</text></svg>';">

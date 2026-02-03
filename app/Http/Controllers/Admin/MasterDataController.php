@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
-use App\Models\SukuBunga;
+// use App\Models\SukuBunga; // REMOVED
 use App\Models\JnsTenorDeposito;
 use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
@@ -24,13 +24,13 @@ class MasterDataController extends Controller
         $stats = [
             'total_bunga_pinjaman' => MasterBungaPinjaman::where('status_aktif', true)->count(),
             'total_denda_pinjaman' => MasterDendaPinjaman::where('status_aktif', true)->count(),
-            'total_suku_bunga_tabungan' => SukuBunga::count(),
+            // 'total_suku_bunga_tabungan' => SukuBunga::count(), // REMOVED
             'total_tenor_deposito' => JnsTenorDeposito::where('aktif', true)->count(),
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
-            'total_jenis_deposito' => JnsDeposito::where('status_aktif', true)->count(),
-            'total_jns_akun' => \App\Models\JnsAkun::where('is_active', true)->count(),
-            'total_biaya_transfer' => \App\Models\BiayaTransfer::where('is_active', true)->count(),
+            'total_jenis_deposito' => 0, 
+            'total_jns_akun' => 0, 
+            'total_biaya_transfer' => 0, 
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -168,60 +168,10 @@ class MasterDataController extends Controller
         return redirect()->back()->with('success', 'Status berhasil diubah');
     }
 
-    // ==================== SUKU BUNGA TABUNGAN ====================
-    
-    public function sukuBungaTabunganIndex()
-    {
-        $data = SukuBunga::paginate(15);
-        return view('admin.master-data.suku-bunga-tabungan.index', compact('data'));
-    }
-
-    public function sukuBungaTabunganCreate()
-    {
-        return view('admin.master-data.suku-bunga-tabungan.create');
-    }
-
-    public function sukuBungaTabunganStore(Request $request)
-    {
-        $request->validate([
-            'jenis_bunga' => 'required|string|max:100',
-            'opsi_val' => 'required|numeric|min:0|max:100',
-        ]);
-
-        SukuBunga::create($request->all());
-
-        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
-            ->with('success', 'Data berhasil ditambahkan');
-    }
-
-    public function sukuBungaTabunganEdit($id)
-    {
-        $data = SukuBunga::findOrFail($id);
-        return view('admin.master-data.suku-bunga-tabungan.edit', compact('data'));
-    }
-
-    public function sukuBungaTabunganUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'jenis_bunga' => 'required|string|max:100',
-            'opsi_val' => 'required|numeric|min:0|max:100',
-        ]);
-
-        $data = SukuBunga::findOrFail($id);
-        $data->update($request->all());
-
-        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
-            ->with('success', 'Data berhasil diupdate');
-    }
-
-    public function sukuBungaTabunganDestroy($id)
-    {
-        $data = SukuBunga::findOrFail($id);
-        $data->delete();
-
-        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
-            ->with('success', 'Data berhasil dihapus');
-    }
+    // ==================== SUKU BUNGA TABUNGAN (REMOVED) ====================
+    /*
+    public function sukuBungaTabunganIndex() ...
+    */
 
     // ==================== TENOR DEPOSITO ====================
     
@@ -567,73 +517,10 @@ class MasterDataController extends Controller
         return redirect()->back()->with('success', 'Status berhasil diubah');
     }
 
-    // ===== JNS AKUN =====
-
-    public function jnsAkunIndex()
-    {
-        $data = \App\Models\JnsAkun::latest()->paginate(15);
-        return view('admin.master-data.jns-akun.index', compact('data'));
-    }
-
-    public function jnsAkunCreate()
-    {
-        return view('admin.master-data.jns-akun.create');
-    }
-
-    public function jnsAkunStore(Request $request)
-    {
-        $request->validate([
-            'kode_akun' => 'required|string|max:20|unique:jns_akun,kode_akun',
-            'nama_akun' => 'required|string|max:100',
-            'prefix_id' => 'required|string|max:10',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        \App\Models\JnsAkun::create($request->all());
-
-        return redirect()->route('admin.master-data.jns-akun.index')
-            ->with('success', 'Data berhasil ditambahkan');
-    }
-
-    public function jnsAkunEdit($id)
-    {
-        $data = \App\Models\JnsAkun::findOrFail($id);
-        return view('admin.master-data.jns-akun.edit', compact('data'));
-    }
-
-    public function jnsAkunUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'kode_akun' => 'required|string|max:20|unique:jns_akun,kode_akun,' . $id,
-            'nama_akun' => 'required|string|max:100',
-            'prefix_id' => 'required|string|max:10',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        $data = \App\Models\JnsAkun::findOrFail($id);
-        $data->update($request->all());
-
-        return redirect()->route('admin.master-data.jns-akun.index')
-            ->with('success', 'Data berhasil diupdate');
-    }
-
-    public function jnsAkunDestroy($id)
-    {
-        $data = \App\Models\JnsAkun::findOrFail($id);
-        $data->delete();
-
-        return redirect()->route('admin.master-data.jns-akun.index')
-            ->with('success', 'Data berhasil dihapus');
-    }
-
-    public function jnsAkunToggleStatus($id)
-    {
-        $data = \App\Models\JnsAkun::findOrFail($id);
-        $data->is_active = !$data->is_active;
-        $data->save();
-
-        return redirect()->back()->with('success', 'Status berhasil diubah');
-    }
+    // ===== JNS AKUN (REMOVED) =====
+    /*
+    public function jnsAkunIndex() ...
+    */
 
     // ===== BIAYA TRANSFER =====
 
