@@ -17,6 +17,7 @@ use App\Models\MasterDendaPinjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use App\Helpers\IdGenerator; // Add Helper
 
 class PinjamanController extends Controller
 {
@@ -28,10 +29,10 @@ class PinjamanController extends Controller
         // Statistik pinjaman
         $stats = [
             'total_pengajuan_pending' => PengajuanPinjaman::whereDoesntHave('pinjaman')->count(),
-            'total_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->whereIn('status', ['pencairan', 'telaksana'])->count(),
+            'total_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->count(),
             'total_pinjaman_lunas' => PinjamanH::where('lunas', 'lunas')->count(),
             'total_pinjaman_hari_ini' => PinjamanH::whereDate('created_at', today())->count(),
-            'total_nominal_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->whereIn('status', ['pencairan', 'telaksana'])->sum('jumlah_pinjam') ?? 0,
+            'total_nominal_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
             'total_angsuran_telat' => $this->getTotalAngsuranTelat(),
             'total_pembayaran_pending' => PengajuanPembayaranPinjaman::where('status', '1')->count(),
         ];
@@ -45,7 +46,7 @@ class PinjamanController extends Controller
 
         // Pinjaman aktif terbaru
         $pinjaman_aktif_terbaru = PinjamanH::where('lunas', 'belum')
-            ->whereIn('status', ['pencairan', 'telaksana'])
+            // ->whereIn('status', ['pencairan', 'telaksana']) // Removed status check
             ->with('nasabah.user')
             ->latest()
             ->take(5)
@@ -201,18 +202,23 @@ class PinjamanController extends Controller
             $bungaRp = ($nominal * $bungaPersen) / 100;
             $jumlahPinjam = $nominal; // Jumlah yang diterima nasabah (sama dengan nominal)
 
+            // Generate ID Pinjaman: P (Pinjaman) T (Transfer) DPNJM (Detail Pinjaman Header)
+            $idPinjaman = IdGenerator::generate('tbl_pinjaman_h', 'P', 'T', 'DPNJM', $request->tgl_cair);
+
             // Create pinjaman
             $pinjaman = PinjamanH::create([
+                'id' => $idPinjaman,
                 'id_anggota' => $pengajuan->id_anggota,
                 'id_pengajuan' => $pengajuan->id,
                 'jumlah_pinjam' => $jumlahPinjam,
                 'lama_pinjam' => (int)$pengajuan->durasi,
+                // ... logic hitungan angsuran ...
+                'ags_bulan' => ($jumlahPinjam + $bungaRp) / (int)$pengajuan->durasi, // Base calculation logic
                 'jenis' => 'bulanan', // Hanya bulanan
-                'bunga' => $bungaPersen / 100, // Convert to decimal
+                'bunga' => $bungaPersen, // Store as decimal percentage e.g 2.5
                 'bunga_rp' => $bungaRp,
                 'denda_persen' => $masterDenda->denda_persen,
                 'tgl_pinjam' => $request->tgl_cair,
-                'status' => 'telaksana',
                 'lunas' => 'belum',
             ]);
 
@@ -277,7 +283,7 @@ class PinjamanController extends Controller
     {
         $query = PinjamanH::with('nasabah.user')
             ->where('lunas', 'belum')
-            ->whereIn('status', ['pencairan', 'telaksana'])
+            // ->whereIn('status', ['pencairan', 'telaksana']) // Removed status check
             ->latest();
 
         // Filter by jenis
@@ -285,10 +291,10 @@ class PinjamanController extends Controller
             $query->where('jenis', $request->jenis);
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
+        // Filter by status (removed because PinjamanH status column dropped)
+        /* if ($request->has('status') && $request->status !== '') {
             $query->where('status', $request->status);
-        }
+        } */
 
         // Search
         if ($request->has('search') && $request->search !== '') {
@@ -395,14 +401,29 @@ class PinjamanController extends Controller
         // Total per angsuran
         $totalPerAngsuran = $pokokPerBulan + $bungaPerBulan;
 
-        $tanggalMulai = $pinjaman->tgl_pinjam;
+        $tanggalMulai = \Carbon\Carbon::parse($pinjaman->tgl_pinjam); // Correct carbon parsing
+        
+        // Generate Base ID for Tempo: P (Pinjaman) T (Transfer) TPNJM (Tempo Pinjaman)
+        // Kita generate ID pertama, lalu increment manual untuk performa
+        $baseId = IdGenerator::generate('tempo_pinjaman_b', 'P', 'T', 'TPNJM', $tanggalMulai);
+        
+        // Extract sequence dari baseId (misal 300120260001PTTPNJM) -> 0001
+        // Format: DATE(8) + SEQ(4) + STR
+        $datePrefix = substr($baseId, 0, 8);
+        $seqStart = (int)substr($baseId, 8, 4);
+        $suffix = substr($baseId, 12); // PTTPNJM
 
         for ($i = 1; $i <= $jumlahAngsuran; $i++) {
             $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
+            
+            // Generate Sequence Manual
+            $currentSeq = $seqStart + ($i - 1);
+            $seqStr = str_pad($currentSeq, 4, '0', STR_PAD_LEFT);
+            $currentId = $datePrefix . $seqStr . $suffix;
 
             $data = [
+                'id' => $currentId,
                 'pinjaman_id' => $pinjaman->id,
-                'anggota_id' => $pinjaman->id_anggota,
                 'no_urut' => $i,
                 'tgl_jatuh_tempo' => $tanggalJatuhTempo,
                 'jumlah_tagihan' => round($totalPerAngsuran, 2),
@@ -424,9 +445,11 @@ class PinjamanController extends Controller
             ->whereDate('tgl_jatuh_tempo', '<', now())
             ->count();
 
-        $mingguan = TempoPinjamanM::where('status_bayar', 'telat')
+        // Fitur mingguan dinonaktifkan sementara
+        /* $mingguan = TempoPinjamanM::where('status_bayar', 'telat')
             ->whereDate('tgl_jatuh_tempo', '<', now())
-            ->count();
+            ->count(); */
+        $mingguan = 0;
 
         return $bulanan + $mingguan;
     }
@@ -438,21 +461,19 @@ class PinjamanController extends Controller
     {
         $bulanan = TempoPinjamanB::whereDate('tgl_jatuh_tempo', today())
             ->where('status_bayar', 'belum')
-            ->with(['pinjaman.nasabah.user', 'nasabah.user'])
+            ->with(['pinjaman.nasabah.user']) // Removed nasabah.user direct relation from tempo if not exists
             ->get()
             ->map(function($item) {
                 $item->jenis = 'bulanan';
+                // Helper to get nasabah from pinjaman relation
+                $item->nasabah = $item->pinjaman->nasabah ?? null;
                 return $item;
             });
 
-        $mingguan = TempoPinjamanM::whereDate('tgl_jatuh_tempo', today())
-            ->where('status_bayar', 'belum')
-            ->with(['pinjaman.nasabah.user', 'nasabah.user'])
-            ->get()
-            ->map(function($item) {
-                $item->jenis = 'mingguan';
-                return $item;
-            });
+        /* $mingguan = TempoPinjamanM::whereDate('tgl_jatuh_tempo', today())
+            // ... commented out ...
+            ->get(); */
+        $mingguan = collect([]);
 
         return $bulanan->merge($mingguan)->take(5);
     }

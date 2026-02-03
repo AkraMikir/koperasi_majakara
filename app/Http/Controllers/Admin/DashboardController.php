@@ -19,14 +19,20 @@ class DashboardController extends Controller
     public function index()
     {
         // Statistik utama
-        $totalSetoran = TransTabungan::where('jenis', 'setoran')->sum('nominal') ?? 0;
-        $totalPenarikan = TransTabungan::where('jenis', 'penarikan')->sum('nominal') ?? 0;
+        $totalSetoran = TransTabungan::whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'STR');
+            })->sum('nominal') ?? 0;
+            
+        $totalPenarikan = TransTabungan::whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'PNR');
+            })->sum('nominal') ?? 0;
         
         $stats = [
             'total_nasabah' => Nasabah::count(),
             'total_tabungan' => max(0, $totalSetoran - $totalPenarikan), // Pastikan tidak negatif
-            'total_pinjaman' => PinjamanH::whereIn('status', ['pencairan', 'telaksana'])->where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
-            'pinjaman_aktif' => PinjamanH::whereIn('status', ['pencairan', 'telaksana'])->where('lunas', 'belum')->count(),
+            // PinjamanH hanya berisi pinjaman aktif/valid
+            'total_pinjaman' => PinjamanH::where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
+            'pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->count(),
             'total_deposito' => DepositoH::where('status', 'aktif')->sum('nominal_awal') ?? 0,
             'deposito_aktif' => DepositoH::where('status', 'aktif')->count(),
             'total_gadai' => GadaiH::where('status', 'aktif')->sum('jumlah_pinjaman') ?? 0,
@@ -51,10 +57,14 @@ class DashboardController extends Controller
         $pinjaman = PengajuanPinjaman::whereDoesntHave('pinjaman')->count();
         $deposito = PengajuanDeposito::where('status', '1')->count();
         // Cek status gadai - biasanya 'pending' atau '1'
-        $gadai = PengajuanGadai::where(function($query) {
-            $query->where('status', 'pending')
-                  ->orWhere('status', '1');
-        })->count();
+        // Skip gadai try catch for now
+        $gadai = 0;
+        try {
+            $gadai = PengajuanGadai::where(function($query) {
+                $query->where('status', 'pending')
+                      ->orWhere('status', '1');
+            })->count();
+        } catch (\Exception $e) {}
 
         return $tabungan + $pinjaman + $deposito + $gadai;
     }
@@ -75,7 +85,7 @@ class DashboardController extends Controller
                 'id' => $t->id,
                 'type' => 'tabungan',
                 'nama' => $t->nasabah->user->nama ?? 'N/A',
-                'nominal' => 0, // Tabungan tidak punya nominal di pengajuan
+                'nominal' => $t->nominal, // Added nominal
                 'tanggal' => $t->created_at->format('d M Y'),
             ];
         }
@@ -98,23 +108,26 @@ class DashboardController extends Controller
         }
 
         // Pengajuan Deposito
-        $deposito = PengajuanDeposito::where('status', '1')
-            ->with('nasabah.user')
-            ->latest()
-            ->take(5)
-            ->get();
+        try {
+            $deposito = PengajuanDeposito::where('status', '1')
+                ->with('nasabah.user')
+                ->latest()
+                ->take(5)
+                ->get();
 
-        foreach ($deposito as $d) {
-            $pengajuan[] = [
-                'id' => $d->id,
-                'type' => 'deposito',
-                'nama' => $d->nasabah->user->nama ?? 'N/A',
-                'nominal' => $d->nominal,
-                'tanggal' => $d->created_at->format('d M Y'),
-            ];
-        }
+            foreach ($deposito as $d) {
+                $pengajuan[] = [
+                    'id' => $d->id,
+                    'type' => 'deposito',
+                    'nama' => $d->nasabah->user->nama ?? 'N/A',
+                    'nominal' => $d->nominal,
+                    'tanggal' => $d->created_at->format('d M Y'),
+                ];
+            }
+        } catch (\Exception $e) {}
 
         // Pengajuan Gadai
+        try {
         $gadai = PengajuanGadai::where(function($query) {
             $query->where('status', 'pending')
                   ->orWhere('status', '1');
@@ -133,6 +146,7 @@ class DashboardController extends Controller
                 'tanggal' => $g->created_at->format('d M Y'),
             ];
         }
+        } catch (\Exception $e) {}
 
         // Sort by tanggal terbaru
         usort($pengajuan, function($a, $b) {
@@ -147,15 +161,16 @@ class DashboardController extends Controller
         $aktivitas = [];
 
         // Transaksi Tabungan Terbaru
-        $transTabungan = TransTabungan::with('nasabah.user')
-            ->latest()
+        $transTabungan = TransTabungan::with(['nasabah.user', 'jnsTransaksi'])
+            ->latest('tgl_transaksi')
             ->take(5)
             ->get();
 
         foreach ($transTabungan as $t) {
+            $jenis = $t->jnsTransaksi ? $t->jnsTransaksi->nama : 'Transaksi';
             $aktivitas[] = [
                 'type' => 'tabungan',
-                'deskripsi' => ($t->nasabah->user->nama ?? 'Nasabah') . ' - ' . ucfirst($t->jenis) . ' Rp ' . number_format($t->nominal, 0, ',', '.'),
+                'deskripsi' => ($t->nasabah->user->nama ?? 'Nasabah') . ' - ' . ucfirst($jenis) . ' Rp ' . number_format($t->nominal, 0, ',', '.'),
                 'waktu' => $t->created_at->diffForHumans(),
             ];
         }

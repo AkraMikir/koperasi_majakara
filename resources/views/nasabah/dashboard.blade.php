@@ -305,11 +305,16 @@
 
             <div class="space-y-3">
                 @forelse($transaksiTerbaru ?? [] as $transaksi)
+                @php
+                    $isSetoran = optional($transaksi->jnsTransaksi)->kode === 'STR';
+                    $jenisNama = optional($transaksi->jnsTransaksi)->nama ?? 'Transaksi';
+                    $viaNama = optional($transaksi->jnsVia)->nama ?? 'Manual';
+                @endphp
                 <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="block p-4 bg-gray-50 rounded-xl border border-gray-200 hover:border-[#674c1d]/30 hover:shadow-md transition-all">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 {{ $transaksi->jenis === 'setoran' ? 'bg-green-100' : 'bg-red-100' }} rounded-lg flex items-center justify-center">
-                                @if($transaksi->jenis === 'setoran')
+                            <div class="w-10 h-10 {{ $isSetoran ? 'bg-green-100' : 'bg-red-100' }} rounded-lg flex items-center justify-center">
+                                @if($isSetoran)
                                     <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
@@ -320,16 +325,16 @@
                                 @endif
                             </div>
                             <div>
-                                <p class="font-semibold text-gray-900">{{ ucfirst($transaksi->jenis) }}</p>
-                                <p class="text-sm text-gray-500">{{ $transaksi->tgl_transaksi->format('d M Y, H:i') }} • {{ ucfirst($transaksi->via) }}</p>
+                                <p class="font-semibold text-gray-900">{{ ucfirst($jenisNama) }}</p>
+                                <p class="text-sm text-gray-500">{{ $transaksi->tgl_transaksi->format('d M Y, H:i') }} • {{ ucfirst($viaNama) }}</p>
                             </div>
                         </div>
                         <div class="text-right flex items-center gap-2">
                             <div>
-                                <p class="font-bold {{ $transaksi->jenis === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $transaksi->jenis === 'setoran' ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
+                                <p class="font-bold {{ $isSetoran ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ $isSetoran ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
                                 </p>
-                                <p class="text-xs text-gray-500 font-mono">{{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+                                <p class="text-xs text-gray-500 font-mono">{{ $transaksi->id }}</p>
                             </div>
                             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

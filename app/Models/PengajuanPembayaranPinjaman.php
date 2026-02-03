@@ -13,8 +13,11 @@ class PengajuanPembayaranPinjaman extends Model
     use HasFactory;
 
     protected $table = 'tbl_pengajuan_pembayaran_pinjaman';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'id_anggota',
         'pinjaman_id',
         'tempo_id',
@@ -22,6 +25,7 @@ class PengajuanPembayaranPinjaman extends Model
         'nominal',
         'rekening_tujuan',
         'keterangan',
+        'keterangan_admin',
         'status',
         'tgl_pembayaran',
     ];
@@ -48,8 +52,8 @@ class PengajuanPembayaranPinjaman extends Model
         return $this->hasOne(JanjiTemuPembayaranPinjaman::class, 'id_pengajuan');
     }
 
-    public function buktiFoto(): HasMany
+    public function buktiFoto()
     {
-        return $this->hasMany(BuktiFotoPembayaranPinjaman::class, 'id_pengajuan');
+        return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
     }
 }

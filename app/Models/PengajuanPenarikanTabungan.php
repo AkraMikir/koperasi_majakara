@@ -12,8 +12,11 @@ class PengajuanPenarikanTabungan extends Model
     use HasFactory;
 
     protected $table = 'tbl_pengajuan_penarikan_tabungan';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'id_anggota',
         'tgl_pengajuan',
         'nominal',
@@ -22,6 +25,7 @@ class PengajuanPenarikanTabungan extends Model
         'nama_bank',
         'foto_bukti_tf_admin',
         'keterangan',
+        'keterangan_admin',
         'status',
     ];
 

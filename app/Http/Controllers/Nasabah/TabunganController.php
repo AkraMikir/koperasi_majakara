@@ -9,6 +9,8 @@ use App\Models\JanjiTemuTabungan;
 use App\Models\BuktiFotoTabungan;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\TransTabungan;
+use App\Models\BuktiFoto; // New Model
+use App\Helpers\IdGenerator; // New Helper
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -61,7 +63,9 @@ class TabunganController extends Controller
         
         // Get riwayat setoran from database
         $riwayatTabungan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'STR');
+            })
             ->latest('tgl_transaksi')
             ->take(10)
             ->get();
@@ -101,7 +105,9 @@ class TabunganController extends Controller
 
         // Get riwayat penarikan from database
         $riwayatPenarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'PNR');
+            })
             ->latest('tgl_transaksi')
             ->take(10)
             ->get();
@@ -195,11 +201,15 @@ class TabunganController extends Controller
                         ->withInput($request->except('pin'));
                 }
 
+                // Generate ID: Tabungan (T), Transfer (T), Setoran (STR)
+                $idPengajuan = IdGenerator::generate('tbl_pengajuan_tabungan', 'T', 'T', 'STR');
+
                 // Create pengajuan tabungan with nominal
                 $pengajuan = PengajuanTabungan::create([
+                    'id' => $idPengajuan,
                     'id_anggota' => $idAnggota,
                     'nominal' => $request->nominal,
-                    'foto_bukti_tf' => 'transfer', // Indikator bahwa ini transfer
+                    // 'foto_bukti_tf' => 'transfer', // REMOVED
                     'keterangan' => $request->keterangan,
                     'status' => '1', // Pending
                 ]);
@@ -209,10 +219,12 @@ class TabunganController extends Controller
                     foreach ($request->file('bukti_foto') as $file) {
                         $path = $file->store('bukti_tabungan', 'public');
                         
-                        BuktiFotoTabungan::create([
-                            'id_pengajuan' => $pengajuan->id,
-                            'file_photo' => $path,
-                            'jenis' => 'tabungan',
+                        BuktiFoto::create([
+                            'owner_id' => $idPengajuan,
+                            'owner_fitur' => 'T',
+                            'owner_trans' => 'STR',
+                            'file_path' => $path,
+                            'keterangan' => 'Bukti Transfer'
                         ]);
                     }
                 }
@@ -311,10 +323,14 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
+            // Generate ID: Tabungan (T), Cash (C), Setoran (STR)
+            $idPengajuan = IdGenerator::generate('tbl_pengajuan_tabungan', 'T', 'C', 'STR');
+
             // Create pengajuan tabungan
             $pengajuan = PengajuanTabungan::create([
+                'id' => $idPengajuan,
                 'id_anggota' => $idAnggota,
-                'foto_bukti_tf' => 'tunai',
+                // 'foto_bukti_tf' => 'tunai', // REMOVED
                 'keterangan' => $request->keterangan,
                 'status' => '1', // Pending
             ]);
@@ -493,32 +509,13 @@ class TabunganController extends Controller
     {
         // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
             ->sum('nominal') ?? 0;
-
-        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
-            ->where('status', '2') // Approved
-            ->whereDoesntHave('transTabungan')
-            ->with('janjiTemu')
-            ->get();
-
-        foreach ($pengajuanApproved as $pengajuan) {
-            // Gunakan nominal dari pengajuan (bukan dari bukti foto)
-            $nominal = $pengajuan->nominal ?? 0;
             
-            // Jika nominal masih 0, coba ambil dari janji temu (untuk backward compatibility)
-            if ($nominal == 0 && $pengajuan->janjiTemu) {
-                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
-            }
-            
-            $totalSetoran += $nominal;
-        }
-
         return max(0, $totalSetoran - $totalPenarikan);
     }
 

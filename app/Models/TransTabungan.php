@@ -11,17 +11,18 @@ class TransTabungan extends Model
     use HasFactory;
 
     protected $table = 'trans_tabungan';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'id_transaksi',
+        'id',
         'id_pengajuan_setor',
         'id_pengajuan_tarik',
         'id_anggota',
-        'id_jns_akun',
+        'id_via',
+        'id_jns_trans',
         'nominal',
         'keterangan',
-        'jenis',
-        'via',
         'tgl_transaksi',
     ];
 
@@ -31,6 +32,12 @@ class TransTabungan extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected static function boot()
+    {
+        parent::boot();
+        // ID generated manual
+    }
 
     public function nasabah(): BelongsTo
     {
@@ -47,26 +54,17 @@ class TransTabungan extends Model
         return $this->belongsTo(PengajuanPenarikanTabungan::class, 'id_pengajuan_tarik');
     }
 
-    public function jnsAkun(): BelongsTo
+    // New Relationships to Master Tables
+    // TransTabungan tidak perlu jnsFitur karena fiturnya pasti Tabungan
+    
+    public function jnsVia(): BelongsTo
     {
-        return $this->belongsTo(JnsAkun::class, 'id_jns_akun');
+        return $this->belongsTo(JnsVia::class, 'id_via');
     }
-
-    /**
-     * Generate unique transaction ID with format: YYYYMMDD-SEQ-TYPE
-     * Example: 20260128-001-TAB
-     */
-    public static function generateIdTransaksi($jnsAkunPrefix = 'TAB')
+    
+    public function jnsTransaksi(): BelongsTo
     {
-        $date = now()->format('Ymd'); // 20260128
-        
-        // Count today's transactions
-        $count = self::whereDate('created_at', now())->count() + 1;
-        
-        // Pad sequence with zeros (001, 002, etc)
-        $seq = str_pad($count, 3, '0', STR_PAD_LEFT);
-        
-        return "{$date}-{$seq}-{$jnsAkunPrefix}";
+        return $this->belongsTo(JnsTransaksi::class, 'id_jns_trans');
     }
 }
 

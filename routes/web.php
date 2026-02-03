@@ -160,15 +160,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanToggleStatus'])->name('toggle-status');
         });
         
-        // Suku Bunga Tabungan
-        Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganDestroy'])->name('destroy');
-        });
+        // Suku Bunga Tabungan (REMOVED)
+        // Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () { ... });
         
         // Tenor Deposito
         Route::prefix('tenor-deposito')->name('tenor-deposito.')->group(function () {
@@ -224,16 +217,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
         });
 
-        // Jenis Akun
-        Route::prefix('jns-akun')->name('jns-akun.')->group(function () {
-            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jnsAkunToggleStatus'])->name('toggle-status');
-        });
+        // Jenis Akun (REMOVED)
+        // Route::prefix('jns-akun')->name('jns-akun.')->group(function () { ... });
 
         // Biaya Transfer
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
@@ -249,6 +234,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
+    Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index'); // New Universal Janji Temu
     Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');
     Route::get('/pengajuan', function () { return view('admin.pengajuan.index'); })->name('pengajuan.index');
 });

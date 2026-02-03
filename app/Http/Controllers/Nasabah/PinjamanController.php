@@ -29,7 +29,6 @@ class PinjamanController extends Controller
 
         // Get pinjaman aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
-            ->whereIn('status', ['pencairan', 'telaksana'])
             ->where('lunas', 'belum')
             ->with(['pengajuan', 'tempoBulanan', 'tempoMingguan'])
             ->latest()
@@ -566,7 +565,6 @@ class PinjamanController extends Controller
         $idAnggota = $this->getIdAnggota();
 
         $query = PinjamanH::where('id_anggota', $idAnggota)
-            ->whereIn('status', ['pencairan', 'telaksana'])
             ->where('lunas', 'belum')
             ->with(['pengajuan', 'tempoBulanan', 'tempoMingguan'])
             ->latest();
@@ -642,11 +640,15 @@ class PinjamanController extends Controller
         $query = null;
 
         if ($jenis === 'bulanan') {
-            $query = TempoPinjamanB::where('anggota_id', $idAnggota)
+            $query = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                    $q->where('id_anggota', $idAnggota);
+                })
                 ->with(['pinjaman.pengajuan'])
                 ->latest('tgl_jatuh_tempo');
         } else {
-            $query = TempoPinjamanM::where('anggota_id', $idAnggota)
+            $query = TempoPinjamanM::whereHas('pinjaman', function($q) use ($idAnggota) {
+                    $q->where('id_anggota', $idAnggota);
+                })
                 ->with(['pinjaman.pengajuan'])
                 ->latest('tgl_jatuh_tempo');
         }
@@ -682,11 +684,15 @@ class PinjamanController extends Controller
         $jenis = $request->get('jenis', 'bulanan');
 
         if ($jenis === 'bulanan') {
-            $angsuran = TempoPinjamanB::where('anggota_id', $idAnggota)
+            $angsuran = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                    $q->where('id_anggota', $idAnggota);
+                })
                 ->with(['pinjaman.pengajuan', 'nasabah.user'])
                 ->findOrFail($id);
         } else {
-            $angsuran = TempoPinjamanM::where('anggota_id', $idAnggota)
+            $angsuran = TempoPinjamanM::whereHas('pinjaman', function($q) use ($idAnggota) {
+                    $q->where('id_anggota', $idAnggota);
+                })
                 ->with(['pinjaman.pengajuan', 'nasabah.user'])
                 ->findOrFail($id);
         }
@@ -782,7 +788,6 @@ class PinjamanController extends Controller
 
         // Get pinjaman aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
-            ->whereIn('status', ['pencairan', 'telaksana'])
             ->where('lunas', 'belum')
             ->with(['pengajuan'])
             ->get();

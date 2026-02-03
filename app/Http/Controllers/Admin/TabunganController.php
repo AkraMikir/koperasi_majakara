@@ -11,6 +11,8 @@ use App\Models\Nasabah;
 use App\Models\BuktiFotoTabungan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
+use App\Helpers\IdGenerator;
 
 class TabunganController extends Controller
 {
@@ -24,8 +26,12 @@ class TabunganController extends Controller
             'total_pengajuan_setor' => PengajuanTabungan::where('status', '1')->count(),
             'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->count(),
             'total_transaksi_hari_ini' => TransTabungan::whereDate('created_at', today())->count(),
-            'total_setoran_hari_ini' => TransTabungan::where('jenis', 'setoran')->whereDate('created_at', today())->sum('nominal') ?? 0,
-            'total_penarikan_hari_ini' => TransTabungan::where('jenis', 'penarikan')->whereDate('created_at', today())->sum('nominal') ?? 0,
+            'total_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
+                    $q->where('kode', 'STR');
+                })->whereDate('created_at', today())->sum('nominal') ?? 0,
+            'total_penarikan_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
+                    $q->where('kode', 'PNR');
+                })->whereDate('created_at', today())->sum('nominal') ?? 0,
             'total_janji_temu_pending' => JanjiTemuTabungan::where('tanggal_janji_temu', '>=', now())->count(),
         ];
 
@@ -123,21 +129,25 @@ class TabunganController extends Controller
         // Create transaksi tabungan jika belum ada
         // Pastikan tidak ada duplikasi transaksi
         if ($pengajuan->transTabungan->count() == 0) {
-            // Get jns_akun for Tabungan
-            $jnsAkun = \App\Models\JnsAkun::where('kode_akun', 'TAB')->first();
-            
-            // Generate ID transaksi
-            $idTransaksi = TransTabungan::generateIdTransaksi($jnsAkun->prefix_id ?? 'TAB');
+            // V2 Logic: Master Data Driven
+            $kodeVia = ($pengajuan->janjiTemu) ? 'TN' : 'TF';
+            $kodeTrans = 'STR';
+
+            // Get IDs from Master Tables
+            $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+            $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+
+            // Generate Complex String ID
+            $idTransaksi = IdGenerator::generateIdTransaksi('T', $kodeVia, $kodeTrans);
 
             TransTabungan::create([
-                'id_transaksi' => $idTransaksi,
+                'id' => $idTransaksi,
                 'id_pengajuan_setor' => $pengajuan->id,
                 'id_anggota' => $pengajuan->id_anggota,
-                'id_jns_akun' => $jnsAkun->id ?? null,
+                'id_via' => $idVia,
+                'id_jns_trans' => $idTrans,
                 'nominal' => $nominal,
                 'keterangan' => $pengajuan->keterangan ?? 'Setoran tabungan disetujui',
-                'jenis' => 'setoran',
-                'via' => $pengajuan->janjiTemu ? 'cash' : ($request->via ?? 'transfer'),
                 'tgl_transaksi' => now(),
             ]);
         }
@@ -244,22 +254,26 @@ class TabunganController extends Controller
             'foto_bukti_tf_admin' => $fotoBuktiPath,
         ]);
 
-        // Get jns_akun for Tabungan
-        $jnsAkun = \App\Models\JnsAkun::where('kode_akun', 'TAB')->first();
+        // V2 Logic: Master Data Driven
+        $kodeVia = ($pengajuan->metode_transfer == 'transfer') ? 'TF' : 'TN';
+        $kodeTrans = 'PNR';
+
+        // Get IDs
+        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
         
-        // Generate ID transaksi kompleks
-        $idTransaksi = TransTabungan::generateIdTransaksi($jnsAkun->prefix_id ?? 'TAB');
+        // Generate ID
+        $idTransaksi = IdGenerator::generateIdTransaksi('T', $kodeVia, $kodeTrans);
 
         // Create transaksi penarikan
         TransTabungan::create([
-            'id_transaksi' => $idTransaksi,
+            'id' => $idTransaksi,
             'id_pengajuan_tarik' => $pengajuan->id,
             'id_anggota' => $pengajuan->id_anggota,
-            'id_jns_akun' => $jnsAkun->id ?? null,
+            'id_via' => $idVia,
+            'id_jns_trans' => $idTrans,
             'nominal' => $pengajuan->nominal,
             'keterangan' => $pengajuan->keterangan,
-            'jenis' => 'penarikan',
-            'via' => $pengajuan->metode_transfer == 'transfer' ? 'transfer' : 'cash',
             'tgl_transaksi' => now(),
         ]);
 
@@ -416,14 +430,24 @@ class TabunganController extends Controller
             $pengajuan->update(['status' => '2']);
         }
 
+        // V2 Logic
+        $kodeVia = 'TN'; // Janji temu pasti tunai
+        $kodeTrans = 'STR'; // Create trans dari janji temu tabungan = Setor
+
+        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+        
+        $idTransaksi = IdGenerator::generateIdTransaksi('T', $kodeVia, $kodeTrans);
+
         // Create transaksi tabungan
         $transaksi = TransTabungan::create([
+            'id' => $idTransaksi,
             'id_pengajuan_setor' => $pengajuan->id,
             'id_anggota' => $pengajuan->id_anggota,
+            'id_via' => $idVia,
+            'id_jns_trans' => $idTrans,
             'nominal' => $nominal,
             'keterangan' => $request->keterangan ?? 'Setoran tabungan dari janji temu',
-            'jenis' => 'setoran',
-            'via' => 'cash',
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
 
@@ -513,10 +537,10 @@ class TabunganController extends Controller
         $nasabah->getCollection()->transform(function($item) {
             $item->saldo = $this->getSaldoNasabah($item->id);
             $item->total_setoran = TransTabungan::where('id_anggota', $item->id)
-                ->where('jenis', 'setoran')
+                ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
                 ->sum('nominal') ?? 0;
             $item->total_penarikan = TransTabungan::where('id_anggota', $item->id)
-                ->where('jenis', 'penarikan')
+                ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
                 ->sum('nominal') ?? 0;
             return $item;
         });
@@ -531,11 +555,11 @@ class TabunganController extends Controller
     {
         // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
             ->sum('nominal') ?? 0;
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
@@ -566,9 +590,8 @@ class TabunganController extends Controller
     public function createTransaksi()
     {
         $nasabah = Nasabah::with('user')->get();
-        $jnsAkun = \App\Models\JnsAkun::where('is_active', true)->get();
 
-        return view('admin.tabungan.create-transaksi', compact('nasabah', 'jnsAkun'));
+        return view('admin.tabungan.create-transaksi', compact('nasabah'));
     }
 
     /**
@@ -578,7 +601,6 @@ class TabunganController extends Controller
     {
         $request->validate([
             'id_anggota' => 'required|exists:tbl_nasabah,id',
-            'id_jns_akun' => 'required|exists:jns_akun,id',
             'jenis' => 'required|in:setoran,penarikan',
             'nominal' => 'required|numeric|min:10000',
             'via' => 'required|in:transfer,cash',
@@ -597,11 +619,15 @@ class TabunganController extends Controller
             }
         }
 
-        // Get jns_akun prefix
-        $jnsAkun = \App\Models\JnsAkun::find($request->id_jns_akun);
+        // V2 Logic Mapping
+        $kodeVia = ($request->via == 'transfer') ? 'TF' : 'TN';
+        $kodeTrans = ($request->jenis == 'setoran') ? 'STR' : 'PNR';
         
-        // Generate ID transaksi
-        $idTransaksi = TransTabungan::generateIdTransaksi($jnsAkun->prefix_id ?? 'TAB');
+        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+        
+        // Generate ID
+        $idTransaksi = IdGenerator::generateIdTransaksi('T', $kodeVia, $kodeTrans);
 
         // Upload foto bukti if exists
         $fotoBukti = null;
@@ -611,13 +637,12 @@ class TabunganController extends Controller
 
         // Create transaksi
         $transaksi = TransTabungan::create([
-            'id_transaksi' => $idTransaksi,
+            'id' => $idTransaksi,
             'id_anggota' => $request->id_anggota,
-            'id_jns_akun' => $request->id_jns_akun,
+            'id_via' => $idVia,
+            'id_jns_trans' => $idTrans,
             'nominal' => $request->nominal,
             'keterangan' => $request->keterangan . ($fotoBukti ? ' | Foto: ' . $fotoBukti : ''),
-            'jenis' => $request->jenis,
-            'via' => $request->via,
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
 

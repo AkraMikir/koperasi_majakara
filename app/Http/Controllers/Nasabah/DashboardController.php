@@ -14,7 +14,7 @@ use App\Models\PengajuanPinjaman;
 use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
 use App\Models\TempoPinjamanB;
-use App\Models\TempoPinjamanM;
+// use App\Models\TempoPinjamanM; // Removed for V2
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -45,12 +45,12 @@ class DashboardController extends Controller
 
         // Get Pinjaman Aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
-            ->whereIn('status', ['pencairan', 'telaksana'])
             ->where('lunas', 'belum')
             ->get();
         $totalPinjaman = $pinjamanAktif->sum('jumlah_pinjam') ?? 0;
-        $sisaPinjaman = $pinjamanAktif->sum('saldo_lebih') ?? 0;
-
+        
+        $sisaPinjaman = 0; // Logic sisa pinjaman V2 pending
+        
         // Get Deposito Aktif
         $depositoAktif = DepositoH::where('id_nasabah', $idAnggota)
             ->where('status', 'aktif')
@@ -306,15 +306,9 @@ class DashboardController extends Controller
         $nextWeek = Carbon::now()->addDays(7);
         
         // Get angsuran bulanan
-        $angsuranB = TempoPinjamanB::where('anggota_id', $idAnggota)
-            ->where('status_bayar', 'belum')
-            ->whereBetween('tgl_jatuh_tempo', [$now, $nextWeek])
-            ->orderBy('tgl_jatuh_tempo')
-            ->with('pinjaman')
-            ->first();
-        
-        // Get angsuran mingguan
-        $angsuranM = TempoPinjamanM::where('anggota_id', $idAnggota)
+        $angsuranB = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                $q->where('id_anggota', $idAnggota);
+            })
             ->where('status_bayar', 'belum')
             ->whereBetween('tgl_jatuh_tempo', [$now, $nextWeek])
             ->orderBy('tgl_jatuh_tempo')
@@ -322,11 +316,7 @@ class DashboardController extends Controller
             ->first();
         
         // Return yang paling dekat
-        if ($angsuranB && $angsuranM) {
-            return $angsuranB->tgl_jatuh_tempo < $angsuranM->tgl_jatuh_tempo ? $angsuranB : $angsuranM;
-        }
-        
-        return $angsuranB ?? $angsuranM;
+        return $angsuranB;
     }
 
     /**
@@ -365,18 +355,25 @@ class DashboardController extends Controller
     /**
      * Get statistik transaksi bulan ini
      */
+    /**
+     * Get statistik transaksi bulan ini
+     */
     private function getTransaksiBulanIni($idAnggota)
     {
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
         
         $setoran = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'STR');
+            })
             ->whereBetween('tgl_transaksi', [$startOfMonth, $endOfMonth])
             ->sum('nominal') ?? 0;
         
         $penarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'PNR');
+            })
             ->whereBetween('tgl_transaksi', [$startOfMonth, $endOfMonth])
             ->sum('nominal') ?? 0;
         
@@ -401,17 +398,15 @@ class DashboardController extends Controller
         
         // Cek angsuran telat
         $now = Carbon::now();
-        $angsuranTelatB = TempoPinjamanB::where('anggota_id', $idAnggota)
+        $angsuranTelatB = TempoPinjamanB::where('pinjaman_id', function($q) use ($idAnggota) { // Fix: use subquery or join since anggota_id removed from Tempo
+                $q->select('id')->from('tbl_pinjaman_h')->where('id_anggota', $idAnggota);
+            })
             ->where('status_bayar', 'belum')
             ->where('tgl_jatuh_tempo', '<', $now)
             ->count();
         
-        $angsuranTelatM = TempoPinjamanM::where('anggota_id', $idAnggota)
-            ->where('status_bayar', 'belum')
-            ->where('tgl_jatuh_tempo', '<', $now)
-            ->count();
-        
-        $totalAngsuranTelat = $angsuranTelatB + $angsuranTelatM;
+        // TempoPinjamanM belum ada di refactoring, skip logic merge
+        $totalAngsuranTelat = $angsuranTelatB;
         
         if ($totalAngsuranTelat > 0) {
             $notifikasi[] = [
@@ -422,17 +417,22 @@ class DashboardController extends Controller
         }
         
         // Cek deposito jatuh tempo (3 hari ke depan)
-        $depositoJatuhTempo = DepositoH::where('id_nasabah', $idAnggota)
-            ->where('status', 'aktif')
-            ->whereBetween('tgl_jatuh_tempo', [$now, $now->copy()->addDays(3)])
-            ->count();
-        
-        if ($depositoJatuhTempo > 0) {
-            $notifikasi[] = [
-                'type' => 'info',
-                'message' => "{$depositoJatuhTempo} deposito akan jatuh tempo dalam 3 hari",
-                'link' => '#',
-            ];
+        // Skip DepositoH if table dropped or use try catch
+        try {
+            $depositoJatuhTempo = DepositoH::where('id_nasabah', $idAnggota)
+                ->where('status', 'aktif')
+                ->whereBetween('tgl_jatuh_tempo', [$now, $now->copy()->addDays(3)])
+                ->count();
+            
+            if ($depositoJatuhTempo > 0) {
+                $notifikasi[] = [
+                    'type' => 'info',
+                    'message' => "{$depositoJatuhTempo} deposito akan jatuh tempo dalam 3 hari",
+                    'link' => '#',
+                ];
+            }
+        } catch (\Exception $e) {
+            // Ignore if table doesn't exist yet
         }
         
         return $notifikasi;
@@ -465,29 +465,16 @@ class DashboardController extends Controller
     {
         // Hitung dari trans_tabungan yang sudah ada
         $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'setoran')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'STR');
+            })
             ->sum('nominal') ?? 0;
 
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
-            ->where('jenis', 'penarikan')
+            ->whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'PNR');
+            })
             ->sum('nominal') ?? 0;
-
-        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
-            ->where('status', '2') // Approved
-            ->whereDoesntHave('transTabungan')
-            ->with('buktiFoto', 'janjiTemu')
-            ->get();
-
-        foreach ($pengajuanApproved as $pengajuan) {
-            $nominal = 0;
-            if ($pengajuan->buktiFoto && $pengajuan->buktiFoto->count() > 0) {
-                $nominal = $pengajuan->buktiFoto->sum('nominal');
-            } elseif ($pengajuan->janjiTemu) {
-                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
-            }
-            $totalSetoran += $nominal;
-        }
 
         return max(0, $totalSetoran - $totalPenarikan);
     }
