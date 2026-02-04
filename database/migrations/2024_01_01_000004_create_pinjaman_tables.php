@@ -16,6 +16,7 @@ return new class extends Migration
             $table->decimal('nominal', 15, 2);
             $table->string('jenis', 20)->nullable()->default('bulanan');
             $table->integer('durasi');
+            $table->string('jenis_pencairan', 20)->nullable()->default('transfer'); // transfer atau cash
             $table->char('status', 1)->default('1');
             $table->text('keterangan')->nullable();
             $table->text('keterangan_admin')->nullable();

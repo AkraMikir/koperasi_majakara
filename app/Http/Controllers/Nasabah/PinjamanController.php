@@ -483,6 +483,7 @@ class PinjamanController extends Controller
             // Create janji temu
             JanjiTemuPinjaman::create([
                 'id_pengajuan' => $pengajuan->id,
+                'id_nasabah' => $idAnggota,
                 'lokasi_temu' => $request->lokasi_temu,
                 'nominal' => $request->nominal,
                 'tanggal_janji_temu' => $request->tanggal_janji_temu,
@@ -819,11 +820,15 @@ class PinjamanController extends Controller
                 if ($tempoId) {
                     if ($selectedPinjaman->jenis === 'bulanan') {
                         $selectedAngsuran = TempoPinjamanB::where('id', $tempoId)
-                            ->where('anggota_id', $idAnggota)
+                            ->whereHas('pinjaman', function($q) use ($idAnggota) {
+                                $q->where('id_anggota', $idAnggota);
+                            })
                             ->first();
                     } else {
                         $selectedAngsuran = TempoPinjamanM::where('id', $tempoId)
-                            ->where('anggota_id', $idAnggota)
+                            ->whereHas('pinjaman', function($q) use ($idAnggota) {
+                                $q->where('id_anggota', $idAnggota);
+                            })
                             ->first();
                     }
                 }

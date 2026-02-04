@@ -22,12 +22,30 @@ class PengajuanPinjaman extends Model
         'nominal',
         'jenis',
         'durasi',
+        'jenis_pencairan',
         'status',
         'keterangan',
         'keterangan_admin',
         'tgl_cair',
         'bunga_persen',
     ];
+
+    /**
+     * Boot the model and auto-generate ID.
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($model) {
+            if (empty($model->id)) {
+                // Generate ID: PJ-YYYYMMDD-XXXXXXXX (random 8 digit)
+                $date = now()->format('Ymd');
+                $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
+                $model->id = "PJ-{$date}-{$random}";
+            }
+        });
+    }
 
     protected $casts = [
         'tgl_pengajuan' => 'datetime',
