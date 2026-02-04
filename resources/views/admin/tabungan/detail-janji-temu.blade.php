@@ -140,22 +140,25 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Penerimaan</label>
-                            <div id="foto-container" class="space-y-2">
-                                <div class="foto-upload-item flex gap-2">
-                                    <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                                    <button type="button" onclick="removeFotoInput(this)" class="hidden px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                        </svg>
-                                    </button>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Penerimaan (Max 3)</label>
+                            <div id="foto-container" class="space-y-2 mb-2">
+                                <div class="foto-upload-item">
+                                    <div class="relative">
+                                        <input type="file" name="foto_penerimaan[]" accept="image/*" 
+                                            class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
+                                            file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
+                                            file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                                    </div>
                                 </div>
                             </div>
-                            <button type="button" onclick="addFotoInput()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">
-                                + Tambah Foto
+                            <button type="button" onclick="addFotoInput()" id="btn-add-foto" 
+                                class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium transition-colors flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                Tambah Foto
                             </button>
-                            <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
+                            <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG (Max 5MB per file, maksimal 3 foto)</p>
                         </div>
 
                         <div>
@@ -203,28 +206,49 @@
         }
     }
 
-    // Add/Remove Foto Input
+    // Add/Remove Foto Input (Max 3)
     function addFotoInput() {
         const container = document.getElementById('foto-container');
+        const currentCount = container.querySelectorAll('.foto-upload-item').length;
+        
+        if (currentCount >= 3) {
+            alert('Maksimal 3 foto');
+            return;
+        }
+        
         const newItem = document.createElement('div');
-        newItem.className = 'foto-upload-item flex gap-2';
+        newItem.className = 'foto-upload-item flex gap-2 items-center';
         newItem.innerHTML = `
-            <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-            <button type="button" onclick="removeFotoInput(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex-1 relative">
+                <input type="file" name="foto_penerimaan[]" accept="image/*" 
+                    class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
+                    file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
+                    file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+            </div>
+            <button type="button" onclick="removeFotoInput(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         `;
         container.appendChild(newItem);
+        
+        // Hide button if max reached
+        if (currentCount + 1 >= 3) {
+            document.getElementById('btn-add-foto').style.display = 'none';
+        }
     }
 
     function removeFotoInput(button) {
         const item = button.closest('.foto-upload-item');
         const container = document.getElementById('foto-container');
+        
         if (container.children.length > 1) {
             item.remove();
+            // Show button again if less than max
+            document.getElementById('btn-add-foto').style.display = 'flex';
+        } else {
+            alert('Minimal 1 foto harus ada');
         }
     }
 

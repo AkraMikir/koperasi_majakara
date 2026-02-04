@@ -420,9 +420,8 @@ class TabunganController extends Controller
     {
         $request->validate([
             'nominal' => 'required|string',
-            'keterangan' => 'nullable|string|max:500',
-            'foto_penerimaan' => 'nullable|image|max:5120',
-            'tgl_transaksi' => 'required|date',
+            'keterangan_admin' => 'nullable|string|max:500',
+            'foto_penerimaan.*' => 'nullable|image|max:5120',  // Multiple files
         ]);
 
         // Parse nominal from formatted currency string
@@ -443,7 +442,6 @@ class TabunganController extends Controller
         }
 
         $idAnggota = $janjiTemu->id_nasabah;
-        $nominal = $request->nominal ?? $janjiTemu->nominal;
 
         // Handle foto penerimaan menggunakan tbl_bukti_foto universal
         if ($request->hasFile('foto_penerimaan')) {
@@ -479,8 +477,8 @@ class TabunganController extends Controller
             'id_anggota' => $idAnggota,
             'id_jns_via' => $idVia,
             'id_jns_transaksi' => $idTrans,
-            'nominal' => $nominal,
-            'keterangan' => 'Setoran tunai via janji temu #' . $janjiTemu->id,
+            'nominal' => $nominal,  // Use parsed nominal
+            'keterangan' => $janjiTemu->keterangan,  // Use nasabah keterangan
             'tgl_transaksi' => now(),
         ]);
 

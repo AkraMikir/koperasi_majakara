@@ -329,8 +329,9 @@ class TabunganController extends Controller
             $idAnggota = $this->getIdAnggota();
 
             // Generate ID untuk janji temu
-            // Format: DDMMYYYYNNNN + T (Tabungan) + JT (Janji Temu) + STR (Setoran)
-            $id = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'JT', 'STR');
+            // Format: DDMMYYYY + T + CS + JNJT (tanpa sequence number)
+            // Contoh: 04022026TCSJNJT
+            $id = \Carbon\Carbon::now()->format('dmY') . 'TCS' . 'JNJT';
             
             // Parse dates
             $tanggalJanjiTemu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
