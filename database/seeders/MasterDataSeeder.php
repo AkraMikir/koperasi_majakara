@@ -56,16 +56,24 @@ class MasterDataSeeder extends Seeder
         DB::table('jns_via')->truncate();
         DB::table('jns_via')->insert([
             ['kode' => 'TF', 'nama' => 'Transfer', 'deskripsi' => 'Via transfer bank', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'TN', 'nama' => 'Tunai', 'deskripsi' => 'Via tunai/cash', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'CS', 'nama' => 'Cash', 'deskripsi' => 'Via tunai/cash', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('jns_transaksi')->truncate();
         DB::table('jns_transaksi')->insert([
+            // Tabungan
             ['kode' => 'STR', 'nama' => 'Setoran', 'deskripsi' => 'Setoran tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['kode' => 'PNR', 'nama' => 'Penarikan', 'deskripsi' => 'Penarikan tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'BYR', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran angsuran', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'BGA', 'nama' => 'Bunga', 'deskripsi' => 'Bunga', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'ADM', 'nama' => 'Admin Fee', 'deskripsi' => 'Biaya admin', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TRKT', 'nama' => 'Transaksi Tabungan', 'deskripsi' => 'Transaksi umum tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            
+            // Pinjaman
+            ['kode' => 'PNJ', 'nama' => 'Pengajuan', 'deskripsi' => 'Pengajuan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PMB', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran angsuran pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'DPNJM', 'nama' => 'Data Pinjaman', 'deskripsi' => 'Data pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TPNJM', 'nama' => 'Tempo Pinjaman', 'deskripsi' => 'Tempo/jatuh tempo pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            
+            // Universal
+            ['kode' => 'JNJT', 'nama' => 'Janji Temu', 'deskripsi' => 'Janji temu untuk transaksi', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // 4. Tenor Deposito

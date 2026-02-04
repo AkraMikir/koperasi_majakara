@@ -39,9 +39,7 @@ class TabunganController extends Controller
             ->get();
 
         // Get riwayat janji temu from database
-        $riwayatJanjiTemu = JanjiTemuTabungan::whereHas('pengajuan', function($q) use ($idAnggota) {
-                $q->where('id_anggota', $idAnggota);
-            })
+        $riwayatJanjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
             ->with('lokasi')
             ->latest('tanggal_janji_temu')
             ->take(10)
@@ -330,24 +328,24 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
-            // Generate ID untuk tracking (TIDAK insert ke tbl_pengajuan_tabungan)
-            // Generate ID: Tabungan (T), Janji Temu (JT), Setoran (STR)
-            $idPengajuan = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'JT', 'STR');
+            // Generate ID untuk janji temu
+            // Format: DDMMYYYYNNNN + T (Tabungan) + JT (Janji Temu) + STR (Setoran)
+            $id = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'JT', 'STR');
             
             // Parse dates
             $tanggalJanjiTemu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
             $waktuJanjiTemu = \Carbon\Carbon::parse($request->waktu_janji_temu)->format('H:i:s');
             
-            // Create janji temu dengan id_pengajuan terisi (untuk tracking)
-            // Tapi TIDAK buat record di tbl_pengajuan_tabungan
+            // Create janji temu
             JanjiTemuTabungan::create([
-                'id_pengajuan' => $idPengajuan,  // ✅ Terisi - untuk tracking/identifier
+                'id' => $id,                    // ✅ Generated ID
                 'id_nasabah' => $idAnggota,
                 'lokasi_temu' => $request->lokasi_temu,
                 'nominal' => $request->nominal,
                 'tanggal_janji_temu' => $tanggalJanjiTemu,
                 'waktu_janji_temu' => $waktuJanjiTemu,
                 'keterangan' => $request->keterangan,
+                'status' => '1',                // ✅ Default: Menunggu
             ]);
 
             // Redirect ke status janji temu

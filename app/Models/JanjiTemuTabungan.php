@@ -11,15 +11,21 @@ class JanjiTemuTabungan extends Model
     use HasFactory;
 
     protected $table = 'tbl_janji_temu_tabungan';
+    
+    // ✅ ID is now string (generated)
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
-        'id_pengajuan',
+        'id',                    // ✅ NEW
         'id_nasabah',
         'lokasi_temu',
         'nominal',
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
+        'keterangan_admin',      // ✅ NEW
+        'status',                // ✅ NEW
     ];
 
     protected $casts = [
@@ -30,34 +36,16 @@ class JanjiTemuTabungan extends Model
         'updated_at' => 'datetime',
     ];
 
-    public function pengajuan(): BelongsTo
-    {
-        return $this->belongsTo(PengajuanTabungan::class, 'id_pengajuan');
-    }
-
     public function nasabah(): BelongsTo
     {
         return $this->belongsTo(Nasabah::class, 'id_nasabah');
-    }
-
-    public function transTabungan(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
-    {
-        // Janji temu -> pengajuan -> transaksi
-        return $this->hasOneThrough(
-            TransTabungan::class,
-            PengajuanTabungan::class,
-            'id',                    // Foreign key on pengajuan table
-            'id_pengajuan_setor',    // Foreign key on trans_tabungan table
-            'id_pengajuan',          // Local key on janji_temu table
-            'id'                     // Local key on pengajuan table
-        );
     }
 
     public function lokasi(): BelongsTo
     {
         return $this->belongsTo(JnsLokasiPerusahaan::class, 'lokasi_temu');
     }
+    
+    // ✅ REMOVED: pengajuan() relation - no longer needed
+    // ✅ REMOVED: transTabungan() relation - no longer needed
 }
-
-
-

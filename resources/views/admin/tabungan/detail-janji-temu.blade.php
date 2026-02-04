@@ -22,7 +22,7 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Data Nasabah (dari pengajuan atau langsung dari janji temu) -->
             @php
-                $nasabah = $janjiTemu->pengajuan?->nasabah ?? $janjiTemu->nasabah;
+                $nasabah = $janjiTemu->nasabah;  // Direct nasabah access
             @endphp
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Data Nasabah</h2>
@@ -78,12 +78,6 @@
                         <p class="text-sm text-gray-600">Nominal</p>
                         <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
-                    @if($janjiTemu->pengajuan)
-                    <div>
-                        <p class="text-sm text-gray-600">ID Pengajuan</p>
-                        <p class="font-semibold text-gray-900">#{{ $janjiTemu->pengajuan->id }}</p>
-                    </div>
-                    @endif
                 </div>
             </div>
         </div>
@@ -94,36 +88,38 @@
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Status</h3>
                 <div class="space-y-3">
                     @php
-                        $isPast = $janjiTemu->tanggal_janji_temu < now();
-                        $statusColor = $isPast ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
-                        $statusLabel = $isPast ? 'Selesai' : 'Akan Datang';
-                        $hasTransaksi = $janjiTemu->transTabungan || ($janjiTemu->pengajuan && $janjiTemu->pengajuan->transTabungan->count() > 0);
+                        $statusConfig = [
+                            '1' => ['label' => 'Menunggu', 'color' => 'bg-yellow-100 text-yellow-700'],
+                            '2' => ['label' => 'Selesai', 'color' => 'bg-green-100 text-green-700'],
+                            '3' => ['label' => 'Batal', 'color' => 'bg-red-100 text-red-700'],
+                        ];
+                        $status = $statusConfig[$janjiTemu->status] ?? $statusConfig['1'];
                     @endphp
-                    <span class="inline-block px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
-                        {{ $statusLabel }}
+                    <span class="inline-block px-4 py-2 {{ $status['color'] }} rounded-full text-sm font-semibold">
+                        {{ $status['label'] }}
                     </span>
                     <div>
                         <p class="text-sm text-gray-600">Waktu Tersisa</p>
                         <p class="font-semibold text-gray-900">
-                            @if($isPast)
+                            @if($janjiTemu->tanggal_janji_temu < now())
                                 Sudah lewat
                             @else
                                 {{ $janjiTemu->tanggal_janji_temu->diffForHumans() }}
                             @endif
                         </p>
                     </div>
-                    @if($hasTransaksi)
+                    @if($janjiTemu->status == '2')
                     <div class="pt-3 border-t border-gray-200">
                         <p class="text-sm text-gray-600 mb-2">Status Transaksi</p>
                         <span class="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                            ✓ Sudah Dibuat
+                            ✓ Sudah Diproses
                         </span>
                     </div>
                     @endif
                 </div>
             </div>
 
-            @if(!$hasTransaksi)
+            @if($janjiTemu->status == '1')
             <!-- Form Create Transaksi -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Buat Transaksi Tabungan</h3>
@@ -144,23 +140,30 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Transaksi <span class="text-red-500">*</span></label>
-                            <input type="date" name="tgl_transaksi" value="{{ date('Y-m-d') }}" required 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Penerimaan</label>
+                            <div id="foto-container" class="space-y-2">
+                                <div class="foto-upload-item flex gap-2">
+                                    <input type="file" name="foto_penerimaan[]" accept="image/*" 
+                                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                                    <button type="button" onclick="removeFotoInput(this)" class="hidden px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <button type="button" onclick="addFotoInput()" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 text-sm font-medium">
+                                + Tambah Foto
+                            </button>
+                            <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Foto Penerimaan (Opsional)</label>
-                            <input type="file" name="foto_penerimaan" accept="image/*" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                            <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 5MB)</p>
-                        </div>
-
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan</label>
-                            <textarea name="keterangan" rows="3" 
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan Admin</label>
+                            <textarea name="keterangan_admin" rows="3" 
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none resize-none"
-                                placeholder="Tambahkan keterangan jika diperlukan..."></textarea>
+                                placeholder="Tambahkan catatan atau keterangan admin..."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Catatan: Keterangan nasabah akan otomatis digunakan dalam transaksi</p>
                         </div>
 
                         <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
@@ -170,10 +173,7 @@
                 </form>
             </div>
             @else
-            <!-- Info Transaksi Sudah Ada -->
-            @php
-                $transaksiJanjiTemu = $janjiTemu->transTabungan ?? $janjiTemu->pengajuan?->transTabungan?->first();
-            @endphp
+            <!-- Info Sudah Diproses -->
             <div class="bg-green-50 rounded-2xl shadow-md p-6 border border-green-200">
                 <div class="flex items-center gap-3 mb-3">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -181,12 +181,12 @@
                     </svg>
                     <h3 class="text-lg font-bold text-green-800">Transaksi Sudah Dibuat</h3>
                 </div>
-                <p class="text-sm text-green-700 mb-4">Transaksi tabungan untuk janji temu ini sudah dibuat.</p>
-                @if($transaksiJanjiTemu)
-                <a href="{{ route('admin.tabungan.detail-transaksi', $transaksiJanjiTemu->id) }}" 
-                    class="block text-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
-                    Lihat Detail Transaksi
-                </a>
+                <p class="text-sm text-green-700">Janji temu telah diproses dan transaksi tabungan sudah dibuat.</p>
+                @if($janjiTemu->keterangan_admin)
+                <div class="mt-4 p-3 bg-white rounded-lg">
+                    <p class="text-xs text-gray-600 mb-1">Keterangan Admin:</p>
+                    <p class="text-sm text-gray-900">{{ $janjiTemu->keterangan_admin }}</p>
+                </div>
                 @endif
             </div>
             @endif
@@ -200,6 +200,31 @@
         let value = input.value.replace(/[^\d]/g, '');
         if (value) {
             input.value = new Intl.NumberFormat('id-ID').format(value);
+        }
+    }
+
+    // Add/Remove Foto Input
+    function addFotoInput() {
+        const container = document.getElementById('foto-container');
+        const newItem = document.createElement('div');
+        newItem.className = 'foto-upload-item flex gap-2';
+        newItem.innerHTML = `
+            <input type="file" name="foto_penerimaan[]" accept="image/*" 
+                class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+            <button type="button" onclick="removeFotoInput(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        `;
+        container.appendChild(newItem);
+    }
+
+    function removeFotoInput(button) {
+        const item = button.closest('.foto-upload-item');
+        const container = document.getElementById('foto-container');
+        if (container.children.length > 1) {
+            item.remove();
         }
     }
 

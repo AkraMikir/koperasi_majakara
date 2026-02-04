@@ -80,30 +80,27 @@ return new class extends Migration
 
         // 5. Janji Temu Pinjaman
         Schema::create('tbl_janji_temu_pinjaman', function (Blueprint $table) {
-            $table->string('id', 30)->primary();  // ✅ Generated ID
+            $table->id();
+            $table->string('id_pengajuan', 30);
             $table->foreignId('id_nasabah')->constrained('tbl_nasabah');
             $table->foreignId('lokasi_temu')->constrained('jns_lokasi_perusahaan');
             $table->decimal('nominal', 15, 2);
             $table->dateTime('tanggal_janji_temu');
             $table->time('waktu_janji_temu');
             $table->text('keterangan')->nullable();
-            $table->text('keterangan_admin')->nullable();  // ✅ NEW
-            $table->enum('status', ['1', '2', '3'])->default('1');  // ✅ NEW
             $table->timestamps();
         });
 
         // 6. Janji Temu Pembayaran
         Schema::create('tbl_janji_temu_pembayaran_pinjaman', function (Blueprint $table) {
-            $table->string('id', 30)->primary();  // ✅ Generated ID
-            $table->string('id_pinjaman', 30);  // Reference to pinjaman
+            $table->id();
+            $table->string('id_pengajuan', 30);
             $table->foreignId('id_nasabah')->constrained('tbl_nasabah');
             $table->foreignId('lokasi_temu')->constrained('jns_lokasi_perusahaan');
             $table->decimal('nominal', 15, 2);
             $table->dateTime('tanggal_janji_temu');
             $table->time('waktu_janji_temu');
             $table->text('keterangan')->nullable();
-            $table->text('keterangan_admin')->nullable();  // ✅ NEW
-            $table->enum('status', ['1', '2', '3'])->default('1');  // ✅ NEW
             $table->timestamps();
         });
     }
