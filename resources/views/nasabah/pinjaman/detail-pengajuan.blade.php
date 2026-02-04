@@ -4,8 +4,19 @@
 
 @section('content')
 <div class="w-full pb-6">
+    <!-- Back Button -->
+    <div class="mx-4 mt-4 mb-4">
+        <a href="{{ route('nasabah.pinjaman.status-pengajuan') }}"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-white rounded-xl shadow hover:shadow-md transition-all text-gray-700 hover:text-[#674c1d]">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Kembali
+        </a>
+    </div>
+
     <!-- Hero Section -->
-    <div class="mx-4 mt-4 mb-6">
+    <div class="mx-4 mb-6">
         <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <div class="flex items-center justify-between">

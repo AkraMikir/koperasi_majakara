@@ -30,22 +30,7 @@ class PengajuanPinjaman extends Model
         'bunga_persen',
     ];
 
-    /**
-     * Boot the model and auto-generate ID.
-     */
-    protected static function boot()
-    {
-        parent::boot();
-        
-        static::creating(function ($model) {
-            if (empty($model->id)) {
-                // Generate ID: PJ-YYYYMMDD-XXXXXXXX (random 8 digit)
-                $date = now()->format('Ymd');
-                $random = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 8));
-                $model->id = "PJ-{$date}-{$random}";
-            }
-        });
-    }
+    // ID digenerate di controller via IdGenerator (format: DDMMYYYY + SEQ + P + TF/TN + PNJ)
 
     protected $casts = [
         'tgl_pengajuan' => 'datetime',

@@ -12,8 +12,10 @@ use App\Models\JnsLokasiPerusahaan;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFotoPembayaranPinjaman;
+use App\Models\BuktiFoto;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
+use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
@@ -125,35 +127,40 @@ class PinjamanController extends Controller
     }
 
     /**
-     * Show the pengajuan pinjaman page (pilihan metode).
+     * Show the pengajuan pinjaman page (satu halaman: pilihan metode + form transfer/tunai inline).
      */
-    public function pengajuanPinjaman()
+    public function pengajuanPinjaman(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
 
-        // Get riwayat pengajuan
         $riwayatPengajuan = PengajuanPinjaman::where('id_anggota', $idAnggota)
             ->with('pinjaman')
             ->latest()
             ->take(10)
             ->get();
 
+        $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        $durasiList = \App\Models\JnsAngsuranBulan::where('aktif', 'y')->orderBy('bulan')->get();
+        if ($durasiList->isEmpty()) {
+            $durasiList = collect(range(1, 24))->map(fn ($b) => (object)['bulan' => $b, 'ket' => (string)$b]);
+        }
+        $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
+
         return view('nasabah.pinjaman.pengajuan-pinjaman', [
             'riwayatPengajuan' => $riwayatPengajuan,
+            'masterBunga' => $masterBunga,
+            'durasiList' => $durasiList,
+            'lokasi' => $lokasi,
+            'openMetode' => $request->get('metode'), // 'transfer' | 'tunai'
         ]);
     }
 
     /**
-     * Show the pengajuan transfer page.
+     * Redirect ke halaman pengajuan (satu halaman) dengan metode transfer.
      */
     public function pengajuanTransfer()
     {
-        // Get master data bunga untuk info
-        $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
-        
-        return view('nasabah.pinjaman.pengajuan-transfer', [
-            'masterBunga' => $masterBunga,
-        ]);
+        return redirect()->route('nasabah.pinjaman.pengajuan', ['metode' => 'transfer']);
     }
 
     /**
@@ -179,60 +186,51 @@ class PinjamanController extends Controller
             ], 400);
         }
 
-        $bungaPersen = $masterBunga->bunga_persen;
-        $bungaRp = ($nominal * $bungaPersen) / 100;
-        
-        // Bunga dibagi ke setiap angsuran
-        $bungaPerBulan = $bungaRp / $durasi;
-        
-        // Pokok per bulan
-        $pokokPerBulan = $nominal / $durasi;
-        
-        // Total per angsuran (pokok + bunga)
-        $totalPerAngsuran = $pokokPerBulan + $bungaPerBulan;
+        $bungaPersen = (float) $masterBunga->bunga_persen;
+        $bungaRp = round($nominal * $bungaPersen / 100, 2);
+        $totalKewajiban = $nominal + $bungaRp; // Total yang harus dibayar tepat
 
-        // Generate simulasi per bulan
+        // Angsuran: n-1 pertama dibulatkan ke bawah ke ratusan, bulan terakhir = sisa
+        $angsuranBulanan = (int) floor($totalKewajiban / $durasi / 100) * 100;
+        $akumulasi = $angsuranBulanan * ($durasi - 1);
+        $angsuranTerakhir = (int) round($totalKewajiban - $akumulasi, 0);
+
         $simulasi = [];
         $tanggalMulai = now();
-        
         for ($i = 1; $i <= $durasi; $i++) {
             $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
-            
+            $totalBulan = ($i < $durasi) ? $angsuranBulanan : $angsuranTerakhir;
             $simulasi[] = [
                 'bulan' => $i,
                 'tanggal' => $tanggalJatuhTempo->format('d/m/Y'),
-                'pokok' => round($pokokPerBulan, 2),
-                'bunga' => round($bungaPerBulan, 2),
-                'total' => round($totalPerAngsuran, 2),
+                'pokok' => 0,
+                'bunga' => 0,
+                'total' => (int) $totalBulan,
             ];
         }
+
+        $displayAngsuran = $durasi > 1 ? $angsuranBulanan : (int) $totalKewajiban;
 
         return response()->json([
             'success' => true,
             'data' => [
-                'nominal' => $nominal,
+                'nominal' => (float) $nominal,
                 'durasi' => $durasi,
                 'bunga_persen' => $bungaPersen,
-                'bunga_total' => round($bungaRp, 2),
-                'total_yang_harus_dibayar' => round($nominal + $bungaRp, 2),
-                'angsuran_per_bulan' => round($totalPerAngsuran, 2),
+                'bunga_total' => $bungaRp,
+                'total_yang_harus_dibayar' => (int) round($totalKewajiban, 0),
+                'angsuran_per_bulan' => $displayAngsuran,
                 'simulasi' => $simulasi,
             ]
         ]);
     }
 
     /**
-     * Show the janji temu pinjaman page.
+     * Redirect ke halaman pengajuan (satu halaman) dengan metode tunai.
      */
     public function janjiTemuPinjaman(Request $request)
     {
-        $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
-        
-        return view('nasabah.pinjaman.janji-temu', [
-            'lokasi' => $lokasi,
-            'nominal' => $request->nominal,
-            'keterangan' => $request->keterangan,
-        ]);
+        return redirect()->route('nasabah.pinjaman.pengajuan', ['metode' => 'tunai']);
     }
 
     /**
@@ -249,13 +247,18 @@ class PinjamanController extends Controller
         $nominalRaw = $request->input('nominal_raw') ?? str_replace(['.', ',', ' '], '', $request->input('nominal'));
         $request->merge(['nominal' => $nominalRaw]);
         
+        $rules = [
+            'nominal' => 'required|numeric|min:100000',
+            'durasi' => 'required|integer|min:1|max:24',
+            'pin' => 'required|numeric|digits:6',
+            'keterangan' => 'nullable|string|max:500',
+        ];
+        if (($request->jenis_pencairan ?? 'transfer') === 'transfer') {
+            $rules['bukti_foto'] = 'required|array|min:1';
+            $rules['bukti_foto.*'] = 'image|max:5120';
+        }
         try {
-            $validated = $request->validate([
-                'nominal' => 'required|numeric|min:100000',
-                'durasi' => 'required|integer|min:1|max:24',
-                'pin' => 'required|numeric|digits:6',
-                'keterangan' => 'nullable|string|max:500',
-            ]);
+            $validated = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', [
                 'errors' => $e->errors(),
@@ -286,33 +289,47 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
+        $jenisPencairan = $request->jenis_pencairan ?? 'transfer';
 
-        \Log::info('Submitting pengajuan pinjaman', [
-            'user_id' => $user->id,
-            'id_anggota' => $idAnggota,
-            'nominal' => $request->nominal,
-            'jenis' => $request->jenis,
-            'durasi' => $request->durasi,
-            'jenis_pencairan' => $request->jenis_pencairan,
-        ]);
+        // Bunga dari master_bunga_pinjaman sesuai durasi
+        $durasi = (int) $request->durasi;
+        $bungaMaster = MasterBungaPinjaman::where('status_aktif', true)
+            ->where('durasi_min', '<=', $durasi)
+            ->where('durasi_max', '>=', $durasi)
+            ->first();
+        $bungaPersen = $bungaMaster ? (float) $bungaMaster->bunga_persen : 10.00;
+
+        // ID dari 3 master: P (pinjaman), TF/TN (via), PNJ (pengajuan)
+        $kodeVia = $jenisPencairan === 'tunai' ? 'TN' : 'TF';
+        $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', $kodeVia, 'PNJ');
 
         try {
-            // Create pengajuan (transfer) - hanya bulanan
             $pengajuan = PengajuanPinjaman::create([
+                'id' => $idPengajuan,
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
-                'jenis' => 'bulanan', // Hanya bulanan
-                'durasi' => (int)$request->durasi,
-                'jenis_pencairan' => 'transfer',
-                'status' => '1', // Pending
+                'jenis' => 'bulanan',
+                'durasi' => $durasi,
+                'jenis_pencairan' => $jenisPencairan,
+                'status' => '1',
                 'keterangan' => $request->keterangan,
+                'bunga_persen' => $bungaPersen,
             ]);
 
-            \Log::info('Pengajuan transfer created successfully', [
-                'pengajuan_id' => $pengajuan->id,
-                'id_anggota' => $pengajuan->id_anggota,
-            ]);
+            // Bukti foto (transfer): simpan ke tbl_bukti_foto seperti tabungan
+            if ($jenisPencairan === 'transfer' && $request->hasFile('bukti_foto')) {
+                foreach ($request->file('bukti_foto') as $file) {
+                    $path = $file->store('bukti_pinjaman', 'public');
+                    BuktiFoto::create([
+                        'owner_id' => $pengajuan->id,
+                        'owner_fitur' => 'P',
+                        'owner_trans' => 'pengajuan',
+                        'file_path' => $path,
+                        'keterangan' => 'Bukti transfer pengajuan pinjaman',
+                    ]);
+                }
+            }
 
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
@@ -400,6 +417,10 @@ class PinjamanController extends Controller
      */
     public function submitJanjiTemuPinjaman(Request $request)
     {
+        // Clean nominal dari format rupiah (sama seperti transfer)
+        $nominalRaw = $request->input('nominal_raw') ?? str_replace(['.', ',', ' '], '', $request->input('nominal'));
+        $request->merge(['nominal' => $nominalRaw]);
+
         \Log::info('Submit janji temu pinjaman request received', [
             'all_data' => $request->except('pin'),
             'has_pin' => $request->has('pin'),
@@ -453,26 +474,38 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
+        $durasi = (int) $request->durasi;
+
+        // Bunga dari master_bunga_pinjaman sesuai durasi
+        $bungaMaster = MasterBungaPinjaman::where('status_aktif', true)
+            ->where('durasi_min', '<=', $durasi)
+            ->where('durasi_max', '>=', $durasi)
+            ->first();
+        $bungaPersen = $bungaMaster ? (float) $bungaMaster->bunga_persen : 10.00;
+
+        // ID dari 3 master: P (pinjaman), TN (tunai), PNJ (pengajuan)
+        $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', 'TN', 'PNJ');
 
         \Log::info('Submitting janji temu pinjaman', [
             'user_id' => $user->id,
             'id_anggota' => $idAnggota,
             'nominal' => $request->nominal,
-            'jenis' => $request->jenis,
-            'durasi' => $request->durasi,
+            'durasi' => $durasi,
         ]);
 
         try {
-            // Create pengajuan (cash) - hanya bulanan
+            // Create pengajuan (tunai) - hanya bulanan
             $pengajuan = PengajuanPinjaman::create([
+                'id' => $idPengajuan,
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
-                'jenis' => 'bulanan', // Hanya bulanan
-                'durasi' => (int)$request->durasi,
-                'jenis_pencairan' => 'cash',
+                'jenis' => 'bulanan',
+                'durasi' => $durasi,
+                'jenis_pencairan' => 'tunai',
                 'status' => '1', // Pending
                 'keterangan' => $request->keterangan,
+                'bunga_persen' => $bungaPersen,
             ]);
 
             \Log::info('Pengajuan cash created successfully', [
@@ -855,7 +888,7 @@ class PinjamanController extends Controller
     {
         $validated = $request->validate([
             'pinjaman_id' => 'required|exists:tbl_pinjaman_h,id',
-            'tempo_id' => 'required',
+            'tempo_id' => 'required|exists:tempo_pinjaman_b,id',
             'jenis_tempo' => 'required|in:bulanan,mingguan',
             'nominal' => 'required|numeric|min:1',
             'rekening_tujuan' => 'required|string|max:255',
@@ -889,9 +922,13 @@ class PinjamanController extends Controller
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
 
+        // ID dari 3 master: P (pinjaman), TF (transfer), PMB (pembayaran)
+        $idPengajuanPembayaran = IdGenerator::generate('tbl_pengajuan_pembayaran_pinjaman', 'P', 'TF', 'PMB');
+
         try {
-            // Create pengajuan pembayaran
+            // Create pengajuan pembayaran (tempo_id FK ke tempo_pinjaman_b)
             $pengajuan = PengajuanPembayaranPinjaman::create([
+                'id' => $idPengajuanPembayaran,
                 'id_anggota' => $idAnggota,
                 'pinjaman_id' => $request->pinjaman_id,
                 'tempo_id' => $request->tempo_id,
@@ -932,7 +969,7 @@ class PinjamanController extends Controller
     {
         $validated = $request->validate([
             'pinjaman_id' => 'required|exists:tbl_pinjaman_h,id',
-            'tempo_id' => 'required',
+            'tempo_id' => 'required|exists:tempo_pinjaman_b,id',
             'jenis_tempo' => 'required|in:bulanan,mingguan',
             'nominal' => 'required|numeric|min:1',
             'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
@@ -967,9 +1004,13 @@ class PinjamanController extends Controller
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
 
+        // ID dari 3 master: P (pinjaman), TN (tunai), PMB (pembayaran)
+        $idPengajuanPembayaran = IdGenerator::generate('tbl_pengajuan_pembayaran_pinjaman', 'P', 'TN', 'PMB');
+
         try {
-            // Create pengajuan pembayaran
+            // Create pengajuan pembayaran (tempo_id FK ke tempo_pinjaman_b)
             $pengajuan = PengajuanPembayaranPinjaman::create([
+                'id' => $idPengajuanPembayaran,
                 'id_anggota' => $idAnggota,
                 'pinjaman_id' => $request->pinjaman_id,
                 'tempo_id' => $request->tempo_id,

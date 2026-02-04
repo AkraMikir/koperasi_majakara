@@ -12,6 +12,7 @@ class JnsAngsuranBulan extends Model
     protected $table = 'jns_angsuran_bulan';
 
     protected $fillable = [
+        'bulan',
         'ket',
         'aktif',
     ];
