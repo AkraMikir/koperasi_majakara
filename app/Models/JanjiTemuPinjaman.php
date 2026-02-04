@@ -14,6 +14,7 @@ class JanjiTemuPinjaman extends Model
 
     protected $fillable = [
         'id_pengajuan',
+        'id_nasabah',
         'lokasi_temu',
         'nominal',
         'tanggal_janji_temu',
@@ -37,5 +38,10 @@ class JanjiTemuPinjaman extends Model
     public function lokasi(): BelongsTo
     {
         return $this->belongsTo(JnsLokasiPerusahaan::class, 'lokasi_temu');
+    }
+
+    public function nasabah(): BelongsTo
+    {
+        return $this->belongsTo(Nasabah::class, 'id_nasabah');
     }
 }
