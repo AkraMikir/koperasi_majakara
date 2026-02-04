@@ -41,19 +41,19 @@
                             <p class="text-sm text-gray-600">ID Pengajuan</p>
                             <p class="text-lg font-bold text-[#674c1d]">#{{ $item->id }}</p>
                             <!-- Indikator Metode -->
-                            @if($item->foto_bukti_tf === 'transfer')
+                            @if($item->janjiTemu)
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Ada Janji Temu
+                            </span>
+                            @else
                             <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
                                 Via Transfer
-                            </span>
-                            @elseif($item->foto_bukti_tf === 'tunai' && $item->janjiTemu)
-                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                                </svg>
-                                Via Janji Temu
                             </span>
                             @endif
                         </div>
@@ -62,8 +62,8 @@
                         @php
                             $statusConfig = [
                                 '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Menunggu'],
-                                '3' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Disetujui'],
-                                '2' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'label' => 'Ditolak'],
+                                '2' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Disetujui'],
+                                '3' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'label' => 'Ditolak'],
                             ];
                             $status = $statusConfig[$item->status] ?? $statusConfig['1'];
                         @endphp
@@ -96,8 +96,24 @@
 
                 @if($item->keterangan)
                 <div class="mb-4 p-3 bg-gray-50 rounded-lg">
-                    <p class="text-sm text-gray-600 mb-1">Keterangan</p>
+                    <p class="text-sm text-gray-600 mb-1">Keterangan Anda</p>
                     <p class="text-sm text-gray-900">{{ $item->keterangan }}</p>
+                </div>
+                @endif
+
+                @if($item->keterangan_admin)
+                <div class="mb-4 p-3 {{ $item->status == '2' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }} rounded-lg">
+                    <div class="flex items-start gap-2">
+                        <svg class="w-5 h-5 {{ $item->status == '2' ? 'text-green-600' : 'text-red-600' }} mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="flex-1">
+                            <p class="text-sm font-semibold {{ $item->status == '2' ? 'text-green-700' : 'text-red-700' }} mb-1">
+                                Catatan dari Admin
+                            </p>
+                            <p class="text-sm {{ $item->status == '2' ? 'text-green-900' : 'text-red-900' }}">{{ $item->keterangan_admin }}</p>
+                        </div>
+                    </div>
                 </div>
                 @endif
 

@@ -12,6 +12,7 @@ use App\Models\BuktiFotoTabungan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Helpers\IdGenerator;
 
 class TabunganController extends Controller
@@ -495,26 +496,96 @@ class TabunganController extends Controller
     {
         $request->validate([
             'nominal' => 'nullable|numeric|min:10000',
-            'keterangan' => 'nullable|string|max:500',
+            'keterangan_admin' => 'nullable|string|max:500',
             'status' => 'required|in:1,2,3',
         ]);
 
-        $pengajuan = PengajuanTabungan::findOrFail($id);
-        
-        $updateData = [
-            'keterangan' => $request->keterangan,
-            'status' => $request->status,
-        ];
+        try {
+            DB::beginTransaction();
+            
+            $pengajuan = PengajuanTabungan::with(['buktiFoto', 'janjiTemu', 'transTabungan'])->findOrFail($id);
+            
+            $updateData = [
+                'status' => $request->status,
+            ];
 
-        // Update nominal jika diisi
-        if ($request->has('nominal') && $request->nominal) {
-            $updateData['nominal'] = $request->nominal;
+            // Update nominal jika diisi
+            if ($request->has('nominal') && $request->nominal) {
+                $updateData['nominal'] = $request->nominal;
+            }
+
+            // Update keterangan_admin jika diisi
+            if ($request->has('keterangan_admin') && $request->keterangan_admin) {
+                $updateData['keterangan_admin'] = $request->keterangan_admin;
+            }
+
+            $pengajuan->update($updateData);
+
+            // Jika status approved (2) dan belum ada transaksi, buat transaksi
+            if ($request->status == '2' && $pengajuan->transTabungan->count() == 0) {
+                // Get nominal from pengajuan (or janji temu for tunai)
+                $nominal = $pengajuan->nominal ?? 0;
+                if ($pengajuan->janjiTemu && $nominal == 0) {
+                    $nominal = $pengajuan->janjiTemu->nominal ?? 0;
+                }
+
+                // Validate nominal
+                if ($nominal == 0 || $nominal < 10000) {
+                    DB::rollBack();
+                    return redirect()->back()
+                        ->with('error', 'Nominal tidak valid. Minimal Rp 10.000');
+                }
+
+                // V2 Logic: Master Data Driven
+                $kodeVia = ($pengajuan->janjiTemu) ? 'TN' : 'TF';
+                $kodeTrans = 'STR';
+
+                // Get IDs from Master Tables
+                $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+                $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+
+                // Generate Complex String ID using correct method
+                $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
+
+                Log::info('Creating transaksi tabungan from editPengajuanSetor', [
+                    'id' => $idTransaksi,
+                    'pengajuan_id' => $pengajuan->id,
+                    'nominal' => $nominal,
+                    'id_via' => $idVia,
+                    'id_trans' => $idTrans,
+                ]);
+
+                TransTabungan::create([
+                    'id' => $idTransaksi,
+                    'id_pengajuan_setor' => $pengajuan->id,
+                    'id_anggota' => $pengajuan->id_anggota,
+                    'id_jns_via' => $idVia,
+                    'id_jns_transaksi' => $idTrans,
+                    'nominal' => abs((float) $nominal), // setoran selalu positif
+                    'keterangan' => $request->keterangan_admin ?? $pengajuan->keterangan ?? 'Setoran tabungan disetujui',
+                    'tgl_transaksi' => now(),
+                ]);
+
+                Log::info('Transaksi tabungan created successfully from edit', ['id' => $idTransaksi]);
+            }
+
+            DB::commit();
+
+            return redirect()->route('admin.tabungan.pengajuan-setor')
+                ->with('success', 'Pengajuan setoran berhasil diupdate dan transaksi telah dibuat');
+                
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error edit pengajuan setor', [
+                'pengajuan_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        $pengajuan->update($updateData);
-
-        return redirect()->route('admin.tabungan.detail-pengajuan-setor', $id)
-            ->with('success', 'Pengajuan setoran berhasil diupdate');
     }
 
     /**

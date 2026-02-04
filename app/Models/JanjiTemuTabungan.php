@@ -40,9 +40,17 @@ class JanjiTemuTabungan extends Model
         return $this->belongsTo(Nasabah::class, 'id_nasabah');
     }
 
-    public function transTabungan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function transTabungan(): \Illuminate\Database\Eloquent\Relations\HasOneThrough
     {
-        return $this->hasOne(TransTabungan::class, 'id_janji_temu_tabungan');
+        // Janji temu -> pengajuan -> transaksi
+        return $this->hasOneThrough(
+            TransTabungan::class,
+            PengajuanTabungan::class,
+            'id',                    // Foreign key on pengajuan table
+            'id_pengajuan_setor',    // Foreign key on trans_tabungan table
+            'id_pengajuan',          // Local key on janji_temu table
+            'id'                     // Local key on pengajuan table
+        );
     }
 
     public function lokasi(): BelongsTo

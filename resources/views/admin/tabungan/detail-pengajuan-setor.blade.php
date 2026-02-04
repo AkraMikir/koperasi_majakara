@@ -89,27 +89,9 @@
                         @endif
                     </div>
 
-                    <!-- Keterangan (Editable) -->
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <p class="text-sm text-gray-600">Keterangan</p>
-                            @if($pengajuan->status == '1')
-                            <button onclick="toggleEditKeterangan()" id="btn-edit-keterangan" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-semibold">
-                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                </svg>
-                                Edit
-                            </button>
-                            @endif
-                        </div>
-                        <div id="keterangan-display">
-                            <p class="text-gray-900 mt-1">{{ $pengajuan->keterangan ?: 'Tidak ada keterangan' }}</p>
-                        </div>
-                        @if($pengajuan->status == '1')
-                        <div id="keterangan-edit" class="hidden">
-                            <textarea id="input-keterangan" rows="3" class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">{{ $pengajuan->keterangan }}</textarea>
-                        </div>
-                        @endif
+                        <p class="text-sm text-gray-600">Keterangan</p>
+                        <p class="text-gray-900 mt-1">{{ $pengajuan->keterangan ?: 'Tidak ada keterangan' }}</p>
                     </div>
 
                     <div>
@@ -117,8 +99,8 @@
                         @php
                             $statusConfig = [
                                 '1' => ['label' => 'Pending', 'bg' => 'bg-yellow-100', 'text' => 'text-yellow-700'],
-                                '3' => ['label' => 'Disetujui', 'bg' => 'bg-green-100', 'text' => 'text-green-700'],
-                                '2' => ['label' => 'Ditolak', 'bg' => 'bg-red-100', 'text' => 'text-red-700'],
+                                '2' => ['label' => 'Disetujui', 'bg' => 'bg-green-100', 'text' => 'text-green-700'],
+                                '3' => ['label' => 'Ditolak', 'bg' => 'bg-red-100', 'text' => 'text-red-700'],
                             ];
                             $status = $statusConfig[$pengajuan->status] ?? $statusConfig['1'];
                         @endphp
@@ -127,25 +109,56 @@
                         </span>
                     </div>
 
-                    <!-- Update & Approve Buttons -->
+                    <!-- Approve Button -->
                     @if($pengajuan->status == '1')
-                    <div class="pt-4 border-t border-gray-200 space-y-3">
-                        <button onclick="updateAndApprove()" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                    <div class="pt-4 border-t border-gray-200">
+                        <button onclick="showApproveModal()" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                             </svg>
-                            Update & Setujui
+                            Setujui Pengajuan
                         </button>
-                        <button onclick="quickApprove()" class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
-                            <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            Setujui Cepat (Tanpa Edit)
-                        </button>
+                        <p class="text-xs text-gray-500 mt-2 text-center">Nominal akan diambil dari nilai yang ditampilkan (jika sudah diedit, akan menggunakan nilai edit)</p>
                     </div>
                     @endif
                 </div>
             </div>
+
+            <!-- Approve Modal with Keterangan Admin -->
+            @if($pengajuan->status == '1')
+            <div id="approveModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Setujui Pengajuan</h3>
+                    <form id="approveForm" method="POST">
+                        @csrf
+                        <input type="hidden" name="nominal" id="modal-nominal">
+                        <input type="hidden" name="status" value="2">
+                        
+                        <div class="mb-4">
+                            <p class="text-sm text-gray-700 mb-2">Nominal yang akan disetujui:</p>
+                            <p id="modal-nominal-display" class="text-2xl font-bold text-[#674c1d]"></p>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Keterangan Admin <span class="text-gray-400">(Opsional)</span>
+                            </label>
+                            <textarea name="keterangan_admin" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Tambahkan catatan tambahan jika diperlukan..."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Keterangan ini akan dilihat oleh nasabah</p>
+                        </div>
+                        
+                        <div class="flex space-x-3">
+                            <button type="button" onclick="hideApproveModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                                Batal
+                            </button>
+                            <button type="submit" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Setujui
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            @endif
 
             <!-- Bukti Foto Transfer -->
             @if($pengajuan->buktiFoto->count() > 0)
@@ -253,8 +266,11 @@
                     <form method="POST" action="{{ route('admin.tabungan.reject-setor', $pengajuan->id) }}">
                         @csrf
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Alasan Penolakan <span class="text-red-500">*</span>
+                            </label>
                             <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
+                            <p class="text-xs text-gray-500 mt-1">Alasan ini akan dilihat oleh nasabah</p>
                         </div>
                         <div class="flex space-x-3">
                             <button type="button" onclick="hideRejectModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
@@ -276,7 +292,6 @@
 <script>
 
     let editingNominal = false;
-    let editingKeterangan = false;
 
     function toggleEditNominal() {
         editingNominal = !editingNominal;
@@ -290,83 +305,46 @@
         }
     }
 
-    function toggleEditKeterangan() {
-        editingKeterangan = !editingKeterangan;
-        document.getElementById('keterangan-display').classList.toggle('hidden');
-        document.getElementById('keterangan-edit').classList.toggle('hidden');
-        
-        if (!editingKeterangan) {
-            const input = document.getElementById('input-keterangan');
-            document.getElementById('keterangan-display').querySelector('p').textContent = 
-                input.value || 'Tidak ada keterangan';
-        }
-    }
-
     function formatNominalInput(input) {
         let value = input.value.replace(/\D/g, '');
         input.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     }
 
-    function updateAndApprove() {
-        if (!confirm('Update data dan setujui pengajuan ini?')) return;
-        
-        const nominal = document.getElementById('input-nominal').value.replace(/\D/g, '');
-        const keterangan = document.getElementById('input-keterangan').value;
+    function showApproveModal() {
+        // Ambil nominal dari input (jika sedang edit) atau dari display value
+        const nominalInput = document.getElementById('input-nominal');
+        const nominal = nominalInput.value.replace(/\D/g, '');
         
         if (parseInt(nominal) < 10000) {
             alert('Nominal minimal Rp 10.000');
             return;
         }
 
-        // Create form and submit
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("admin.tabungan.edit-pengajuan-setor", $pengajuan->id) }}';
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        
-        const nominalInput = document.createElement('input');
-        nominalInput.type = 'hidden';
-        nominalInput.name = 'nominal';
-        nominalInput.value = nominal;
-        
-        const keteranganInput = document.createElement('input');
-        keteranganInput.type = 'hidden';
-        keteranganInput.name = 'keterangan';
-        keteranganInput.value = keterangan;
-        
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'status';
-        statusInput.value = '2';
-        
-        form.appendChild(csrf);
-        form.appendChild(nominalInput);
-        form.appendChild(keteranganInput);
-        form.appendChild(statusInput);
-        
-        document.body.appendChild(form);
-        form.submit();
+        // Set nominal di modal
+        document.getElementById('modal-nominal').value = nominal;
+        document.getElementById('modal-nominal-display').textContent = 
+            'Rp ' + parseInt(nominal).toLocaleString('id-ID');
+
+        // Check apakah nominal sudah diedit
+        const originalNominal = '{{ $pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0) }}';
+        const isEdited = (nominal !== originalNominal.replace(/\D/g, ''));
+
+        // Set form action based on whether nominal was edited or not
+        const form = document.getElementById('approveForm');
+        if (isEdited) {
+            // Jika diedit, submit ke edit route (akan update nominal + buat transaksi + update status)
+            form.action = '{{ route("admin.tabungan.edit-pengajuan-setor", $pengajuan->id) }}';
+        } else {
+            // Jika tidak diedit, bisa langsung approve tapi tetap dengan modal untuk keterangan
+            form.action = '{{ route("admin.tabungan.edit-pengajuan-setor", $pengajuan->id) }}';
+        }
+
+        // Show modal
+        document.getElementById('approveModal').classList.remove('hidden');
     }
 
-    function quickApprove() {
-        if (!confirm('Setujui pengajuan tanpa edit?')) return;
-        
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = '{{ route("admin.tabungan.approve-setor", $pengajuan->id) }}';
-        
-        const csrf = document.createElement('input');
-        csrf.type = 'hidden';
-        csrf.name = '_token';
-        csrf.value = '{{ csrf_token() }}';
-        
-        form.appendChild(csrf);
-        document.body.appendChild(form);
-        form.submit();
+    function hideApproveModal() {
+        document.getElementById('approveModal').classList.add('hidden');
     }
 
     function showRejectModal() {
@@ -375,6 +353,21 @@
     
     function hideRejectModal() {
         document.getElementById('rejectModal').classList.add('hidden');
+    }
+
+    function showPhotoPreview(url, title) {
+        // Simple modal for photo preview
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4';
+        modal.onclick = function() { document.body.removeChild(modal); };
+        
+        const img = document.createElement('img');
+        img.src = url;
+        img.className = 'max-w-full max-h-full rounded-lg';
+        img.alt = title;
+        
+        modal.appendChild(img);
+        document.body.appendChild(modal);
     }
 </script>
 @endpush

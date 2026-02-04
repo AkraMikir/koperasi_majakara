@@ -330,19 +330,27 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
-            // Janji temu langsung ke tbl_janji_temu_tabungan (tidak buat pengajuan)
-            $tanggalWaktu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
+            // Generate ID untuk tracking (TIDAK insert ke tbl_pengajuan_tabungan)
+            // Generate ID: Tabungan (T), Janji Temu (JT), Setoran (STR)
+            $idPengajuan = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'JT', 'STR');
             
+            // Parse dates
+            $tanggalJanjiTemu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
+            $waktuJanjiTemu = \Carbon\Carbon::parse($request->waktu_janji_temu)->format('H:i:s');
+            
+            // Create janji temu dengan id_pengajuan terisi (untuk tracking)
+            // Tapi TIDAK buat record di tbl_pengajuan_tabungan
             JanjiTemuTabungan::create([
-                'id_pengajuan' => null,
+                'id_pengajuan' => $idPengajuan,  // ✅ Terisi - untuk tracking/identifier
                 'id_nasabah' => $idAnggota,
                 'lokasi_temu' => $request->lokasi_temu,
                 'nominal' => $request->nominal,
-                'tanggal_janji_temu' => $tanggalWaktu,
-                'waktu_janji_temu' => $tanggalWaktu,
+                'tanggal_janji_temu' => $tanggalJanjiTemu,
+                'waktu_janji_temu' => $waktuJanjiTemu,
                 'keterangan' => $request->keterangan,
             ]);
 
+            // Redirect ke status janji temu
             return redirect()->route('nasabah.tabungan.status-janji-temu')
                 ->with('success', 'Janji temu berhasil dibuat!');
                 

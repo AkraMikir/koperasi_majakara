@@ -5,11 +5,9 @@ use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
-    /**
-     * View janji temu universal: Tabungan pakai id_nasabah (tidak wajib punya pengajuan).
-     */
     public function up(): void
     {
+        // Recreate view with LEFT JOIN to support janji temu without pengajuan
         DB::statement("
             CREATE OR REPLACE VIEW v_janji_temu_universal AS 
             SELECT 
@@ -25,7 +23,7 @@ return new class extends Migration
                 jtt.keterangan,
                 jtt.created_at
             FROM tbl_janji_temu_tabungan jtt
-            JOIN tbl_nasabah n ON n.id = jtt.id_nasabah
+            JOIN tbl_nasabah n ON jtt.id_nasabah = n.id
             JOIN users u ON n.user_id = u.id
             JOIN jns_lokasi_perusahaan jl ON jtt.lokasi_temu = jl.id
             
@@ -53,6 +51,7 @@ return new class extends Migration
 
     public function down(): void
     {
+        // Revert to old view
         DB::statement("
             CREATE OR REPLACE VIEW v_janji_temu_universal AS 
             SELECT 
