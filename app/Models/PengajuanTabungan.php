@@ -48,10 +48,7 @@ class PengajuanTabungan extends Model
         return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
     }
 
-    public function janjiTemu(): HasOne
-    {
-        return $this->hasOne(JanjiTemuTabungan::class, 'id_pengajuan');
-    }
+    // REMOVED: janjiTemu relation - janji temu sekarang independent
 
     public function transTabungan(): HasMany
     {

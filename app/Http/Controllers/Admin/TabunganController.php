@@ -70,7 +70,7 @@ class TabunganController extends Controller
      */
     public function pengajuanSetor(Request $request)
     {
-        $query = PengajuanTabungan::with(['nasabah.user', 'buktiFoto', 'janjiTemu'])
+        $query = PengajuanTabungan::with(['nasabah.user', 'buktiFoto'])  // Removed janjiTemu
             ->latest();
 
         // Filter by status
@@ -100,7 +100,7 @@ class TabunganController extends Controller
      */
     public function detailPengajuanSetor($id)
     {
-        $pengajuan = PengajuanTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'buktiFoto', 'janjiTemu.lokasi'])
+        $pengajuan = PengajuanTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'buktiFoto'])  // Removed janjiTemu
             ->findOrFail($id);
 
         return view('admin.tabungan.detail-pengajuan-setor', compact('pengajuan'));
@@ -114,13 +114,10 @@ class TabunganController extends Controller
         try {
             DB::beginTransaction();
             
-            $pengajuan = PengajuanTabungan::with(['buktiFoto', 'janjiTemu', 'transTabungan'])->findOrFail($id);
+            $pengajuan = PengajuanTabungan::with(['buktiFoto', 'transTabungan'])->findOrFail($id);  // Removed janjiTemu
             
-            // Get nominal from pengajuan (or janji temu for tunai)
+            // Get nominal from pengajuan
             $nominal = $pengajuan->nominal ?? 0;
-            if ($pengajuan->janjiTemu && $nominal == 0) {
-                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
-            }
 
             // Validate nominal
             if ($nominal == 0 || $nominal < 10000) {
@@ -133,7 +130,7 @@ class TabunganController extends Controller
             // Pastikan tidak ada duplikasi transaksi
             if ($pengajuan->transTabungan->count() == 0) {
                 // V2 Logic: Master Data Driven
-                $kodeVia = ($pengajuan->janjiTemu) ? 'TN' : 'TF';
+                $kodeVia = 'TF';  // Pengajuan always Transfer
                 $kodeTrans = 'STR';
 
                 // Get IDs from Master Tables
@@ -500,7 +497,7 @@ class TabunganController extends Controller
         try {
             DB::beginTransaction();
             
-            $pengajuan = PengajuanTabungan::with(['buktiFoto', 'janjiTemu', 'transTabungan'])->findOrFail($id);
+            $pengajuan = PengajuanTabungan::with(['buktiFoto', 'transTabungan'])->findOrFail($id);  // Removed janjiTemu
             
             $updateData = [
                 'status' => $request->status,
@@ -520,11 +517,8 @@ class TabunganController extends Controller
 
             // Jika status approved (2) dan belum ada transaksi, buat transaksi
             if ($request->status == '2' && $pengajuan->transTabungan->count() == 0) {
-                // Get nominal from pengajuan (or janji temu for tunai)
+                // Get nominal from pengajuan
                 $nominal = $pengajuan->nominal ?? 0;
-                if ($pengajuan->janjiTemu && $nominal == 0) {
-                    $nominal = $pengajuan->janjiTemu->nominal ?? 0;
-                }
 
                 // Validate nominal
                 if ($nominal == 0 || $nominal < 10000) {
@@ -534,7 +528,7 @@ class TabunganController extends Controller
                 }
 
                 // V2 Logic: Master Data Driven
-                $kodeVia = ($pengajuan->janjiTemu) ? 'TN' : 'TF';
+                $kodeVia = 'TF';  // Pengajuan always Transfer
                 $kodeTrans = 'STR';
 
                 // Get IDs from Master Tables
@@ -667,7 +661,7 @@ class TabunganController extends Controller
         $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->with('janjiTemu')
+            ->with(['buktiFoto'])  // Removed janjiTemu
             ->get();
 
         foreach ($pengajuanApproved as $pengajuan) {
@@ -675,9 +669,7 @@ class TabunganController extends Controller
             $nominal = $pengajuan->nominal ?? 0;
             
             // Jika nominal masih 0, coba ambil dari janji temu (untuk backward compatibility)
-            if ($nominal == 0 && $pengajuan->janjiTemu) {
-                $nominal = $pengajuan->janjiTemu->nominal ?? 0;
-            }
+            $nominal = $pengajuan->nominal;  // Use pengajuan nominal directly
             
             $totalSetoran += $nominal;
         }

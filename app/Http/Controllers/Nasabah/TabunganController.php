@@ -416,7 +416,7 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         $pengajuan = PengajuanTabungan::where('id_anggota', $idAnggota)
-            ->with(['buktiFoto', 'janjiTemu.lokasi'])
+            ->with(['buktiFoto'])  // Removed janjiTemu relation
             ->latest()
             ->paginate(10);
 

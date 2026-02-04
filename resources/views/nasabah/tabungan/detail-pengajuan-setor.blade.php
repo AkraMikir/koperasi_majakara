@@ -58,10 +58,7 @@
             <div class="space-y-4">
                 <div>
                     <p class="text-sm text-gray-600 mb-2">Total Nominal</p>
-                    @php
-                        $nominal = $pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0);
-                    @endphp
-                    <p class="text-3xl font-bold text-[#674c1d]">Rp {{ number_format($nominal, 0, ',', '.') }}</p>
+                    <p class="text-3xl font-bold text-[#674c1d]">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                 </div>
 
                 @if($pengajuan->keterangan)
@@ -96,28 +93,7 @@
         </div>
         @endif
 
-        <!-- Janji Temu -->
-        @if($pengajuan->janjiTemu)
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Janji Temu</h2>
-            <div class="space-y-3">
-                <div>
-                    <p class="text-sm text-gray-600">Tanggal & Waktu</p>
-                    <p class="font-semibold text-gray-900">{{ $pengajuan->janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600">Lokasi</p>
-                    <p class="font-semibold text-gray-900">{{ $pengajuan->janjiTemu->lokasi->nama_lokasi ?? 'N/A' }}</p>
-                    <p class="text-sm text-gray-600">{{ $pengajuan->janjiTemu->lokasi->alamat_lengkap ?? '' }}</p>
-                    <p class="text-xs text-gray-500">{{ $pengajuan->janjiTemu->lokasi->kota ?? '' }}, {{ $pengajuan->janjiTemu->lokasi->provinsi ?? '' }}</p>
-                </div>
-                <div>
-                    <p class="text-sm text-gray-600">Nominal</p>
-                    <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($pengajuan->janjiTemu->nominal, 0, ',', '.') }}</p>
-                </div>
-            </div>
-        </div>
-        @endif
+        <!-- Note: Janji temu removed - sekarang independent, hanya untuk setoran tunai -->
     </div>
 </div>
 @endsection
