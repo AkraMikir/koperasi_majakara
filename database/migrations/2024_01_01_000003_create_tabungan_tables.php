@@ -62,10 +62,25 @@ return new class extends Migration
             $table->enum('status', ['1', '2', '3'])->default('1'); // ✅ NEW: 1=Menunggu, 2=Selesai, 3=Batal
             $table->timestamps();
         });
+
+        // 5. Bukti Foto Universal (untuk semua fitur)
+        Schema::create('tbl_bukti_foto', function (Blueprint $table) {
+            $table->id();
+            $table->string('owner_id', 30); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
+            $table->string('owner_fitur', 10); // T=Tabungan, P=Pinjaman, G=Gadai, D=Deposito
+            $table->string('owner_trans', 20); // Type transaksi: STR, PNR, PNJ, JNJT, dll
+            $table->string('file_path', 255);
+            $table->text('keterangan')->nullable();
+            $table->timestamps();
+            
+            // Index untuk pencarian
+            $table->index(['owner_id', 'owner_fitur', 'owner_trans']);
+        });
     }
 
     public function down(): void
     {
+        Schema::dropIfExists('tbl_bukti_foto');
         Schema::dropIfExists('tbl_janji_temu_tabungan');
         Schema::dropIfExists('trans_tabungan');
         Schema::dropIfExists('tbl_pengajuan_penarikan_tabungan');
