@@ -51,7 +51,7 @@ INSERT INTO `jns_fitur` (`kode`, `nama`, `deskripsi`, `is_active`, `created_at`,
 -- Table: jns_via
 CREATE TABLE `jns_via` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `kode` char(1) NOT NULL,
+  `kode` char(2) NOT NULL,
   `nama` varchar(50) NOT NULL,
   `deskripsi` text,
   `is_active` tinyint(1) NOT NULL DEFAULT 1,
@@ -63,8 +63,8 @@ CREATE TABLE `jns_via` (
 
 -- Seed jns_via
 INSERT INTO `jns_via` (`kode`, `nama`, `deskripsi`, `is_active`, `created_at`, `updated_at`) VALUES
-('T', 'Transfer', 'Via transfer bank', 1, NOW(), NOW()),
-('C', 'Cash', 'Via tunai/cash', 1, NOW(), NOW());
+('TF', 'Transfer', 'Via transfer bank', 1, NOW(), NOW()),
+('TN', 'Tunai', 'Via tunai/cash', 1, NOW(), NOW());
 
 -- Table: jns_transaksi
 CREATE TABLE `jns_transaksi` (

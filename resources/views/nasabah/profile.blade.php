@@ -343,62 +343,28 @@
         </div>
     </div>
 
-    <!-- Keamanan PIN -->
+    <!-- Keamanan & Privasi - Link ke Setting -->
     <div class="mx-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-2xl shadow-lg p-6 border-2 border-[#d4af37]/30">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-lg font-bold text-[#674c1d] font-display">Keamanan PIN</h2>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Ubah PIN -->
-                <button onclick="openUbahPinModal()" class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] hover:from-[#8b6f2f] hover:to-[#674c1d] text-white rounded-xl p-4 transition-all duration-300 shadow-md hover:shadow-xl flex items-center gap-3">
-                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                         </svg>
                     </div>
-                    <div class="text-left">
-                        <p class="font-semibold text-base">Ubah PIN</p>
-                        <p class="text-sm text-white/80">Ganti PIN dengan yang baru</p>
+                    <div>
+                        <h2 class="text-lg font-bold text-white font-display">Keamanan & Privasi</h2>
+                        <p class="text-white/90 text-sm">Kelola password dan PIN transaksi</p>
                     </div>
-                </button>
-
-                <!-- Lupa PIN -->
-                <button onclick="openLupaPinModal()" class="bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] hover:from-[#8b6f2f] hover:to-[#d4af37] text-white rounded-xl p-4 transition-all duration-300 shadow-md hover:shadow-xl flex items-center gap-3">
-                    <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
                     </div>
-                    <div class="text-left">
-                        <p class="font-semibold text-base">Lupa PIN</p>
-                        <p class="text-sm text-white/80">Reset PIN dengan OTP</p>
-                    </div>
-                </button>
-            </div>
-
-            <!-- Info Keamanan -->
-            <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                <a href="{{ route('nasabah.setting.index') }}" 
+                    class="px-5 py-3 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white rounded-xl transition-all font-semibold text-sm flex items-center gap-2 border border-white/30">
+                    Buka Setting
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                    <div class="text-sm text-blue-800">
-                        <p class="font-semibold mb-1">Tips Keamanan PIN:</p>
-                        <ul class="list-disc list-inside space-y-1 text-blue-700">
-                            <li>Gunakan PIN yang mudah diingat tapi sulit ditebak</li>
-                            <li>Jangan gunakan tanggal lahir atau kombinasi berurutan</li>
-                            <li>Ganti PIN secara berkala untuk keamanan lebih baik</li>
-                            <li>Jangan bagikan PIN kepada siapapun</li>
-                        </ul>
-                    </div>
-                </div>
+                </a>
             </div>
         </div>
     </div>
@@ -500,302 +466,10 @@
     </div>
 </div>
 
-<!-- Modal Ubah PIN -->
-<div id="modalUbahPin" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] p-6 rounded-t-2xl">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white">Ubah PIN</h3>
-                </div>
-                <button onclick="closeUbahPinModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
+<!-- Modals PIN Telah Dipindahkan ke Halaman Setting -->
 
-        <form action="{{ route('nasabah.pin.update') }}" method="POST" class="p-6">
-            @csrf
-            
-            <div class="space-y-4">
-                <!-- PIN Lama -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        PIN Lama <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="pin_lama" id="pin_lama" maxlength="6" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                           placeholder="••••••" required>
-                    <p class="text-xs text-gray-500 mt-1">Masukkan PIN lama Anda (6 digit)</p>
-                </div>
-
-                <!-- PIN Baru -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        PIN Baru <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="pin_baru" id="pin_baru" maxlength="6" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                           placeholder="••••••" required>
-                    <p class="text-xs text-gray-500 mt-1">Masukkan PIN baru (6 digit)</p>
-                </div>
-
-                <!-- Konfirmasi PIN Baru -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        Konfirmasi PIN Baru <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="pin_baru_confirmation" id="pin_baru_confirmation" maxlength="6" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                           placeholder="••••••" required>
-                    <p class="text-xs text-gray-500 mt-1">Ketik ulang PIN baru untuk konfirmasi</p>
-                </div>
-            </div>
-
-            <div class="mt-6 flex gap-3">
-                <button type="button" onclick="closeUbahPinModal()" 
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="submit" 
-                        class="flex-1 px-6 py-3 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
-                    Ubah PIN
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Lupa PIN -->
-<div id="modalLupaPin" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] p-6 rounded-t-2xl">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-white">Lupa PIN</h3>
-                </div>
-                <button onclick="closeLupaPinModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        <div class="p-6">
-            <!-- Step 1: Request OTP -->
-            <div id="stepRequestOtp">
-                <div class="text-center mb-6">
-                    <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-full flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h4 class="text-lg font-semibold text-gray-900 mb-2">Verifikasi dengan OTP</h4>
-                    <p class="text-sm text-gray-600">Kami akan mengirimkan kode OTP ke nomor WhatsApp Anda: <strong>{{ $nasabah->user->nomor_hp }}</strong></p>
-                </div>
-
-                <form action="{{ route('nasabah.pin.send-otp-lupa') }}" method="POST">
-                    @csrf
-                    <button type="submit" id="btnSendOtp"
-                            class="w-full px-6 py-3 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#d4af37] transition-all shadow-md hover:shadow-lg">
-                        Kirim Kode OTP
-                    </button>
-                </form>
-
-                <button type="button" onclick="closeLupaPinModal()" 
-                        class="w-full mt-3 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-            </div>
-
-            <!-- Step 2: Verify OTP & Set New PIN -->
-            <div id="stepVerifyOtp" class="hidden">
-                <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
-                    <div class="flex gap-3">
-                        <svg class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <div class="text-sm text-green-800">
-                            <p class="font-semibold">Kode OTP telah dikirim!</p>
-                            <p>Silakan cek WhatsApp Anda dan masukkan kode OTP di bawah ini.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <form action="{{ route('nasabah.pin.verify-otp-lupa') }}" method="POST">
-                    @csrf
-                    
-                    <div class="space-y-4">
-                        <!-- Kode OTP -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Kode OTP <span class="text-red-500">*</span>
-                            </label>
-                            <input type="text" name="otp_code" id="otp_code" maxlength="6" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                                   placeholder="••••••" required>
-                            <p class="text-xs text-gray-500 mt-1">Masukkan kode OTP 6 digit</p>
-                        </div>
-
-                        <!-- PIN Baru -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                PIN Baru <span class="text-red-500">*</span>
-                            </label>
-                            <input type="password" name="pin_baru" id="pin_baru_lupa" maxlength="6" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                                   placeholder="••••••" required>
-                            <p class="text-xs text-gray-500 mt-1">Masukkan PIN baru (6 digit)</p>
-                        </div>
-
-                        <!-- Konfirmasi PIN Baru -->
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">
-                                Konfirmasi PIN Baru <span class="text-red-500">*</span>
-                            </label>
-                            <input type="password" name="pin_baru_confirmation" id="pin_baru_confirmation_lupa" maxlength="6" 
-                                   class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                                   placeholder="••••••" required>
-                            <p class="text-xs text-gray-500 mt-1">Ketik ulang PIN baru untuk konfirmasi</p>
-                        </div>
-                    </div>
-
-                    <div class="mt-6 space-y-3">
-                        <button type="submit" 
-                                class="w-full px-6 py-3 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#d4af37] transition-all shadow-md hover:shadow-lg">
-                            Verifikasi & Ubah PIN
-                        </button>
-
-                        <!-- Resend OTP -->
-                        <div class="text-center">
-                            <p class="text-sm text-gray-600 mb-2">Tidak menerima kode?</p>
-                            <form action="{{ route('nasabah.pin.resend-otp-lupa') }}" method="POST" class="inline">
-                                @csrf
-                                <button type="submit" id="btnResendOtp"
-                                        class="text-[#8b6f2f] font-semibold hover:text-[#674c1d] transition-colors">
-                                    Kirim Ulang OTP
-                                </button>
-                            </form>
-                            <span id="resendCountdown" class="text-sm text-gray-500 ml-2 hidden"></span>
-                        </div>
-
-                        <button type="button" onclick="closeLupaPinModal()" 
-                                class="w-full px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                            Batal
-                        </button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!-- ==================== EDIT PROFILE FUNCTIONS ====================-->
 <script>
-// Modal Ubah PIN
-function openUbahPinModal() {
-    document.getElementById('modalUbahPin').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeUbahPinModal() {
-    document.getElementById('modalUbahPin').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    // Reset form
-    document.getElementById('modalUbahPin').querySelector('form').reset();
-}
-
-// Modal Lupa PIN
-function openLupaPinModal() {
-    document.getElementById('modalLupaPin').classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-    // Reset to step 1
-    document.getElementById('stepRequestOtp').classList.remove('hidden');
-    document.getElementById('stepVerifyOtp').classList.add('hidden');
-}
-
-function closeLupaPinModal() {
-    document.getElementById('modalLupaPin').classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    // Reset forms
-    document.getElementById('stepRequestOtp').classList.remove('hidden');
-    document.getElementById('stepVerifyOtp').classList.add('hidden');
-}
-
-// Check if OTP was sent (from server session)
-const otpWasSent = {{ session('lupa_pin_otp_sent') ? 'true' : 'false' }};
-
-// Show OTP verification step after OTP sent
-if (otpWasSent) {
-    document.addEventListener('DOMContentLoaded', function() {
-        openLupaPinModal();
-        document.getElementById('stepRequestOtp').classList.add('hidden');
-        document.getElementById('stepVerifyOtp').classList.remove('hidden');
-        startResendCountdown();
-    });
-}
-
-// Resend countdown timer
-let resendCountdownInterval;
-function startResendCountdown() {
-    let seconds = 60;
-    const btnResendOtp = document.getElementById('btnResendOtp');
-    const countdownSpan = document.getElementById('resendCountdown');
-    
-    btnResendOtp.disabled = true;
-    btnResendOtp.classList.add('opacity-50', 'cursor-not-allowed');
-    countdownSpan.classList.remove('hidden');
-    
-    resendCountdownInterval = setInterval(function() {
-        seconds--;
-        countdownSpan.textContent = `(${seconds}s)`;
-        
-        if (seconds <= 0) {
-            clearInterval(resendCountdownInterval);
-            btnResendOtp.disabled = false;
-            btnResendOtp.classList.remove('opacity-50', 'cursor-not-allowed');
-            countdownSpan.classList.add('hidden');
-        }
-    }, 1000);
-}
-
-// Only allow numbers for PIN inputs
-document.addEventListener('DOMContentLoaded', function() {
-    const pinInputs = document.querySelectorAll('input[name^="pin"], input[name="otp_code"]');
-    pinInputs.forEach(input => {
-        input.addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '');
-        });
-    });
-});
-
-// Close modal when clicking outside
-document.getElementById('modalUbahPin').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeUbahPinModal();
-    }
-});
-
-document.getElementById('modalLupaPin').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeLupaPinModal();
-    }
-});
-
-// ==================== EDIT PROFILE FUNCTIONS ====================
-
 // Data template untuk setiap jenis data
 const formTemplates = {
     'data_user': {

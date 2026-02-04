@@ -33,6 +33,7 @@ class TabunganController extends Controller
             'status' => 'Aktif',
         ];
         $transaksiTabungan = TransTabungan::where('id_anggota', $idAnggota)
+            ->with(['jnsTransaksi', 'jnsVia'])
             ->latest('tgl_transaksi')
             ->take(10)
             ->get();
@@ -66,13 +67,18 @@ class TabunganController extends Controller
             ->whereHas('jnsTransaksi', function($q) {
                 $q->where('kode', 'STR');
             })
+            ->with(['jnsTransaksi', 'jnsVia'])
             ->latest('tgl_transaksi')
             ->take(10)
             ->get();
 
+        // Get lokasi untuk janji temu
+        $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
+
         return view('nasabah.tabungan.nabung-sekarang', [
             'user' => auth()->user(),
             'riwayatTabungan' => $riwayatTabungan,
+            'lokasi' => $lokasi,
         ]);
     }
 
@@ -108,6 +114,7 @@ class TabunganController extends Controller
             ->whereHas('jnsTransaksi', function($q) {
                 $q->where('kode', 'PNR');
             })
+            ->with(['jnsTransaksi', 'jnsVia'])
             ->latest('tgl_transaksi')
             ->take(10)
             ->get();
@@ -323,30 +330,20 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
-            // Generate ID: Tabungan (T), Cash (C), Setoran (STR)
-            $idPengajuan = IdGenerator::generate('tbl_pengajuan_tabungan', 'T', 'C', 'STR');
-
-            // Create pengajuan tabungan
-            $pengajuan = PengajuanTabungan::create([
-                'id' => $idPengajuan,
-                'id_anggota' => $idAnggota,
-                // 'foto_bukti_tf' => 'tunai', // REMOVED
-                'keterangan' => $request->keterangan,
-                'status' => '1', // Pending
-            ]);
-
-            // Create janji temu
+            // Janji temu langsung ke tbl_janji_temu_tabungan (tidak buat pengajuan)
             $tanggalWaktu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
             
             JanjiTemuTabungan::create([
-                'id_pengajuan' => $pengajuan->id,
+                'id_pengajuan' => null,
+                'id_nasabah' => $idAnggota,
                 'lokasi_temu' => $request->lokasi_temu,
                 'nominal' => $request->nominal,
                 'tanggal_janji_temu' => $tanggalWaktu,
                 'waktu_janji_temu' => $tanggalWaktu,
+                'keterangan' => $request->keterangan,
             ]);
 
-            return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
+            return redirect()->route('nasabah.tabungan.status-janji-temu')
                 ->with('success', 'Janji temu berhasil dibuat!');
                 
         } catch (\Illuminate\Auth\AuthenticationException $e) {
@@ -422,6 +419,23 @@ class TabunganController extends Controller
     }
 
     /**
+     * Show status janji temu (setoran tunai) - hanya dari tbl_janji_temu_tabungan.
+     */
+    public function statusJanjiTemu()
+    {
+        $idAnggota = $this->getIdAnggota();
+        
+        $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
+            ->with('lokasi')
+            ->latest('tanggal_janji_temu')
+            ->paginate(10);
+
+        return view('nasabah.tabungan.status-janji-temu', [
+            'janjiTemu' => $janjiTemu,
+        ]);
+    }
+
+    /**
      * Show status pengajuan penarikan.
      */
     public function statusPengajuanTarik()
@@ -476,7 +490,7 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         $transaksi = TransTabungan::where('id_anggota', $idAnggota)
-            ->with(['pengajuanSetor.buktiFoto', 'pengajuanTarik'])
+            ->with(['pengajuanSetor.buktiFoto', 'pengajuanTarik', 'jnsTransaksi', 'jnsVia'])
             ->findOrFail($id);
 
         return view('nasabah.tabungan.detail-transaksi', [
@@ -491,9 +505,7 @@ class TabunganController extends Controller
     {
         $idAnggota = $this->getIdAnggota();
         
-        $janjiTemu = JanjiTemuTabungan::whereHas('pengajuan', function($q) use ($idAnggota) {
-                $q->where('id_anggota', $idAnggota);
-            })
+        $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
             ->with(['pengajuan', 'lokasi'])
             ->findOrFail($id);
 

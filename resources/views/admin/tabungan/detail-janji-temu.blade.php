@@ -20,38 +20,41 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Data Nasabah -->
+            <!-- Data Nasabah (dari pengajuan atau langsung dari janji temu) -->
+            @php
+                $nasabah = $janjiTemu->pengajuan?->nasabah ?? $janjiTemu->nasabah;
+            @endphp
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Data Nasabah</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600">Nama Lengkap</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->user->nama ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->user->nama ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Email</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->user->email ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->user->email ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nomor HP</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->user->nomor_hp ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">NIK</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                     </div>
-                    @if($janjiTemu->pengajuan->nasabah->dataRek)
+                    @if($nasabah->dataRek ?? null)
                     <div>
                         <p class="text-sm text-gray-600">No. Rekening</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nama Bank</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->dataRek->nama_bank ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->dataRek->nama_bank ?? 'N/A' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nama Pemilik Rekening</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->pengajuan->nasabah->dataRek->nama_pemilik_rekening ?? 'N/A' }}</p>
+                        <p class="font-semibold text-gray-900">{{ $nasabah->dataRek->nama_pemilik_rekening ?? 'N/A' }}</p>
                     </div>
                     @endif
                 </div>
@@ -75,10 +78,12 @@
                         <p class="text-sm text-gray-600">Nominal</p>
                         <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
+                    @if($janjiTemu->pengajuan)
                     <div>
                         <p class="text-sm text-gray-600">ID Pengajuan</p>
                         <p class="font-semibold text-gray-900">#{{ $janjiTemu->pengajuan->id }}</p>
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -92,7 +97,7 @@
                         $isPast = $janjiTemu->tanggal_janji_temu < now();
                         $statusColor = $isPast ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
                         $statusLabel = $isPast ? 'Selesai' : 'Akan Datang';
-                        $hasTransaksi = $janjiTemu->pengajuan->transTabungan->count() > 0;
+                        $hasTransaksi = $janjiTemu->transTabungan || ($janjiTemu->pengajuan && $janjiTemu->pengajuan->transTabungan->count() > 0);
                     @endphp
                     <span class="inline-block px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
                         {{ $statusLabel }}
@@ -166,6 +171,9 @@
             </div>
             @else
             <!-- Info Transaksi Sudah Ada -->
+            @php
+                $transaksiJanjiTemu = $janjiTemu->transTabungan ?? $janjiTemu->pengajuan?->transTabungan?->first();
+            @endphp
             <div class="bg-green-50 rounded-2xl shadow-md p-6 border border-green-200">
                 <div class="flex items-center gap-3 mb-3">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -174,10 +182,12 @@
                     <h3 class="text-lg font-bold text-green-800">Transaksi Sudah Dibuat</h3>
                 </div>
                 <p class="text-sm text-green-700 mb-4">Transaksi tabungan untuk janji temu ini sudah dibuat.</p>
-                <a href="{{ route('admin.tabungan.detail-transaksi', $janjiTemu->pengajuan->transTabungan->first()->id) }}" 
+                @if($transaksiJanjiTemu)
+                <a href="{{ route('admin.tabungan.detail-transaksi', $transaksiJanjiTemu->id) }}" 
                     class="block text-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
                     Lihat Detail Transaksi
                 </a>
+                @endif
             </div>
             @endif
         </div>

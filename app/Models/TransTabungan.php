@@ -17,9 +17,9 @@ class TransTabungan extends Model
     protected $fillable = [
         'id',
         'id_pengajuan_setor',
+        'id_janji_temu_tabungan',
         'id_pengajuan_tarik',
         'id_anggota',
-        'id_jns_fitur',
         'id_jns_via',
         'id_jns_transaksi',
         'nominal',
@@ -33,6 +33,31 @@ class TransTabungan extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    protected $appends = ['jenis', 'via'];
+
+    /**
+     * Jenis transaksi untuk tampilan: setoran | penarikan (dari jns_transaksi.kode).
+     */
+    public function getJenisAttribute(): ?string
+    {
+        $kode = $this->jnsTransaksi?->kode;
+        if ($kode === 'STR') {
+            return 'setoran';
+        }
+        if ($kode === 'PNR') {
+            return 'penarikan';
+        }
+        return null;
+    }
+
+    /**
+     * Via transaksi untuk tampilan (dari jns_via.nama).
+     */
+    public function getViaAttribute(): ?string
+    {
+        return $this->jnsVia?->nama;
+    }
 
     protected static function boot()
     {
@@ -53,6 +78,11 @@ class TransTabungan extends Model
     public function pengajuanTarik(): BelongsTo
     {
         return $this->belongsTo(PengajuanPenarikanTabungan::class, 'id_pengajuan_tarik');
+    }
+
+    public function janjiTemuTabungan(): BelongsTo
+    {
+        return $this->belongsTo(JanjiTemuTabungan::class, 'id_janji_temu_tabungan');
     }
 
     // New Relationships to Master Tables

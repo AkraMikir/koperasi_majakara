@@ -39,19 +39,19 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Jenis</p>
-                        <span class="inline-block px-4 py-2 {{ $transaksi->jenis === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-sm font-semibold">
-                            {{ ucfirst($transaksi->jenis) }}
+                        <span class="inline-block px-4 py-2 {{ ($transaksi->jenis ?? '') === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-sm font-semibold">
+                            {{ ucfirst($transaksi->jenis ?? '-') }}
                         </span>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Nominal</p>
-                        <p class="text-3xl font-bold {{ $transaksi->jenis === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
-                            {{ $transaksi->jenis === 'setoran' ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
+                        <p class="text-3xl font-bold {{ ($transaksi->jenis ?? '') === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
+                            {{ ($transaksi->jenis ?? '') === 'setoran' ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->nominal), 0, ',', '.') }}
                         </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Via</p>
-                        <p class="font-semibold text-gray-900">{{ ucfirst($transaksi->via) }}</p>
+                        <p class="font-semibold text-gray-900">{{ $transaksi->via ? ucfirst($transaksi->via) : '-' }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">ID Transaksi</p>
@@ -69,16 +69,21 @@
         </div>
 
         <!-- Bukti Foto (jika setoran) -->
-        @if($transaksi->jenis === 'setoran' && $transaksi->pengajuanSetor && $transaksi->pengajuanSetor->buktiFoto->count() > 0)
+        @if(($transaksi->jenis ?? '') === 'setoran' && $transaksi->pengajuanSetor && $transaksi->pengajuanSetor->buktiFoto->count() > 0)
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Bukti Transfer</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach($transaksi->pengajuanSetor->buktiFoto as $bukti)
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <img src="{{ asset('storage/' . $bukti->file_photo) }}" alt="Bukti Transfer" class="w-full h-48 object-cover">
+                <div class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" 
+                    onclick="showPhotoPreview('{{ asset('storage/' . $bukti->file_path) }}', 'Bukti Transfer #{{ $loop->iteration }}')">
+                    <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Transfer" class="w-full h-48 object-cover">
                     <div class="p-4 bg-gray-50">
-                        <p class="font-semibold text-[#674c1d] mb-1">Rp {{ number_format($bukti->nominal, 0, ',', '.') }}</p>
-                        <p class="text-sm text-gray-600">{{ $bukti->keterangan }}</p>
+                        <p class="text-sm text-gray-600 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                            </svg>
+                            Klik untuk memperbesar
+                        </p>
                     </div>
                 </div>
                 @endforeach

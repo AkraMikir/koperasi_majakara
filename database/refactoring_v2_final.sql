@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `jns_fitur` (
 
 CREATE TABLE IF NOT EXISTS `jns_via` (
     `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-    `kode` CHAR(1) NOT NULL UNIQUE, -- T (Transfer), C (Cash)
+    `kode` CHAR(2) NOT NULL UNIQUE, -- TF (Transfer), TN (Tunai)
     `nama` VARCHAR(50) NOT NULL,
     `deskripsi` TEXT NULL,
     `is_active` TINYINT(1) NOT NULL DEFAULT 1,
@@ -55,8 +55,8 @@ INSERT IGNORE INTO `jns_fitur` (`kode`, `nama`) VALUES
 ('G', 'Gadai');
 
 INSERT IGNORE INTO `jns_via` (`kode`, `nama`) VALUES 
-('T', 'Transfer'),
-('C', 'Cash');
+('TF', 'Transfer'),
+('TN', 'Tunai');
 
 INSERT IGNORE INTO `jns_transaksi` (`kode`, `nama`) VALUES 
 ('STR', 'Setoran Tabungan'),

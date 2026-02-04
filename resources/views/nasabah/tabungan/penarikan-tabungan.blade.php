@@ -173,11 +173,11 @@
                             </div>
                             <div>
                                 <p class="font-semibold text-gray-900">Penarikan</p>
-                                <p class="text-sm text-gray-500">{{ $riwayat->tgl_transaksi->format('d M Y') }} • {{ ucfirst($riwayat->via) }}</p>
+                                <p class="text-sm text-gray-500">{{ $riwayat->tgl_transaksi->format('d M Y') }} • {{ $riwayat->via ? ucfirst($riwayat->via) : '-' }}</p>
                             </div>
                         </div>
                         <div class="text-right">
-                            <p class="font-bold text-red-600">-Rp {{ number_format($riwayat->nominal, 0, ',', '.') }}</p>
+                            <p class="font-bold text-red-600">-Rp {{ number_format(abs((float) $riwayat->nominal), 0, ',', '.') }}</p>
                             <p class="text-xs text-gray-500 font-mono">{{ $riwayat->id_transaksi ?? 'TRX-' . str_pad($riwayat->id, 5, '0', STR_PAD_LEFT) }}</p>
                         </div>
                     </div>

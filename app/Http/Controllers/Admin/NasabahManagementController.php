@@ -232,4 +232,61 @@ class NasabahManagementController extends Controller
 
         return view('admin.nasabah.detail', compact('nasabah', 'pendingChanges'));
     }
+
+    /**
+     * Reset PIN nasabah (for lupa PIN cases)
+     * Route: POST /admin/nasabah/{id}/reset-pin
+     */
+    public function resetPin(Request $request, $id)
+    {
+        $nasabah = Nasabah::with('user')->findOrFail($id);
+        
+        // Validasi input PIN baru
+        $request->validate([
+            'pin_baru' => 'required|digits:6',
+        ], [
+            'pin_baru.required' => 'PIN baru harus diisi',
+            'pin_baru.digits' => 'PIN harus 6 digit',
+        ]);
+
+        try {
+            $pinBaru = (int) $request->pin_baru;
+
+            // Update PIN nasabah
+            $nasabah->user->update([
+                'pin' => $pinBaru,
+            ]);
+
+            Log::info('Admin reset PIN nasabah', [
+                'admin_id' => auth()->id(),
+                'admin_email' => auth()->user()->email,
+                'nasabah_id' => $nasabah->id,
+                'nasabah_email' => $nasabah->user->email,
+                'timestamp' => now(),
+            ]);
+
+            return redirect()->back()->with('success', 'PIN nasabah berhasil direset. Silakan informasikan PIN baru kepada nasabah melalui WhatsApp.');
+        } catch (\Exception $e) {
+            Log::error('Error reset PIN nasabah', [
+                'admin_id' => auth()->id(),
+                'nasabah_id' => $nasabah->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat reset PIN. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Generate random PIN 6 digit untuk nasabah
+     * Route: GET /admin/nasabah/{id}/generate-pin (API)
+     */
+    public function generateRandomPin()
+    {
+        $pin = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
+        
+        return response()->json([
+            'pin' => $pin,
+        ]);
+    }
 }

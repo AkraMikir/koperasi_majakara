@@ -56,8 +56,8 @@ return new class extends Migration
             $table->string('id_pengajuan_setor', 30)->nullable();
             $table->string('id_pengajuan_tarik', 30)->nullable();
             $table->foreignId('id_anggota')->constrained('tbl_nasabah')->onDelete('cascade');
-            $table->foreignId('id_jns_trans')->nullable()->constrained('jns_transaksi');
-            $table->foreignId('id_via')->nullable()->constrained('jns_via');
+            $table->foreignId('id_jns_transaksi')->nullable()->constrained('jns_transaksi');
+            $table->foreignId('id_jns_via')->nullable()->constrained('jns_via');
             $table->decimal('nominal', 15, 2);
             $table->text('keterangan')->nullable();
             $table->timestamp('tgl_transaksi')->useCurrent();

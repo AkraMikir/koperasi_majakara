@@ -19,7 +19,7 @@
                         <p class="text-white/90 text-sm">ID: #{{ $janjiTemu->id }}</p>
                     </div>
                 </div>
-                <a href="{{ route('nasabah.tabungan.index') }}" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-colors">
+                <a href="{{ route('nasabah.tabungan.status-janji-temu') }}" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-colors">
                     ← Kembali
                 </a>
             </div>
@@ -27,26 +27,6 @@
     </div>
 
     <div class="mx-4 mb-6 space-y-6">
-        <!-- Status Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-600 mb-1">Status</p>
-                    @php
-                        $isPast = $janjiTemu->tanggal_janji_temu < now();
-                        $statusColor = $isPast ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700';
-                        $statusLabel = $isPast ? 'Selesai' : 'Menunggu';
-                    @endphp
-                    <span class="inline-block mt-2 px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
-                        {{ $statusLabel }}
-                    </span>
-                </div>
-                <div class="text-right">
-                    <p class="text-sm text-gray-600">Tanggal Janji Temu</p>
-                    <p class="font-semibold text-gray-900">{{ $janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
-                </div>
-            </div>
-        </div>
 
         <!-- Informasi Janji Temu -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">

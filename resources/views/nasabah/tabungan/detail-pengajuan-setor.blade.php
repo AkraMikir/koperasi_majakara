@@ -56,12 +56,13 @@
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Informasi Pengajuan</h2>
             
             <div class="space-y-4">
-                @if($pengajuan->buktiFoto->count() > 0)
                 <div>
                     <p class="text-sm text-gray-600 mb-2">Total Nominal</p>
-                    <p class="text-3xl font-bold text-[#674c1d]">Rp {{ number_format($pengajuan->buktiFoto->sum('nominal'), 0, ',', '.') }}</p>
+                    @php
+                        $nominal = $pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0);
+                    @endphp
+                    <p class="text-3xl font-bold text-[#674c1d]">Rp {{ number_format($nominal, 0, ',', '.') }}</p>
                 </div>
-                @endif
 
                 @if($pengajuan->keterangan)
                 <div>
@@ -78,11 +79,16 @@
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Bukti Transfer</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @foreach($pengajuan->buktiFoto as $bukti)
-                <div class="border border-gray-200 rounded-xl overflow-hidden">
-                    <img src="{{ asset('storage/' . $bukti->file_photo) }}" alt="Bukti Transfer" class="w-full h-48 object-cover">
+                <div class="border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg transition-shadow cursor-pointer" 
+                    onclick="showPhotoPreview('{{ asset('storage/' . $bukti->file_path) }}', 'Bukti Transfer #{{ $loop->iteration }}')">
+                    <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Transfer" class="w-full h-48 object-cover">
                     <div class="p-4 bg-gray-50">
-                        <p class="font-semibold text-[#674c1d] mb-1">Rp {{ number_format($bukti->nominal, 0, ',', '.') }}</p>
-                        <p class="text-sm text-gray-600">{{ $bukti->keterangan }}</p>
+                        <p class="text-sm text-gray-600 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path>
+                            </svg>
+                            Klik untuk memperbesar
+                        </p>
                     </div>
                 </div>
                 @endforeach

@@ -64,7 +64,10 @@
                     <a href="{{ route('nasabah.tabungan.status-pengajuan-setor') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
                         <p class="text-white text-xs font-medium">Status Setoran</p>
                     </a>
-                    <a href="{{ route('nasabah.tabungan.status-pengajuan-tarik') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
+                    <a href="{{ route('nasabah.tabungan.status-janji-temu') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center">
+                        <p class="text-white text-xs font-medium">Status Janji Temu</p>
+                    </a>
+                    <a href="{{ route('nasabah.tabungan.status-pengajuan-tarik') }}" class="bg-white/10 backdrop-blur-sm hover:bg-white/20 rounded-lg p-3 transition-all border border-white/20 text-center col-span-2">
                         <p class="text-white text-xs font-medium">Status Penarikan</p>
                     </a>
                     </div>
@@ -114,21 +117,21 @@
                     </thead>
                     <tbody>
                         @forelse($transaksiTabungan ?? [] as $transaksi)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}'">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}';`">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $transaksi->tgl_transaksi->format('d M Y') }}</p>
                             </td>
                             <td class="px-4 py-3">
-                                <span class="px-3 py-1 {{ $transaksi->jenis === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-xs font-semibold">
-                                    {{ ucfirst($transaksi->jenis) }}
+                                <span class="px-3 py-1 {{ ($transaksi->jenis ?? '') === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-xs font-semibold">
+                                    {{ ucfirst($transaksi->jenis ?? '-') }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
-                                <p class="font-semibold {{ $transaksi->jenis === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ $transaksi->jenis === 'setoran' ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
+                                <p class="font-semibold {{ ($transaksi->jenis ?? '') === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
+                                    {{ ($transaksi->jenis ?? '') === 'setoran' ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->nominal), 0, ',', '.') }}
                                 </p>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ ucfirst($transaksi->via) }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $transaksi->via ? ucfirst($transaksi->via) : '-' }}</td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-between">
                                     <span class="text-sm text-gray-500 font-mono">{{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</span>

@@ -57,6 +57,9 @@
     <!-- Bottom Navbar -->
     <x-nasabah.bottom-navbar />
     
+    <!-- Universal Photo Preview Modal -->
+    <x-photo-preview-modal />
+    
     @stack('scripts')
     
     <script>

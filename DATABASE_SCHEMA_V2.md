@@ -9,7 +9,7 @@ Tabel untuk mencatat mutasi saldo.
 | :--- | :--- | :--- | :--- |
 | `id` (Auto Inc) | **CHANGED** | `id` (CHAR 17) | Format: `SEQ..DATE..FITUR..` |
 | `jenis` (enum) | **DELETED** | `id_jns_trans` | FK ke `jns_transaksi`. Gunakan kode 'STR', 'PNR'. |
-| `via` (enum) | **DELETED** | `id_via` | FK ke `jns_via`. Gunakan kode 'CSH', 'TRF'. |
+| `via` (enum) | **DELETED** | `id_via` | FK ke `jns_via`. Gunakan kode 'TF', 'TN'. |
 | `id_jns_akun` | **DELETED** | - | Tidak dipakai lagi. Identitas transaksi via `id_jns_trans`. |
 | `tgl_transaksi` | KEEP | `tgl_transaksi` | Timestamp. |
 
@@ -19,7 +19,7 @@ Tabel untuk mencatat mutasi saldo.
 TransTabungan::whereHas('jnsTransaksi', fn($q) => $q->where('kode', 'STR'))->get();
 
 // Query Via Transfer
-TransTabungan::whereHas('jnsVia', fn($q) => $q->where('kode', 'TRF'))->get();
+TransTabungan::whereHas('jnsVia', fn($q) => $q->where('kode', 'TF'))->get();
 ```
 
 ## 2. Pinjaman Header (`tbl_pinjaman_h`)
@@ -65,8 +65,8 @@ TempoPinjamanB::whereHas('pinjaman', fn($q) => $q->where('id_anggota', $id))->ge
 
 ## 5. Master Data
 Tabel-tabel master baru:
-- `jns_fitur` (kode: TAB, PNJ, DEP, GAD)
-- `jns_via` (kode: CSH, TRF, AUT)
+- `jns_fitur` (kode: T, P, D, G)
+- `jns_via` (kode: TF=Transfer, TN=Tunai)
 - `jns_transaksi` (kode: STR, PNR, BYR, CAIR)
 - `master_bunga_pinjaman` (Restored)
 - `master_denda_pinjaman` (Restored)

@@ -78,17 +78,18 @@
                         <p class="text-sm text-gray-600">Tanggal Pengajuan</p>
                         <p class="font-semibold text-gray-900">{{ $item->created_at->format('d M Y, H:i') }}</p>
                     </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Total Nominal</p>
+                        @php
+                            $nominal = $item->nominal > 0 ? $item->nominal : ($item->janjiTemu->nominal ?? 0);
+                        @endphp
+                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($nominal, 0, ',', '.') }}</p>
+                    </div>
                     @if($item->janjiTemu)
                     <div>
                         <p class="text-sm text-gray-600">Janji Temu</p>
                         <p class="font-semibold text-gray-900">{{ $item->janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
                         <p class="text-xs text-gray-500">{{ $item->janjiTemu->lokasi->nama_lokasi ?? 'N/A' }}</p>
-                    </div>
-                    @endif
-                    @if($item->buktiFoto->count() > 0)
-                    <div>
-                        <p class="text-sm text-gray-600">Total Nominal</p>
-                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($item->buktiFoto->sum('nominal'), 0, ',', '.') }}</p>
                     </div>
                     @endif
                 </div>

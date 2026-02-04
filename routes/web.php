@@ -34,13 +34,27 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
     
-    // PIN Management Routes
+    // PIN Management Routes (DEPRECATED - Moved to Setting)
     Route::prefix('pin')->name('pin.')->group(function () {
         Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
         Route::post('/send-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'sendOtpLupaPin'])->name('send-otp-lupa');
         Route::post('/resend-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'resendOtpLupaPin'])->name('resend-otp-lupa');
         Route::post('/verify-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'verifyOtpLupaPin'])->name('verify-otp-lupa');
         Route::get('/get-cooldown', [\App\Http\Controllers\Nasabah\PinController::class, 'getCooldown'])->name('get-cooldown');
+    });
+    
+    // Setting Routes (Security & Privacy)
+    Route::prefix('setting')->name('setting.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Nasabah\SettingController::class, 'index'])->name('index');
+        
+        // Password Management
+        Route::post('/change-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePassword'])->name('change-password');
+        Route::post('/send-otp-password-reset', [\App\Http\Controllers\Nasabah\SettingController::class, 'sendOtpPasswordReset'])->name('send-otp-password-reset');
+        Route::post('/verify-otp-reset-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'verifyOtpAndResetPassword'])->name('verify-otp-reset-password');
+        
+        // PIN Management
+        Route::post('/change-pin', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePin'])->name('change-pin');
+        Route::get('/otp-cooldown', [\App\Http\Controllers\Nasabah\SettingController::class, 'getOtpCooldown'])->name('otp-cooldown');
     });
     
     // Profile Update Routes
@@ -61,6 +75,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::post('/janji-temu', [TabunganController::class, 'submitJanjiTemu'])->name('submit-janji-temu');
         Route::post('/verify-pin', [TabunganController::class, 'verifyPin'])->name('verify-pin');
         Route::get('/status-pengajuan-setor', [TabunganController::class, 'statusPengajuanSetor'])->name('status-pengajuan-setor');
+        Route::get('/status-janji-temu', [TabunganController::class, 'statusJanjiTemu'])->name('status-janji-temu');
         Route::get('/status-pengajuan-tarik', [TabunganController::class, 'statusPengajuanTarik'])->name('status-pengajuan-tarik');
         Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
         Route::get('/pengajuan-tarik/{id}', [TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
@@ -255,12 +270,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
         Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
         Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
+        
+        // PIN Management
+        Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
+        Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
     });
     
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index'); // New Universal Janji Temu
-    Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index');
+    // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
     Route::get('/pengajuan', function () { return view('admin.pengajuan.index'); })->name('pengajuan.index');
 });
 

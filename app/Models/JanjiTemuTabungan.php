@@ -14,10 +14,12 @@ class JanjiTemuTabungan extends Model
 
     protected $fillable = [
         'id_pengajuan',
+        'id_nasabah',
         'lokasi_temu',
         'nominal',
         'tanggal_janji_temu',
         'waktu_janji_temu',
+        'keterangan',
     ];
 
     protected $casts = [
@@ -31,6 +33,16 @@ class JanjiTemuTabungan extends Model
     public function pengajuan(): BelongsTo
     {
         return $this->belongsTo(PengajuanTabungan::class, 'id_pengajuan');
+    }
+
+    public function nasabah(): BelongsTo
+    {
+        return $this->belongsTo(Nasabah::class, 'id_nasabah');
+    }
+
+    public function transTabungan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(TransTabungan::class, 'id_janji_temu_tabungan');
     }
 
     public function lokasi(): BelongsTo
