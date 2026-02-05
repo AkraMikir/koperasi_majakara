@@ -40,22 +40,12 @@
                         <div class="flex items-center gap-3 mb-2">
                             <p class="text-sm text-gray-600">ID Pengajuan</p>
                             <p class="text-lg font-bold text-[#674c1d]">#{{ $item->id }}</p>
-                            <!-- Indikator Metode -->
-                            @if($item->janjiTemu)
-                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold flex items-center gap-1">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                </svg>
-                                Ada Janji Temu
-                            </span>
-                            @else
                             <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold flex items-center gap-1">
                                 <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
                                 Via Transfer
                             </span>
-                            @endif
                         </div>
                     </div>
                     <div>
@@ -80,18 +70,8 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Total Nominal</p>
-                        @php
-                            $nominal = $item->nominal > 0 ? $item->nominal : ($item->janjiTemu->nominal ?? 0);
-                        @endphp
-                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($item->nominal ?? 0, 0, ',', '.') }}</p>
                     </div>
-                    @if($item->janjiTemu)
-                    <div>
-                        <p class="text-sm text-gray-600">Janji Temu</p>
-                        <p class="font-semibold text-gray-900">{{ $item->janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
-                        <p class="text-xs text-gray-500">{{ $item->janjiTemu->lokasi->nama_lokasi ?? 'N/A' }}</p>
-                    </div>
-                    @endif
                 </div>
 
                 @if($item->keterangan)

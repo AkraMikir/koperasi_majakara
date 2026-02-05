@@ -85,15 +85,14 @@
                     <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none" placeholder="Tambahkan keterangan..."></textarea>
                 </div>
 
-                <!-- Upload Foto Bukti -->
+                <!-- Upload Foto Bukti (Multiple) -->
                 <div class="md:col-span-2">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti (Opsional)</label>
-                    <input type="file" name="foto_bukti" accept="image/jpeg,image/png,image/jpg"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer (Opsional)</label>
+                    <input type="file" name="foto_bukti[]" accept="image/jpeg,image/png,image/jpg" multiple
                         class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
-                        onchange="previewFoto(this)">
-                    <div id="foto-preview" class="hidden mt-3">
-                        <img src="" alt="Preview" class="max-w-full max-h-48 rounded-lg border border-gray-200 shadow-sm">
-                    </div>
+                        onchange="previewMultipleFoto(this)">
+                    <p class="text-xs text-gray-500 mt-1">Bisa upload lebih dari 1 foto. Max 5MB per foto.</p>
+                    <div id="foto-preview" class="hidden mt-3 grid grid-cols-2 md:grid-cols-3 gap-3"></div>
                 </div>
             </div>
 
@@ -122,16 +121,31 @@
         }
     }
 
-    function previewFoto(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            const preview = document.getElementById('foto-preview');
+    function previewMultipleFoto(input) {
+        const preview = document.getElementById('foto-preview');
+        preview.innerHTML = ''; // Clear previous previews
+        
+        if (input.files && input.files.length > 0) {
+            preview.classList.remove('hidden');
             
-            reader.onload = function(e) {
-                preview.querySelector('img').src = e.target.result;
-                preview.classList.remove('hidden');
-            };
-            reader.readAsDataURL(input.files[0]);
+            Array.from(input.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative group';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}" 
+                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[#674c1d] transition-all">
+                        <span class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                            ${index + 1}
+                        </span>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            preview.classList.add('hidden');
         }
     }
 

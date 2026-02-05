@@ -117,7 +117,7 @@
                     </thead>
                     <tbody>
                         @forelse($transaksiTabungan ?? [] as $transaksi)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}';`">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}'">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $transaksi->tgl_transaksi->format('d M Y') }}</p>
                             </td>

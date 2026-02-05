@@ -86,18 +86,46 @@
                 </div>
             </div>
 
-            <!-- Bukti Foto (jika setoran) -->
+            <!-- Bukti Foto (jika setoran dari pengajuan) -->
             @if($transaksi->jenis === 'setoran' && $transaksi->pengajuanSetor && $transaksi->pengajuanSetor->buktiFoto->count() > 0)
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer</h2>
+                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer (dari Pengajuan)</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($transaksi->pengajuanSetor->buktiFoto as $bukti)
                     <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($bukti->file_photo) }}" alt="Bukti Foto" class="w-full h-48 object-cover"
+                        @if($bukti->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path))
+                        <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Foto" class="w-full h-48 object-cover"
                             onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'400\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EGambar tidak dapat dimuat%3C/text%3E%3C/svg%3E';">
+                        @else
+                        <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">File tidak ditemukan</div>
+                        @endif
                         <div class="p-3 bg-gray-50">
-                            <p class="text-sm font-semibold text-gray-900">Rp {{ number_format($bukti->nominal, 0, ',', '.') }}</p>
-                            <p class="text-xs text-gray-600">{{ $bukti->keterangan }}</p>
+                            <p class="text-xs text-gray-600">{{ $bukti->keterangan ?? 'Bukti Transfer' }}</p>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Bukti Foto Transaksi Manual -->
+            @php
+                $buktiFotoManual = $transaksi->buktiFoto ?? collect();
+            @endphp
+            @if($buktiFotoManual->count() > 0)
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Transaksi</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    @foreach($buktiFotoManual as $bukti)
+                    <div class="border border-gray-200 rounded-lg overflow-hidden group cursor-pointer" onclick="window.open('{{ Storage::url($bukti->file_path) }}', '_blank')">
+                        @if($bukti->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path))
+                        <img src="{{ Storage::url($bukti->file_path) }}" alt="Bukti Transaksi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200">
+                        @else
+                        <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">File tidak ditemukan</div>
+                        @endif
+                        <div class="p-3 bg-gray-50">
+                            <p class="text-xs text-gray-600">{{ $bukti->keterangan ?? 'Bukti Transaksi' }}</p>
+                            <p class="text-xs text-gray-400 mt-1">Upload: {{ $bukti->created_at->format('d M Y, H:i') }}</p>
                         </div>
                     </div>
                     @endforeach

@@ -337,9 +337,14 @@ class TabunganController extends Controller
         $query = TransTabungan::with('nasabah.user')
             ->latest();
 
-        // Filter by jenis
+        // Filter by jenis (via relasi jns_transaksi; 'jenis' adalah accessor, bukan kolom DB)
         if ($request->has('jenis') && $request->jenis !== '') {
-            $query->where('jenis', $request->jenis);
+            $kode = $request->jenis === 'setoran' ? 'STR' : ($request->jenis === 'penarikan' ? 'PNR' : null);
+            if ($kode) {
+                $query->whereHas('jnsTransaksi', function ($q) use ($kode) {
+                    $q->where('kode', $kode);
+                });
+            }
         }
 
         // Filter by date
@@ -392,7 +397,7 @@ class TabunganController extends Controller
      */
     public function detailTransaksi($id)
     {
-        $transaksi = TransTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'pengajuanSetor.buktiFoto', 'pengajuanTarik'])
+        $transaksi = TransTabungan::with(['nasabah.user', 'nasabah.dataKtp', 'pengajuanSetor.buktiFoto', 'pengajuanTarik', 'buktiFoto'])
             ->findOrFail($id);
 
         return view('admin.tabungan.detail-transaksi', compact('transaksi'));
@@ -413,6 +418,9 @@ class TabunganController extends Controller
     /**
      * Create transaksi tabungan langsung dari janji temu.
      */
+    /**
+     * Create transaksi tabungan langsung dari janji temu.
+     */
     public function createTransFromJanjiTemu(Request $request, $id)
     {
         $request->validate([
@@ -421,66 +429,92 @@ class TabunganController extends Controller
             'foto_penerimaan.*' => 'nullable|image|max:5120',  // Multiple files
         ]);
 
-        // Parse nominal from formatted currency string
-        $nominal = (float) str_replace(['.', ','], '', $request->nominal);
-        
-        if ($nominal < 10000) {
-            return redirect()->back()
-                ->with('error', 'Nominal minimal Rp 10.000')
-                ->withInput();
-        }
+        try {
+            DB::beginTransaction();
 
-        $janjiTemu = JanjiTemuTabungan::with(['nasabah'])->findOrFail($id);
-
-        // Check if already processed (status = 2)
-        if ($janjiTemu->status == '2') {
-            return redirect()->back()
-                ->with('error', 'Janji temu ini sudah diproses sebelumnya');
-        }
-
-        $idAnggota = $janjiTemu->id_nasabah;
-
-        // Handle foto penerimaan menggunakan tbl_bukti_foto universal
-        if ($request->hasFile('foto_penerimaan')) {
-            foreach ($request->file('foto_penerimaan') as $file) {
-                $fotoPenerimaan = $file->store('bukti_tabungan', 'public');
-                BuktiFoto::create([
-                    'owner_id' => $janjiTemu->id,
-                    'owner_fitur' => 'T',  // Tabungan
-                    'owner_trans' => 'JNJT',  // Janji Temu
-                    'file_path' => $fotoPenerimaan,
-                    'keterangan' => 'Bukti penerimaan janji temu',
-                ]);
+            // Parse nominal from formatted currency string
+            $nominal = (float) str_replace(['.', ','], '', $request->nominal);
+            
+            if ($nominal < 10000) {
+                return redirect()->back()
+                    ->with('error', 'Nominal minimal Rp 10.000')
+                    ->withInput();
             }
+
+            $janjiTemu = JanjiTemuTabungan::with(['nasabah'])->findOrFail($id);
+            $idAnggota = $janjiTemu->id_nasabah;
+
+            // Check if already processed (status = 2)
+            if ($janjiTemu->status == '2') {
+                return redirect()->back()
+                    ->with('error', 'Janji temu ini sudah diproses sebelumnya');
+            }
+
+            // Determine Transaction Type based on Keterangan Prefix
+            $isPenarikan = str_contains($janjiTemu->keterangan, '[PENARIKAN TUNAI]');
+            $kodeTrans = $isPenarikan ? 'PNR' : 'STR';
+
+            // Validate Saldo if Penarikan
+            if ($isPenarikan) {
+                $saldo = $this->getSaldoNasabah($idAnggota);
+                if ($saldo < $nominal) {
+                    DB::rollBack();
+                    return redirect()->back()
+                        ->with('error', 'Saldo nasabah tidak mencukupi untuk penarikan ini. Saldo: ' . number_format($saldo));
+                }
+            }
+
+            // Save foto penerimaan (bukti fisik)
+            if ($request->hasFile('foto_penerimaan')) {
+                foreach ($request->file('foto_penerimaan') as $file) {
+                    $fotoPenerimaan = $file->store('bukti_tabungan', 'public');
+                    BuktiFoto::create([
+                        'owner_id' => $janjiTemu->id,
+                        'owner_fitur' => 'T',  // Tabungan
+                        'owner_trans' => 'JNJT',  // Janji Temu
+                        'file_path' => $fotoPenerimaan,
+                        'keterangan' => 'Bukti penerimaan janji temu',
+                    ]);
+                }
+            }
+
+            // Update janji temu status to selesai
+            $janjiTemu->update([
+                'status' => '2',  // Selesai
+                'keterangan_admin' => $request->keterangan_admin,
+            ]);
+
+            // Create transaksi tabungan
+            $kodeVia = 'CS';  // Cash (janji temu)
+            
+            $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+            $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+            
+            // Generate ID: T + CS + STR/PNR
+            $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
+
+            TransTabungan::create([
+                'id' => $idTransaksi,
+                'id_pengajuan_setor' => null,  // Tidak ada pengajuan
+                'id_pengajuan_tarik' => null,
+                'id_anggota' => $idAnggota,
+                'id_jns_via' => $idVia,
+                'id_jns_transaksi' => $idTrans,
+                'nominal' => $nominal,  // Use parsed nominal
+                'keterangan' => $janjiTemu->keterangan,  // Use nasabah keterangan
+                'tgl_transaksi' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.tabungan.janji-temu')
+                ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
+            
+        } catch (\Exception $e) {
+             DB::rollBack();
+             return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
-
-        // Update janji temu status to selesai
-        $janjiTemu->update([
-            'status' => '2',  // Selesai
-            'keterangan_admin' => $request->keterangan_admin,
-        ]);
-
-        // Create transaksi tabungan
-        $kodeVia = 'CS';  // Cash (janji temu)
-        $kodeTrans = 'STR';  // Setoran
-        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
-        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
-        $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
-
-        TransTabungan::create([
-            'id' => $idTransaksi,
-            'id_pengajuan_setor' => null,  // Tidak ada pengajuan
-            'id_pengajuan_tarik' => null,
-            'id_anggota' => $idAnggota,
-            'id_jns_via' => $idVia,
-            'id_jns_transaksi' => $idTrans,
-            'nominal' => $nominal,  // Use parsed nominal
-            'keterangan' => $janjiTemu->keterangan,  // Use nasabah keterangan
-            'tgl_transaksi' => now(),
-        ]);
-
-        return redirect()->route('admin.tabungan.janji-temu')
-            ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
     }
 
     /**
@@ -597,10 +631,10 @@ class TabunganController extends Controller
                 ->with('error', 'Pengajuan yang sudah memiliki transaksi tidak bisa dihapus');
         }
 
-        // Delete bukti foto files
+        // Delete bukti foto files (model BuktiFoto pakai file_path)
         foreach ($pengajuan->buktiFoto as $bukti) {
-            if (Storage::disk('public')->exists($bukti->file_photo)) {
-                Storage::disk('public')->delete($bukti->file_photo);
+            if ($bukti->file_path && Storage::disk('public')->exists($bukti->file_path)) {
+                Storage::disk('public')->delete($bukti->file_path);
             }
         }
 
@@ -609,6 +643,12 @@ class TabunganController extends Controller
         return redirect()->route('admin.tabungan.pengajuan-setor')
             ->with('success', 'Pengajuan setoran berhasil dihapus');
     }
+
+    // Method pengajuanTarik duplicat removed
+
+
+    // Method detailPengajuanTarik, approveTarik, rejectTarik duplicate block removed
+
 
     /**
      * Display saldo nasabah per nasabah.
@@ -699,7 +739,7 @@ class TabunganController extends Controller
             'via' => 'required|in:transfer,cash',
             'keterangan' => 'nullable|string|max:500',
             'tgl_transaksi' => 'required|date',
-            'foto_bukti' => 'nullable|image|max:5120',
+            'foto_bukti.*' => 'nullable|image|max:5120',  // Support multiple files
         ]);
 
         // If penarikan, check saldo
@@ -722,22 +762,32 @@ class TabunganController extends Controller
         // Generate ID using correct method
         $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
-        // Upload foto bukti if exists
-        $fotoBukti = null;
-        if ($request->hasFile('foto_bukti')) {
-            $fotoBukti = $request->file('foto_bukti')->store('bukti_transaksi', 'public');
-        }
-
-        // Create transaksi
+        // Create transaksi (WITHOUT foto path in keterangan)
         $transaksi = TransTabungan::create([
             'id' => $idTransaksi,
             'id_anggota' => $request->id_anggota,
             'id_jns_via' => $idVia,
             'id_jns_transaksi' => $idTrans,
             'nominal' => $request->nominal,
-            'keterangan' => $request->keterangan . ($fotoBukti ? ' | Foto: ' . $fotoBukti : ''),
+            'keterangan' => $request->keterangan,  // ✅ Hanya keterangan, tanpa path foto
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
+
+        // Save bukti foto to tbl_bukti_foto (if exists)
+        if ($request->hasFile('foto_bukti')) {
+            foreach ($request->file('foto_bukti') as $file) {
+                $path = $file->store('bukti_transaksi', 'public');
+                
+                // Save to tbl_bukti_foto using BuktiFoto model
+                BuktiFoto::create([
+                    'owner_id' => $idTransaksi,
+                    'owner_fitur' => 'T',  // Tabungan
+                    'owner_trans' => $kodeTrans,  // STR or PNR
+                    'file_path' => $path,
+                    'keterangan' => 'Bukti transaksi manual - ' . ($request->jenis == 'setoran' ? 'Setoran' : 'Penarikan'),
+                ]);
+            }
+        }
 
         return redirect()->route('admin.tabungan.transaksi')
             ->with('success', "Transaksi {$request->jenis} berhasil dibuat dengan ID: {$idTransaksi}");
@@ -748,7 +798,7 @@ class TabunganController extends Controller
      */
     public function editTransaksi($id)
     {
-        $transaksi = TransTabungan::with(['nasabah.user', 'jnsAkun'])->findOrFail($id);
+        $transaksi = TransTabungan::with(['nasabah.user', 'buktiFoto', 'jnsTransaksi', 'jnsVia'])->findOrFail($id);
 
         // Only allow edit if created manually (no pengajuan)
         if ($transaksi->id_pengajuan_setor || $transaksi->id_pengajuan_tarik) {
@@ -756,10 +806,7 @@ class TabunganController extends Controller
                 ->with('error', 'Transaksi dari pengajuan tidak dapat diedit');
         }
 
-        $nasabah = Nasabah::with('user')->get();
-        $jnsAkun = \App\Models\JnsAkun::where('is_active', true)->get();
-
-        return view('admin.tabungan.edit-transaksi', compact('transaksi', 'nasabah', 'jnsAkun'));
+        return view('admin.tabungan.edit-transaksi', compact('transaksi'));
     }
 
     /**
@@ -779,12 +826,16 @@ class TabunganController extends Controller
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
             'tgl_transaksi' => 'required|date',
+            'foto_bukti.*' => 'nullable|image|max:5120',  // Multiple files
         ]);
 
+        // Get jenis from relation
+        $jenis = $transaksi->jnsTransaksi->kode == 'STR' ? 'setoran' : 'penarikan';
+
         // If changing to penarikan or increasing penarikan, check saldo
-        if ($request->jenis == 'penarikan') {
+        if ($jenis == 'penarikan') {
             $saldo = $this->getSaldoNasabah($transaksi->id_anggota);
-            $saldoWithoutThis = $saldo + ($transaksi->jenis == 'penarikan' ? $transaksi->nominal : 0);
+            $saldoWithoutThis = $saldo + $transaksi->nominal;
             
             if ($saldoWithoutThis < $request->nominal) {
                 return redirect()->back()
@@ -795,9 +846,27 @@ class TabunganController extends Controller
 
         $transaksi->update([
             'nominal' => $request->nominal,
-            'keterangan' => $request->keterangan,
+            'keterangan' => $request->keterangan,  // ✅ Tidak ada path foto di sini
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
+
+        // Save new bukti foto to tbl_bukti_foto (if uploaded)
+        if ($request->hasFile('foto_bukti')) {
+            $kodeTrans = $transaksi->jnsTransaksi->kode;
+            
+            foreach ($request->file('foto_bukti') as $file) {
+                $path = $file->store('bukti_transaksi', 'public');
+                
+                // Save to tbl_bukti_foto using BuktiFoto model
+                BuktiFoto::create([
+                    'owner_id' => $transaksi->id,
+                    'owner_fitur' => 'T',  // Tabungan
+                    'owner_trans' => $kodeTrans,  // STR or PNR
+                    'file_path' => $path,
+                    'keterangan' => 'Bukti transaksi manual - ' . ($jenis == 'setoran' ? 'Setoran' : 'Penarikan'),
+                ]);
+            }
+        }
 
         return redirect()->route('admin.tabungan.detail-transaksi', $id)
             ->with('success', 'Transaksi berhasil diupdate');

@@ -97,6 +97,15 @@ class TransTabungan extends Model
     {
         return $this->belongsTo(JnsTransaksi::class, 'id_jns_transaksi');
     }
+
+    /**
+     * Get bukti foto untuk transaksi manual (dari tbl_bukti_foto).
+     */
+    public function buktiFoto()
+    {
+        return $this->hasMany(BuktiFoto::class, 'owner_id', 'id')
+            ->where('owner_fitur', 'T');
+    }
 }
 
 

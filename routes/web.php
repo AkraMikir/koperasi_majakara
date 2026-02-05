@@ -262,18 +262,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
     
-    // Nasabah Management Routes
+    // Nasabah Management Routes (rute spesifik harus di atas /{id} agar tidak tertimpa)
     Route::prefix('nasabah')->name('nasabah.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'index'])->name('index');
-        Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
         Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
         Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
         Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
-        
-        // PIN Management
-        Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
         Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
+        Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
+        Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
     });
     
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');

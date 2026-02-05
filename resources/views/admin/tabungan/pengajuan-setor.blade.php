@@ -56,13 +56,8 @@
                 <tbody>
                     @forelse($pengajuan as $item)
                     @php
-                        // Calculate total nominal from bukti foto or janji temu
-                        $totalNominal = 0;
-                        if ($item->buktiFoto && $item->buktiFoto->count() > 0) {
-                            $totalNominal = $item->buktiFoto->sum('nominal');
-                        } elseif ($item->janjiTemu) {
-                            $totalNominal = $item->janjiTemu->nominal ?? 0;
-                        }
+                        // Nominal dari pengajuan (PengajuanTabungan.nominal)
+                        $totalNominal = (float) ($item->nominal ?? 0);
                     @endphp
                     <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
                         <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>

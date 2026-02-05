@@ -204,32 +204,36 @@
 
 @push('scripts')
 <script>
-    // Biaya transfer data (from database)
-    const biayaData = @json(\App\Models\BiayaTransfer::where('is_active', true)->get()->groupBy('bank_pengirim'));
+    // Biaya transfer logic (Simplified, DB table not available yet)
+    const biayaData = {}; 
 
     function calculateBiaya() {
         const bankPengirim = document.getElementById('bank_pengirim').value;
         const bankPenerima = '{{ $pengajuan->nama_bank }}';
         const nominal = {{ $pengajuan->nominal }};
 
-        if (!bankPengirim || !bankPenerima) {
+        if (!bankPengirim) {
             return;
         }
 
-        // Find biaya from data
+        // Logic sederhana: Beda bank = 6500, Sama bank = 0
         let biaya = 0;
-        if (biayaData[bankPengirim]) {
-            const found = biayaData[bankPengirim].find(b => b.bank_penerima === bankPenerima);
-            if (found) {
-                biaya = parseFloat(found.biaya_admin);
-            } else {
-                // Default ke "Bank Lainnya"
-                const foundLainnya = biayaData[bankPengirim].find(b => b.bank_penerima === 'Bank Lainnya');
-                if (foundLainnya) {
-                    biaya = parseFloat(foundLainnya.biaya_admin);
-                }
+        if (bankPenerima && bankPenerima !== 'Bank Lainnya' && !bankPenerima.includes(bankPengirim)) {
+            // Check similarities (e.g. BRI vs BRI)
+            if (bankPenerima.toLowerCase() !== bankPengirim.toLowerCase()) {
+                biaya = 6500;
             }
+        } else {
+             // Default safe assumption
+             biaya = 6500;
         }
+        
+        // Jika sama persis
+        if (bankPenerima && bankPenerima.toLowerCase() === bankPengirim.toLowerCase()) {
+            biaya = 0;
+        }
+        
+        // Removed unused biayaData check
 
         // Show biaya section
         const biayaSection = document.getElementById('biaya-section');

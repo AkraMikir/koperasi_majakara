@@ -15,6 +15,7 @@ class JnsLokasiPerusahaan extends Model
     protected $fillable = [
         'nama_lokasi',
         'alamat_lengkap',
+        'google_maps_embed',
         'kota',
         'provinsi',
         'tipe_lokasi',

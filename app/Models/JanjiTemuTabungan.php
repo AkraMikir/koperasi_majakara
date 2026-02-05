@@ -17,15 +17,13 @@ class JanjiTemuTabungan extends Model
     protected $keyType = 'string';
 
     protected $fillable = [
-        'id',                    // ✅ NEW
+        'id',
         'id_nasabah',
         'lokasi_temu',
         'nominal',
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
-        'keterangan_admin',      // ✅ NEW
-        'status',                // ✅ NEW
     ];
 
     protected $casts = [

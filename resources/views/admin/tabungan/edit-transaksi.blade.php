@@ -32,7 +32,7 @@
 
     <!-- Form -->
     <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <form method="POST" action="{{ route('admin.tabungan.update-transaksi', $transaksi->id) }}" class="space-y-6" id="edit-form">
+        <form method="POST" action="{{ route('admin.tabungan.update-transaksi', $transaksi->id) }}" enctype="multipart/form-data" class="space-y-6" id="edit-form">
             @csrf
             @method('PUT')
 
@@ -44,16 +44,18 @@
                     <p class="text-sm text-gray-600">{{ $transaksi->nasabah->user->email ?? '' }}</p>
                 </div>
 
-                <!-- Info Jenis (readonly) -->
-                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <p class="text-sm font-semibold text-gray-700 mb-2">Jenis Akun:</p>
-                    <p class="font-bold text-gray-900">{{ $transaksi->jnsAkun->nama_akun ?? 'Tabungan' }}</p>
-                </div>
-
+                <!-- Info Jenis dan Via (readonly) -->
                 <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
                     <p class="text-sm font-semibold text-gray-700 mb-2">Jenis Transaksi:</p>
                     <span class="inline-block px-3 py-1 {{ $transaksi->jenis == 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-sm font-semibold">
                         {{ ucfirst($transaksi->jenis) }}
+                    </span>
+                </div>
+
+                <div class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-700 mb-2">Via:</p>
+                    <span class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                        {{ ucfirst($transaksi->via) }}
                     </span>
                 </div>
 
@@ -78,10 +80,42 @@
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                 </div>
 
-                <!-- Keterangan (editable) -->
+                <!-- Keterangan (editable - BERSIH TANPA PATH FOTO) -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan</label>
                     <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none" placeholder="Tambahkan keterangan...">{{ $transaksi->keterangan }}</textarea>
+                </div>
+
+                <!-- Preview Bukti Foto yang Sudah Ada -->
+                @php
+                    $buktiFoto = $transaksi->buktiFoto ?? collect();
+                @endphp
+                @if($buktiFoto->count() > 0)
+                <div class="md:col-span-2 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-700 mb-3">Bukti Transaksi:</p>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        @foreach($buktiFoto as $foto)
+                        <div class="relative group">
+                            <img src="{{ Storage::url($foto->file_path) }}" alt="Bukti Transfer" 
+                                class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm cursor-pointer hover:border-[#674c1d] transition-all"
+                                onclick="window.open('{{ Storage::url($foto->file_path) }}', '_blank')">
+                            <span class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
+                                {{ $loop->iteration }}
+                            </span>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+                @endif
+
+                <!-- Upload Bukti Foto Baru (Multiple) -->
+                <div class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Baru (Opsional)</label>
+                    <input type="file" name="foto_bukti[]" accept="image/jpeg,image/png,image/jpg" multiple
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
+                        onchange="previewMultipleFoto(this)">
+                    <p class="text-xs text-gray-500 mt-1">Bisa upload lebih dari 1 foto. Foto baru akan ditambahkan ke bukti yang sudah ada.</p>
+                    <div id="foto-preview" class="hidden mt-3 grid grid-cols-2 md:grid-cols-3 gap-3"></div>
                 </div>
             </div>
 
@@ -107,8 +141,32 @@
         }
     }
 
-    function checkSaldo() {
-        // TODO: Implement realtime saldo check
+    function previewMultipleFoto(input) {
+        const preview = document.getElementById('foto-preview');
+        preview.innerHTML = ''; // Clear previous previews
+        
+        if (input.files && input.files.length > 0) {
+            preview.classList.remove('hidden');
+            
+            Array.from(input.files).forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const div = document.createElement('div');
+                    div.className = 'relative group';
+                    div.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview ${index + 1}" 
+                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[#674c1d] transition-all">
+                        <span class="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full">
+                            Baru ${index + 1}
+                        </span>
+                    `;
+                    preview.appendChild(div);
+                };
+                reader.readAsDataURL(file);
+            });
+        } else {
+            preview.classList.add('hidden');
+        }
     }
 
     // Convert formatted currency back to number before submit

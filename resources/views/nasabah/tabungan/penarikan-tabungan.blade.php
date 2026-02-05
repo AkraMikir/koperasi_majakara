@@ -82,14 +82,14 @@
                 
             <form id="form-penarikan" method="POST" action="{{ route('nasabah.tabungan.submit-penarikan') }}" class="space-y-6">
                 @csrf
-                <input type="hidden" name="metode" id="metode-input" value="">
+                <input type="hidden" name="metode" id="metode-input" value="{{ old('metode') }}">
 
                 <!-- Nominal Penarikan -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Penarikan *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
-                        <input type="text" name="nominal" id="nominal" placeholder="0" required
+                        <input type="text" name="nominal" id="nominal" value="{{ old('nominal', request('nominal')) }}" placeholder="0" required
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
                             oninput="formatCurrency(this)" onblur="checkSaldo()">
                     </div>
@@ -101,7 +101,48 @@
                             <p class="text-sm text-red-600 font-medium">Saldo tidak mencukupi!</p>
                         </div>
                     </div>
+                    @if(session('error'))
+                    <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg">
+                        <p class="text-sm text-red-600 font-medium">{{ session('error') }}</p>
+                    </div>
+                    @endif
                     <p class="text-xs text-gray-500 mt-2">Minimal: Rp 10.000 | Saldo tersedia: Rp {{ number_format($tabunganInfo->saldo ?? 0, 0, ',', '.') }}</p>
+                </div>
+
+                <!-- Tunai Details (for Tunai) -->
+                <div id="tunai-section" class="hidden space-y-4">
+                    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-4">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <p class="text-blue-700 text-sm">Silakan buat janji temu untuk melakukan penarikan tunai di kantor kami.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor *</label>
+                        <select name="lokasi_temu" id="lokasi_temu" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                            <option value="">-- Pilih Lokasi --</option>
+                            @foreach($lokasi ?? [] as $loc)
+                            <option value="{{ $loc->id }}" {{ old('lokasi_temu') == $loc->id ? 'selected' : '' }}>{{ $loc->nama_lokasi }} - {{ $loc->kota }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal *</label>
+                            <input type="date" name="tanggal_janji_temu" id="tanggal_janji_temu" min="{{ date('Y-m-d') }}" value="{{ old('tanggal_janji_temu') }}"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu *</label>
+                            <input type="time" name="waktu_janji_temu" id="waktu_janji_temu" value="{{ old('waktu_janji_temu') }}"
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                            <p class="text-xs text-gray-500 mt-1">Jam operasional: 08:00 - 16:00</p>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Bank Details (for Transfer) -->
@@ -110,19 +151,15 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bank *</label>
                         <select name="nama_bank" id="nama_bank" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <option value="">Pilih Bank</option>
-                            <option value="BCA">BCA</option>
-                            <option value="BNI">BNI</option>
-                            <option value="Mandiri">Mandiri</option>
-                            <option value="BRI">BRI</option>
-                            <option value="CIMB Niaga">CIMB Niaga</option>
-                            <option value="Permata">Permata</option>
-                            <option value="Bank Lainnya">Bank Lainnya</option>
+                            @foreach(['BCA', 'BNI', 'Mandiri', 'BRI', 'CIMB Niaga', 'Permata', 'Bank Lainnya'] as $bank)
+                                <option value="{{ $bank }}" {{ old('nama_bank') == $bank ? 'selected' : '' }}>{{ $bank }}</option>
+                            @endforeach
                         </select>
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Rekening *</label>
-                        <input type="text" name="no_rekening" id="no_rekening" placeholder="Masukkan nomor rekening tujuan"
+                        <input type="text" name="no_rekening" id="no_rekening" placeholder="Masukkan nomor rekening tujuan" value="{{ old('no_rekening') }}"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                         <p class="text-xs text-gray-500 mt-2">Pastikan nomor rekening sudah benar</p>
@@ -133,12 +170,12 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
                     <textarea name="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none"></textarea>
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none">{{ old('keterangan') }}</textarea>
                 </div>
                 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="submit" id="submit-btn" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="button" onclick="showPinModal()" id="submit-btn" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
                         Ajukan Penarikan
                     </button>
                     <a href="{{ route('nasabah.tabungan.index') }}" class="block w-full mt-3 py-3 text-center text-gray-600 hover:text-gray-800 transition-colors">
@@ -198,8 +235,67 @@
     </div>
 </div>
 
+<!-- PIN Modal -->
+<div id="pin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-gray-900">Verifikasi PIN</h3>
+                    <p class="text-sm text-gray-600">Masukkan PIN Anda untuk melanjutkan</p>
+                </div>
+            </div>
+            <button onclick="closePinModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="pin-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-red-700 text-sm"></p>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
+            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-center text-2xl font-mono tracking-widest"
+                placeholder="••••••"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+
+        <div class="flex gap-3">
+            <button onclick="closePinModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                Batal
+            </button>
+            <button onclick="verifyAndSubmit()" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                Verifikasi
+            </button>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Init Nominal Format (if has old value)
+        const nominalInput = document.getElementById('nominal');
+        if(nominalInput.value) {
+            formatCurrency(nominalInput);
+        }
+        
+        // Init Metode based on Old Value
+        const oldMetode = document.getElementById('metode-input').value;
+        if (oldMetode) {
+            selectMethod(oldMetode);
+        }
+    });
+
     function selectMethod(metode) {
         document.getElementById('metode-input').value = metode;
         document.getElementById('form-section').classList.remove('hidden');
@@ -208,23 +304,41 @@
         const btnTunai = document.getElementById('btn-tunai');
         const btnTransfer = document.getElementById('btn-transfer');
         
+        // Reset all
         btnTunai.classList.remove('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
         btnTransfer.classList.remove('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
         
         if (metode === 'tunai') {
             btnTunai.classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
+            
+            // Show Tunai Section & Validation
+            document.getElementById('tunai-section').classList.remove('hidden');
+            document.getElementById('lokasi_temu').setAttribute('required', 'required');
+            document.getElementById('tanggal_janji_temu').setAttribute('required', 'required');
+            document.getElementById('waktu_janji_temu').setAttribute('required', 'required');
+            
+            // Hide Bank Section & Remove Validation
             document.getElementById('bank-section').classList.add('hidden');
             document.getElementById('nama_bank').removeAttribute('required');
             document.getElementById('no_rekening').removeAttribute('required');
         } else {
             btnTransfer.classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
+            
+            // Hide Tunai Section & Remove Validation
+            document.getElementById('tunai-section').classList.add('hidden');
+            document.getElementById('lokasi_temu').removeAttribute('required');
+            document.getElementById('tanggal_janji_temu').removeAttribute('required');
+            document.getElementById('waktu_janji_temu').removeAttribute('required');
+            
+            // Show Bank Section & Validation
             document.getElementById('bank-section').classList.remove('hidden');
             document.getElementById('nama_bank').setAttribute('required', 'required');
             document.getElementById('no_rekening').setAttribute('required', 'required');
         }
         
-        // Scroll to form
-        document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // Scroll to form if not page load (or maybe always)
+        // document.getElementById('form-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        // NOTE: Commented scroll to prevent jump on reload
     }
 
     function formatCurrency(input) {
@@ -237,7 +351,8 @@
     function checkSaldo() {
         const nominalInput = document.getElementById('nominal');
         const nominal = parseInt(nominalInput.value.replace(/[^\d]/g, '')) || 0;
-        const saldo = parseInt(document.getElementById('saldo-data').dataset.saldo) || 0;
+        const saldoData = document.getElementById('saldo-data');
+        const saldo = parseInt(saldoData ? saldoData.dataset.saldo : 0) || 0;
         const warning = document.getElementById('saldo-warning');
         const submitBtn = document.getElementById('submit-btn');
 
@@ -250,12 +365,78 @@
         }
     }
 
-    // Convert formatted currency back to number before submit
-    document.getElementById('form-penarikan').addEventListener('submit', function(e) {
-        const nominalInput = document.getElementById('nominal');
-        if (nominalInput) {
-            nominalInput.value = nominalInput.value.replace(/[^\d]/g, '');
+    // Modal Functions
+    function showPinModal() {
+        const form = document.getElementById('form-penarikan');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
         }
+
+        // Check nominal validity (already handled by checkSaldo but good to double check)
+        const nominalInput = document.getElementById('nominal');
+        const nominalRaw = nominalInput.value.replace(/[^\d]/g, '');
+        const nominal = parseFloat(nominalRaw);
+        
+        if (!nominal || nominal < 10000) {
+             alert('Nominal minimal Rp 10.000');
+             nominalInput.focus();
+             return;
+        }
+        
+        // Show modal
+        document.getElementById('pin-modal').classList.remove('hidden');
+        document.getElementById('pin-modal').classList.add('flex');
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-input').focus();
+    }
+
+    function closePinModal() {
+        document.getElementById('pin-modal').classList.add('hidden');
+        document.getElementById('pin-modal').classList.remove('flex');
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-error').classList.add('hidden');
+    }
+
+    function verifyAndSubmit() {
+        const pin = document.getElementById('pin-input').value;
+        if (pin.length !== 6) {
+            showPinError('PIN harus 6 digit');
+            return;
+        }
+
+        const form = document.getElementById('form-penarikan');
+        const nominalInput = document.getElementById('nominal');
+        // Unformat nominal before submit
+        nominalInput.value = nominalInput.value.replace(/[^\d]/g, '');
+
+        // Create hidden input for PIN
+        // (Make sure to remove old one if exists or just append)
+        let pinInput = form.querySelector('input[name="pin"]');
+        if (!pinInput) {
+            pinInput = document.createElement('input');
+            pinInput.type = 'hidden';
+            pinInput.name = 'pin';
+            form.appendChild(pinInput);
+        }
+        pinInput.value = pin;
+
+        form.submit();
+    }
+    
+    function showPinError(message) {
+        const errorDiv = document.getElementById('pin-error');
+        errorDiv.querySelector('p').textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+
+    // Modal Events
+    document.getElementById('pin-modal').addEventListener('click', function(e) {
+        if (e.target === this) closePinModal();
+    });
+    
+    document.getElementById('pin-input').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') verifyAndSubmit();
     });
 </script>
 @endpush
