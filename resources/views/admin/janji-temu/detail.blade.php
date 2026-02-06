@@ -11,7 +11,7 @@
             <p class="text-gray-600 mt-1">ID Janji Temu: #{{ $janjiTemu->id }}</p>
         </div>
         <div class="flex items-center space-x-3">
-            <a href="{{ route('admin.tabungan.janji-temu') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+            <a href="{{ route('admin.janji-temu.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>
         </div>
@@ -88,15 +88,18 @@
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Status</h3>
                 <div class="space-y-3">
                     @php
-                        $statusConfig = [
-                            '1' => ['label' => 'Menunggu', 'color' => 'bg-yellow-100 text-yellow-700'],
-                            '2' => ['label' => 'Selesai', 'color' => 'bg-green-100 text-green-700'],
-                            '3' => ['label' => 'Batal', 'color' => 'bg-red-100 text-red-700'],
-                        ];
-                        $status = $statusConfig[$janjiTemu->status] ?? $statusConfig['1'];
+                        // Calculate status based on datetime
+                        $dateTime = \Carbon\Carbon::parse($janjiTemu->tanggal_janji_temu);
+                        if (isset($janjiTemu->waktu_janji_temu)) {
+                            $time = \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu);
+                            $dateTime->setTime($time->hour, $time->minute, $time->second);
+                        }
+                        $isPast = $dateTime->isPast();
+                        $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
+                        $statusColor = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-700';
                     @endphp
-                    <span class="inline-block px-4 py-2 {{ $status['color'] }} rounded-full text-sm font-semibold">
-                        {{ $status['label'] }}
+                    <span class="inline-block px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
+                        {{ $statusLabel }}
                     </span>
                     <div>
                         <p class="text-sm text-gray-600">Waktu Tersisa</p>
@@ -108,18 +111,10 @@
                             @endif
                         </p>
                     </div>
-                    @if($janjiTemu->status == '2')
-                    <div class="pt-3 border-t border-gray-200">
-                        <p class="text-sm text-gray-600 mb-2">Status Transaksi</p>
-                        <span class="inline-block px-4 py-2 bg-green-100 text-green-700 rounded-full text-sm font-semibold">
-                            ✓ Sudah Diproses
-                        </span>
-                    </div>
-                    @endif
                 </div>
             </div>
 
-            @if($janjiTemu->status == '1')
+            @if(!$isPast)
             <!-- Form Create Transaksi -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Buat Transaksi Tabungan</h3>

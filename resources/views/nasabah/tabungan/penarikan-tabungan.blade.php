@@ -399,7 +399,10 @@
     }
 
     function verifyAndSubmit() {
+        console.log('=== VERIFY AND SUBMIT CALLED ===');
         const pin = document.getElementById('pin-input').value;
+        console.log('PIN length:', pin.length);
+        
         if (pin.length !== 6) {
             showPinError('PIN harus 6 digit');
             return;
@@ -407,8 +410,13 @@
 
         const form = document.getElementById('form-penarikan');
         const nominalInput = document.getElementById('nominal');
+        
+        console.log('Form found:', !!form);
+        console.log('Nominal before unformat:', nominalInput.value);
+        
         // Unformat nominal before submit
         nominalInput.value = nominalInput.value.replace(/[^\d]/g, '');
+        console.log('Nominal after unformat:', nominalInput.value);
 
         // Create hidden input for PIN
         // (Make sure to remove old one if exists or just append)
@@ -418,9 +426,18 @@
             pinInput.type = 'hidden';
             pinInput.name = 'pin';
             form.appendChild(pinInput);
+            console.log('Created new PIN input');
         }
         pinInput.value = pin;
+        console.log('PIN input value set:', pinInput.value);
 
+        console.log('Form data before submit:');
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+
+        console.log('Submitting form...');
         form.submit();
     }
     

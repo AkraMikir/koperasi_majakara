@@ -397,15 +397,15 @@ class TabunganController extends Controller
                 'metode' => 'required|in:tunai,transfer',
                 'nominal' => 'required|numeric|min:10000',
                 'keterangan' => 'nullable|string|max:500',
-                // Transfer specific (nullable because they're sent as null when metode=tunai)
+                // Transfer specific
                 'nama_bank' => 'nullable|required_if:metode,transfer|string|max:100',
                 'no_rekening' => 'nullable|required_if:metode,transfer|string|max:50',
                 // Tunai specific
-                'lokasi_temu' => 'required_if:metode,tunai|exists:jns_lokasi_perusahaan,id',
-                'tanggal_janji_temu' => 'required_if:metode,tunai|date|after_or_equal:today',
-                'waktu_janji_temu' => 'required_if:metode,tunai',
+                'lokasi_temu' => 'nullable|required_if:metode,tunai|exists:jns_lokasi_perusahaan,id',
+                'tanggal_janji_temu' => 'nullable|required_if:metode,tunai|date|after_or_equal:today',
+                'waktu_janji_temu' => 'nullable|required_if:metode,tunai',
             ]);
-            \Log::info('Validation passed penarikan', ['id_anggota' => auth()->user()->id, 'nominal' => $request->nominal]);
+            \Log::info('Validation passed penarikan', ['id_anggota' => auth()->user()->id, 'nominal' => $request->nominal, 'metode' => $request->metode]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             \Log::error('Validation failed', ['errors' => $e->errors()]);
             throw $e;
@@ -473,10 +473,19 @@ class TabunganController extends Controller
 
             } else {
                 // Handle Transfer -> PengajuanPenarikanTabungan
+                \Log::info('=== PENARIKAN TRANSFER DEBUG ===');
+                
                 $kodeVia = 'TF';
                 $idPengajuan = IdGenerator::generate('tbl_pengajuan_penarikan_tabungan', 'T', $kodeVia, 'PNR');
-        
-                PengajuanPenarikanTabungan::create([
+                
+                \Log::info('Generated ID: ' . $idPengajuan);
+                \Log::info('ID Anggota: ' . $idAnggota);
+                \Log::info('Nominal: ' . $request->nominal);
+                \Log::info('Nama Bank: ' . $request->nama_bank);
+                \Log::info('No Rekening: ' . $request->no_rekening);
+                \Log::info('Keterangan: ' . $request->keterangan);
+                
+                $dataToCreate = [
                     'id' => $idPengajuan,
                     'id_anggota' => $idAnggota,
                     'tgl_pengajuan' => now(),
@@ -486,7 +495,13 @@ class TabunganController extends Controller
                     'no_rekening' => $request->no_rekening,
                     'keterangan' => $request->keterangan,
                     'status' => '1', // Pending
-                ]);
+                ];
+                
+                \Log::info('Data to create:', $dataToCreate);
+                
+                $result = PengajuanPenarikanTabungan::create($dataToCreate);
+                
+                \Log::info('Create result:', ['result' => $result ? 'SUCCESS' : 'FAILED', 'id' => $result ? $result->id : null]);
         
                 return redirect()->route('nasabah.tabungan.status-pengajuan-tarik')
                     ->with('success', 'Pengajuan penarikan transfer berhasil dikirim! Menunggu persetujuan admin.');

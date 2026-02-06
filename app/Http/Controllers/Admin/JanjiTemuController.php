@@ -41,4 +41,19 @@ class JanjiTemuController extends Controller
 
         return view('admin.janji-temu.index', compact('janjiTemu'));
     }
+
+    /**
+     * Show detail of a specific janji temu.
+     */
+    public function detail($id)
+    {
+        // Directly load from JanjiTemuTabungan since ID is from tbl_janji_temu_tabungan
+        $janjiTemu = \App\Models\JanjiTemuTabungan::with(['nasabah', 'lokasi'])
+            ->findOrFail($id);
+
+        return view('admin.janji-temu.detail', [
+            'janjiTemu' => $janjiTemu,
+            'fitur' => 'Tabungan',
+        ]);
+    }
 }

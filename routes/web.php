@@ -277,6 +277,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index'); // New Universal Janji Temu
+    Route::get('/janji-temu-universal/{id}', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'detail'])->name('janji-temu.detail'); // Detail Janji Temu
     // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
     Route::get('/pengajuan', function () { return view('admin.pengajuan.index'); })->name('pengajuan.index');
 });

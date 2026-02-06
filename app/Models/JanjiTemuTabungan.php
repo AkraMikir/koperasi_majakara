@@ -28,8 +28,8 @@ class JanjiTemuTabungan extends Model
 
     protected $casts = [
         'nominal' => 'decimal:2',
-        'tanggal_janji_temu' => 'datetime',
-        'waktu_janji_temu' => 'datetime',
+        'tanggal_janji_temu' => 'date',  // DATE column
+        // waktu_janji_temu is TIMESTAMP, leave as string for manual parsing
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

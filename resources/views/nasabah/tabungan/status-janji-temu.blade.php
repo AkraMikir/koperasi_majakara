@@ -47,9 +47,15 @@
                         <p class="text-lg font-bold text-[#674c1d]">#{{ $item->id }}</p>
                     </div>
                     @php
-                        $isPast = $item->tanggal_janji_temu < now();
-                        $statusColor = $isPast ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700';
-                        $statusLabel = $isPast ? 'Selesai' : 'Akan Datang';
+                        // Combine date and time for accurate isPast check
+                        $dateTime = \Carbon\Carbon::parse($item->tanggal_janji_temu);
+                        if (isset($item->waktu_janji_temu)) {
+                            $time = \Carbon\Carbon::parse($item->waktu_janji_temu);
+                            $dateTime->setTime($time->hour, $time->minute, $time->second);
+                        }
+                        $isPast = $dateTime->isPast();
+                        $statusColor = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-700';
+                        $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
                     @endphp
                     <span class="px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
                         {{ $statusLabel }}

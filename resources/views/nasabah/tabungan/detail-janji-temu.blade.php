@@ -26,6 +26,16 @@
         </div>
     </div>
 
+    @php
+        // Combine date and time for accurate isPast check
+        $dateTime = \Carbon\Carbon::parse($janjiTemu->tanggal_janji_temu);
+        if (isset($janjiTemu->waktu_janji_temu)) {
+            $time = \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu);
+            $dateTime->setTime($time->hour, $time->minute, $time->second);
+        }
+        $isPast = $dateTime->isPast();
+    @endphp
+    
     <div class="mx-4 mb-6 space-y-6">
 
         <!-- Informasi Janji Temu -->
@@ -62,15 +72,13 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Status</h2>
             @php
-                $statusConfig = [
-                    '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Menunggu'],
-                    '2' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Selesai'],
-                    '3' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'label' => 'Dibatalkan'],
-                ];
-                $status = $statusConfig[$janjiTemu->status ?? '1'] ?? $statusConfig['1'];
+                // Calculate status based on datetime
+                $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
+                $statusBg = $isPast ? 'bg-gray-100' : 'bg-amber-100';
+                $statusText = $isPast ? 'text-gray-700' : 'text-amber-700';
             @endphp
-            <span class="inline-block px-4 py-2 {{ $status['bg'] }} {{ $status['text'] }} rounded-full text-sm font-semibold">
-                {{ $status['label'] }}
+            <span class="inline-block px-4 py-2 {{ $statusBg }} {{ $statusText }} rounded-full text-sm font-semibold">
+                {{ $statusLabel }}
             </span>
             @if($janjiTemu->keterangan)
             <p class="text-sm text-gray-600 mt-3">{{ $janjiTemu->keterangan }}</p>

@@ -196,7 +196,6 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Waktu</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Lokasi</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -204,15 +203,28 @@
                         @php
                             $hasTanggalJanjiTemu = property_exists($janji, 'tanggal_janji_temu') && $janji->tanggal_janji_temu !== null;
                             $tanggalJanji = $janji->tanggal ?? ($hasTanggalJanjiTemu ? $janji->tanggal_janji_temu : ($janji->created_at ?? now()));
-                            $waktuJanji = $janji->waktu ?? ($hasTanggalJanjiTemu ? \Carbon\Carbon::parse($janji->tanggal_janji_temu)->format('H:i') : \Carbon\Carbon::parse($tanggalJanji)->format('H:i'));
+                            $waktuJanji = property_exists($janji, 'waktu_janji_temu') && $janji->waktu_janji_temu ? \Carbon\Carbon::parse($janji->waktu_janji_temu)->format('H:i') : '00:00';
                             $namaLokasi = 'N/A';
                             if (is_string($janji->lokasi ?? null)) {
                                 $namaLokasi = $janji->lokasi;
                             } elseif (isset($janji->lokasi) && is_object($janji->lokasi) && property_exists($janji->lokasi, 'nama_lokasi')) {
                                 $namaLokasi = $janji->lokasi->nama_lokasi ?? 'N/A';
                             }
-                            $isPast = $hasTanggalJanjiTemu ? \Carbon\Carbon::parse($janji->tanggal_janji_temu)->isPast() : false;
-                            $status = $janji->status ?? ($isPast ? 'Selesai' : 'Menunggu');
+                            // Combine date and time for accurate isPast check
+                            if ($hasTanggalJanjiTemu) {
+                                $dateTime = \Carbon\Carbon::parse($janji->tanggal_janji_temu);
+                                // Check if waktu_janji_temu exists and add time
+                                if (property_exists($janji, 'waktu_janji_temu') && $janji->waktu_janji_temu) {
+                                    $waktuStr = is_string($janji->waktu_janji_temu) ? $janji->waktu_janji_temu : \Carbon\Carbon::parse($janji->waktu_janji_temu)->format('H:i:s');
+                                    list($hour, $minute, $second) = array_pad(explode(':', $waktuStr), 3, 0);
+                                    $dateTime->setTime((int)$hour, (int)$minute, (int)$second);
+                                }
+                                $isPast = $dateTime->isPast();
+                            } else {
+                                $isPast = false;
+                            }
+                            $status = $isPast ? 'Sudah Lewat' : 'Akan Datang';
+                            $statusColor = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-700';
                         @endphp
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-janji-temu', $janji->id) }}'">
                             <td class="px-4 py-3 text-sm">
@@ -222,17 +234,7 @@
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $namaLokasi }}</td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-[#674c1d]">Rp {{ number_format($janji->nominal, 0, ',', '.') }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="px-3 py-1 {{ ($status === 'Selesai' || $isPast) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
-                                        {{ $status }}
-                                    </span>
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
-                            </td>
+                        </td>
                         </tr>
                         @empty
                         <tr>
