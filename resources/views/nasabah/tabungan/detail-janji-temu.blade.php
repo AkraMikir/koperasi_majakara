@@ -47,7 +47,12 @@
                         @endif
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600 mb-1">Nominal</p>
+                        <div class="flex items-center gap-2 mb-1">
+                            <p class="text-sm text-gray-600">Nominal</p>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700' }}">
+                                {{ $janjiTemu->jenis ?? 'setoran' }}
+                            </span>
+                        </div>
                         <p class="text-2xl font-bold text-[#674c1d]">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
                 </div>
@@ -75,9 +80,15 @@
                 }
                 $isPast = $dateTime->isPast();
 
-                // Status Logic based on Time
-                if ($isPast) {
-                    $statusLabel = 'Sudah Lewat';
+                // Status Logic based on DB Status first, then Time
+                if ($janjiTemu->status == '2') {
+                    $statusLabel = 'Selesai';
+                    $statusClass = 'bg-green-100 text-green-700';
+                } elseif ($janjiTemu->status == '3') {
+                    $statusLabel = 'Dibatalkan';
+                    $statusClass = 'bg-red-100 text-red-700';
+                } elseif ($isPast) {
+                    $statusLabel = 'Terlewat';
                     $statusClass = 'bg-gray-100 text-gray-600';
                 } else {
                     $statusLabel = 'Akan Datang';

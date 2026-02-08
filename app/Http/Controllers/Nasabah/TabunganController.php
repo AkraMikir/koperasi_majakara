@@ -13,6 +13,7 @@ use App\Models\BuktiFoto; // New Model
 use App\Helpers\IdGenerator; // New Helper
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class TabunganController extends Controller
 {
@@ -117,10 +118,14 @@ class TabunganController extends Controller
             ->take(10)
             ->get();
 
+        // Get active office locations
+        $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
+
         return view('nasabah.tabungan.penarikan-tabungan', [
             'user' => auth()->user(),
             'tabunganInfo' => $tabunganInfo,
             'riwayatPenarikan' => $riwayatPenarikan,
+            'lokasi' => $lokasi,
         ]);
     }
 
@@ -375,12 +380,24 @@ class TabunganController extends Controller
     public function submitPenarikan(Request $request)
     {
         $request->validate([
+            'pin' => 'required|numeric|digits:6',
             'metode' => 'required|in:tunai,transfer',
             'nominal' => 'required|numeric|min:10000',
             'keterangan' => 'nullable|string|max:500',
-            'nama_bank' => 'required_if:metode,transfer|string|max:100',
-            'no_rekening' => 'required_if:metode,transfer|string|max:50',
+            'nama_bank' => 'nullable|required_if:metode,transfer|string|max:100',
+            'no_rekening' => 'nullable|required_if:metode,transfer|string|max:50',
+            'lokasi_temu' => 'nullable|required_if:metode,tunai|exists:jns_lokasi_perusahaan,id',
+            'tanggal_janji_temu' => 'nullable|required_if:metode,tunai|date|after_or_equal:today',
+            'waktu_janji_temu' => 'nullable|required_if:metode,tunai',
         ]);
+
+        // Verify PIN
+        $user = auth()->user();
+        if (!$user->pin || (int)$user->pin !== (int)$request->pin) {
+            return redirect()->back()
+                ->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
+        }
 
         $idAnggota = $this->getIdAnggota();
 
@@ -389,27 +406,63 @@ class TabunganController extends Controller
         if ($saldo < $request->nominal) {
             return redirect()->back()
                 ->with('error', 'Saldo tidak mencukupi!')
-                ->withInput();
+                ->withInput($request->except('pin'));
         }
 
-        $kodeVia = $request->metode === 'transfer' ? 'TF' : 'TN';
-        $idPengajuan = IdGenerator::generate('tbl_pengajuan_penarikan_tabungan', 'T', $kodeVia, 'PNR');
+        try {
+            DB::beginTransaction();
 
-        // Create pengajuan penarikan (id wajib string dari migration)
-        PengajuanPenarikanTabungan::create([
-            'id' => $idPengajuan,
-            'id_anggota' => $idAnggota,
-            'tgl_pengajuan' => now(),
-            'nominal' => $request->nominal,
-            'metode_transfer' => $request->metode,
-            'nama_bank' => $request->metode === 'transfer' ? $request->nama_bank : null,
-            'no_rekening' => $request->metode === 'transfer' ? $request->no_rekening : null,
-            'keterangan' => $request->keterangan,
-            'status' => '1', // Pending
-        ]);
+            $kodeVia = $request->metode === 'transfer' ? 'TF' : 'TN';
+            $idPengajuan = IdGenerator::generate('tbl_pengajuan_penarikan_tabungan', 'T', $kodeVia, 'PNR');
 
-        return redirect()->route('nasabah.tabungan.status-pengajuan-tarik')
-            ->with('success', 'Pengajuan penarikan berhasil dikirim!');
+            // 1. Create pengajuan penarikan record (always, for history consistency)
+            PengajuanPenarikanTabungan::create([
+                'id' => $idPengajuan,
+                'id_anggota' => $idAnggota,
+                'tgl_pengajuan' => now(),
+                'nominal' => $request->nominal,
+                'metode_transfer' => $request->metode,
+                'nama_bank' => $request->metode === 'transfer' ? $request->nama_bank : null,
+                'no_rekening' => $request->metode === 'transfer' ? $request->no_rekening : null,
+                'lokasi_temu' => $request->metode === 'tunai' ? $request->lokasi_temu : null,
+                'tanggal_janji_temu' => $request->metode === 'tunai' ? $request->tanggal_janji_temu : null,
+                'waktu_janji_temu' => $request->metode === 'tunai' ? $request->waktu_janji_temu : null,
+                'keterangan' => $request->keterangan,
+                'status' => '1', // Pending
+            ]);
+
+            // 2. If Tunai, also create JanjiTemuTabungan for Universal System
+            if ($request->metode === 'tunai') {
+                $idJanjiTemu = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'CS', 'JNJT');
+                
+                JanjiTemuTabungan::create([
+                    'id' => $idJanjiTemu,
+                    'id_nasabah' => $idAnggota,
+                    'lokasi_temu' => $request->lokasi_temu,
+                    'jenis' => 'penarikan',  // ✅ Set jenis as penarikan
+                    'nominal' => $request->nominal,
+                    'tanggal_janji_temu' => $request->tanggal_janji_temu,
+                    'waktu_janji_temu' => $request->waktu_janji_temu,
+                    'keterangan' => $request->keterangan,
+                    'status' => '1', // Menunggu
+                ]);
+            }
+
+            DB::commit();
+
+            $redirectRoute = $request->metode === 'tunai' 
+                ? 'nasabah.tabungan.status-janji-temu' 
+                : 'nasabah.tabungan.status-pengajuan-tarik';
+
+            return redirect()->route($redirectRoute)
+                ->with('success', 'Pengajuan penarikan berhasil dikirim!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput($request->except('pin'));
+        }
     }
 
     /**
@@ -501,7 +554,7 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         $transaksi = TransTabungan::where('id_anggota', $idAnggota)
-            ->with(['pengajuanSetor.buktiFoto', 'pengajuanTarik', 'jnsTransaksi', 'jnsVia'])
+            ->with(['pengajuanSetor.buktiFoto', 'pengajuanTarik', 'jnsTransaksi', 'jnsVia', 'janjiTemuTabungan.buktiFoto'])
             ->findOrFail($id);
 
         return view('nasabah.tabungan.detail-transaksi', [
@@ -529,7 +582,7 @@ class TabunganController extends Controller
     }
 
     /**
-     * Get saldo nasabah (same method as Admin controller).
+     * Get saldo nasabah.
      */
     private function getSaldoNasabah($idAnggota)
     {
@@ -541,7 +594,17 @@ class TabunganController extends Controller
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
             ->sum('nominal') ?? 0;
-            
+
+        // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
+        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->get();
+
+        foreach ($pengajuanApproved as $pengajuan) {
+            $totalSetoran += $pengajuan->nominal ?? 0;
+        }
+
         return max(0, $totalSetoran - $totalPenarikan);
     }
 

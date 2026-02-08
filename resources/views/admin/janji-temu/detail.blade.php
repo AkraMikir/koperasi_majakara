@@ -63,10 +63,17 @@
             <!-- Informasi Janji Temu -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Informasi Janji Temu</h2>
-                <div class="space-y-4">
-                    <div>
-                        <p class="text-sm text-gray-600">Tanggal & Waktu</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Tanggal & Waktu</p>
+                            <p class="font-semibold text-gray-900">{{ $janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Jenis Transaksi</p>
+                            <span class="inline-block px-3 py-1 rounded-full text-xs font-bold uppercase {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700' }}">
+                                {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'Setoran Tabungan' : 'Penarikan Tabungan' }}
+                            </span>
+                        </div>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Lokasi</p>
@@ -118,7 +125,7 @@
             <!-- Form Create Transaksi -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Buat Transaksi Tabungan</h3>
-                <p class="text-sm text-gray-600 mb-4">Isi form di bawah untuk membuat transaksi tabungan setelah janji temu selesai.</p>
+                <p class="text-sm text-gray-600 mb-4">Isi form di bawah untuk membuat transaksi {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'setoran' : 'penarikan' }} tabungan setelah janji temu selesai.</p>
                 
                 <form method="POST" action="{{ route('admin.tabungan.create-trans-from-janji-temu', $janjiTemu->id) }}" enctype="multipart/form-data">
                     @csrf
@@ -179,7 +186,7 @@
                     </svg>
                     <h3 class="text-lg font-bold text-green-800">Transaksi Sudah Dibuat</h3>
                 </div>
-                <p class="text-sm text-green-700">Janji temu telah diproses dan transaksi tabungan sudah dibuat.</p>
+                <p class="text-sm text-green-700">Janji temu telah diproses dan transaksi {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'setoran' : 'penarikan' }} tabungan sudah dibuat.</p>
                 @if($janjiTemu->keterangan_admin)
                 <div class="mt-4 p-3 bg-white rounded-lg">
                     <p class="text-xs text-gray-600 mb-1">Keterangan Admin:</p>

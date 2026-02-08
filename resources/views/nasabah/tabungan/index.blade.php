@@ -216,8 +216,20 @@
 
                             // Status Logic
                             $isPast = $dateTime->isPast();
-                            $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
-                            $statusClass = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-700';
+                            
+                            if ($janji->status == '2') {
+                                $statusLabel = 'Selesai';
+                                $statusClass = 'bg-green-100 text-green-700';
+                            } elseif ($janji->status == '3') {
+                                $statusLabel = 'Dibatalkan';
+                                $statusClass = 'bg-red-100 text-red-700';
+                            } elseif ($isPast) {
+                                $statusLabel = 'Terlewat';
+                                $statusClass = 'bg-gray-100 text-gray-700';
+                            } else {
+                                $statusLabel = 'Akan Datang';
+                                $statusClass = 'bg-amber-100 text-amber-700';
+                            }
 
                             // Location Logic
                             $namaLokasi = 'N/A';

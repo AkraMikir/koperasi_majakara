@@ -55,9 +55,15 @@
                         }
                         $isPast = $dateTime->isPast();
                         
-                        // Status Logic based on Time
-                        if ($isPast) {
-                            $statusLabel = 'Sudah Lewat';
+                        // Status Logic based on DB Status first, then Time
+                        if ($item->status == '2') {
+                            $statusLabel = 'Selesai';
+                            $statusClass = 'bg-green-100 text-green-700';
+                        } elseif ($item->status == '3') {
+                            $statusLabel = 'Dibatalkan';
+                            $statusClass = 'bg-red-100 text-red-700';
+                        } elseif ($isPast) {
+                            $statusLabel = 'Terlewat';
                             $statusClass = 'bg-gray-100 text-gray-600';
                         } else {
                             $statusLabel = 'Akan Datang';

@@ -106,6 +106,16 @@
                     @endforeach
                 </div>
             </div>
+            @elseif($transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik && $transaksi->pengajuanTarik->foto_bukti_tf_admin)
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Transfer Admin</h2>
+                <div class="max-w-md border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                    <img src="{{ asset('storage/' . $transaksi->pengajuanTarik->foto_bukti_tf_admin) }}" alt="Bukti Transfer" class="w-full h-auto cursor-pointer" onclick="window.open(this.src)">
+                    <div class="p-3 bg-gray-50 text-center text-xs text-gray-500">
+                        Bukti transfer di-upload saat persetujuan
+                    </div>
+                </div>
+            </div>
             @endif
         </div>
 

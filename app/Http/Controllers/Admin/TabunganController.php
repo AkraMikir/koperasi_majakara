@@ -389,7 +389,7 @@ class TabunganController extends Controller
     public function detailJanjiTemu($id)
     {
         $janjiTemu = JanjiTemuTabungan::with([
-            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi',
+            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto'
         ])->findOrFail($id);
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu'));
@@ -406,8 +406,9 @@ class TabunganController extends Controller
             'foto_penerimaan.*' => 'nullable|image|max:5120',  // Multiple files
         ]);
 
-        // Parse nominal from formatted currency string
-        $nominal = (float) str_replace(['.', ','], '', $request->nominal);
+        // Parse nominal from formatted currency string (e.g., "Rp 10.000.000")
+        $nominalStr = preg_replace('/[^0-9]/', '', $request->nominal);
+        $nominal = (float) $nominalStr;
         
         if ($nominal < 10000) {
             return redirect()->back()
@@ -447,24 +448,44 @@ class TabunganController extends Controller
 
         // Create transaksi tabungan
         $kodeVia = 'CS';  // Cash (janji temu)
-        $kodeTrans = 'STR';  // Setoran
+        
+        // Check Janji Temu Type
+        $isWithdrawal = isset($janjiTemu->jenis) && $janjiTemu->jenis === 'penarikan';
+        $kodeTrans = $isWithdrawal ? 'PNR' : 'STR';
+        
         $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
         $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
         $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
+        // Find related pengajuan tarik if this is a withdrawal
+        $idPengajuanTarik = null;
+        if ($isWithdrawal) {
+            $pengajuanTarik = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+                ->where('nominal', $nominal)
+                ->where('status', '1') // Pending
+                ->latest()
+                ->first();
+            
+            if ($pengajuanTarik) {
+                $idPengajuanTarik = $pengajuanTarik->id;
+                $pengajuanTarik->update(['status' => '2']); // Approve
+            }
+        }
+
         TransTabungan::create([
             'id' => $idTransaksi,
-            'id_pengajuan_setor' => null,  // Tidak ada pengajuan
-            'id_pengajuan_tarik' => null,
+            'id_pengajuan_setor' => null, 
+            'id_janji_temu_tabungan' => $janjiTemu->id,
+            'id_pengajuan_tarik' => $idPengajuanTarik,
             'id_anggota' => $idAnggota,
             'id_jns_via' => $idVia,
             'id_jns_transaksi' => $idTrans,
-            'nominal' => $nominal,  // Use parsed nominal
-            'keterangan' => $janjiTemu->keterangan,  // Use nasabah keterangan
+            'nominal' => $nominal,
+            'keterangan' => ($isWithdrawal ? '[PENARIKAN TUNAI] ' : '[SETORAN TUNAI] ') . $janjiTemu->keterangan,
             'tgl_transaksi' => now(),
         ]);
 
-        return redirect()->route('admin.tabungan.janji-temu')
+        return redirect()->route('admin.janji-temu.index')
             ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
     }
 

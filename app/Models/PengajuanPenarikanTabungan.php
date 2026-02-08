@@ -24,6 +24,9 @@ class PengajuanPenarikanTabungan extends Model
         'no_rekening',
         'nama_bank',
         'foto_bukti_tf_admin',
+        'lokasi_temu',
+        'tanggal_janji_temu',
+        'waktu_janji_temu',
         'keterangan',
         'keterangan_admin',
         'status',
@@ -32,6 +35,7 @@ class PengajuanPenarikanTabungan extends Model
     protected $casts = [
         'tgl_pengajuan' => 'datetime',
         'nominal' => 'decimal:2',
+        'tanggal_janji_temu' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -39,6 +43,11 @@ class PengajuanPenarikanTabungan extends Model
     public function nasabah(): BelongsTo
     {
         return $this->belongsTo(Nasabah::class, 'id_anggota');
+    }
+
+    public function lokasi(): BelongsTo
+    {
+        return $this->belongsTo(JnsLokasiPerusahaan::class, 'lokasi_temu');
     }
 
     public function transTabungan(): HasMany

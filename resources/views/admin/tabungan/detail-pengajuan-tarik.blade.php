@@ -70,6 +70,18 @@
                         <p class="text-sm text-gray-600">Nomor Rekening</p>
                         <p class="font-semibold text-gray-900 font-mono">{{ $pengajuan->no_rekening ?? 'N/A' }}</p>
                     </div>
+                    @else
+                    <div>
+                        <p class="text-sm text-gray-600">Lokasi Pertemuan</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->lokasi->nama_lokasi ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Jadwal Pertemuan</p>
+                        <p class="font-semibold text-gray-900">
+                            {{ $pengajuan->tanggal_janji_temu ? $pengajuan->tanggal_janji_temu->format('d M Y') : '-' }} , 
+                            {{ $pengajuan->waktu_janji_temu ? \Carbon\Carbon::parse($pengajuan->waktu_janji_temu)->format('H:i') : '-' }} WIB
+                        </p>
+                    </div>
                     @endif
                     <div>
                         <p class="text-sm text-gray-600">Saldo Nasabah</p>
@@ -100,6 +112,22 @@
                     <div>
                         <p class="text-sm text-gray-600">Keterangan</p>
                         <p class="text-gray-900 mt-1">{{ $pengajuan->keterangan }}</p>
+                    </div>
+                    @endif
+
+                    @if($pengajuan->status == '2' && $pengajuan->foto_bukti_tf_admin)
+                    <div class="pt-4 border-t border-gray-200">
+                        <p class="text-sm text-gray-600 mb-2">Bukti Transfer (Admin)</p>
+                        <div class="max-w-xs border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+                            <img src="{{ asset('storage/' . $pengajuan->foto_bukti_tf_admin) }}" alt="Bukti Transfer" class="w-full h-auto cursor-pointer" onclick="window.open(this.src)">
+                        </div>
+                    </div>
+                    @endif
+
+                    @if($pengajuan->keterangan_admin)
+                    <div class="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                        <p class="text-sm font-semibold text-gray-700 mb-1">Catatan Admin:</p>
+                        <p class="text-gray-600">{{ $pengajuan->keterangan_admin }}</p>
                     </div>
                     @endif
                 </div>
