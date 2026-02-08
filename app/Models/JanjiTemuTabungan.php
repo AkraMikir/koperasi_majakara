@@ -24,6 +24,7 @@ class JanjiTemuTabungan extends Model
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
+        'status',
     ];
 
     protected $casts = [

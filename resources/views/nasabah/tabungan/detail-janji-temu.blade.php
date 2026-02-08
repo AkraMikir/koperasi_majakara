@@ -26,16 +26,6 @@
         </div>
     </div>
 
-    @php
-        // Combine date and time for accurate isPast check
-        $dateTime = \Carbon\Carbon::parse($janjiTemu->tanggal_janji_temu);
-        if (isset($janjiTemu->waktu_janji_temu)) {
-            $time = \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu);
-            $dateTime->setTime($time->hour, $time->minute, $time->second);
-        }
-        $isPast = $dateTime->isPast();
-    @endphp
-    
     <div class="mx-4 mb-6 space-y-6">
 
         <!-- Informasi Janji Temu -->
@@ -46,7 +36,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Tanggal & Waktu</p>
-                        <p class="font-semibold text-gray-900">{{ $janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
+                        <p class="font-semibold text-gray-900">
+                            {{ $janjiTemu->tanggal_janji_temu->format('d M Y') }}
+                            @if(!empty($janjiTemu->waktu_janji_temu))
+                                , {{ \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu)->format('H:i') }}
+                            @endif
+                        </p>
                         @if(!$isPast)
                         <p class="text-xs text-gray-500 mt-1">{{ $janjiTemu->tanggal_janji_temu->diffForHumans() }}</p>
                         @endif
@@ -72,12 +67,24 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Status</h2>
             @php
-                // Calculate status based on datetime
-                $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
-                $statusBg = $isPast ? 'bg-gray-100' : 'bg-amber-100';
-                $statusText = $isPast ? 'text-gray-700' : 'text-amber-700';
+                // Combine date and time for accurate isPast check
+                $dateTime = \Carbon\Carbon::parse($janjiTemu->tanggal_janji_temu);
+                if (!empty($janjiTemu->waktu_janji_temu)) {
+                    $time = \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu);
+                    $dateTime->setTime($time->hour, $time->minute, $time->second);
+                }
+                $isPast = $dateTime->isPast();
+
+                // Status Logic based on Time
+                if ($isPast) {
+                    $statusLabel = 'Sudah Lewat';
+                    $statusClass = 'bg-gray-100 text-gray-600';
+                } else {
+                    $statusLabel = 'Akan Datang';
+                    $statusClass = 'bg-amber-100 text-amber-700';
+                }
             @endphp
-            <span class="inline-block px-4 py-2 {{ $statusBg }} {{ $statusText }} rounded-full text-sm font-semibold">
+            <span class="inline-block px-4 py-2 {{ $statusClass }} rounded-full text-sm font-semibold">
                 {{ $statusLabel }}
             </span>
             @if($janjiTemu->keterangan)
@@ -88,32 +95,6 @@
         <!-- Map/Location Info -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Peta Lokasi</h2>
-            
-            @if($janjiTemu->lokasi && $janjiTemu->lokasi->google_maps_embed)
-            <div class="rounded-xl overflow-hidden border border-gray-200 shadow-sm">
-                <iframe 
-                    src="{{ $janjiTemu->lokasi->google_maps_embed }}" 
-                    width="100%" 
-                    height="450" 
-                    style="border:0;" 
-                    allowfullscreen="" 
-                    loading="lazy" 
-                    referrerpolicy="no-referrer-when-downgrade"
-                    class="w-full">
-                </iframe>
-            </div>
-            <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <div class="flex items-start gap-3">
-                    <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <div>
-                        <p class="text-sm font-semibold text-blue-900 mb-1">Petunjuk Arah</p>
-                        <p class="text-sm text-blue-700">Klik pada peta untuk membuka Google Maps dan mendapatkan petunjuk arah ke lokasi.</p>
-                    </div>
-                </div>
-            </div>
-            @else
             <div class="bg-gray-100 rounded-xl h-64 flex items-center justify-center border border-gray-200">
                 <div class="text-center">
                     <svg class="w-16 h-16 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -123,7 +104,6 @@
                     <p class="text-gray-500">Peta lokasi akan ditampilkan di sini</p>
                 </div>
             </div>
-            @endif
         </div>
     </div>
 </div>

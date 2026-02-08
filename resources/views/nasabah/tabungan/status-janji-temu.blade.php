@@ -49,15 +49,22 @@
                     @php
                         // Combine date and time for accurate isPast check
                         $dateTime = \Carbon\Carbon::parse($item->tanggal_janji_temu);
-                        if (isset($item->waktu_janji_temu)) {
+                        if (!empty($item->waktu_janji_temu)) {
                             $time = \Carbon\Carbon::parse($item->waktu_janji_temu);
                             $dateTime->setTime($time->hour, $time->minute, $time->second);
                         }
                         $isPast = $dateTime->isPast();
-                        $statusColor = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-amber-100 text-amber-700';
-                        $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
+                        
+                        // Status Logic based on Time
+                        if ($isPast) {
+                            $statusLabel = 'Sudah Lewat';
+                            $statusClass = 'bg-gray-100 text-gray-600';
+                        } else {
+                            $statusLabel = 'Akan Datang';
+                            $statusClass = 'bg-amber-100 text-amber-700';
+                        }
                     @endphp
-                    <span class="px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
+                    <span class="px-4 py-2 {{ $statusClass }} rounded-full text-sm font-semibold">
                         {{ $statusLabel }}
                     </span>
                 </div>
@@ -65,7 +72,12 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                     <div>
                         <p class="text-sm text-gray-600">Tanggal & Waktu</p>
-                        <p class="font-semibold text-gray-900">{{ $item->tanggal_janji_temu->format('d M Y, H:i') }}</p>
+                        <p class="font-semibold text-gray-900">
+                            {{ $item->tanggal_janji_temu->format('d M Y') }}
+                            @if(!empty($item->waktu_janji_temu))
+                                , {{ \Carbon\Carbon::parse($item->waktu_janji_temu)->format('H:i') }}
+                            @endif
+                        </p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal</p>

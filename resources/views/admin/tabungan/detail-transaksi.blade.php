@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Transaksi Tabungan</h1>
-            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
         </div>
         <div class="flex items-center space-x-3">
             @if(!$transaksi->id_pengajuan_setor && !$transaksi->id_pengajuan_tarik)
@@ -89,7 +89,7 @@
             <!-- Bukti Foto (jika setoran dari pengajuan) -->
             @if($transaksi->jenis === 'setoran' && $transaksi->pengajuanSetor && $transaksi->pengajuanSetor->buktiFoto->count() > 0)
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer (dari Pengajuan)</h2>
+                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($transaksi->pengajuanSetor->buktiFoto as $bukti)
                     <div class="border border-gray-200 rounded-lg overflow-hidden">
@@ -101,31 +101,6 @@
                         @endif
                         <div class="p-3 bg-gray-50">
                             <p class="text-xs text-gray-600">{{ $bukti->keterangan ?? 'Bukti Transfer' }}</p>
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
-
-            <!-- Bukti Foto Transaksi Manual -->
-            @php
-                $buktiFotoManual = $transaksi->buktiFoto ?? collect();
-            @endphp
-            @if($buktiFotoManual->count() > 0)
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Transaksi</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($buktiFotoManual as $bukti)
-                    <div class="border border-gray-200 rounded-lg overflow-hidden group cursor-pointer" onclick="window.open('{{ Storage::url($bukti->file_path) }}', '_blank')">
-                        @if($bukti->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path))
-                        <img src="{{ Storage::url($bukti->file_path) }}" alt="Bukti Transaksi" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-200">
-                        @else
-                        <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">File tidak ditemukan</div>
-                        @endif
-                        <div class="p-3 bg-gray-50">
-                            <p class="text-xs text-gray-600">{{ $bukti->keterangan ?? 'Bukti Transaksi' }}</p>
-                            <p class="text-xs text-gray-400 mt-1">Upload: {{ $bukti->created_at->format('d M Y, H:i') }}</p>
                         </div>
                     </div>
                     @endforeach

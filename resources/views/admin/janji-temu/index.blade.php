@@ -97,7 +97,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                             @if($item->fitur == 'Tabungan')
-                                <a href="{{ route('admin.janji-temu.detail', $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
+                                <a href="{{ route('admin.tabungan.detail-janji-temu', $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
                             @elseif($item->fitur == 'Pinjaman')
                                 <!-- Asumsi ada route detail pinjaman -->
                                 <a href="{{ route('admin.pinjaman.detail-pengajuan', $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>

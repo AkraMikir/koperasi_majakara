@@ -1,0 +1,195 @@
+@extends('layouts.admin')
+
+@section('title', 'Detail Janji Temu')
+
+@section('content')
+<div class="space-y-6">
+    <!-- Back Button -->
+    <div>
+        <a href="{{ route('admin.janji-temu.index') }}" class="inline-flex items-center text-gray-500 hover:text-[#674c1d] transition-colors">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Kembali ke Janji Temu
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <!-- Data Nasabah Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[#674c1d]/5 rounded-full -mr-16 -mt-16"></div>
+                
+                <h2 class="text-xl font-bold text-gray-900 font-display mb-6 relative">Informasi Nasabah</h2>
+                
+                <div class="flex items-start gap-6 relative">
+                    <div class="shrink-0">
+                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] flex items-center justify-center shadow-lg transform rotate-3">
+                            <span class="text-3xl font-bold text-white font-display">
+                                {{ substr($janjiTemu->nasabah->user->nama, 0, 1) }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-4 flex-1">
+                        <div>
+                            <p class="text-sm text-gray-500 mb-1">Nama Lengkap</p>
+                            <p class="font-bold text-gray-900 text-lg">{{ $janjiTemu->nasabah->user->nama }}</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Email</p>
+                                <p class="font-medium text-gray-900">{{ $janjiTemu->nasabah->user->email }}</p>
+                            </div>
+                            <div>
+                                <p class="text-sm text-gray-500 mb-1">Nomor Telepon</p>
+                                <p class="font-medium text-gray-900">{{ $janjiTemu->nasabah->user->nomor_hp ?? '-' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Janji Temu Detail Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h2 class="text-xl font-bold text-gray-900 font-display mb-6">Detail Janji Temu</h2>
+
+                <div class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-sm text-gray-500 mb-1">Tanggal & Waktu</p>
+                            <p class="font-bold text-gray-900 text-lg">
+                                {{ $janjiTemu->tanggal_janji_temu->format('d M Y') }}
+                            </p>
+                            <p class="text-sm text-[#674c1d] font-medium mt-1">
+                                Pukul {{ $janjiTemu->waktu_janji_temu ? \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu)->format('H:i') : '-' }} WIB
+                            </p>
+                        </div>
+                        
+                        <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                            <p class="text-sm text-gray-500 mb-1">Nominal Setoran</p>
+                            <p class="font-bold text-gray-900 text-lg">
+                                Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p class="text-sm text-gray-500 mb-2">Lokasi Pertemuan</p>
+                        <div class="flex items-start gap-3">
+                            <div class="shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900">
+                                    {{ is_string($janjiTemu->lokasi) ? $janjiTemu->lokasi : ($janjiTemu->lokasi->nama_lokasi ?? '-') }}
+                                </p>
+                                @if(isset($janjiTemu->lokasi) && is_object($janjiTemu->lokasi))
+                                <p class="text-sm text-gray-500 mt-1">{{ $janjiTemu->lokasi->alamat_lengkap ?? '' }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <p class="text-sm text-gray-500 mb-2">Pesan / Keterangan</p>
+                        <p class="text-gray-700 italic">"{{ $janjiTemu->keterangan ?? 'Tidak ada keterangan' }}"</p>
+                    </div>
+
+                    @if($janjiTemu->status == '2')
+                    <div class="p-4 bg-green-50 rounded-xl border border-green-100">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <p class="font-bold text-green-800">Selesai Diproses</p>
+                        </div>
+                        <p class="text-sm text-green-700 ml-11">{{ $janjiTemu->keterangan_admin }}</p>
+                    </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="space-y-6">
+            @if($janjiTemu->status == '1')
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                <h3 class="font-bold text-gray-900 mb-4">Proses Janji Temu</h3>
+                <p class="text-sm text-gray-500 mb-6">
+                    Setelah pertemuan selesai dan uang diterima, proses janji temu ini untuk membuat transaksi setoran otomatis.
+                </p>
+
+                <form action="{{ route('admin.tabungan.create-trans-from-janji-temu', $janjiTemu->id) }}" method="POST" enctype="multipart/form-data">
+                    @csrf
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nominal Diterima</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3 text-gray-500 font-medium">Rp</span>
+                                <input type="text" name="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent outline-none font-bold text-gray-900" 
+                                    readonly>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto (Opsional)</label>
+                            <input type="file" name="foto_penerimaan[]" multiple 
+                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d]/10 file:text-[#674c1d] hover:file:bg-[#674c1d]/20 transition-all">
+                            <p class="text-xs text-gray-500 mt-1">Bisa upload foto uang / kwitansi</p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan Admin</label>
+                            <textarea name="keterangan_admin" rows="3" 
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent outline-none"
+                                placeholder="Catatan tambahan..."></textarea>
+                        </div>
+
+                        <button type="submit" onclick="return confirm('Apakah Anda yakin uang sudah diterima? Transaksi akan dibuat otomatis.')" 
+                            class="w-full py-3 bg-[#674c1d] hover:bg-[#543d16] text-white font-bold rounded-xl shadow-lg shadow-[#674c1d]/20 transition-all transform hover:-translate-y-1">
+                            ✅ Selesaikan & Buat Transaksi
+                        </button>
+                    </div>
+                </form>
+            </div>
+            @endif
+
+            <div class="bg-[#674c1d] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
+                <div class="relative z-10">
+                    <h3 class="font-bold text-lg mb-2">Status Saat Ini</h3>
+                    @if($janjiTemu->status == '1')
+                        <span class="inline-flex px-4 py-1.5 rounded-full bg-yellow-400/20 border border-yellow-400/30 text-yellow-100 font-semibold text-sm backdrop-blur-sm">
+                            Menunggu Pertemuan
+                        </span>
+                        <p class="mt-4 text-sm text-white/80">
+                            Masih menunggu pertemuan dengan nasabah. Pastikan waktu dan lokasi sudah sesuai.
+                        </p>
+                    @elseif($janjiTemu->status == '2')
+                        <span class="inline-flex px-4 py-1.5 rounded-full bg-green-400/20 border border-green-400/30 text-green-100 font-semibold text-sm backdrop-blur-sm">
+                            Selesai
+                        </span>
+                        <p class="mt-4 text-sm text-white/80">
+                            Pertemuan telah selesai dan dana telah diproses ke tabungan nasabah.
+                        </p>
+                    @else
+                        <span class="inline-flex px-4 py-1.5 rounded-full bg-red-400/20 border border-red-400/30 text-red-100 font-semibold text-sm backdrop-blur-sm">
+                            Dibatalkan
+                        </span>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection

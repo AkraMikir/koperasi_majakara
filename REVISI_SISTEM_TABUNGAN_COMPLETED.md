@@ -219,7 +219,7 @@ public static function generateIdTransaksi($jnsAkunPrefix = 'TAB')
 **Perubahan**:
 - ✅ Update semua view yang menampilkan ID transaksi
 - ✅ Format baru: `20260128-001-TAB` (jika ada id_transaksi)
-- ✅ Fallback: `TRX-00001` (jika id_transaksi null)
+- ✅ Fallback: `TR X-00001` (jika id_transaksi null)
 - ✅ Konsisten di semua halaman (nasabah & admin)
 
 **Views Updated**:
