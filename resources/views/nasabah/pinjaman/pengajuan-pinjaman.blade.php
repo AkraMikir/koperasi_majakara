@@ -98,9 +98,9 @@
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-500">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                         </svg>
-                        <span>Upload bukti transfer</span>
+                        <span>Pencairan via transfer bank</span>
                     </div>
                 </button>
 
@@ -134,7 +134,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-gray-900 font-display mb-6">Formulir Pengajuan Pinjaman Transfer</h2>
 
-            <form id="form-transfer" method="POST" action="{{ route('nasabah.pinjaman.submit-pengajuan-transfer') }}" enctype="multipart/form-data" class="space-y-6">
+            <form id="form-transfer" method="POST" action="{{ route('nasabah.pinjaman.submit-pengajuan-transfer') }}" class="space-y-6">
                 @csrf
                 <input type="hidden" name="jenis_pencairan" value="transfer">
 
@@ -164,26 +164,13 @@
                     @error('durasi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
-                <!-- Upload Bukti Transfer (style kecil seperti tabungan) -->
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-3">Upload Bukti Transfer *</label>
-                    <div id="bukti-container-pinjaman" class="space-y-3"></div>
-                    <button type="button" onclick="addBuktiFieldPinjaman()"
-                        class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-[#674c1d] hover:bg-[#4a3514] text-white text-sm font-semibold rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                        </svg>
-                        Tambah Bukti Transfer
-                    </button>
-                    <p class="text-xs text-gray-500 mt-2">Format: JPG, PNG, JPEG (Max 5MB per file). Minimal 1 bukti transfer.</p>
-                    @error('bukti_foto')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
-                </div>
 
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan (Opsional)</label>
                     <textarea name="keterangan" rows="3" placeholder="Tambahkan keterangan jika diperlukan..."
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none">{{ old('keterangan') }}</textarea>
                 </div>
+
 
                 <!-- Estimasi & Simulasi -->
                 <div class="p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
@@ -447,7 +434,6 @@
 
 @push('scripts')
 <script>
-let buktiCountPinjaman = 0;
 let debounceSimulasi = null;
 
 function selectMethod(method) {
@@ -461,7 +447,6 @@ function selectMethod(method) {
     if (method === 'transfer') {
         document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
         document.getElementById('form-transfer-section').classList.remove('hidden');
-        if (buktiCountPinjaman === 0) addBuktiFieldPinjaman();
         updateEstimasiTransfer();
     } else {
         document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
@@ -474,35 +459,6 @@ function selectMethod(method) {
     }, 100);
 }
 
-function addBuktiFieldPinjaman() {
-    buktiCountPinjaman++;
-    const container = document.getElementById('bukti-container-pinjaman');
-    const div = document.createElement('div');
-    div.className = 'relative';
-    div.innerHTML = `
-        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-            <div class="flex-shrink-0 w-10 h-10 bg-[#674c1d] rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-            </div>
-            <div class="flex-1">
-                <input type="file" name="bukti_foto[]" accept="image/*" ${buktiCountPinjaman === 1 ? 'required' : ''}
-                    class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] cursor-pointer">
-                <p class="text-xs text-gray-500 mt-1">Max 5MB (JPG, PNG, JPEG)</p>
-            </div>
-            ${buktiCountPinjaman > 1 ? `
-            <button type="button" onclick="this.closest('.relative').remove(); buktiCountPinjaman--;"
-                class="flex-shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
-            </button>
-            ` : ''}
-        </div>
-    `;
-    container.appendChild(div);
-}
 
 function formatCurrencyTransfer(input) {
     let v = input.value.replace(/[^0-9]/g, '');

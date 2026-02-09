@@ -10,8 +10,12 @@ class BuktiFoto extends Model
     use HasFactory;
 
     protected $table = 'tbl_bukti_foto';
+    protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
 
     protected $fillable = [
+        'id',
         'owner_id',
         'owner_fitur',
         'owner_trans',

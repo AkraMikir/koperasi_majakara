@@ -141,11 +141,11 @@
                 <table class="w-full">
                     <thead>
                         <tr class="border-b-2 border-[#8b6f2f]/20">
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">ID Pinjaman</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Tanggal Pinjam</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jenis</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -162,6 +162,9 @@
                         @endphp
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pinjaman', $pinjaman->id) }}'">
                             <td class="px-4 py-3 text-sm">
+                                <p class="font-medium text-gray-900">{{ $pinjaman->id }}</p>
+                            </td>
+                            <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $pinjaman->tgl_pinjam->format('d M Y') }}</p>
                             </td>
                             <td class="px-4 py-3">
@@ -174,16 +177,6 @@
                             </td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-orange-600">Rp {{ number_format($sisa, 0, ',', '.') }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="px-3 py-1 {{ $pinjaman->status === 'telaksana' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
-                                        {{ ucfirst($pinjaman->status) }}
-                                    </span>
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </div>
                             </td>
                         </tr>
                         @empty

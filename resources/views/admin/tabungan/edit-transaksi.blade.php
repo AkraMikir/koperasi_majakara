@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Edit Transaksi</h1>
-            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ?? 'TRX-' . $transaksi->id }}</p>
+            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ??$transaksi->id }}</p>
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.tabungan.detail-transaksi', $transaksi->id) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">

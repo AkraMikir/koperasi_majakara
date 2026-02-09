@@ -56,7 +56,7 @@ return new class extends Migration
                 UUID() AS id_view,
                 'Pembayaran Pinjaman' AS fitur,
                 jt.id AS id_asli,
-                jt.id_nasabah AS id_anggota,
+                p.id_anggota AS id_anggota,
                 u.nama AS nama_anggota,
                 jt.tanggal_janji_temu,
                 jt.waktu_janji_temu,
@@ -67,7 +67,8 @@ return new class extends Migration
                 jt.status,
                 jt.created_at
             FROM tbl_janji_temu_pembayaran_pinjaman jt
-            JOIN tbl_nasabah n ON jt.id_nasabah = n.id
+            JOIN tbl_pengajuan_pembayaran_pinjaman p ON jt.id_pengajuan = p.id
+            JOIN tbl_nasabah n ON p.id_anggota = n.id
             JOIN users u ON n.user_id = u.id
             JOIN jns_lokasi_perusahaan jl ON jt.lokasi_temu = jl.id
         ");

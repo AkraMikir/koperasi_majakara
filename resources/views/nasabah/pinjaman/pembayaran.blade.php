@@ -194,10 +194,6 @@
                             <p class="text-xs text-gray-500 mt-2">
                                 Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
                             </p>
-                            <p class="text-xs text-yellow-600 mt-1">
-                                💡 Anda bisa membayar sebagian (minimal Rp 1). Denda akan berhenti setelah ada
-                                pembayaran pertama.
-                            </p>
                         </div>
 
                         <!-- Rekening Tujuan -->
@@ -264,10 +260,6 @@
                             </div>
                             <p class="text-xs text-gray-500 mt-2">
                                 Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
-                            </p>
-                            <p class="text-xs text-yellow-600 mt-1">
-                                💡 Anda bisa membayar sebagian (minimal Rp 1). Denda akan berhenti setelah ada
-                                pembayaran pertama.
                             </p>
                         </div>
 

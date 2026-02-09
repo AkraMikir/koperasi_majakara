@@ -69,7 +69,7 @@
                 <tbody>
                     @forelse($transaksi as $item)
                     <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
-                        <td class="px-6 py-4 text-sm font-medium font-mono">{{ $item->id_transaksi ?? 'TRX-' . str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</td>
+                        <td class="px-6 py-4 text-sm font-medium font-mono">{{ $item->id_transaksi ?? str_pad($item->id, 5, '0', STR_PAD_LEFT) }}</td>
                         <td class="px-6 py-4 text-sm">{{ $item->tgl_transaksi->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
                             <div>

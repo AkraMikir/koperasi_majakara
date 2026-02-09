@@ -147,6 +147,10 @@
                                 ✓ Setujui Pengajuan
                             </button>
                         @else
+                            <div class="mb-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
+                                <textarea name="keterangan_admin" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+                            </div>
                             <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md mb-3">
                                 ✓ Setujui Pengajuan
                             </button>
@@ -180,9 +184,9 @@
                     <!-- Status Ditolak -->
                     <div class="p-4 bg-red-50 border border-red-200 rounded-lg">
                         <p class="text-sm text-red-800 font-semibold mb-2">✗ Pengajuan ditolak</p>
-                        @if($pengajuan->keterangan)
+                        @if($pengajuan->keterangan_admin)
                             <p class="text-sm text-red-700">
-                                <strong>Alasan:</strong> {{ $pengajuan->keterangan }}
+                                <strong>Alasan:</strong> {{ $pengajuan->keterangan_admin }}
                             </p>
                         @endif
                     </div>
@@ -213,7 +217,7 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan *</label>
-                            <textarea name="keterangan" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
+                            <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
                         </div>
                         <div class="flex space-x-3">
                             <button type="button" onclick="hideRejectModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">

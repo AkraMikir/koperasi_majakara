@@ -1,0 +1,231 @@
+[33mcommit 22059e82b8b4d815b42d2f51efc83286e0b39b2b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mDessarr[m[33m, [m[1;31morigin/Dessarr[m[33m)[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:58:10 2026 +0700
+
+    Fix: Add sequence number to janji temu ID to prevent duplicates
+    
+    Issue: Duplicate entry error when creating multiple janji temu on same day
+    Root cause: ID format 04022026TCSJNJT has no unique sequence number
+    
+    Solution: Use IdGenerator with sequence number
+    - OLD: 04022026TCSJNJT (same for all entries on same day)
+    - NEW: 04022026001TCSJNJT, 04022026002TCSJNJT, etc.
+    
+    Format: DDMMYYYYNNNN + T + CS + JNJT
+    - DDMMYYYY = Date (04022026)
+    - NNNN = Sequence number (0001, 0002, ...)
+    - T = Tabungan
+    - CS = Cash
+    - JNJT = Janji Temu
+    
+    Now supports multiple janji temu per day without conflicts
+
+[33mcommit a8ea98a59d764f172e32423b49e732a41e9d011e[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:50:27 2026 +0700
+
+    Fix: Remove all janjiTemu relations from PengajuanTabungan
+    
+    Issue: Error 'Unknown column id_pengajuan' when accessing pengajuan setor
+    Root cause: janjiTemu relation still trying to use removed id_pengajuan column
+    
+    Changes:
+    - Removed janjiTemu() relation from PengajuanTabungan model
+    - Removed all janjiTemu eager loading from controllers
+    - Removed janji temu section from detail-pengajuan-setor view
+    - Simplified approvePengajuanSetor logic (always TF)
+    - Fixed nominal logic to use pengajuan.nominal directly
+    
+    Rationale:
+    - Janji temu now independent (for CASH setoran only)
+    - Pengajuan transfer no longer linked to janji temu
+    - Cleaner separation of concerns
+    
+    Files modified:
+    - PengajuanTabungan.php (removed relation)
+    - Nasabah/TabunganController.php (removed eager loading)
+    - Admin/TabunganController.php (removed logic + eager loading)
+    - detail-pengajuan-setor.blade.php (removed janji temu section)
+    
+    Tested: Pengajuan transfer now works without errors
+
+[33mcommit 022d9d666daa641e86b552e358c131966834e221[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:44:58 2026 +0700
+
+    Docs: Add complete documentation for tbl_bukti_foto
+    
+    Added comprehensive documentation including:
+    - Table structure and field descriptions
+    - Usage examples for all scenarios
+    - Best practices
+    - Model definition
+    - Storage location guidelines
+    
+    This universal table supports all features:
+    - Tabungan (STR, PNR, JNJT)
+    - Pinjaman (PNJ, PMB)
+    - Gadai/Deposito (future)
+
+[33mcommit bb26fc6fa4c68686368dab422745b9ec564ffa63[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:43:49 2026 +0700
+
+    Add: tbl_bukti_foto universal table restored
+    
+    Added tbl_bukti_foto table to tabungan migration with:
+    - id (auto increment)
+    - owner_id (VARCHAR 30) - ID from owner table
+    - owner_fitur (VARCHAR 10) - T/P/G/D
+    - owner_trans (VARCHAR 20) - STR/PNR/JNJT/etc
+    - file_path (VARCHAR 255)
+    - keterangan (TEXT)
+    - timestamps
+    - Composite index on (owner_id, owner_fitur, owner_trans)
+    
+    This table is universal and can be used by:
+    - Tabungan (setoran, penarikan, janji temu)
+    - Pinjaman (pengajuan, pembayaran)
+    - Gadai/Deposito
+    
+    Tested: migrate:fresh --seed successful
+    Table verified with Schema::hasTable
+
+[33mcommit 4e2a9d57691f0c3581903547131a60f9ab3f3565[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:39:16 2026 +0700
+
+    Fix: Janji temu ID format, transaksi bug, dan UI improvements
+    
+    ID Format:
+    - Changed from 04022026001TJTSTR to 04022026TCSJNJT
+    - No sequence number, direct format DDMMYYYY+T+CS+JNJT
+    
+    Bug Fixes:
+    - Fixed validation for multiple file uploads (foto_penerimaan.*)
+    - Fixed nominal parsing bug (was being overridden)
+    - Fixed keterangan to use nasabah input, not auto-generated
+    
+    UI/UX Improvements:
+    - Better file input styling with file: pseudo-class
+    - Max 3 photos limit with auto-hide button
+    - Improved add/remove buttons with icons
+    - Better user feedback (alerts for min/max)
+    
+    Files changed:
+    - Nasabah/TabunganController (ID generation)
+    - Admin/TabunganController (createTransFromJanjiTemu)
+    - detail-janji-temu.blade.php (form UI)
+
+[33mcommit de0d2aaa4c6981ef950ff34318a99605b23b5002[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 22:25:50 2026 +0700
+
+    Refactor: Complete janji temu system separation from pengajuan
+    
+    - Changed janji temu tables to use generated VARCHAR(30) ID
+    - Removed id_pengajuan column from all janji temu tables
+    - Added keterangan_admin and status columns
+    - Updated master data seeders (jns_via: TF/CS, jns_transaksi: added JNJT)
+    - Completely rewrote createTransFromJanjiTemu logic
+    - Updated admin form with multiple photo upload (add/remove buttons)
+    - Fixed all controller queries to remove pengajuan references
+    - Updated v_janji_temu_universal view
+    - Clean migration structure with backup
+    
+    Breaking Changes:
+    - ID format changed for all janji temu
+    - Removed pengajuan() and transTabungan() relations from models
+    - Form now uses keterangan_admin separately from keterangan nasabah
+    
+    See .docs/JANJI_TEMU_REFACTOR_CHANGELOG.md for complete details
+
+[33mcommit 0cda336d80eae011fc3f3055f71e2b7bb9662a43[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 21:13:11 2026 +0700
+
+    Dessar before fix migration for janji temu
+
+[33mcommit a772a1798801383c1433f8b20977a85eef7f97f5[m[33m ([m[1;31morigin/akramikir[m[33m)[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Wed Feb 4 19:10:00 2026 +0700
+
+    buat dessar benerin pinjaman
+
+[33mcommit 92e821c9d37f8b27baacde9632aeac05c7ba700f[m
+Merge: c38d2d2 71c079c
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Wed Feb 4 18:32:01 2026 +0700
+
+    Merge branch 'Dessarr' of https://github.com/AkraMikir/koperasi_majakara into akramikir
+
+[33mcommit 71c079c8a20b2dce8d1085830b287df6d49596b8[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Wed Feb 4 18:30:23 2026 +0700
+
+    ready pinjaman ambil
+
+[33mcommit c38d2d21f41da7f55b5e4707d84810eebfa6bde2[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Wed Feb 4 18:29:05 2026 +0700
+
+    update tabungan all
+
+[33mcommit f7ff0ee8fa5cae6770b9474a7b211f5b8cb85b1e[m
+Merge: 0a19592 3fdfb04
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Tue Feb 3 16:40:38 2026 +0700
+
+    commit merege
+
+[33mcommit 0a195924e5f027d139598c0445574d008f4847d6[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Tue Feb 3 16:38:19 2026 +0700
+
+    desasr kocak ni bikin rusak
+
+[33mcommit 3fdfb049ad54f0385e095aea2aeb5eae64e0f4cc[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Tue Feb 3 16:37:36 2026 +0700
+
+    Fix and tiden up migration and seeder
+
+[33mcommit 3084c07fa608db8094e3b014a4bd374d258aa4a5[m
+Merge: 2937d4e 2909547
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Tue Feb 3 15:50:17 2026 +0700
+
+    Merge branch 'Dessarr' of https://github.com/AkraMikir/koperasi_majakara into akramikir
+
+[33mcommit 29095474d39c2e4aaa772284ad67f744284700ac[m
+Author: Dessar <dsrkna@gmail.com>
+Date:   Tue Feb 3 15:44:45 2026 +0700
+
+    Revisi Table Dessar akhirnya push juga
+
+[33mcommit 2937d4e02363f3715509b1169542f7fe5c672706[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Tue Feb 3 15:35:33 2026 +0700
+
+    update otp via pin dan adalah
+
+[33mcommit d1baaacb7ffc8234452cfa7ee147a49cc7ab589f[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Fri Jan 30 19:15:57 2026 +0700
+
+    FIXX ALL REGISTRATION OPT
+
+[33mcommit 67462503e1b58c09a2782f2f71f9d3450698c92b[m
+Author: AkraMikir <162798908+AkraMikir@users.noreply.github.com>
+Date:   Fri Jan 30 04:12:30 2026 +0700
+
+    readme rangkuman registrasi
+
+[33mcommit 4315be1eab4d091adf3b305587c065b7ed6b9890[m
+Merge: ab7b2c9 a8c9baa
+Author: Dessar <dsrkna@gmail.com>
+Date:   Thu Jan 29 15:28:24 2026 +0700
+
+    Buat Akram
+
+[33mcommit ab7b2c92d8ad21c428a75d1a4165f7

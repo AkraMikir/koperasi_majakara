@@ -215,7 +215,7 @@
                         </div>
                         <div class="text-right">
                             <p class="font-bold text-red-600">-Rp {{ number_format(abs((float) $riwayat->nominal), 0, ',', '.') }}</p>
-                            <p class="text-xs text-gray-500 font-mono">{{ $riwayat->id_transaksi ?? 'TRX-' . str_pad($riwayat->id, 5, '0', STR_PAD_LEFT) }}</p>
+                            <p class="text-xs text-gray-500 font-mono">{{ $riwayat->id_transaksi ?? str_pad($riwayat->id, 5, '0', STR_PAD_LEFT) }}</p>
                         </div>
                     </div>
                     @if($riwayat->keterangan)

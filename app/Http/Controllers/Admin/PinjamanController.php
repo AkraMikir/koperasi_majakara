@@ -10,7 +10,7 @@ use App\Models\TempoPinjamanM;
 use App\Models\Nasabah;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
-use App\Models\BuktiFotoPembayaranPinjaman;
+use App\Models\BuktiFoto;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
@@ -123,6 +123,10 @@ class PinjamanController extends Controller
      */
     public function approvePengajuan(Request $request, $id)
     {
+        $request->validate([
+            'keterangan_admin' => 'nullable|string|max:500',
+        ]);
+
         $pengajuan = PengajuanPinjaman::findOrFail($id);
 
         // Cek status harus '1' (pending)
@@ -145,10 +149,11 @@ class PinjamanController extends Controller
                 ->with('error', 'Denda belum diatur di master data');
         }
 
-        // Update status menjadi '3' (Disetujui) dan simpan bunga_persen
+        // Update status menjadi '3' (Disetujui) dan simpan bunga_persen + keterangan_admin
         $pengajuan->update([
             'status' => '3',
             'bunga_persen' => $masterBunga->bunga_persen,
+            'keterangan_admin' => $request->keterangan_admin,
         ]);
 
         return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
@@ -233,9 +238,11 @@ class PinjamanController extends Controller
             }
 
             // Update status pengajuan menjadi '4' (Terlaksana)
+            // Auto-set jenis_pencairan to 'transfer' when status becomes 4
             $pengajuan->update([
                 'status' => '4',
                 'tgl_cair' => $request->tgl_cair,
+                'jenis_pencairan' => 'transfer',
             ]);
 
             DB::commit();
@@ -255,7 +262,7 @@ class PinjamanController extends Controller
     public function rejectPengajuan(Request $request, $id)
     {
         $request->validate([
-            'keterangan' => 'required|string'
+            'keterangan_admin' => 'required|string|max:500'
         ]);
 
         $pengajuan = PengajuanPinjaman::findOrFail($id);
@@ -269,7 +276,7 @@ class PinjamanController extends Controller
         // Update status menjadi '2' (Ditolak)
         $pengajuan->update([
             'status' => '2',
-            'keterangan' => $request->keterangan
+            'keterangan_admin' => $request->keterangan_admin
         ]);
 
         return redirect()->route('admin.pinjaman.pengajuan')
@@ -341,10 +348,10 @@ class PinjamanController extends Controller
         $jenis = $request->get('jenis', 'bulanan');
 
         if ($jenis === 'bulanan') {
-            $query = TempoPinjamanB::with(['pinjaman.nasabah.user', 'nasabah.user'])
+            $query = TempoPinjamanB::with(['pinjaman.nasabah.user'])
                 ->latest('tgl_jatuh_tempo');
         } else {
-            $query = TempoPinjamanM::with(['pinjaman.nasabah.user', 'nasabah.user'])
+            $query = TempoPinjamanM::with(['pinjaman.nasabah.user'])
                 ->latest('tgl_jatuh_tempo');
         }
 
@@ -379,12 +386,14 @@ class PinjamanController extends Controller
     /**
      * Generate jadwal angsuran untuk pinjaman.
      * 
-     * Sistem baru: Bunga tidak dipotong di awal, tapi dibagi ke setiap angsuran
+     * Sistem: Bunga tidak dipotong di awal, tapi dibagi ke setiap angsuran
      * - jumlah_pinjam = nominal (jumlah yang diterima nasabah)
      * - bunga_rp = total bunga yang harus dibayar
-     * - Pokok per bulan = jumlah_pinjam / durasi
-     * - Bunga per bulan = bunga_rp / durasi
-     * - Total per angsuran = pokok per bulan + bunga per bulan
+     * - Total kewajiban = jumlah_pinjam + bunga_rp
+     * - Angsuran n-1 pertama: dibulatkan ke bawah ke ratusan terdekat
+     * - Angsuran terakhir: sisa dari total kewajiban
+     * 
+     * Logika pembulatan ini sama dengan simulasiAngsuran di NasabahController.
      */
     private function generateJadwalAngsuran(PinjamanH $pinjaman)
     {
@@ -392,14 +401,13 @@ class PinjamanController extends Controller
         $jumlahPinjam = $pinjaman->jumlah_pinjam; // Jumlah yang diterima nasabah
         $bungaRp = $pinjaman->bunga_rp; // Total bunga
         
-        // Pokok per bulan
-        $pokokPerBulan = $jumlahPinjam / $jumlahAngsuran;
+        // Total kewajiban yang harus dibayar
+        $totalKewajiban = $jumlahPinjam + $bungaRp;
         
-        // Bunga per bulan
-        $bungaPerBulan = $bungaRp / $jumlahAngsuran;
-        
-        // Total per angsuran
-        $totalPerAngsuran = $pokokPerBulan + $bungaPerBulan;
+        // Angsuran bulanan: n-1 pertama dibulatkan ke bawah ke ratusan, bulan terakhir = sisa
+        $angsuranBulanan = (int) floor($totalKewajiban / $jumlahAngsuran / 100) * 100;
+        $akumulasi = $angsuranBulanan * ($jumlahAngsuran - 1);
+        $angsuranTerakhir = (int) round($totalKewajiban - $akumulasi, 0);
 
         $tanggalMulai = \Carbon\Carbon::parse($pinjaman->tgl_pinjam); // Correct carbon parsing
         
@@ -421,12 +429,17 @@ class PinjamanController extends Controller
             $seqStr = str_pad($currentSeq, 4, '0', STR_PAD_LEFT);
             $currentId = $datePrefix . $seqStr . $suffix;
 
+            // Tentukan jumlah tagihan: 
+            // - Untuk angsuran 1 sampai n-1: angsuranBulanan (sudah dibulatkan)
+            // - Untuk angsuran terakhir (ke-n): sisa total kewajiban
+            $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsuranTerakhir;
+
             $data = [
                 'id' => $currentId,
                 'pinjaman_id' => $pinjaman->id,
                 'no_urut' => $i,
                 'tgl_jatuh_tempo' => $tanggalJatuhTempo,
-                'jumlah_tagihan' => round($totalPerAngsuran, 2),
+                'jumlah_tagihan' => $jumlahTagihan,
                 'jumlah_terbayar' => 0,
                 'denda' => 0,
                 'status_bayar' => 'belum',
@@ -486,10 +499,10 @@ class PinjamanController extends Controller
         $jenis = $request->get('jenis', 'bulanan');
         
         if ($jenis === 'bulanan') {
-            $angsuran = TempoPinjamanB::with(['pinjaman.nasabah.user', 'nasabah.user', 'pinjaman'])
+            $angsuran = TempoPinjamanB::with(['pinjaman.nasabah.user', 'pinjaman'])
                 ->findOrFail($id);
         } else {
-            $angsuran = TempoPinjamanM::with(['pinjaman.nasabah.user', 'nasabah.user', 'pinjaman'])
+            $angsuran = TempoPinjamanM::with(['pinjaman.nasabah.user', 'pinjaman'])
                 ->findOrFail($id);
         }
 
@@ -866,10 +879,15 @@ class PinjamanController extends Controller
                 $file = $request->file('bukti_transfer');
                 $path = $file->store('bukti-pembayaran-pinjaman', 'public');
                 
-                BuktiFotoPembayaranPinjaman::create([
-                    'id_pengajuan' => $pengajuan->id,
-                    'file_photo' => $path,
-                    'jenis' => 'bukti_transfer',
+                // Generate ID for bukti foto: P (pinjaman) + TF (transfer) + PMB (pembayaran)
+                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PMB');
+                
+                BuktiFoto::create([
+                    'id' => $idBuktiFoto,
+                    'owner_id' => $pengajuan->id,
+                    'owner_fitur' => 'P', // Pinjaman
+                    'owner_trans' => 'PMB', // Pembayaran
+                    'file_path' => $path,
                     'keterangan' => $request->keterangan,
                 ]);
             }
@@ -928,10 +946,15 @@ class PinjamanController extends Controller
             $file = $request->file('foto_serah_terima');
             $path = $file->store('bukti-pembayaran-pinjaman', 'public');
             
-            BuktiFotoPembayaranPinjaman::create([
-                'id_pengajuan' => $pengajuan->id,
-                'file_photo' => $path,
-                'jenis' => 'serah_terima',
+            // Generate ID for bukti foto: P (pinjaman) + CS (cash) + PMB (pembayaran)
+            $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'CS', 'PMB');
+            
+            BuktiFoto::create([
+                'id' => $idBuktiFoto,
+                'owner_id' => $pengajuan->id,
+                'owner_fitur' => 'P', // Pinjaman
+                'owner_trans' => 'PMB', // Pembayaran
+                'file_path' => $path,
                 'keterangan' => $request->keterangan,
             ]);
 

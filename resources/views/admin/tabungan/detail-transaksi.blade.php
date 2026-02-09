@@ -8,7 +8,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Transaksi Tabungan</h1>
-            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? 'TRX-' . str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ??str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
         </div>
         <div class="flex items-center space-x-3">
             @if(!$transaksi->id_pengajuan_setor && !$transaksi->id_pengajuan_tarik)
