@@ -9,10 +9,17 @@
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Edit Transaksi</h1>
 <<<<<<< HEAD
+<<<<<<< Updated upstream
             <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ??$transaksi->id }}</p>
 =======
             <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ?? $transaksi->id }}</p>
 >>>>>>> 6c04f015aaaf38a6d6dbe432ab9544fa1013630c
+=======
+            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ?? $transaksi->id }}</p>
+=======
+            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ??$transaksi->id }}</p>
+>>>>>>> ab817ff (before pull)
+>>>>>>> Stashed changes
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.tabungan.detail-transaksi', $transaksi->id) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
