@@ -41,6 +41,7 @@ return new class extends Migration//ikkkkm
             $table->id();
             $table->string('nama_lokasi', 150);
             $table->text('alamat_lengkap');
+            $table->text('google_maps_embed')->nullable(); // Added google_maps_embed
             $table->string('kota', 100);
             $table->string('provinsi', 100);
             $table->string('tipe_lokasi', 50);
@@ -51,10 +52,25 @@ return new class extends Migration//ikkkkm
         // 3. Pinjaman Masters
         Schema::create('jns_angsuran_bulan', function (Blueprint $table) {
             $table->id();
-            $table->char('ket', 1)->unique();
+            $table->unsignedTinyInteger('bulan')->nullable(); // Added bulan
+            $table->string('ket', 5)->nullable(); // Changed to allow string and nullable
             $table->enum('aktif', ['y', 'n'])->default('y');
             $table->timestamps();
         });
+
+        // Populate jns_angsuran_bulan with 1-24 months
+        $now = now();
+        $data = [];
+        for ($i = 1; $i <= 24; $i++) {
+            $data[] = [
+                'bulan' => $i,
+                'ket' => (string) $i,
+                'aktif' => 'y',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+        DB::table('jns_angsuran_bulan')->insert($data);
 
         Schema::create('jns_angsuran_minggu', function (Blueprint $table) {
             $table->id();
