@@ -20,7 +20,7 @@ class TabunganController extends Controller
     /**
      * Show the tabungan dashboard.
      */
-    public function index()
+    public function index(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
         
@@ -33,17 +33,40 @@ class TabunganController extends Controller
             'bunga' => 3.5,
             'status' => 'Aktif',
         ];
-        $transaksiTabungan = TransTabungan::where('id_anggota', $idAnggota)
-            ->with(['jnsTransaksi', 'jnsVia'])
-            ->latest('tgl_transaksi')
-            ->take(10)
+        // Filter Transaksi
+        $transQuery = TransTabungan::where('id_anggota', $idAnggota)
+            ->with(['jnsTransaksi', 'jnsVia']);
+
+        if ($request->filled('trans_id')) {
+            $transQuery->where('id', 'like', '%' . $request->trans_id . '%');
+        }
+        if ($request->filled('trans_date')) {
+            $transQuery->whereDate('tgl_transaksi', $request->trans_date);
+        }
+        if ($request->filled('trans_amount')) {
+            $transQuery->where('nominal', $request->trans_amount);
+        }
+
+        $transaksiTabungan = $transQuery->latest('tgl_transaksi')
+            ->take($request->anyFilled(['trans_id', 'trans_date', 'trans_amount']) ? 50 : 10)
             ->get();
 
-        // Get riwayat janji temu from database
-        $riwayatJanjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
-            ->with('lokasi')
-            ->latest('tanggal_janji_temu')
-            ->take(10)
+        // Filter Janji Temu
+        $apptQuery = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
+            ->with('lokasi');
+
+        if ($request->filled('appt_id')) {
+            $apptQuery->where('id', 'like', '%' . $request->appt_id . '%');
+        }
+        if ($request->filled('appt_date')) {
+            $apptQuery->whereDate('tanggal_janji_temu', $request->appt_date);
+        }
+        if ($request->filled('appt_amount')) {
+            $apptQuery->where('nominal', $request->appt_amount);
+        }
+
+        $riwayatJanjiTemu = $apptQuery->latest('tanggal_janji_temu')
+            ->take($request->anyFilled(['appt_id', 'appt_date', 'appt_amount']) ? 50 : 10)
             ->get();
 
         return view('nasabah.tabungan.index', [

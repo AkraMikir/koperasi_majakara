@@ -98,6 +98,10 @@
                     <p class="text-xs font-semibold text-gray-700">Filter Transaksi</p>
                     </div>
                     <x-nasabah.tabungan.filter-tabungan 
+                    action="{{ route('nasabah.tabungan.index') }}"
+                    name-tanggal="trans_date"
+                    name-jumlah="trans_amount"
+                    name-id="trans_id"
                     placeholder-tanggal="Pilih tanggal"
                     placeholder-jumlah="Jumlah"
                     placeholder-id-transaksi="ID Transaksi" />
@@ -182,6 +186,10 @@
                     <p class="text-xs font-semibold text-gray-700">Filter Janji Temu</p>
                     </div>
                     <x-nasabah.tabungan.filter-tabungan 
+                    action="{{ route('nasabah.tabungan.index') }}"
+                    name-tanggal="appt_date"
+                    name-jumlah="appt_amount"
+                    name-id="appt_id"
                     placeholder-tanggal="Pilih tanggal"
                     placeholder-jumlah="Nominal"
                     placeholder-id-transaksi="ID Janji Temu" />
