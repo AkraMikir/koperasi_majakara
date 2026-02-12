@@ -47,8 +47,8 @@ return new class extends Migration//adadsdaw
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                '' AS keterangan_admin,     -- Placeholder
-                '1' AS status,              -- Placeholder
+                '' AS keterangan_admin,
+                '1' AS status,
                 CAST('other' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pinjaman jt
@@ -69,8 +69,8 @@ return new class extends Migration//adadsdaw
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                '' AS keterangan_admin,     -- Placeholder
-                '1' AS status,              -- Placeholder
+                '' AS keterangan_admin,
+                '1' AS status,
                 CAST('other' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pembayaran_pinjaman jt
