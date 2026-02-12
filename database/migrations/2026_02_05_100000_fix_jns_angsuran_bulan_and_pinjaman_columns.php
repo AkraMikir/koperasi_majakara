@@ -5,7 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
 
-return new class extends Migration
+return new class extends Migration//adawdaw
 {
     /**
      * jns_angsuran_bulan: isi data 1-24 bulan untuk dropdown durasi.
