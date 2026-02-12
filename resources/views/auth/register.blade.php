@@ -313,6 +313,12 @@
                     <input type="hidden" name="step" value="{{ $step }}">
                     @if($step == 1)
                     <input type="hidden" name="substep" value="{{ $subStep }}">
+                    {{-- Bawa data kritis Langkah 1 (Data Diri) di setiap submit substep 2–6 agar nomor HP tidak hilang --}}
+                    @if($subStep > 1)
+                    <input type="hidden" name="nama" value="{{ old('nama', $formData['nama'] ?? '') }}">
+                    <input type="hidden" name="email" value="{{ old('email', $formData['email'] ?? '') }}">
+                    <input type="hidden" name="nomor_hp" value="{{ old('nomor_hp', $formData['nomor_hp'] ?? '') }}">
+                    @endif
                     @endif
 
                     @if($step == 1)
@@ -1000,7 +1006,7 @@
                                     </p>
                                     <div class="inline-block bg-gradient-to-r from-green-50 to-green-100 border-2 border-green-500 rounded-xl px-8 py-4 shadow-md">
                                         <p class="text-3xl font-bold text-green-700 tracking-wide">
-                                            {{ session('register_phone') ?? $phone ?? 'Nomor tidak ditemukan' }}
+                                            {{ session('register_phone') ?? $phone ?? 'Nomor HP tidak tersimpan — kembali ke Langkah 1 (Data Diri) dan isi nomor HP' }}
                                         </p>
                                     </div>
                                 </div>
@@ -1026,10 +1032,12 @@
                                     </ul>
                                 </div>
 
+                                {{-- Hidden input: tombol yang disabled tidak ikut dikirim, jadi kita set send_otp=1 lewat input ini saat klik --}}
+                                <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                                 {{-- Button Kirim OTP with Loading State --}}
                                 <div class="mt-6">
-                                    <button type="submit" name="send_otp" value="1" id="btnSendOtp"
-                                        onclick="showLoadingOtp(this)"
+                                    <button type="submit" name="send_otp_btn" value="1" id="btnSendOtp"
+                                        onclick="setSendOtpAndLoading(this)"
                                         class="w-full px-6 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
                                         <svg class="w-6 h-6" id="iconSend" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -1069,7 +1077,7 @@
                                                 Kode OTP Berhasil Dikirim! 🎉
                                             </p>
                                             <p class="text-xs text-green-800 mt-1">
-                                                Nomor WhatsApp: <strong class="font-semibold">{{ session('register_phone') ?? $phone ?? 'Nomor tidak ditemukan' }}</strong>
+                                                Nomor WhatsApp: <strong class="font-semibold">{{ session('register_phone') ?? $phone ?? 'Nomor HP tidak tersimpan — kembali ke Langkah 1 (Data Diri) dan isi nomor HP' }}</strong>
                                             </p>
                                             <p class="text-xs text-green-700 mt-2 flex items-center gap-1">
                                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -1741,18 +1749,31 @@
             });
     }
 
-    // Show Loading OTP
-    function showLoadingOtp(button) {
+    // Set send_otp=1 (hidden input)
+    function setSendOtpAndLoading(button) {
+        const sendOtpInput = document.getElementById('send_otp_input');
+        if (sendOtpInput) sendOtpInput.value = '1';
+        
+        // We do NOT disable the button here immediately, because it might prevent value submission
+        // or the submit event itself in some browsers.
+        // Instead, the visual change happens, and the actual disabling happens in the form submit handler
+        // or via a small timeout if needed.
+        
+        // Trigger visual loading state
         const iconSend = document.getElementById('iconSend');
         const iconLoading = document.getElementById('iconLoading');
         const textSendOtp = document.getElementById('textSendOtp');
         
         if (iconSend && iconLoading && textSendOtp) {
-            button.disabled = true;
             iconSend.classList.add('hidden');
             iconLoading.classList.remove('hidden');
             textSendOtp.textContent = 'Mengirim OTP...';
         }
+        
+        // Disable button after a short delay to allow form submit to trigger
+        setTimeout(() => {
+            button.disabled = true;
+        }, 100);
     }
 
     // OTP Boxes Handler

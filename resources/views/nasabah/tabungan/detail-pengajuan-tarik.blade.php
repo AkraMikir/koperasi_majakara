@@ -61,14 +61,105 @@
                     <p class="text-3xl font-bold text-[#8b6f2f]">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                 </div>
 
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Metode</p>
+                        <p class="font-semibold text-gray-900">{{ ucfirst($pengajuan->metode_transfer ?? 'Tunai') }}</p>
+                    </div>
+                    @if($pengajuan->metode_transfer === 'transfer')
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Bank Tujuan</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->nama_bank ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Nomor Rekening</p>
+                        <p class="font-semibold text-gray-900 font-mono">{{ $pengajuan->no_rekening ?? 'N/A' }}</p>
+                    </div>
+                    @else
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Lokasi Pertemuan</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->lokasi->nama_lokasi ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600 mb-1">Jadwal</p>
+                        <p class="font-semibold text-gray-900">
+                            {{ $pengajuan->tanggal_janji_temu ? $pengajuan->tanggal_janji_temu->format('d M Y') : '-' }} , 
+                            {{ $pengajuan->waktu_janji_temu ? \Carbon\Carbon::parse($pengajuan->waktu_janji_temu)->format('H:i') : '-' }} WIB
+                        </p>
+                    </div>
+                    @endif
+                </div>
+
                 @if($pengajuan->keterangan)
                 <div>
                     <p class="text-sm text-gray-600 mb-2">Keterangan</p>
                     <p class="text-gray-900">{{ $pengajuan->keterangan }}</p>
                 </div>
                 @endif
+
+                @if($pengajuan->status == '2' && $pengajuan->foto_bukti_tf_admin)
+                <div class="pt-6 border-t border-gray-100">
+                    <h3 class="text-md font-bold text-[#674c1d] mb-4">Bukti Transfer dari Admin</h3>
+                    <div class="max-w-md border border-gray-200 rounded-2xl overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                        onclick="showPhotoPreview('{{ asset('storage/' . $pengajuan->foto_bukti_tf_admin) }}', 'Bukti Transfer Admin')">
+                        <img src="{{ asset('storage/' . $pengajuan->foto_bukti_tf_admin) }}" alt="Bukti Transfer Admin" class="w-full h-auto">
+                        <div class="p-3 bg-gray-50 text-center text-xs text-gray-500">
+                            Klik untuk memperbesar
+                        </div>
+                    </div>
+                </div>
+                @endif
+
+                @if($pengajuan->keterangan_admin)
+                <div class="mt-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
+                    <p class="text-sm font-semibold text-gray-700 mb-1">Pesan dari Admin:</p>
+                    <p class="text-gray-600">{{ $pengajuan->keterangan_admin }}</p>
+                </div>
+                @endif
             </div>
         </div>
     </div>
 </div>
+
+<!-- Photo Preview Modal -->
+<div id="photoPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closePhotoPreview()">
+    <div class="relative max-w-4xl w-full" onclick="event.stopPropagation()">
+        <button onclick="closePhotoPreview()" class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+        </button>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
+            <div class="p-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f]">
+                <h3 id="photoTitle" class="text-white font-bold text-lg"></h3>
+            </div>
+            <div class="p-4 bg-gray-50">
+                <img id="photoPreview" src="" alt="Preview" class="w-full h-auto rounded-lg">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showPhotoPreview(imageSrc, title) {
+    document.getElementById('photoPreview').src = imageSrc;
+    document.getElementById('photoTitle').textContent = title;
+    document.getElementById('photoPreviewModal').classList.remove('hidden');
+    document.getElementById('photoPreviewModal').classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePhotoPreview() {
+    document.getElementById('photoPreviewModal').classList.add('hidden');
+    document.getElementById('photoPreviewModal').classList.remove('flex');
+    document.body.style.overflow = 'auto';
+}
+
+// Close modal on ESC key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closePhotoPreview();
+    }
+});
+</script>
 @endsection

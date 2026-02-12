@@ -70,9 +70,16 @@
                     @forelse($janjiTemu as $item)
                     <tr class="hover:bg-gray-50 transition-colors">
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $item->fitur == 'Tabungan' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' }}">
-                                {{ $item->fitur }}
-                            </span>
+                            <div class="flex flex-col gap-1">
+                                <span class="px-3 py-1 rounded-full text-xs font-medium {{ $item->fitur == 'Tabungan' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700' }}">
+                                    {{ $item->fitur }}
+                                </span>
+                                @if($item->fitur == 'Tabungan' && isset($item->jenis))
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] uppercase font-bold text-center {{ $item->jenis == 'setoran' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700' }}">
+                                        {{ $item->jenis == 'setoran' ? 'Setoran' : 'Penarikan' }}
+                                    </span>
+                                @endif
+                            </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="flex items-center">

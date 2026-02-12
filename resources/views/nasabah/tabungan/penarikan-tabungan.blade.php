@@ -79,6 +79,22 @@
     <div id="form-section" class="mx-4 mb-6 hidden">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-gray-900 font-display mb-6">Formulir Penarikan</h2>
+
+            @if($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border-2 border-red-200 rounded-2xl flex items-start gap-3">
+                <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <p class="font-bold text-red-800 text-sm mb-1">Terjadi Kesalahan:</p>
+                    <ul class="list-disc list-inside text-sm text-red-700">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+            @endif
                 
             <form id="form-penarikan" method="POST" action="{{ route('nasabah.tabungan.submit-penarikan') }}" class="space-y-6">
                 @csrf
@@ -367,21 +383,42 @@
 
     // Modal Functions
     function showPinModal() {
+        console.log('--- showPinModal called ---');
         const form = document.getElementById('form-penarikan');
+        
+        // Detailed validation check
         if (!form.checkValidity()) {
+            console.warn('Form invalid according to checkValidity()');
             form.reportValidity();
             return;
         }
 
-        // Check nominal validity (already handled by checkSaldo but good to double check)
         const nominalInput = document.getElementById('nominal');
         const nominalRaw = nominalInput.value.replace(/[^\d]/g, '');
         const nominal = parseFloat(nominalRaw);
+        
+        console.log('Nominal:', nominal);
         
         if (!nominal || nominal < 10000) {
              alert('Nominal minimal Rp 10.000');
              nominalInput.focus();
              return;
+        }
+
+        const metode = document.getElementById('metode-input').value;
+        console.log('Metode:', metode);
+        
+        if (metode === 'tunai') {
+            const lokasi = document.getElementById('lokasi_temu').value;
+            const tanggal = document.getElementById('tanggal_janji_temu').value;
+            const waktu = document.getElementById('waktu_janji_temu').value;
+            
+            console.log('Tunai data:', { lokasi, tanggal, waktu });
+            
+            if (!lokasi || !tanggal || !waktu) {
+                alert('Silakan lengkapi data lokasi, tanggal, dan waktu janji temu.');
+                return;
+            }
         }
         
         // Show modal
@@ -399,7 +436,10 @@
     }
 
     function verifyAndSubmit() {
+        console.log('=== VERIFY AND SUBMIT CALLED ===');
         const pin = document.getElementById('pin-input').value;
+        console.log('PIN length:', pin.length);
+        
         if (pin.length !== 6) {
             showPinError('PIN harus 6 digit');
             return;
@@ -407,8 +447,13 @@
 
         const form = document.getElementById('form-penarikan');
         const nominalInput = document.getElementById('nominal');
+        
+        console.log('Form found:', !!form);
+        console.log('Nominal before unformat:', nominalInput.value);
+        
         // Unformat nominal before submit
         nominalInput.value = nominalInput.value.replace(/[^\d]/g, '');
+        console.log('Nominal after unformat:', nominalInput.value);
 
         // Create hidden input for PIN
         // (Make sure to remove old one if exists or just append)
@@ -418,9 +463,18 @@
             pinInput.type = 'hidden';
             pinInput.name = 'pin';
             form.appendChild(pinInput);
+            console.log('Created new PIN input');
         }
         pinInput.value = pin;
+        console.log('PIN input value set:', pinInput.value);
 
+        console.log('Form data before submit:');
+        const formData = new FormData(form);
+        for (let [key, value] of formData.entries()) {
+            console.log(key + ':', value);
+        }
+
+        console.log('Submitting form...');
         form.submit();
     }
     

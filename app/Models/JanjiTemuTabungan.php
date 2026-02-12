@@ -20,16 +20,19 @@ class JanjiTemuTabungan extends Model
         'id',
         'id_nasabah',
         'lokasi_temu',
+        'jenis',            // ✅ NEW
         'nominal',
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
+        'keterangan_admin',   // ✅ NEW
+        'status',
     ];
 
     protected $casts = [
         'nominal' => 'decimal:2',
-        'tanggal_janji_temu' => 'datetime',
-        'waktu_janji_temu' => 'datetime',
+        'tanggal_janji_temu' => 'date',  // DATE column
+        // waktu_janji_temu is TIMESTAMP, leave as string for manual parsing
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -43,7 +46,14 @@ class JanjiTemuTabungan extends Model
     {
         return $this->belongsTo(JnsLokasiPerusahaan::class, 'lokasi_temu');
     }
-    
-    // ✅ REMOVED: pengajuan() relation - no longer needed
-    // ✅ REMOVED: transTabungan() relation - no longer needed
+
+    /**
+     * Get bukti foto untuk janji temu (dari tbl_bukti_foto).
+     */
+    public function buktiFoto()
+    {
+        return $this->hasMany(BuktiFoto::class, 'owner_id', 'id')
+            ->where('owner_fitur', 'T')
+            ->where('owner_trans', 'JNJT');
+    }
 }

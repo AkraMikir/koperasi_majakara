@@ -202,36 +202,56 @@
                     <tbody>
                         @forelse($riwayatJanjiTemu ?? [] as $janji)
                         @php
-                            $hasTanggalJanjiTemu = property_exists($janji, 'tanggal_janji_temu') && $janji->tanggal_janji_temu !== null;
-                            $tanggalJanji = $janji->tanggal ?? ($hasTanggalJanjiTemu ? $janji->tanggal_janji_temu : ($janji->created_at ?? now()));
-                            $waktuJanji = $janji->waktu ?? ($hasTanggalJanjiTemu ? \Carbon\Carbon::parse($janji->tanggal_janji_temu)->format('H:i') : \Carbon\Carbon::parse($tanggalJanji)->format('H:i'));
-                            $namaLokasi = 'N/A';
-                            if (is_string($janji->lokasi ?? null)) {
-                                $namaLokasi = $janji->lokasi;
-                            } elseif (isset($janji->lokasi) && is_object($janji->lokasi) && property_exists($janji->lokasi, 'nama_lokasi')) {
-                                $namaLokasi = $janji->lokasi->nama_lokasi ?? 'N/A';
+                            // Parse Date
+                            $tanggal = $janji->tanggal_janji_temu ?? $janji->created_at;
+                            $dateTime = \Carbon\Carbon::parse($tanggal);
+                            
+                            // Parse Time & Display
+                            $displayTime = '00:00';
+                            if (!empty($janji->waktu_janji_temu)) {
+                                $parsedTime = \Carbon\Carbon::parse($janji->waktu_janji_temu);
+                                $dateTime->setTime($parsedTime->hour, $parsedTime->minute, $parsedTime->second);
+                                $displayTime = $parsedTime->format('H:i');
                             }
-                            $isPast = $hasTanggalJanjiTemu ? \Carbon\Carbon::parse($janji->tanggal_janji_temu)->isPast() : false;
-                            $status = $janji->status ?? ($isPast ? 'Selesai' : 'Menunggu');
+
+                            // Status Logic
+                            $isPast = $dateTime->isPast();
+                            
+                            if ($janji->status == '2') {
+                                $statusLabel = 'Selesai';
+                                $statusClass = 'bg-green-100 text-green-700';
+                            } elseif ($janji->status == '3') {
+                                $statusLabel = 'Dibatalkan';
+                                $statusClass = 'bg-red-100 text-red-700';
+                            } elseif ($isPast) {
+                                $statusLabel = 'Terlewat';
+                                $statusClass = 'bg-gray-100 text-gray-700';
+                            } else {
+                                $statusLabel = 'Akan Datang';
+                                $statusClass = 'bg-amber-100 text-amber-700';
+                            }
+
+                            // Location Logic
+                            $namaLokasi = 'N/A';
+                            if (isset($janji->lokasi) && is_object($janji->lokasi)) {
+                                $namaLokasi = $janji->lokasi->nama_lokasi ?? 'N/A';
+                            } elseif (is_string($janji->lokasi)) {
+                                $namaLokasi = $janji->lokasi;
+                            }
                         @endphp
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-janji-temu', $janji->id) }}'">
                             <td class="px-4 py-3 text-sm">
-                                <p class="font-medium text-gray-900">{{ \Carbon\Carbon::parse($tanggalJanji)->format('d M Y') }}</p>
+                                <p class="font-medium text-gray-900">{{ $dateTime->format('d M Y') }}</p>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $waktuJanji }}</td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $displayTime }}</td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $namaLokasi }}</td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-[#674c1d]">Rp {{ number_format($janji->nominal, 0, ',', '.') }}</p>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="px-3 py-1 {{ ($status === 'Selesai' || $isPast) ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
-                                        {{ $status }}
-                                    </span>
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
+                                <span class="px-3 py-1 {{ $statusClass }} rounded-full text-xs font-semibold whitespace-nowrap">
+                                    {{ $statusLabel }}
+                                </span>
                             </td>
                         </tr>
                         @empty

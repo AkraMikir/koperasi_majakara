@@ -34,6 +34,22 @@ class RegisterController extends Controller
     }
 
     /**
+     * Normalisasi nomor HP: hanya angka, format 08xxx (Indonesia).
+     * Contoh: "0812 3456 7890", "628123456789" → "081234567890"
+     */
+    private function normalizeNomorHp(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+        $digits = preg_replace('/[^0-9]/', '', $value);
+        if (str_starts_with($digits, '62') && strlen($digits) > 10) {
+            return '0' . substr($digits, 2); // 62xxx → 0xxx
+        }
+        return $digits;
+    }
+
+    /**
      * Helper function: Move file from temporary storage to permanent storage
      * Permanent path: public/user/{userId}/dataori/{filename}
      */
@@ -191,6 +207,21 @@ class RegisterController extends Controller
         // Validate sub-step untuk Step 1 (1-6)
         if ($step == 1 && (!in_array($subStep, [1, 2, 3, 4, 5, 6]))) {
             $subStep = 1;
+        }
+
+        // Step 2 (OTP): GET /register?step=2 harus lewat handleStep2Otp agar nomor HP & session di-set
+        if ($step == 2) {
+            return $this->handleStep2Otp($request);
+        }
+
+        // Step 3 (PIN): redirect ke route yang benar jika user buka langsung
+        if ($step == 3) {
+            if (!$request->session()->get('register_otp_verified')) {
+                return redirect()->route('register', ['step' => 2])
+                    ->with('error', 'Silakan verifikasi OTP terlebih dahulu');
+            }
+            // Tampilkan form PIN (logic bisa dipindah ke sini atau tetap di register())
+            // Untuk konsistensi, step 3 tetap di-handle oleh register() saat submit; untuk GET kita hanya perlu view
         }
 
         // Get session data
@@ -361,8 +392,18 @@ class RegisterController extends Controller
      */
     public function register(Request $request)
     {
-        $step = $request->input('step', 1);
-        $subStep = $request->input('substep', 1);
+        $step = (int) $request->input('step', 1);
+        $subStep = (int) $request->input('substep', 1);
+        
+        // Debug: log setiap POST ke register (untuk cek apakah tombol Kirim OTP sampai ke sini)
+        if ($request->isMethod('post')) {
+            \Log::info('Register POST received', [
+                'step' => $step,
+                'substep' => $subStep,
+                'has_send_otp' => $request->has('send_otp'),
+                'send_otp_value' => $request->input('send_otp'),
+            ]);
+        }
         
         // Validate step
         if (!in_array($step, [1, 2, 3])) {
@@ -448,7 +489,7 @@ class RegisterController extends Controller
         elseif ($subStep == 3) {
             $validationRules = [
                 'pekerjaan' => 'nullable|string|max:255',
-                'penghasilan' => 'nullable|string|max:50', // Sekarang menggunakan string (range)
+                'penghasilan' => 'nullable|string|max:100', // String untuk range (mis. Rp1.000.000 – Rp2.500.000)
                 'nama_perusahaan' => 'nullable|string|max:255',
                 'nama_bank' => 'nullable|string|max:255',
             ];
@@ -547,18 +588,20 @@ class RegisterController extends Controller
                         $fotoPath = $foto->store('registrasi/temp/data_diri/foto_profil', 'public');
                     }
 
+                    $nomorHp = $this->normalizeNomorHp($request->nomor_hp);
                     $userTemp = \App\Models\UserTemp::create([
                         'nama' => $request->nama,
                         'email' => $request->email,
                         'password' => Hash::make($request->password),
-                        'nomor_hp' => $request->nomor_hp,
+                        'nomor_hp' => $nomorHp ?: $request->nomor_hp,
                         'foto' => $fotoPath,
                     ]);
                 } else {
-                    // Update existing - handle foto update
+                    // Update existing - handle foto update (nomor_hp dinormalisasi)
+                    $nomorHp = $this->normalizeNomorHp($request->nomor_hp ?? $userTemp->nomor_hp);
                     $updateData = [
                         'nama' => $request->nama ?? $userTemp->nama,
-                        'nomor_hp' => $request->nomor_hp ?? $userTemp->nomor_hp,
+                        'nomor_hp' => $nomorHp ?: ($request->nomor_hp ?? $userTemp->nomor_hp),
                         'password' => $request->password ? Hash::make($request->password) : $userTemp->password,
                     ];
                     
@@ -581,6 +624,26 @@ class RegisterController extends Controller
             // Pastikan userTemp ada untuk sub-step selanjutnya
             if (!$userTemp && $subStep > 1) {
                 throw new \Exception('Silakan lengkapi data diri terlebih dahulu');
+            }
+
+            // Sub-step 2–6: pastikan data Data Diri (nomor_hp, nama, email) dari hidden input tetap tersimpan
+            if ($userTemp && $subStep > 1) {
+                $refresh = [];
+                if ($request->filled('nomor_hp')) {
+                    $n = $this->normalizeNomorHp($request->nomor_hp);
+                    if ($n !== '') {
+                        $refresh['nomor_hp'] = $n;
+                    }
+                }
+                if ($request->filled('nama')) {
+                    $refresh['nama'] = $request->nama;
+                }
+                if ($request->filled('email')) {
+                    $refresh['email'] = $request->email;
+                }
+                if (!empty($refresh)) {
+                    $userTemp->update($refresh);
+                }
             }
 
             // Sub-step 2: Create/Update NasabahTemp
@@ -1047,27 +1110,68 @@ class RegisterController extends Controller
     {
         // Check if step 1 data exists
         $userTempId = $request->session()->get('register_user_temp_id');
+        \Log::info('Register Step 2 OTP: session register_user_temp_id = ' . ($userTempId ?? 'null'));
+
         if (!$userTempId) {
             return redirect()->route('register', ['step' => 1, 'substep' => 1])
                 ->with('error', 'Silakan lengkapi data diri terlebih dahulu');
         }
 
         $userTemp = \App\Models\UserTemp::find($userTempId);
-        if (!$userTemp || !$userTemp->nomor_hp) {
+        $nomorHp = $userTemp ? trim((string) $userTemp->nomor_hp) : '';
+
+        \Log::info('Register Step 2 OTP: loaded UserTemp', [
+            'user_temp_id' => $userTempId,
+            'found' => (bool) $userTemp,
+            'email' => $userTemp->email ?? null,
+            'nomor_hp_raw' => $userTemp->nomor_hp ?? null,
+            'nomor_hp_trimmed' => $nomorHp,
+        ]);
+
+        // Fallback: jika record dari session tidak punya nomor HP, cari record lain dengan email sama yang punya nomor (data mungkin ada di record lain)
+        if ($userTemp && $nomorHp === '' && $userTemp->email) {
+            $other = \App\Models\UserTemp::where('email', $userTemp->email)
+                ->whereNotNull('nomor_hp')
+                ->where('nomor_hp', '!=', '')
+                ->orderByDesc('updated_at')
+                ->first();
+            if ($other && trim((string) $other->nomor_hp) !== '') {
+                \Log::info('Register Step 2 OTP: fallback ke UserTemp lain dengan nomor_hp', [
+                    'fallback_id' => $other->id,
+                    'nomor_hp' => $other->nomor_hp,
+                ]);
+                // Salin nomor ke record yang dipakai session agar konsisten
+                $userTemp->update(['nomor_hp' => $other->nomor_hp]);
+                $nomorHp = trim((string) $other->nomor_hp);
+            }
+        }
+
+        if (!$userTemp || $nomorHp === '') {
+            \Log::warning('Register Step 2 OTP: redirect ke step 1 karena nomor_hp kosong', [
+                'user_temp_id' => $userTempId,
+            ]);
             return redirect()->route('register', ['step' => 1, 'substep' => 1])
-                ->with('error', 'Nomor HP belum diisi');
+                ->with('error', 'Nomor HP belum diisi. Silakan isi nomor HP Anda di Langkah 1 (Data Diri).');
+        }
+
+        // Gunakan nomor yang dinormalisasi untuk tampilan dan OTP (konsisten dengan format yang disimpan)
+        $nomorHpDisplay = $this->normalizeNomorHp($nomorHp) ?: $nomorHp;
+
+        // Simpan nomor yang sudah dinormalisasi ke DB agar data lama (dengan spasi/format salah) ikut terperbaiki
+        if ($nomorHpDisplay !== $nomorHp) {
+            $userTemp->update(['nomor_hp' => $nomorHpDisplay]);
         }
 
         $sessionId = $request->session()->get('register_session_id');
         
         // Store phone in session for display
-        $request->session()->put('register_phone', $userTemp->nomor_hp);
+        $request->session()->put('register_phone', $nomorHpDisplay);
 
         // === CASE 1: User submit OTP code untuk verifikasi ===
         if ($request->has('otp_code') && $request->isMethod('post')) {
             \Log::info('User submitting OTP for verification', [
                 'user_temp_id' => $userTempId,
-                'phone' => $userTemp->nomor_hp,
+                'phone' => $nomorHpDisplay,
             ]);
 
             // Validate OTP code
@@ -1084,17 +1188,17 @@ class RegisterController extends Controller
                     ->withInput();
             }
 
-            // Verify OTP using OtpService
+            // Verify OTP using OtpService (pakai nomor yang sama dengan saat kirim)
             $verifyResult = $this->otpService->verify(
                 $request->otp_code,
-                $userTemp->nomor_hp,
+                $nomorHpDisplay,
                 $sessionId
             );
 
             if (!$verifyResult['success']) {
                 \Log::warning('OTP verification failed', [
                     'user_temp_id' => $userTempId,
-                    'phone' => $userTemp->nomor_hp,
+                    'phone' => $nomorHpDisplay,
                     'message' => $verifyResult['message'],
                 ]);
 
@@ -1106,7 +1210,7 @@ class RegisterController extends Controller
             // OTP verified successfully
             \Log::info('OTP verified successfully', [
                 'user_temp_id' => $userTempId,
-                'phone' => $userTemp->nomor_hp,
+                'phone' => $nomorHpDisplay,
             ]);
 
             // Set session verified
@@ -1120,7 +1224,7 @@ class RegisterController extends Controller
         if ($request->has('send_otp') && $request->send_otp == '1' && $request->isMethod('post')) {
             \Log::info('User requesting to send OTP', [
                 'user_temp_id' => $userTempId,
-                'phone' => $userTemp->nomor_hp,
+                'phone' => $nomorHpDisplay,
                 'is_resend' => $request->session()->has('otp_sent_at'),
             ]);
 
@@ -1130,7 +1234,7 @@ class RegisterController extends Controller
             if ($isResend) {
                 // Resend OTP - invalidate old OTP first
                 $otpResult = $this->otpService->resend(
-                    $userTemp->nomor_hp,
+                    $nomorHpDisplay,
                     $sessionId,
                     null, // user_id null karena masih temp
                     'registration'
@@ -1138,67 +1242,104 @@ class RegisterController extends Controller
             } else {
                 // First time send OTP
                 $otpResult = $this->otpService->generateAndSend(
-                    $userTemp->nomor_hp,
+                    $nomorHpDisplay,
                     $sessionId,
-                    null, // user_id null karena masih registration  
+                    null, // user_id null karena masih temp
                     'registration'
                 );
             }
 
-            if ($otpResult['success']) {
-                // Mark that OTP has been sent
+            \Log::info('Register: OTP send result', [
+                'success' => $otpResult['success'] ?? false,
+                'message' => $otpResult['message'] ?? '',
+            ]);
+
+            if (!empty($otpResult['success'])) {
+                // Mark that OTP has been sent - Use PERSISTENT session data
                 $request->session()->put('otp_sent_at', now()->toDateTimeString());
+                $request->session()->put('otp_session_id', $sessionId); 
+                // Store expiration - assuming 5 minutes based on OTP duration
+                $request->session()->put('otp_expires_at', now()->addMinutes(5)->toDateTimeString());
                 
-                \Log::info('OTP sent successfully', [
+                \Log::info('OTP sent successfully - Session Updated', [
                     'user_temp_id' => $userTempId,
-                    'phone' => $userTemp->nomor_hp,
+                    'phone' => $nomorHpDisplay,
+                    'session_id' => $sessionId,
                     'is_resend' => $isResend,
                 ]);
 
                 $message = $isResend 
                     ? 'Kode OTP baru telah dikirim ke WhatsApp Anda.' 
-                    : 'Kode OTP telah dikirim ke WhatsApp nomor ' . $userTemp->nomor_hp . '. Silakan cek pesan masuk Anda.';
+                    : 'Kode OTP telah dikirim ke WhatsApp nomor ' . $nomorHpDisplay . '. Silakan cek pesan masuk Anda.';
 
                 return redirect()->route('register', ['step' => 2])
-                    ->with('success', $message)
-                    ->with('otp_sent', true); // Flag untuk tampilkan form input OTP
+                    ->with('success', $message);
+                    // 'otp_sent' flash data is no longer strictly needed as we check session, 
+                    // but kept for backward compatibility if view relies on it.
             } else {
                 \Log::error('Failed to send OTP', [
                     'user_temp_id' => $userTempId,
-                    'phone' => $userTemp->nomor_hp,
-                    'error' => $otpResult['message'],
+                    'phone' => $nomorHpDisplay,
+                    'error' => $otpResult['message'] ?? 'Unknown error',
                 ]);
 
                 return redirect()->route('register', ['step' => 2])
-                    ->with('error', 'Gagal mengirim OTP: ' . $otpResult['message']);
+                    ->with('error', 'Gagal mengirim OTP: ' . ($otpResult['message'] ?? 'Unknown error'));
             }
         }
 
         // === CASE 3: Default - Tampilkan halaman Step 2 ===
-        // Cek apakah OTP sudah pernah dikirim
-        $otpSent = $request->session()->has('otp_sent_at');
+        // Check if OTP has been sent and is still valid
+        $otpSentAt = $request->session()->get('otp_sent_at');
+        $otpExpiresAt = $request->session()->get('otp_expires_at');
         
+        $otpSent = false;
+        if ($otpSentAt && $otpExpiresAt) {
+            // Check if not expired
+            if (now()->lessThan($otpExpiresAt)) {
+                $otpSent = true;
+            } else {
+                // Expired - clear session? 
+                // Currently we keep it to show "Expired" state in frontend if desired, 
+                // but strictly speaking, if expired, we might want to force resend UI.
+                // For now, let's keep it true so user sees the input form and expiry message.
+                $otpSent = true; 
+            }
+        }
+        
+        // Fallback: check session flash (legacy)
+        if (session('otp_sent')) {
+            $otpSent = true;
+        }
+
         // Get remaining cooldown if OTP already sent
         $remainingCooldown = 0;
         if ($otpSent) {
-            $remainingCooldown = $this->otpService->getRemainingCooldown($userTemp->nomor_hp);
+            $remainingCooldown = $this->otpService->getRemainingCooldown($nomorHpDisplay);
         }
 
         \Log::info('Displaying Step 2 OTP page', [
             'user_temp_id' => $userTempId,
-            'phone' => $userTemp->nomor_hp,
+            'phone' => $nomorHpDisplay,
             'otp_sent' => $otpSent,
+            'otp_sent_at' => $otpSentAt,
             'remaining_cooldown' => $remainingCooldown,
         ]);
 
-        // Tampilkan view dengan data
+        // Jangan tampilkan halaman OTP jika nomor kosong (safeguard terakhir)
+        if ($nomorHpDisplay === '' || trim($nomorHpDisplay) === '') {
+            return redirect()->route('register', ['step' => 1, 'substep' => 1])
+                ->with('error', 'Nomor HP belum tersimpan. Silakan isi nomor HP di Langkah 1 (Data Diri) lalu lanjutkan kembali.');
+        }
+
+        // Tampilkan view dengan data (phone dinormalisasi agar tidak "Nomor tidak ditemukan")
         return view('auth.register', [
             'step' => 2,
             'subStep' => null,
             'sessionData' => [],
             'sessionId' => $sessionId,
             'formData' => [],
-            'phone' => $userTemp->nomor_hp,
+            'phone' => $nomorHpDisplay,
             'otpSent' => $otpSent, // Flag apakah OTP sudah dikirim
             'remainingCooldown' => $remainingCooldown, // Seconds remaining for resend
         ]);
