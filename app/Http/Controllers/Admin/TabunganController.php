@@ -191,13 +191,13 @@ class TabunganController extends Controller
     public function rejectSetor(Request $request, $id)
     {
         $request->validate([
-            'keterangan' => 'required|string'
+            'keterangan_admin' => 'required|string'
         ]);
 
         $pengajuan = PengajuanTabungan::findOrFail($id);
         $pengajuan->update([
             'status' => '3',
-            'keterangan' => $request->keterangan
+            'keterangan_admin' => $request->keterangan_admin
         ]);
 
         return redirect()->route('admin.tabungan.pengajuan-setor')
@@ -316,13 +316,13 @@ class TabunganController extends Controller
     public function rejectTarik(Request $request, $id)
     {
         $request->validate([
-            'keterangan' => 'required|string'
+            'keterangan_admin' => 'required|string'
         ]);
 
         $pengajuan = PengajuanPenarikanTabungan::findOrFail($id);
         $pengajuan->update([
             'status' => '3',
-            'keterangan' => $request->keterangan
+            'keterangan_admin' => $request->keterangan_admin
         ]);
 
         return redirect()->route('admin.tabungan.pengajuan-tarik')

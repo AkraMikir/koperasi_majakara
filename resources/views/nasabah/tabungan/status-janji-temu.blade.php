@@ -19,7 +19,7 @@
                         <p class="text-white/90 text-sm">Jadwal setoran tunai di kantor</p>
                     </div>
                 </div>
-                <a href="{{ route('nasabah.tabungan.nabung-sekarang') }}" 
+                <a href="{{ route('nasabah.tabungan.index') }}" 
                     class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all text-sm font-semibold flex items-center gap-2">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
