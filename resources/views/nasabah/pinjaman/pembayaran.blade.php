@@ -206,19 +206,25 @@
 
                         <!-- Upload Bukti Transfer -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer
-                                *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer *</label>
                             <div id="bukti-container" class="space-y-3">
-                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-[#8b6f2f] transition-colors cursor-pointer"
-                                    onclick="addBuktiField()">
-                                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
-                                        </path>
+                                <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-[#8b6f2f]/50 transition-colors">
+                                    <div class="flex-shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" name="bukti_foto[]" accept="image/*" required
+                                            class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#8b6f2f] file:text-white hover:file:bg-[#674c1d] file:cursor-pointer cursor-pointer">
+                                        <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
+                                    </div>
+                                </div>
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 text-center hover:border-[#8b6f2f] transition-colors cursor-pointer" onclick="addBuktiField()">
+                                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                     </svg>
                                     <p class="text-sm text-gray-600">Klik untuk tambah bukti transfer</p>
-                                    <p class="text-xs text-gray-400 mt-1">Format: JPG, PNG (Max 5MB per file)</p>
                                 </div>
                             </div>
                         </div>
@@ -429,20 +435,27 @@ function addBuktiField() {
     buktiCount++;
     const container = document.getElementById('bukti-container');
     const div = document.createElement('div');
-    div.className = 'border-2 border-gray-200 rounded-xl p-4 space-y-3';
+    div.className = 'relative';
     div.innerHTML = `
-        <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-semibold text-gray-700">Bukti Transfer ${buktiCount}</label>
-            <button type="button" onclick="this.parentElement.parentElement.remove();" class="text-red-600 hover:text-red-700">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+            <div class="flex-shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <input type="file" name="bukti_foto[]" accept="image/*" required
+                    class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#8b6f2f] file:text-white hover:file:bg-[#674c1d] cursor-pointer">
+                <p class="text-xs text-gray-500 mt-1">Max 5MB (JPG, PNG, JPEG)</p>
+            </div>
+            <button type="button" onclick="this.closest('.relative').remove();" class="flex-shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
         </div>
-        <input type="file" name="bukti_foto[]" accept="image/*" required 
-            class="w-full px-4 py-2 border border-gray-300 rounded-lg">
     `;
-    container.insertBefore(div, container.firstChild);
+    container.insertBefore(div, container.querySelector('.border-dashed'));
 }
 
 function showPinModal(formType) {

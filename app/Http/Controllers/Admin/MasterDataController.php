@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
-// use App\Models\SukuBunga; // REMOVED
+use App\Models\SukuBunga;
 use App\Models\JnsTenorDeposito;
 use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
@@ -24,12 +24,11 @@ class MasterDataController extends Controller
         $stats = [
             'total_bunga_pinjaman' => MasterBungaPinjaman::where('status_aktif', true)->count(),
             'total_denda_pinjaman' => MasterDendaPinjaman::where('status_aktif', true)->count(),
-            // 'total_suku_bunga_tabungan' => SukuBunga::count(), // REMOVED
+            'total_suku_bunga_tabungan' => SukuBunga::count(),
             'total_tenor_deposito' => JnsTenorDeposito::where('aktif', true)->count(),
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
-            'total_jns_akun' => 0, 
             'total_biaya_transfer' => 0, 
         ];
 
@@ -168,10 +167,60 @@ class MasterDataController extends Controller
         return redirect()->back()->with('success', 'Status berhasil diubah');
     }
 
-    // ==================== SUKU BUNGA TABUNGAN (REMOVED) ====================
-    /*
-    public function sukuBungaTabunganIndex() ...
-    */
+    // ==================== SUKU BUNGA TABUNGAN ====================
+
+    public function sukuBungaTabunganIndex()
+    {
+        $data = SukuBunga::orderBy('jenis_bunga')->paginate(15);
+        return view('admin.master-data.suku-bunga-tabungan.index', compact('data'));
+    }
+
+    public function sukuBungaTabunganCreate()
+    {
+        return view('admin.master-data.suku-bunga-tabungan.create');
+    }
+
+    public function sukuBungaTabunganStore(Request $request)
+    {
+        $request->validate([
+            'jenis_bunga' => 'required|string|max:255',
+            'opsi_val' => 'required|numeric|min:0|max:100',
+        ]);
+
+        SukuBunga::create($request->only(['jenis_bunga', 'opsi_val']));
+
+        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
+            ->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function sukuBungaTabunganEdit($id)
+    {
+        $data = SukuBunga::findOrFail($id);
+        return view('admin.master-data.suku-bunga-tabungan.edit', compact('data'));
+    }
+
+    public function sukuBungaTabunganUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'jenis_bunga' => 'required|string|max:255',
+            'opsi_val' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $data = SukuBunga::findOrFail($id);
+        $data->update($request->only(['jenis_bunga', 'opsi_val']));
+
+        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
+            ->with('success', 'Data berhasil diupdate');
+    }
+
+    public function sukuBungaTabunganDestroy($id)
+    {
+        $data = SukuBunga::findOrFail($id);
+        $data->delete();
+
+        return redirect()->route('admin.master-data.suku-bunga-tabungan.index')
+            ->with('success', 'Data berhasil dihapus');
+    }
 
     // ==================== TENOR DEPOSITO ====================
     
@@ -516,11 +565,6 @@ class MasterDataController extends Controller
 
         return redirect()->back()->with('success', 'Status berhasil diubah');
     }
-
-    // ===== JNS AKUN (REMOVED) =====
-    /*
-    public function jnsAkunIndex() ...
-    */
 
     // ===== BIAYA TRANSFER =====
 

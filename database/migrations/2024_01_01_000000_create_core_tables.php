@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->integer('pin')->nullable();
             $table->string('password');
-            $table->char('nomor_hp', 12);
+            $table->string('nomor_hp', 20); // Changed from char(12) to varchar(20)
             $table->string('foto');
             $table->enum('role', ['nasabah', 'admin_operasional', 'admin_utama'])->default('nasabah');
             $table->timestamp('email_verified_at')->nullable();
@@ -91,7 +91,7 @@ return new class extends Migration
             $table->string('email')->nullable()->unique();
             $table->integer('pin')->nullable();
             $table->string('password')->nullable();
-            $table->char('nomor_hp', 12)->nullable();
+            $table->string('nomor_hp', 20)->nullable(); // Changed from char(12) to varchar(20)
             $table->string('foto')->nullable();
             $table->timestamps();
         });

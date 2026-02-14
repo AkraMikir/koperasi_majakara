@@ -48,7 +48,7 @@ return new class extends Migration//ikkkkm
             $table->id();
             $table->foreignId('nasabah_id')->constrained('tbl_nasabah')->onDelete('cascade');
             $table->string('pekerjaan')->nullable();
-            $table->decimal('penghasilan', 10, 2)->nullable();
+            $table->string('penghasilan', 100)->nullable(); // Changed FROM decimal(10,2) TO string
             $table->string('nama_perusahaan')->nullable();
             $table->timestamps();
         });
@@ -107,7 +107,7 @@ return new class extends Migration//ikkkkm
             $table->id();
             $table->foreignId('nasabah_id')->constrained('tbl_nasabah_temp')->onDelete('cascade');
             $table->string('pekerjaan')->nullable();
-            $table->decimal('penghasilan', 10, 2)->nullable();
+            $table->string('penghasilan', 100)->nullable(); // Changed FROM decimal(10,2) TO string
             $table->string('nama_perusahaan')->nullable();
             $table->string('nama_bank')->nullable();
             $table->timestamps();
@@ -143,8 +143,8 @@ return new class extends Migration//ikkkkm
         // 4. OTP
         Schema::create('tbl_otp', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->enum('type', ['registration', 'transaction', 'login', 'pin'])->default('registration');
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade'); // Made user_id nullable
+            $table->enum('type', ['registration', 'transaction', 'login', 'pin', 'password_reset'])->default('registration'); // Added password_reset
             $table->string('otp_code', 6);
             $table->enum('channel', ['whatsapp', 'sms', 'email'])->default('whatsapp');
             $table->string('phone_number', 20)->nullable();

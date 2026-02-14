@@ -23,6 +23,7 @@ return new class extends Migration//ikkkkm
                 jt.keterangan,
                 jt.keterangan_admin,
                 jt.status,
+                CAST(jt.jenis AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_tabungan jt
             JOIN tbl_nasabah n ON jt.id_nasabah = n.id
@@ -42,8 +43,9 @@ return new class extends Migration//ikkkkm
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                jt.keterangan_admin,
-                jt.status,
+                '' AS keterangan_admin,     -- Placeholder
+                '1' AS status,              -- Placeholder
+                CAST('other' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pinjaman jt
             JOIN tbl_nasabah n ON jt.id_nasabah = n.id
@@ -63,8 +65,9 @@ return new class extends Migration//ikkkkm
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                jt.keterangan_admin,
-                jt.status,
+                '' AS keterangan_admin,     -- Placeholder
+                '1' AS status,              -- Placeholder
+                CAST('other' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pembayaran_pinjaman jt
             JOIN tbl_pengajuan_pembayaran_pinjaman p ON jt.id_pengajuan = p.id

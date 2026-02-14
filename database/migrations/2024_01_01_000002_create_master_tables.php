@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration//ikkkkm
 {
@@ -41,6 +42,7 @@ return new class extends Migration//ikkkkm
             $table->id();
             $table->string('nama_lokasi', 150);
             $table->text('alamat_lengkap');
+            $table->text('google_maps_embed')->nullable(); // Added google_maps_embed
             $table->string('kota', 100);
             $table->string('provinsi', 100);
             $table->string('tipe_lokasi', 50);
@@ -51,10 +53,25 @@ return new class extends Migration//ikkkkm
         // 3. Pinjaman Masters
         Schema::create('jns_angsuran_bulan', function (Blueprint $table) {
             $table->id();
-            $table->char('ket', 1)->unique();
+            $table->unsignedTinyInteger('bulan')->nullable(); // Added bulan
+            $table->string('ket', 5)->nullable(); // Changed to allow string and nullable
             $table->enum('aktif', ['y', 'n'])->default('y');
             $table->timestamps();
         });
+
+        // Populate jns_angsuran_bulan with 1-24 months
+        $now = now();
+        $data = [];
+        for ($i = 1; $i <= 24; $i++) {
+            $data[] = [
+                'bulan' => $i,
+                'ket' => (string) $i,
+                'aktif' => 'y',
+                'created_at' => $now,
+                'updated_at' => $now,
+            ];
+        }
+        DB::table('jns_angsuran_bulan')->insert($data);
 
         Schema::create('jns_angsuran_minggu', function (Blueprint $table) {
             $table->id();
@@ -78,6 +95,14 @@ return new class extends Migration//ikkkkm
             $table->decimal('denda_persen', 5, 2);
             $table->boolean('status_aktif')->default(true);
             $table->string('keterangan')->nullable();
+            $table->timestamps();
+        });
+
+        // 3b. Suku Bunga Tabungan
+        Schema::create('suku_bunga', function (Blueprint $table) {
+            $table->id();
+            $table->string('jenis_bunga', 255);
+            $table->decimal('opsi_val', 5, 4);
             $table->timestamps();
         });
 
@@ -128,6 +153,7 @@ return new class extends Migration//ikkkkm
         Schema::dropIfExists('jns_tenor_deposito');
         Schema::dropIfExists('tbl_gadai_spesial');
         Schema::dropIfExists('m_barang_gadai');
+        Schema::dropIfExists('suku_bunga');
         Schema::dropIfExists('master_denda_pinjaman');
         Schema::dropIfExists('master_bunga_pinjaman');
         Schema::dropIfExists('jns_angsuran_minggu');

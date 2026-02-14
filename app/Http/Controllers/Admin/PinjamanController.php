@@ -71,16 +71,13 @@ class PinjamanController extends Controller
         $query = PengajuanPinjaman::with('nasabah.user')
             ->latest();
 
-        // Filter by status (pengajuan yang belum punya pinjaman = pending)
-        if ($request->has('status') && $request->status !== '') {
+        // Filter by status: kosong / Semua Status = tampilkan semua pengajuan
+        if ($request->filled('status')) {
             if ($request->status === 'pending') {
                 $query->whereDoesntHave('pinjaman');
-            } else {
+            } elseif ($request->status === 'approved') {
                 $query->whereHas('pinjaman');
             }
-        } else {
-            // Default show pending
-            $query->whereDoesntHave('pinjaman');
         }
 
         // Filter by jenis
@@ -119,7 +116,7 @@ class PinjamanController extends Controller
 
     /**
      * Approve pengajuan pinjaman (Status 1 -> 3).
-     * Hanya update status dan bunga_persen, BELUM buat pinjaman.
+     * BARU: Update status, buat pinjaman header, tapi BELUM generate jadwal angsuran.
      */
     public function approvePengajuan(Request $request, $id)
     {
@@ -135,6 +132,12 @@ class PinjamanController extends Controller
                 ->with('error', 'Pengajuan ini tidak bisa disetujui karena statusnya bukan pending');
         }
 
+        // Cek apakah sudah punya pinjaman
+        if ($pengajuan->pinjaman) {
+            return redirect()->back()
+                ->with('error', 'Pengajuan ini sudah memiliki data pinjaman');
+        }
+
         // Get bunga dari master data berdasarkan durasi
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
         if (!$masterBunga) {
@@ -142,27 +145,63 @@ class PinjamanController extends Controller
                 ->with('error', 'Bunga untuk durasi ' . $pengajuan->durasi . ' bulan belum diatur di master data');
         }
 
-        // Get denda dari master data (validasi)
+        // Get denda dari master data
         $masterDenda = MasterDendaPinjaman::getDendaAktif();
         if (!$masterDenda) {
             return redirect()->back()
                 ->with('error', 'Denda belum diatur di master data');
         }
 
-        // Update status menjadi '3' (Disetujui) dan simpan bunga_persen + keterangan_admin
-        $pengajuan->update([
-            'status' => '3',
-            'bunga_persen' => $masterBunga->bunga_persen,
-            'keterangan_admin' => $request->keterangan_admin,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
-            ->with('success', 'Pengajuan berhasil disetujui. Silakan klik "Cairkan" untuk melanjutkan pencairan dana.');
+            // Hitung bunga
+            $nominal = $pengajuan->nominal;
+            $bungaPersen = $masterBunga->bunga_persen;
+            $bungaRp = ($nominal * $bungaPersen) / 100;
+            $jumlahPinjam = $nominal;
+
+            // Generate ID Pinjaman: P (Pinjaman) TF/TN (Transfer/Tunai) DPNJM (Detail Pinjaman Header)
+            $kodeVia = $pengajuan->jenis_pencairan === 'transfer' ? 'TF' : 'TN';
+            $idPinjaman = IdGenerator::generate('tbl_pinjaman_h', 'P', $kodeVia, 'DPNJM', now());
+
+            // Create pinjaman header (BELUM ada jadwal angsuran)
+            $pinjaman = PinjamanH::create([
+                'id' => $idPinjaman,
+                'id_anggota' => $pengajuan->id_anggota,
+                'id_pengajuan' => $pengajuan->id,
+                'jumlah_pinjam' => $jumlahPinjam,
+                'lama_pinjam' => (int)$pengajuan->durasi,
+                'ags_bulan' => ($jumlahPinjam + $bungaRp) / (int)$pengajuan->durasi,
+                'jenis' => 'bulanan',
+                'bunga' => $bungaPersen,
+                'bunga_rp' => $bungaRp,
+                'denda_persen' => $masterDenda->denda_persen,
+                'tgl_pinjam' => now(), // Tanggal approval
+                'lunas' => 'belum',
+            ]);
+
+            // Update status pengajuan menjadi '3' (Disetujui)
+            $pengajuan->update([
+                'status' => '3',
+                'bunga_persen' => $masterBunga->bunga_persen,
+                'keterangan_admin' => $request->keterangan_admin,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
+                ->with('success', 'Pengajuan berhasil disetujui dan data pinjaman dibuat. Silakan klik "Cairkan" untuk generate jadwal angsuran dan pencairan dana.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
      * Cairkan pinjaman (Status 3 -> 4).
-     * Buat pinjaman dan generate jadwal angsuran.
+     * BARU: Hanya generate jadwal angsuran dan save bukti foto. Pinjaman header sudah dibuat di status 3.
      */
     public function cairkanPinjaman(Request $request, $id)
     {
@@ -171,7 +210,7 @@ class PinjamanController extends Controller
             'bukti_transfer' => 'nullable|image|max:5120',
         ]);
 
-        $pengajuan = PengajuanPinjaman::findOrFail($id);
+        $pengajuan = PengajuanPinjaman::with('pinjaman')->findOrFail($id);
 
         // Cek status harus '3' (disetujui)
         if ($pengajuan->status !== '3') {
@@ -180,69 +219,54 @@ class PinjamanController extends Controller
         }
 
         // Cek apakah sudah punya pinjaman
-        if ($pengajuan->pinjaman) {
+        if (!$pengajuan->pinjaman) {
             return redirect()->back()
-                ->with('error', 'Pengajuan ini sudah dicairkan sebelumnya');
+                ->with('error', 'Data pinjaman belum dibuat. Silakan setujui pengajuan terlebih dahulu.');
+        }
+
+        $pinjaman = $pengajuan->pinjaman;
+
+        // Cek apakah jadwal angsuran sudah dibuat
+        $existingTempo = TempoPinjamanB::where('pinjaman_id', $pinjaman->id)->exists();
+        if ($existingTempo) {
+            return redirect()->back()
+                ->with('error', 'Pinjaman ini sudah dicairkan sebelumnya (jadwal angsuran sudah ada)');
         }
 
         try {
             DB::beginTransaction();
 
-            // Get bunga dan denda dari master data
-            $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
-            if (!$masterBunga) {
-                return redirect()->back()
-                    ->with('error', 'Bunga untuk durasi ' . $pengajuan->durasi . ' bulan belum diatur di master data');
-            }
-
-            $masterDenda = MasterDendaPinjaman::getDendaAktif();
-            if (!$masterDenda) {
-                return redirect()->back()
-                    ->with('error', 'Denda belum diatur di master data');
-            }
-
-            // Hitung bunga
-            $nominal = $pengajuan->nominal;
-            $bungaPersen = $masterBunga->bunga_persen;
-            $bungaRp = ($nominal * $bungaPersen) / 100;
-            $jumlahPinjam = $nominal; // Jumlah yang diterima nasabah (sama dengan nominal)
-
-            // Generate ID Pinjaman: P (Pinjaman) T (Transfer) DPNJM (Detail Pinjaman Header)
-            $idPinjaman = IdGenerator::generate('tbl_pinjaman_h', 'P', 'T', 'DPNJM', $request->tgl_cair);
-
-            // Create pinjaman
-            $pinjaman = PinjamanH::create([
-                'id' => $idPinjaman,
-                'id_anggota' => $pengajuan->id_anggota,
-                'id_pengajuan' => $pengajuan->id,
-                'jumlah_pinjam' => $jumlahPinjam,
-                'lama_pinjam' => (int)$pengajuan->durasi,
-                // ... logic hitungan angsuran ...
-                'ags_bulan' => ($jumlahPinjam + $bungaRp) / (int)$pengajuan->durasi, // Base calculation logic
-                'jenis' => 'bulanan', // Hanya bulanan
-                'bunga' => $bungaPersen, // Store as decimal percentage e.g 2.5
-                'bunga_rp' => $bungaRp,
-                'denda_persen' => $masterDenda->denda_persen,
+            // Update tanggal pinjam di pinjaman header
+            $pinjaman->update([
                 'tgl_pinjam' => $request->tgl_cair,
-                'lunas' => 'belum',
             ]);
 
             // Generate jadwal angsuran
             $this->generateJadwalAngsuran($pinjaman);
 
-            // Upload bukti transfer jika ada
+            // Upload bukti transfer dan simpan ke tbl_bukti_foto dengan kode PNCR
             if ($request->hasFile('bukti_transfer')) {
                 $file = $request->file('bukti_transfer');
                 $path = $file->store('bukti-pencairan-pinjaman', 'public');
-                // Simpan path ke pinjaman atau tabel lain jika perlu
+                
+                // Generate ID for bukti foto: P (pinjaman) + TF (transfer) + PNCR (pencairan)
+                // Format: 120220260001PTFPNCR (tanggal + seq + P + TF + PNCR)
+                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PNCR', $request->tgl_cair);
+                
+                BuktiFoto::create([
+                    'id' => $idBuktiFoto,
+                    'owner_id' => $pengajuan->id, // ID pengajuan
+                    'owner_fitur' => 'P', // Pinjaman
+                    'owner_trans' => 'PNCR', // Pencairan
+                    'file_path' => $path,
+                    'keterangan' => 'Bukti transfer pencairan pinjaman',
+                ]);
             }
 
-            // Update status pengajuan menjadi '4' (Terlaksana)
-            // Auto-set jenis_pencairan to 'transfer' when status becomes 4
+            // Update status pengajuan menjadi '4' (Terlaksana/Tercair)
             $pengajuan->update([
                 'status' => '4',
                 'tgl_cair' => $request->tgl_cair,
-                'jenis_pencairan' => 'transfer',
             ]);
 
             DB::commit();
@@ -318,6 +342,32 @@ class PinjamanController extends Controller
     }
 
     /**
+     * Display list of pinjaman lunas (sudah lunas).
+     */
+    public function pinjamanLunas(Request $request)
+    {
+        $query = PinjamanH::with('nasabah.user')
+            ->where('lunas', 'lunas')
+            ->latest();
+
+        if ($request->has('jenis') && $request->jenis !== '') {
+            $query->where('jenis', $request->jenis);
+        }
+
+        if ($request->has('search') && $request->search !== '') {
+            $search = $request->search;
+            $query->whereHas('nasabah.user', function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $pinjaman = $query->paginate(15);
+
+        return view('admin.pinjaman.pinjaman-lunas', compact('pinjaman'));
+    }
+
+    /**
      * Display detail pinjaman.
      */
     public function detailPinjaman($id)
@@ -340,47 +390,53 @@ class PinjamanController extends Controller
     }
 
     /**
-     * Display list of angsuran/tempo.
+     * Display list of angsuran grouped by pinjaman (satu baris per pinjaman, dengan tabel kecil detail angsuran & status pembayaran).
      */
     public function angsuran(Request $request)
     {
-        $query = null;
         $jenis = $request->get('jenis', 'bulanan');
 
-        if ($jenis === 'bulanan') {
-            $query = TempoPinjamanB::with(['pinjaman.nasabah.user'])
-                ->latest('tgl_jatuh_tempo');
-        } else {
-            $query = TempoPinjamanM::with(['pinjaman.nasabah.user'])
-                ->latest('tgl_jatuh_tempo');
+        $query = PinjamanH::with(['nasabah.user'])
+            ->where('lunas', 'belum')
+            ->when($jenis === 'bulanan', fn ($q) => $q->with(['tempoBulanan' => fn ($q) => $q->orderBy('no_urut')]))
+            ->when($jenis === 'mingguan', fn ($q) => $q->with(['tempoMingguan' => fn ($q) => $q->orderBy('no_urut')]))
+            ->latest();
+
+        // Filter by status (pinjaman yang punya minimal satu angsuran dengan status ini)
+        if ($request->filled('status')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->where('status_bayar', $request->status));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->where('status_bayar', $request->status));
+            }
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status_bayar', $request->status);
+        // Filter by date (jatuh tempo)
+        if ($request->filled('tanggal_dari')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari));
+            }
+        }
+        if ($request->filled('tanggal_sampai')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai));
+            }
         }
 
-        // Filter by date
-        if ($request->has('tanggal_dari') && $request->tanggal_dari !== '') {
-            $query->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari);
-        }
-
-        if ($request->has('tanggal_sampai') && $request->tanggal_sampai !== '') {
-            $query->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai);
-        }
-
-        // Search
-        if ($request->has('search') && $request->search !== '') {
+        // Search by nasabah
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('nasabah.user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
+            $query->whereHas('nasabah.user', fn ($q) => $q->where('nama', 'like', "%{$search}%")
+                ->orWhere('email', 'like', "%{$search}%"));
         }
 
-        $angsuran = $query->paginate(20);
+        $pinjamanList = $query->paginate(10);
 
-        return view('admin.pinjaman.angsuran', compact('angsuran', 'jenis'));
+        return view('admin.pinjaman.angsuran', compact('pinjamanList', 'jenis'));
     }
 
     /**
@@ -772,11 +828,12 @@ class PinjamanController extends Controller
 
     /**
      * Approve pengajuan pembayaran.
+     * BARU: Simpan keterangan_admin, update tgl_pembayaran, dan update tempo_pinjaman_b
      */
     public function approvePembayaran(Request $request, $id)
     {
         $request->validate([
-            'keterangan' => 'nullable|string|max:500',
+            'keterangan_admin' => 'nullable|string|max:500',
         ]);
 
         $pengajuan = PengajuanPembayaranPinjaman::with(['pinjaman'])->findOrFail($id);
@@ -786,14 +843,92 @@ class PinjamanController extends Controller
                 ->with('error', 'Status pengajuan tidak valid untuk disetujui');
         }
 
-        // Update status menjadi disetujui
-        $pengajuan->update([
-            'status' => '3', // Disetujui
-            'keterangan' => $request->keterangan,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        return redirect()->route('admin.pinjaman.pembayaran')
-            ->with('success', 'Pengajuan pembayaran berhasil disetujui');
+            // Get angsuran yang terkait
+            $angsuran = null;
+            if ($pengajuan->tempo_id && $pengajuan->jenis_tempo) {
+                if ($pengajuan->jenis_tempo === 'bulanan') {
+                    $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)->first();
+                } else {
+                    $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)->first();
+                }
+            }
+
+            if (!$angsuran) {
+                return redirect()->back()
+                    ->with('error', 'Data angsuran tidak ditemukan');
+            }
+
+            $pinjaman = $pengajuan->pinjaman;
+            if (!$pinjaman) {
+                return redirect()->back()
+                    ->with('error', 'Data pinjaman tidak ditemukan');
+            }
+
+            // Hitung denda
+            $denda = $this->hitungDenda($angsuran, $pinjaman);
+            $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
+
+            // Update angsuran dengan pembayaran
+            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + $pengajuan->nominal;
+            
+            $statusBayar = 'belum';
+            $tglBayar = null;
+            
+            if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
+                $statusBayar = 'lunas';
+                $jumlahTerbayarBaru = $totalTagihanPlusDenda;
+                $denda = 0;
+                $tglBayar = now();
+            } elseif ($jumlahTerbayarBaru >= $angsuran->jumlah_tagihan) {
+                $statusBayar = $angsuran->tgl_jatuh_tempo < now() ? 'telat' : 'belum';
+                $tglBayar = now();
+            } elseif ($angsuran->tgl_jatuh_tempo < now() && $jumlahTerbayarBaru < $angsuran->jumlah_tagihan) {
+                $statusBayar = 'telat';
+                // Jika ada pembayaran parsial, tetap catat tanggal bayar
+                if ($jumlahTerbayarBaru > 0) {
+                    $tglBayar = now();
+                }
+            }
+
+            $angsuran->update([
+                'jumlah_terbayar' => $jumlahTerbayarBaru,
+                'denda' => $denda,
+                'status_bayar' => $statusBayar,
+                'tgl_bayar' => $tglBayar,
+            ]);
+
+            // Check if all angsuran sudah lunas
+            $allAngsuran = $pinjaman->jenis === 'bulanan' 
+                ? $pinjaman->tempoBulanan 
+                : $pinjaman->tempoMingguan;
+            
+            $allLunas = $allAngsuran->every(function($item) {
+                return $item->status_bayar === 'lunas';
+            });
+
+            if ($allLunas) {
+                $pinjaman->update(['lunas' => 'lunas']);
+            }
+
+            // Update status pengajuan pembayaran menjadi disetujui
+            $pengajuan->update([
+                'status' => '3', // Disetujui
+                'keterangan_admin' => $request->keterangan_admin,
+                'tgl_pembayaran' => now(),
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.pembayaran')
+                ->with('success', 'Pengajuan pembayaran berhasil disetujui dan angsuran diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -802,7 +937,7 @@ class PinjamanController extends Controller
     public function rejectPembayaran(Request $request, $id)
     {
         $request->validate([
-            'keterangan' => 'required|string|max:500',
+            'keterangan_admin' => 'required|string|max:500',
         ]);
 
         $pengajuan = PengajuanPembayaranPinjaman::findOrFail($id);
@@ -814,7 +949,7 @@ class PinjamanController extends Controller
 
         $pengajuan->update([
             'status' => '2', // Ditolak
-            'keterangan' => $request->keterangan,
+            'keterangan_admin' => $request->keterangan_admin,
         ]);
 
         return redirect()->route('admin.pinjaman.pembayaran')

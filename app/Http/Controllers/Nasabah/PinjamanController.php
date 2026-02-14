@@ -115,8 +115,23 @@ class PinjamanController extends Controller
         }
         $semuaAngsuran = $semuaAngsuran->sortBy('tgl_jatuh_tempo')->take(10);
 
+        // Pinjaman Lunas (lunas = 'lunas') dengan total terbayar dari tempo
+        $pinjamanLunas = PinjamanH::where('id_anggota', $idAnggota)
+            ->where('lunas', 'lunas')
+            ->with(['tempoBulanan', 'tempoMingguan'])
+            ->latest()
+            ->get()
+            ->map(function ($p) {
+                $terbayar = $p->jenis === 'bulanan'
+                    ? $p->tempoBulanan->sum('jumlah_terbayar')
+                    : $p->tempoMingguan->sum('jumlah_terbayar');
+                $p->total_terbayar = $terbayar;
+                return $p;
+            });
+
         return view('nasabah.pinjaman.index', [
             'pinjamanAktif' => $pinjamanAktif,
+            'pinjamanLunas' => $pinjamanLunas,
             'totalPinjamanAktif' => $totalPinjamanAktif,
             'sisaPinjaman' => $sisaPinjaman,
             'angsuranTerdekat' => $angsuranTerdekat,
@@ -589,11 +604,6 @@ class PinjamanController extends Controller
             $query->where('jenis', $request->jenis);
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status);
-        }
-
         $pinjaman = $query->paginate(15);
 
         return view('nasabah.pinjaman.pinjaman-aktif', [
@@ -632,6 +642,15 @@ class PinjamanController extends Controller
         $angsuranLunas = $angsuran->where('status_bayar', 'lunas')->count();
         $totalAngsuran = $angsuran->count();
 
+        // Bukti transfer dari pengajuan pembayaran yang sudah disetujui/terlaksana (untuk pegangan nasabah)
+        $buktiTransferPinjaman = PengajuanPembayaranPinjaman::where('pinjaman_id', $id)
+            ->whereIn('status', ['3', '4'])
+            ->with('buktiFoto')
+            ->get()
+            ->pluck('buktiFoto')
+            ->flatten()
+            ->filter(function ($b) { return $b && $b->file_path; });
+
         return view('nasabah.pinjaman.detail-pinjaman', [
             'pinjaman' => $pinjaman,
             'angsuran' => $angsuran,
@@ -641,6 +660,7 @@ class PinjamanController extends Controller
             'progress' => $progress,
             'angsuranLunas' => $angsuranLunas,
             'totalAngsuran' => $totalAngsuran,
+            'buktiTransferPinjaman' => $buktiTransferPinjaman,
         ]);
     }
 

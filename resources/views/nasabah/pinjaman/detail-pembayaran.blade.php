@@ -87,8 +87,14 @@
 
             @if($pengajuan->keterangan)
             <div class="mt-6 pt-6 border-t border-gray-200">
-                <p class="text-sm text-gray-500 mb-1">Keterangan</p>
+                <p class="text-sm text-gray-500 mb-1">Keterangan Anda</p>
                 <p class="text-gray-900">{{ $pengajuan->keterangan }}</p>
+            </div>
+            @endif
+            @if($pengajuan->keterangan_admin)
+            <div class="mt-6 pt-6 border-t border-gray-200">
+                <p class="text-sm text-gray-500 mb-1">Keterangan Admin</p>
+                <p class="text-gray-900 {{ in_array($pengajuan->status, ['2']) ? 'text-red-700 font-medium' : 'text-green-700' }}">{{ $pengajuan->keterangan_admin }}</p>
             </div>
             @endif
         </div>

@@ -29,6 +29,9 @@ return new class extends Migration//ikkkkm
             $table->string('no_rekening', 50)->nullable();
             $table->string('nama_bank', 100)->nullable();
             $table->string('foto_bukti_tf_admin', 255)->nullable();
+            $table->foreignId('lokasi_temu')->nullable()->constrained('jns_lokasi_perusahaan')->onDelete('set null'); // Added
+            $table->date('tanggal_janji_temu')->nullable(); // Added
+            $table->time('waktu_janji_temu')->nullable(); // Added
             $table->text('keterangan')->nullable();
             $table->text('keterangan_admin')->nullable();
             $table->enum('status', ['1', '2', '3'])->default('1');
@@ -54,12 +57,13 @@ return new class extends Migration//ikkkkm
             $table->string('id', 30)->primary(); // ✅ Generated ID
             $table->foreignId('id_nasabah')->constrained('tbl_nasabah')->onDelete('cascade');
             $table->foreignId('lokasi_temu')->constrained('jns_lokasi_perusahaan')->onDelete('cascade');
+            $table->enum('jenis', ['setoran', 'penarikan'])->default('setoran'); // Added
             $table->decimal('nominal', 15, 2);
             $table->datetime('tanggal_janji_temu');
-            $table->time('waktu_janji_temu');
+            $table->time('waktu_janji_temu'); // Ensure TIME type
             $table->text('keterangan')->nullable();
-            $table->text('keterangan_admin')->nullable(); // ✅ NEW
-            $table->enum('status', ['1', '2', '3'])->default('1'); // ✅ NEW: 1=Menunggu, 2=Selesai, 3=Batal
+            $table->text('keterangan_admin')->nullable(); // Added
+            $table->enum('status', ['1', '2', '3'])->default('1'); // Added: 1=Menunggu, 2=Selesai, 3=Batal
             $table->timestamps();
         });
 

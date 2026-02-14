@@ -15,6 +15,7 @@ return new class extends Migration//qadawd
             $table->id();
             $table->unsignedBigInteger('id_nasabah');
             $table->enum('jenis_data', [
+                'data_user',         // users (new)
                 'data_pribadi',      // tbl_nasabah
                 'data_ktp',          // data_ktp
                 'pekerjaan',         // pekerjaan

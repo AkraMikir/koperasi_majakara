@@ -122,8 +122,9 @@
         </div>
     </div>
 
-    <!-- Pinjaman Aktif -->
-    <div class="mx-4 mb-6">
+    <!-- Pinjaman Aktif & Pinjaman Lunas (setengah lebar masing-masing) -->
+    <div class="mx-4 mb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Pinjaman Aktif -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
@@ -136,7 +137,6 @@
                 </div>
                 <a href="{{ route('nasabah.pinjaman.pinjaman-aktif') }}" class="text-sm text-[#8b6f2f] font-medium hover:underline">Lihat Semua</a>
             </div>
-            
             <div class="overflow-x-auto">
                 <table class="w-full">
                     <thead>
@@ -144,49 +144,68 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">ID Pinjaman</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Tanggal Pinjam</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jenis</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($pinjamanAktif ?? [] as $pinjaman)
-                        @php
-                            $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
-                            $totalTerbayar = 0;
-                            if ($pinjaman->jenis === 'bulanan') {
-                                $totalTerbayar = $pinjaman->tempoBulanan->sum('jumlah_terbayar') ?? 0;
-                            } else {
-                                $totalTerbayar = $pinjaman->tempoMingguan->sum('jumlah_terbayar') ?? 0;
-                            }
-                            $sisa = max(0, $totalTagihan - $totalTerbayar);
-                        @endphp
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pinjaman', $pinjaman->id) }}'">
-                            <td class="px-4 py-3 text-sm">
-                                <p class="font-medium text-gray-900">{{ $pinjaman->id }}</p>
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                <p class="font-medium text-gray-900">{{ $pinjaman->tgl_pinjam->format('d M Y') }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-semibold text-gray-900">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                                    {{ ucfirst($pinjaman->jenis) }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-semibold text-orange-600">Rp {{ number_format($sisa, 0, ',', '.') }}</p>
-                            </td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->id }}</td>
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->tgl_pinjam->format('d M Y') }}</td>
+                            <td class="px-4 py-3 font-semibold text-gray-900">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center">
+                            <td colspan="3" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                     </svg>
                                     <p class="text-gray-500">Belum ada pinjaman aktif</p>
+                                </div>
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pinjaman Lunas -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-green-600 to-green-700 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-[#8b6f2f] font-display">Pinjaman Lunas</h2>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b-2 border-[#8b6f2f]/20">
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">ID Pinjaman</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah Pinjam</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Terbayar</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pinjamanLunas ?? [] as $pinjaman)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pinjaman', $pinjaman->id) }}'">
+                            <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->id }}</td>
+                            <td class="px-4 py-3 font-semibold text-gray-900">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 font-semibold text-green-600">Rp {{ number_format($pinjaman->total_terbayar ?? 0, 0, ',', '.') }}</td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="3" class="px-4 py-12 text-center">
+                                <div class="flex flex-col items-center gap-3">
+                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    <p class="text-gray-500">Belum ada pinjaman lunas</p>
                                 </div>
                             </td>
                         </tr>

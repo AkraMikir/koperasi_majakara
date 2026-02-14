@@ -37,7 +37,9 @@ return new class extends Migration//ikkkkm
             $table->decimal('bunga_rp', 15, 2); // rupiah
             $table->decimal('denda_persen', 5, 2)->nullable()->default(0.30);
             $table->decimal('ags_bulan', 15, 2);
+            $table->decimal('ags_minggu', 15, 2)->nullable(); // Added
             $table->date('tgl_pinjam');
+            $table->decimal('saldo_lebih', 15, 2)->nullable()->default(0); // Added
             $table->enum('lunas', ['belum', 'lunas'])->nullable()->default('belum');
             $table->timestamps();
         });
@@ -47,6 +49,22 @@ return new class extends Migration//ikkkkm
             $table->string('id', 30)->primary();
             $table->string('pinjaman_id', 30)->index(); 
             // Manual FK definition later if needed, but 'string' type keys generally skip constrained() unless referencing string primary
+            $table->integer('no_urut');
+            $table->date('tgl_jatuh_tempo');
+            $table->decimal('jumlah_tagihan', 15, 2);
+            $table->decimal('jumlah_terbayar', 15, 2)->nullable()->default(0);
+            $table->decimal('denda', 15, 2)->nullable()->default(0);
+            $table->timestamp('tgl_bayar')->nullable();
+            $table->enum('status_bayar', ['belum', 'lunas', 'telat'])->nullable()->default('belum');
+            $table->timestamps();
+            
+            $table->foreign('pinjaman_id')->references('id')->on('tbl_pinjaman_h')->onDelete('cascade');
+        });
+
+        // 3b. Tempo Pinjaman (Mingguan)
+        Schema::create('tempo_pinjaman_m', function (Blueprint $table) {
+            $table->string('id', 30)->primary();
+            $table->string('pinjaman_id', 30)->index();
             $table->integer('no_urut');
             $table->date('tgl_jatuh_tempo');
             $table->decimal('jumlah_tagihan', 15, 2);

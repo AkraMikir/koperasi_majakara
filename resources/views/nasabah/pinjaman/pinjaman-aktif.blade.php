@@ -35,7 +35,7 @@
                 <p class="text-xs font-semibold text-gray-700">Filter Pinjaman</p>
             </div>
             
-            <form method="GET" action="{{ route('nasabah.pinjaman.pinjaman-aktif') }}" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <form method="GET" action="{{ route('nasabah.pinjaman.pinjaman-aktif') }}" class="flex gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-700 mb-2">Jenis</label>
                     <select name="jenis" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20">
@@ -44,19 +44,8 @@
                         <option value="mingguan" {{ request('jenis') === 'mingguan' ? 'selected' : '' }}>Mingguan</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-700 mb-2">Status</label>
-                    <select name="status" class="w-full px-4 py-2 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20">
-                        <option value="">Semua Status</option>
-                        <option value="pencairan" {{ request('status') === 'pencairan' ? 'selected' : '' }}>Pencairan</option>
-                        <option value="telaksana" {{ request('status') === 'telaksana' ? 'selected' : '' }}>Telaksana</option>
-                    </select>
-                </div>
-                <div class="flex items-end">
-                    <button type="submit" class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-2 rounded-xl hover:shadow-lg transition-all">
-                        Filter
-                    </button>
-                </div>
+
+
             </form>
         </div>
     </div>
@@ -72,7 +61,7 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jenis</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Lunas</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -104,8 +93,8 @@
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-between">
-                                    <span class="px-3 py-1 {{ $item->status === 'telaksana' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
-                                        {{ ucfirst($item->status) }}
+                                    <span class="px-3 py-1 {{ $item->lunas === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
+                                        {{ $item->lunas === 'lunas' ? 'Lunas' : 'Belum' }}
                                     </span>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
