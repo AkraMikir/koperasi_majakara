@@ -101,8 +101,8 @@
             </div>
         </div>
 
-        <!-- Sidebar Actions -->
-        <div class="space-y-6">
+        <!-- Sidebar Actions (sticky) -->
+        <div class="space-y-6 lg:sticky lg:top-6 lg:self-start">
             <!-- Action Buttons -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan</h3>

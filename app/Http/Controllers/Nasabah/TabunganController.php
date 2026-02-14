@@ -251,8 +251,9 @@ class TabunganController extends Controller
                 if ($request->hasFile('bukti_foto')) {
                     foreach ($request->file('bukti_foto') as $file) {
                         $path = $file->store('bukti_tabungan', 'public');
-                        
+                        $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'T', 'T', 'STR');
                         BuktiFoto::create([
+                            'id' => $idBuktiFoto,
                             'owner_id' => $idPengajuan,
                             'owner_fitur' => 'T',
                             'owner_trans' => 'STR',

@@ -149,8 +149,8 @@
             </div>
         </div>
 
-        <!-- Sidebar Actions -->
-        <div class="space-y-6">
+        <!-- Sidebar Actions (sticky) -->
+        <div class="space-y-6 lg:sticky lg:top-6 lg:self-start">
             @if($janjiTemu->status == '1')
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="font-bold text-gray-900 mb-4">Proses Janji Temu</h3>

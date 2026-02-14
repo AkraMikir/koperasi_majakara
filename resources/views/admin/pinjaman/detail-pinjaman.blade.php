@@ -73,7 +73,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Bunga</p>
-                        <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga * 100, 2) }}%</p>
+                        <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga, 2) }}%</p>
                         <p class="text-xs text-gray-500">Rp {{ number_format($pinjaman->bunga_rp, 0, ',', '.') }}</p>
                     </div>
                     <div>
@@ -156,8 +156,8 @@
             </div>
         </div>
 
-        <!-- Sidebar Summary -->
-        <div class="space-y-6">
+        <!-- Sidebar Summary (sticky) -->
+        <div class="space-y-6 lg:sticky lg:top-6 lg:self-start">
             <!-- Summary Card -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Ringkasan</h3>

@@ -63,74 +63,67 @@
     <!-- Table Section -->
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
         <div class="overflow-x-auto">
-            <table class="w-full">
+            <table class="w-full min-w-[720px]">
                 <thead>
-                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Pinjaman</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Metode</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
+                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/8 to-[#8b6f2f]/8">
+                        <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide w-40">ID</th>
+                        <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide">Nasabah</th>
+                        <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide w-32">Pinjaman</th>
+                        <th class="px-5 py-4 text-right text-xs font-bold text-[#674c1d] uppercase tracking-wide w-36">Nominal</th>
+                        <th class="px-5 py-4 text-center text-xs font-bold text-[#674c1d] uppercase tracking-wide w-28">Tanggal</th>
+                        <th class="px-5 py-4 text-center text-xs font-bold text-[#674c1d] uppercase tracking-wide w-28">Status</th>
+                        <th class="px-5 py-4 text-center text-xs font-bold text-[#674c1d] uppercase tracking-wide w-24">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($pengajuan as $item)
-                    <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
-                        <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>
-                        <td class="px-6 py-4">
-                            <div>
-                                <p class="font-semibold text-gray-900">{{ $item->nasabah->user->nama ?? 'N/A' }}</p>
-                                <p class="text-sm text-gray-500">{{ $item->nasabah->user->email ?? '-' }}</p>
+                    <tr class="border-b border-gray-100 last:border-b-0 hover:bg-amber-50/50 transition-colors">
+                        <td class="px-5 py-4">
+                            <span class="text-sm font-mono font-medium text-gray-700">#{{ $item->id }}</span>
+                        </td>
+                        <td class="px-5 py-4">
+                            <div class="min-w-0">
+                                <p class="font-semibold text-gray-900 truncate max-w-[200px]">{{ $item->nasabah->user->nama ?? 'N/A' }}</p>
+                                <p class="text-sm text-gray-500 truncate max-w-[200px]">{{ $item->nasabah->user->email ?? '-' }}</p>
                             </div>
                         </td>
-                        <td class="px-6 py-4">
-                            <p class="font-semibold text-gray-900">#{{ str_pad($item->pinjaman_id, 6, '0', STR_PAD_LEFT) }}</p>
+                        <td class="px-5 py-4">
+                            <span class="font-mono text-sm font-medium text-gray-800">#{{ $item->pinjaman_id }}</span>
                         </td>
-                        <td class="px-6 py-4">
-                            <p class="font-semibold text-[#674c1d]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
+                        <td class="px-5 py-4 text-right">
+                            <span class="font-semibold text-[#674c1d]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</span>
                         </td>
-                        <td class="px-6 py-4">
-                            @if($item->rekening_tujuan)
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
-                                Transfer
-                            </span>
-                            @else
-                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
-                                Cash
-                            </span>
-                            @endif
-                        </td>
-                        <td class="px-6 py-4 text-sm text-gray-600">
+                        <td class="px-5 py-4 text-center text-sm text-gray-600">
                             {{ $item->created_at->format('d M Y') }}
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-4 text-center">
                             @php
                                 $statusConfig = [
-                                    '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Pending'],
-                                    '2' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'label' => 'Ditolak'],
-                                    '3' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'label' => 'Disetujui'],
-                                    '4' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Terlaksana'],
+                                    '1' => ['bg' => 'bg-amber-50', 'text' => 'text-amber-700', 'label' => 'Pending'],
+                                    '2' => ['bg' => 'bg-red-50', 'text' => 'text-red-700', 'label' => 'Ditolak'],
+                                    '3' => ['bg' => 'bg-sky-50', 'text' => 'text-sky-700', 'label' => 'Disetujui'],
+                                    '4' => ['bg' => 'bg-emerald-50', 'text' => 'text-emerald-700', 'label' => 'Terlaksana'],
                                 ];
                                 $status = $statusConfig[$item->status] ?? $statusConfig['1'];
                             @endphp
-                            <span class="px-3 py-1 {{ $status['bg'] }} {{ $status['text'] }} rounded-full text-xs font-semibold">
+                            <span class="inline-block px-3 py-1.5 {{ $status['bg'] }} {{ $status['text'] }} rounded-lg text-xs font-semibold border border-current/10">
                                 {{ $status['label'] }}
                             </span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-5 py-4 text-center">
                             <a href="{{ route('admin.pinjaman.detail-pembayaran', $item->id) }}" 
-                                class="px-3 py-1 bg-[#674c1d] text-white rounded-lg hover:bg-[#8b6f2f] transition-colors text-xs font-medium">
+                                class="inline-flex items-center px-4 py-2 bg-[#674c1d] text-white rounded-lg hover:bg-[#5a4018] transition-colors text-xs font-medium shadow-sm">
                                 Detail
                             </a>
                         </td>
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-12 text-center">
-                            <p class="text-gray-500">Tidak ada pengajuan pembayaran</p>
+                        <td colspan="7" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center gap-2">
+                                <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                <p class="text-gray-500 font-medium">Tidak ada pengajuan pembayaran</p>
+                            </div>
                         </td>
                     </tr>
                     @endforelse
@@ -139,7 +132,7 @@
         </div>
 
         @if($pengajuan->hasPages())
-        <div class="px-6 py-4 border-t border-gray-200">
+        <div class="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
             {{ $pengajuan->links() }}
         </div>
         @endif

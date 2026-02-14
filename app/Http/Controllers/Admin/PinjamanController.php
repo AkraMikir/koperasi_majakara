@@ -562,7 +562,18 @@ class PinjamanController extends Controller
                 ->findOrFail($id);
         }
 
-        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis'));
+        // Bukti transfer untuk angsuran ini (jika sudah lunas)
+        $buktiTransferAngsuran = collect();
+        if ($angsuran->status_bayar === 'lunas') {
+            $pengajuanBayar = PengajuanPembayaranPinjaman::where('tempo_id', $id)
+                ->where('jenis_tempo', $jenis)
+                ->whereIn('status', ['3', '4'])
+                ->with('buktiFoto')
+                ->get();
+            $buktiTransferAngsuran = $pengajuanBayar->pluck('buktiFoto')->flatten()->filter(fn($b) => $b && ($b->file_path ?? null));
+        }
+
+        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran'));
     }
 
     /**
@@ -624,83 +635,6 @@ class PinjamanController extends Controller
         $denda = $pokokPerBulan * ($dendaPersen / 100) * $hariTelat;
 
         return round($denda, 2);
-    }
-
-    /**
-     * Update pembayaran angsuran.
-     */
-    public function updatePembayaranAngsuran(Request $request, $id)
-    {
-        $request->validate([
-            'jumlah_bayar' => 'required|numeric|min:0',
-            'jenis' => 'required|in:bulanan,mingguan',
-        ]);
-
-        if ($request->jenis === 'bulanan') {
-            $angsuran = TempoPinjamanB::findOrFail($id);
-        } else {
-            $angsuran = TempoPinjamanM::findOrFail($id);
-        }
-
-        $pinjaman = $angsuran->pinjaman;
-        if (!$pinjaman) {
-            return redirect()->back()
-                ->with('error', 'Pinjaman tidak ditemukan');
-        }
-
-        // Hitung denda sebelum pembayaran
-        $denda = $this->hitungDenda($angsuran, $pinjaman);
-        
-        // Total yang harus dibayar = tagihan + denda
-        $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
-        
-        // Hitung jumlah terbayar setelah pembayaran baru
-        $jumlahTerbayarSebelumnya = $angsuran->jumlah_terbayar ?? 0;
-        $jumlahTerbayar = $jumlahTerbayarSebelumnya + $request->jumlah_bayar;
-        
-        // Tentukan status bayar
-        $statusBayar = 'belum';
-        $tglBayar = null;
-        
-        if ($jumlahTerbayar >= $totalTagihanPlusDenda) {
-            // Jika sudah membayar lebih dari atau sama dengan tagihan + denda
-            $statusBayar = 'lunas';
-            $jumlahTerbayar = $totalTagihanPlusDenda; // Jangan lebih dari tagihan + denda
-            $denda = 0; // Reset denda jika sudah lunas
-            $tglBayar = now();
-        } elseif ($jumlahTerbayar >= $angsuran->jumlah_tagihan) {
-            // Jika sudah membayar tagihan pokok, tapi masih ada denda
-            $statusBayar = $angsuran->tgl_jatuh_tempo < now() ? 'telat' : 'belum';
-            $tglBayar = now();
-        } elseif ($angsuran->tgl_jatuh_tempo < now() && $jumlahTerbayar < $angsuran->jumlah_tagihan) {
-            // Jika sudah telat dan belum lunas
-            $statusBayar = 'telat';
-        }
-
-        $angsuran->update([
-            'jumlah_terbayar' => $jumlahTerbayar,
-            'denda' => $denda,
-            'status_bayar' => $statusBayar,
-            'tgl_bayar' => $tglBayar,
-        ]);
-
-        // Check if all angsuran sudah lunas, update pinjaman
-        if ($pinjaman) {
-            $allAngsuran = $pinjaman->jenis === 'bulanan' 
-                ? $pinjaman->tempoBulanan 
-                : $pinjaman->tempoMingguan;
-            
-            $allLunas = $allAngsuran->every(function($item) {
-                return $item->status_bayar === 'lunas';
-            });
-
-            if ($allLunas) {
-                $pinjaman->update(['lunas' => 'lunas']);
-            }
-        }
-
-        return redirect()->back()
-            ->with('success', 'Pembayaran angsuran berhasil diperbarui');
     }
 
     /**
