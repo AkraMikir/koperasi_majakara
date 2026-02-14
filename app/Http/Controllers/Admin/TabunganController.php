@@ -449,10 +449,13 @@ class TabunganController extends Controller
         $idAnggota = $janjiTemu->id_nasabah;
 
         // Handle foto penerimaan menggunakan tbl_bukti_foto universal
+        // id wajib diisi: tbl_bukti_foto pakai id string (bukan auto-increment)
         if ($request->hasFile('foto_penerimaan')) {
             foreach ($request->file('foto_penerimaan') as $file) {
                 $fotoPenerimaan = $file->store('bukti_tabungan', 'public');
+                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'T', 'CS', 'JNJT');
                 BuktiFoto::create([
+                    'id' => $idBuktiFoto,
                     'owner_id' => $janjiTemu->id,
                     'owner_fitur' => 'T',  // Tabungan
                     'owner_trans' => 'JNJT',  // Janji Temu

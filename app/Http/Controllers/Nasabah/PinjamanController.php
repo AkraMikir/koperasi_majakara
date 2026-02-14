@@ -327,6 +327,15 @@ class PinjamanController extends Controller
                 'bunga_persen' => $bungaPersen,
             ]);
 
+            \App\Models\AdminNotification::notify(
+                'pinjaman',
+                'Pengajuan pinjaman baru',
+                'Nasabah mengajukan pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pinjaman'
+            );
+
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
@@ -503,6 +512,15 @@ class PinjamanController extends Controller
                 'keterangan' => $request->keterangan,
                 'bunga_persen' => $bungaPersen,
             ]);
+
+            \App\Models\AdminNotification::notify(
+                'pinjaman',
+                'Pengajuan pinjaman baru (tunai)',
+                'Nasabah mengajukan pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' via janji temu',
+                route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pinjaman'
+            );
 
             \Log::info('Pengajuan cash created successfully', [
                 'pengajuan_id' => $pengajuan->id,
@@ -940,6 +958,15 @@ class PinjamanController extends Controller
                 'status' => '1', // Pending
             ]);
 
+            \App\Models\AdminNotification::notify(
+                'pinjaman_pembayaran',
+                'Pengajuan pembayaran pinjaman baru',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pembayaran_pinjaman'
+            );
+
             // Upload bukti foto
             if ($request->hasFile('bukti_foto')) {
                 foreach ($request->file('bukti_foto') as $file) {
@@ -1025,6 +1052,15 @@ class PinjamanController extends Controller
                 'keterangan' => $request->keterangan,
                 'status' => '1', // Pending
             ]);
+
+            \App\Models\AdminNotification::notify(
+                'pinjaman_pembayaran',
+                'Pengajuan pembayaran pinjaman baru (tunai)',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' via janji temu',
+                route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pembayaran_pinjaman'
+            );
 
             // Create janji temu
             JanjiTemuPembayaranPinjaman::create([

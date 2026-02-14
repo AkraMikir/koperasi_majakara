@@ -110,6 +110,23 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
 // Admin Routes
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Notifikasi Admin
+    Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
+
+    // Laporan Keuangan
+    Route::prefix('laporan')->name('laporan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'index'])->name('index');
+        Route::get('/rekapitulasi', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'rekapitulasi'])->name('rekapitulasi');
+        Route::get('/tabungan', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'tabungan'])->name('tabungan');
+        Route::get('/saldo-tabungan', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'saldoTabungan'])->name('saldo-tabungan');
+        Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/angsuran-pinjaman', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'angsuranPinjaman'])->name('angsuran-pinjaman');
+        Route::get('/jatuh-tempo', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'jatuhTempo'])->name('jatuh-tempo');
+        Route::get('/pengajuan', [\App\Http\Controllers\Admin\LaporanKeuanganController::class, 'pengajuan'])->name('pengajuan');
+    });
     
     // Tabungan Routes
     Route::prefix('tabungan')->name('tabungan.')->group(function () {

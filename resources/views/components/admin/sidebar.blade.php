@@ -5,6 +5,8 @@ return str_starts_with($currentRoute, $route) ? 'bg-gradient-to-r from-[#674c1d]
 'text-gray-700 hover:bg-gray-100';
 };
 $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
+$isTabunganActive = str_starts_with($currentRoute, 'admin.tabungan');
+$isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
 @endphp
 
 <aside id="adminSidebar"
@@ -39,18 +41,51 @@ $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
                 <span class="font-medium">Dashboard</span>
             </a>
 
-            <!-- Tabungan -->
-            <a href="{{ route('admin.tabungan.index') }}"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.tabungan') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
-                        </path>
+            <!-- Tabungan (expandable) -->
+            <div x-data="{ open: {{ $isTabunganActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isTabunganActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="font-medium">Tabungan</span>
+                    </div>
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+                    <a href="{{ route('admin.tabungan.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.tabungan.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Dashboard
+                    </a>
+                    <a href="{{ route('admin.tabungan.pengajuan-setor') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.pengajuan-setor') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Pengajuan Setoran
+                    </a>
+                    <a href="{{ route('admin.tabungan.pengajuan-tarik') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.pengajuan-tarik') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Pengajuan Penarikan
+                    </a>
+                    <a href="{{ route('admin.tabungan.transaksi') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.transaksi') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Transaksi
+                    </a>
+                    <a href="{{ route('admin.tabungan.saldo-nasabah') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.saldo-nasabah') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Saldo Nasabah
+                    </a>
                 </div>
-                <span class="font-medium">Tabungan</span>
-            </a>
+            </div>
 
             <!-- Pinjaman (expandable) -->
             <div x-data="{ open: {{ $isPinjamanActive ? 'true' : 'false' }} }" class="space-y-1">
@@ -139,6 +174,64 @@ $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
                 </div>
                 <span class="font-medium">Janji Temu</span>
             </a>
+
+            <!-- Laporan Keuangan (expandable) -->
+            <div x-data="{ open: {{ $isLaporanActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isLaporanActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="font-medium">Laporan Keuangan</span>
+                    </div>
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+                    <a href="{{ route('admin.laporan.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Daftar Laporan
+                    </a>
+                    <a href="{{ route('admin.laporan.rekapitulasi') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.rekapitulasi' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Rekapitulasi
+                    </a>
+                    <a href="{{ route('admin.laporan.tabungan') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.tabungan' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Laporan Tabungan
+                    </a>
+                    <a href="{{ route('admin.laporan.saldo-tabungan') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.saldo-tabungan' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Saldo Tabungan
+                    </a>
+                    <a href="{{ route('admin.laporan.pinjaman-aktif') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.pinjaman-aktif' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Pinjaman Aktif
+                    </a>
+                    <a href="{{ route('admin.laporan.angsuran-pinjaman') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.angsuran-pinjaman' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Angsuran Pinjaman
+                    </a>
+                    <a href="{{ route('admin.laporan.jatuh-tempo') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.jatuh-tempo' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Jatuh Tempo
+                    </a>
+                    <a href="{{ route('admin.laporan.pengajuan') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.laporan.pengajuan' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Laporan Pengajuan
+                    </a>
+                </div>
+            </div>
 
             <!-- Divider -->
             <div class="my-4 border-t border-gray-200"></div>
