@@ -8,12 +8,23 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Pengajuan Penarikan Tabungan</h1>
-            <p class="text-gray-600 mt-1">Kelola pengajuan penarikan tabungan dari nasabah</p>
+            <p class="text-gray-600 mt-1">Kelola pengajuan penarikan tabungan via <strong>Transfer</strong> dari nasabah</p>
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.tabungan.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>
+        </div>
+    </div>
+
+    <!-- Info: Hanya Transfer -->
+    <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-start gap-3">
+        <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <div>
+            <p class="text-sm font-semibold text-blue-800">Hanya Penarikan via Transfer</p>
+            <p class="text-sm text-blue-700 mt-0.5">Daftar ini menampilkan hanya pengajuan penarikan dengan metode <strong>Transfer</strong>. Penarikan dengan metode <strong>Tunai</strong> diproses melalui menu <a href="{{ route('admin.janji-temu.index') }}" class="underline font-medium hover:text-blue-900">Janji Temu</a>.</p>
         </div>
     </div>
 

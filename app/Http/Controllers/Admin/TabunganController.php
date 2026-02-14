@@ -23,10 +23,10 @@ class TabunganController extends Controller
      */
     public function index()
     {
-        // Statistik tabungan
+        // Statistik tabungan (pengajuan tarik = hanya transfer; tunai lewat Janji Temu)
         $stats = [
             'total_pengajuan_setor' => PengajuanTabungan::where('status', '1')->count(),
-            'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->count(),
+            'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->where('metode_transfer', 'transfer')->count(),
             'total_transaksi_hari_ini' => TransTabungan::whereDate('created_at', today())->count(),
             'total_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'STR');
@@ -44,8 +44,9 @@ class TabunganController extends Controller
             ->take(5)
             ->get();
 
-        // Pengajuan penarikan terbaru (pending)
+        // Pengajuan penarikan terbaru (pending, hanya transfer)
         $pengajuan_tarik_terbaru = PengajuanPenarikanTabungan::where('status', '1')
+            ->where('metode_transfer', 'transfer')
             ->with('nasabah.user')
             ->latest()
             ->take(5)
@@ -209,7 +210,9 @@ class TabunganController extends Controller
      */
     public function pengajuanTarik(Request $request)
     {
+        // Hanya pengajuan penarikan via TRANSFER. Penarikan tunai diproses via Janji Temu.
         $query = PengajuanPenarikanTabungan::with('nasabah.user')
+            ->where('metode_transfer', 'transfer')
             ->latest();
 
         // Filter by status
@@ -242,6 +245,12 @@ class TabunganController extends Controller
         $pengajuan = PengajuanPenarikanTabungan::with(['nasabah.user', 'nasabah.dataKtp'])
             ->findOrFail($id);
 
+        // Penarikan tunai diproses via Janji Temu, bukan di halaman ini
+        if ($pengajuan->metode_transfer !== 'transfer') {
+            return redirect()->route('admin.janji-temu.index')
+                ->with('info', 'Penarikan tunai diproses melalui menu Janji Temu. Silakan cek daftar janji temu untuk penarikan tunai.');
+        }
+
         // Get saldo nasabah
         $saldo = $this->getSaldoNasabah($pengajuan->id_anggota);
 
@@ -254,6 +263,12 @@ class TabunganController extends Controller
     public function approveTarik(Request $request, $id)
     {
         $pengajuan = PengajuanPenarikanTabungan::findOrFail($id);
+
+        // Penarikan tunai diproses via Janji Temu, bukan di sini
+        if ($pengajuan->metode_transfer !== 'transfer') {
+            return redirect()->route('admin.janji-temu.index')
+                ->with('info', 'Penarikan tunai diproses melalui menu Janji Temu.');
+        }
         
         // Validate for transfer
         if ($pengajuan->metode_transfer == 'transfer') {
@@ -320,6 +335,13 @@ class TabunganController extends Controller
         ]);
 
         $pengajuan = PengajuanPenarikanTabungan::findOrFail($id);
+
+        // Penarikan tunai diproses via Janji Temu
+        if ($pengajuan->metode_transfer !== 'transfer') {
+            return redirect()->route('admin.janji-temu.index')
+                ->with('info', 'Penarikan tunai diproses melalui menu Janji Temu.');
+        }
+
         $pengajuan->update([
             'status' => '3',
             'keterangan_admin' => $request->keterangan_admin
@@ -671,12 +693,7 @@ class TabunganController extends Controller
             ->get();
 
         foreach ($pengajuanApproved as $pengajuan) {
-            // Gunakan nominal dari pengajuan (bukan dari bukti foto)
             $nominal = $pengajuan->nominal ?? 0;
-            
-            // Jika nominal masih 0, coba ambil dari janji temu (untuk backward compatibility)
-            $nominal = $pengajuan->nominal;  // Use pengajuan nominal directly
-            
             $totalSetoran += $nominal;
         }
 
@@ -754,7 +771,7 @@ class TabunganController extends Controller
      */
     public function editTransaksi($id)
     {
-        $transaksi = TransTabungan::with(['nasabah.user', 'jnsAkun'])->findOrFail($id);
+        $transaksi = TransTabungan::with(['nasabah.user'])->findOrFail($id);
 
         // Only allow edit if created manually (no pengajuan)
         if ($transaksi->id_pengajuan_setor || $transaksi->id_pengajuan_tarik) {
@@ -763,9 +780,8 @@ class TabunganController extends Controller
         }
 
         $nasabah = Nasabah::with('user')->get();
-        $jnsAkun = \App\Models\JnsAkun::where('is_active', true)->get();
 
-        return view('admin.tabungan.edit-transaksi', compact('transaksi', 'nasabah', 'jnsAkun'));
+        return view('admin.tabungan.edit-transaksi', compact('transaksi', 'nasabah'));
     }
 
     /**
@@ -787,10 +803,10 @@ class TabunganController extends Controller
             'tgl_transaksi' => 'required|date',
         ]);
 
-        // If changing to penarikan or increasing penarikan, check saldo
-        if ($request->jenis == 'penarikan') {
+        // Jika transaksi ini penarikan, validasi saldo (edit nominal tidak boleh melebihi saldo tersedia)
+        if ($transaksi->jenis === 'penarikan') {
             $saldo = $this->getSaldoNasabah($transaksi->id_anggota);
-            $saldoWithoutThis = $saldo + ($transaksi->jenis == 'penarikan' ? $transaksi->nominal : 0);
+            $saldoWithoutThis = $saldo + $transaksi->nominal; // kembalikan nominal lama dulu
             
             if ($saldoWithoutThis < $request->nominal) {
                 return redirect()->back()

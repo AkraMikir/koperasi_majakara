@@ -106,14 +106,8 @@
         <!-- Map/Location Info -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4">Peta Lokasi</h2>
-            <div class="bg-gray-100 rounded-xl h-64 flex items-center justify-center border border-gray-200">
-                <div class="text-center">
-                    <svg class="w-16 h-16 text-gray-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                    </svg>
-                    <p class="text-gray-500">Peta lokasi akan ditampilkan di sini</p>
-                </div>
+            <div class="rounded-xl overflow-hidden border border-gray-200 w-full">
+                <iframe src="https://www.google.com/maps/embed?pb=!4v1771057242792!6m8!1m7!1sTDnmeXtVvimBtQeXmqSSCQ!2m2!1d-6.267415399913648!2d106.9806162945405!3f247.41483905689947!4f-35.52001210835799!5f0.7820865974627469" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Peta Lokasi Janji Temu"></iframe>
             </div>
         </div>
     </div>

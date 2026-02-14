@@ -82,6 +82,12 @@
                         <p class="text-xs text-gray-500">{{ $janjiTemu->lokasi->kota ?? '' }}, {{ $janjiTemu->lokasi->provinsi ?? '' }}</p>
                     </div>
                     <div>
+                        <p class="text-sm text-gray-600 mb-2">Peta Lokasi</p>
+                        <div class="rounded-xl overflow-hidden border border-gray-200 w-full mt-2">
+                            <iframe src="https://www.google.com/maps/embed?pb=!4v1771057242792!6m8!1m7!1sTDnmeXtVvimBtQeXmqSSCQ!2m2!1d-6.267415399913648!2d106.9806162945405!3f247.41483905689947!4f-35.52001210835799!5f0.7820865974627469" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Peta Lokasi Janji Temu"></iframe>
+                        </div>
+                    </div>
+                    <div>
                         <p class="text-sm text-gray-600">Nominal</p>
                         <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>

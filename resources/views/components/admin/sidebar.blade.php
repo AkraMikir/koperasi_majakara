@@ -128,20 +128,6 @@
                 </div>
             </a>
             
-            <!-- Pengajuan -->
-            <a href="{{ route('admin.pengajuan.index') }}" 
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.pengajuan') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3 relative">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                    </svg>
-                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                        <span class="text-xs text-white font-bold">3</span>
-                    </span>
-                </div>
-                <span class="font-medium">Pengajuan</span>
-            </a>
-            
             <!-- Master Data -->
             <a href="{{ route('admin.master-data.index') }}" 
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.master-data') }}">

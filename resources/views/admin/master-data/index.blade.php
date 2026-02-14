@@ -44,21 +44,6 @@
             <p class="text-xs text-gray-500">Data aktif</p>
         </a>
 
-        <!-- Suku Bunga Tabungan -->
-        <a href="{{ route('admin.master-data.suku-bunga-tabungan.index') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-[#4a3514]/20 to-[#4a3514]/10 rounded-xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-[#4a3514]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <span class="px-3 py-1 bg-[#4a3514]/10 text-[#4a3514] rounded-full text-xs font-semibold">{{ $stats['total_suku_bunga_tabungan'] }}</span>
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">Suku Bunga Tabungan</h3>
-            <p class="text-3xl font-bold text-[#4a3514] mb-1">{{ $stats['total_suku_bunga_tabungan'] }}</p>
-            <p class="text-xs text-gray-500">Data master</p>
-        </a>
-
         <!-- Tenor Deposito -->
         <a href="{{ route('admin.master-data.tenor-deposito.index') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer">
             <div class="flex items-center justify-between mb-4">
@@ -118,21 +103,6 @@
             <h3 class="text-sm font-medium text-gray-600 mb-1">Jenis Deposito</h3>
             <p class="text-3xl font-bold text-[#d4af37] mb-1">{{ $stats['total_jenis_deposito'] }}</p>
             <p class="text-xs text-gray-500">Tipe deposito</p>
-        </a>
-
-        <!-- Jenis Akun -->
-        <a href="{{ route('admin.master-data.jns-akun.index') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300 cursor-pointer">
-            <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-purple-500/20 to-purple-600/10 rounded-xl flex items-center justify-center">
-                    <svg class="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                    </svg>
-                </div>
-                <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">4</span>
-            </div>
-            <h3 class="text-sm font-medium text-gray-600 mb-1">Jenis Akun</h3>
-            <p class="text-3xl font-bold text-purple-600 mb-1">4</p>
-            <p class="text-xs text-gray-500">Tipe akun</p>
         </a>
 
         <!-- Biaya Transfer -->
@@ -214,22 +184,6 @@
                 </div>
             </div>
             <div class="space-y-3">
-                <a href="{{ route('admin.master-data.suku-bunga-tabungan.index') }}" class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f]/20 to-[#d4af37]/20 rounded-lg flex items-center justify-center">
-                            <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="font-semibold text-gray-900">Suku Bunga Tabungan</p>
-                            <p class="text-xs text-gray-500">{{ $stats['total_suku_bunga_tabungan'] }} data</p>
-                        </div>
-                    </div>
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
                 <a href="{{ route('admin.master-data.tenor-deposito.index') }}" class="flex items-center justify-between p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200">
                     <div class="flex items-center space-x-3">
                         <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f]/20 to-[#d4af37]/20 rounded-lg flex items-center justify-center">

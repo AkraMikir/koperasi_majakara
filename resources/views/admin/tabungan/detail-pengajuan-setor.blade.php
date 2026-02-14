@@ -77,11 +77,11 @@
                             @endif
                         </div>
                         <div id="nominal-display">
-                            <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0), 0, ',', '.') }}</p>
+                            <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</p>
                         </div>
                         @if($pengajuan->status == '1')
                         <div id="nominal-edit" class="hidden">
-                            <input type="text" id="input-nominal" value="{{ number_format($pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0), 0, '', '') }}" 
+                            <input type="text" id="input-nominal" value="{{ number_format($pengajuan->nominal ?? 0, 0, '', '') }}" 
                                 class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none text-lg font-semibold"
                                 oninput="formatNominalInput(this)">
                             <p class="text-xs text-gray-500 mt-1">Min: Rp 10.000</p>
@@ -209,27 +209,6 @@
             </div>
             @endif
 
-            <!-- Janji Temu -->
-            @if($pengajuan->janjiTemu)
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Janji Temu</h2>
-                <div class="space-y-3">
-                    <div>
-                        <p class="text-sm text-gray-600">Tanggal & Waktu</p>
-                        <p class="font-semibold text-gray-900">{{ $pengajuan->janjiTemu->tanggal_janji_temu->format('d M Y, H:i') }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Lokasi</p>
-                        <p class="font-semibold text-gray-900">{{ $pengajuan->janjiTemu->lokasi->nama_lokasi ?? 'N/A' }}</p>
-                        <p class="text-sm text-gray-600 mt-1">{{ $pengajuan->janjiTemu->lokasi->alamat_lengkap ?? '' }}</p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-gray-600">Nominal</p>
-                        <p class="font-semibold text-[#674c1d]">Rp {{ number_format($pengajuan->janjiTemu->nominal, 0, ',', '.') }}</p>
-                    </div>
-                </div>
-            </div>
-            @endif
         </div>
 
         <!-- Sidebar Actions -->

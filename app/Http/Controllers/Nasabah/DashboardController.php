@@ -144,31 +144,23 @@ class DashboardController extends Controller
         
         $allPengajuan = [];
         
-        // Get Pengajuan Tabungan (Setoran)
+        // Get Pengajuan Tabungan (Setoran) - hanya transfer; nominal dari pengajuan
         $tabunganSetor = PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '1') // Pending
-            ->with(['buktiFoto', 'janjiTemu'])
+            ->with(['buktiFoto'])
             ->latest()
             ->get();
         
         foreach ($tabunganSetor as $t) {
-            // Calculate nominal
-            $nominal = 0;
-            if ($t->buktiFoto && $t->buktiFoto->count() > 0) {
-                $nominal = $t->buktiFoto->sum('nominal');
-            } elseif ($t->janjiTemu) {
-                $nominal = $t->janjiTemu->nominal ?? 0;
-            }
-            
             $allPengajuan[] = [
                 'id' => $t->id,
                 'type' => 'tabungan_setor',
                 'jenis' => 'Setoran Tabungan',
-                'nominal' => $nominal,
+                'nominal' => $t->nominal ?? 0,
                 'tanggal' => $t->created_at,
                 'status' => $this->getStatusText($t->status),
                 'detail_url' => route('nasabah.tabungan.detail-pengajuan-setor', $t->id),
-                'metode' => $t->foto_bukti_tf == 'transfer' ? 'Transfer' : ($t->foto_bukti_tf == 'tunai' ? 'Janji Temu' : 'N/A'),
+                'metode' => 'Transfer',
             ];
         }
         

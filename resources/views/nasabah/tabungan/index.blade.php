@@ -113,18 +113,22 @@
                     <thead>
                         <tr class="border-b-2 border-[#674c1d]/20">
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Waktu</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jenis</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jumlah</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Via</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">ID Transaksi</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Keterangan</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-20">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @forelse($transaksiTabungan ?? [] as $transaksi)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}'">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $transaksi->tgl_transaksi->format('d M Y') }}</p>
                             </td>
+                            <td class="px-4 py-3 text-sm text-gray-600">{{ $transaksi->tgl_transaksi->format('H:i') }}</td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 {{ ($transaksi->jenis ?? '') === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-xs font-semibold">
                                     {{ ucfirst($transaksi->jenis ?? '-') }}
@@ -137,17 +141,22 @@
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $transaksi->via ? ucfirst($transaksi->via) : '-' }}</td>
                             <td class="px-4 py-3">
-                                <div class="flex items-center justify-between">
-                                    <span class="text-sm text-gray-500 font-mono">{{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</span>
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <span class="text-sm text-gray-700 font-mono">{{ $transaksi->id_transaksi ?? $transaksi->id }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-600 max-w-[180px]">
+                                <span class="line-clamp-2" title="{{ $transaksi->keterangan }}">{{ Str::limit($transaksi->keterangan ?? '-', 40) }}</span>
+                            </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#674c1d]/10 text-[#674c1d] hover:bg-[#674c1d]/20 transition-colors" title="Lihat detail">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
+                                    </svg>
+                                </a>
                             </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center">
+                            <td colspan="8" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -200,11 +209,14 @@
                 <table class="w-full">
                     <thead>
                         <tr class="border-b-2 border-[#674c1d]/20">
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">ID Janji Temu</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Waktu</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jenis</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Lokasi</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
+                            <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-20">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -215,7 +227,7 @@
                             $dateTime = \Carbon\Carbon::parse($tanggal);
                             
                             // Parse Time & Display
-                            $displayTime = '00:00';
+                            $displayTime = '-';
                             if (!empty($janji->waktu_janji_temu)) {
                                 $parsedTime = \Carbon\Carbon::parse($janji->waktu_janji_temu);
                                 $dateTime->setTime($parsedTime->hour, $parsedTime->minute, $parsedTime->second);
@@ -246,12 +258,22 @@
                             } elseif (is_string($janji->lokasi)) {
                                 $namaLokasi = $janji->lokasi;
                             }
+
+                            // Jenis: setoran / penarikan
+                            $jenisLabel = ucfirst($janji->jenis ?? 'setoran');
+                            $jenisClass = ($janji->jenis ?? 'setoran') === 'penarikan' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700';
                         @endphp
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.tabungan.detail-janji-temu', $janji->id) }}'">
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                            <td class="px-4 py-3">
+                                <span class="text-sm font-mono text-gray-700">{{ $janji->id }}</span>
+                            </td>
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $dateTime->format('d M Y') }}</p>
                             </td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $displayTime }}</td>
+                            <td class="px-4 py-3">
+                                <span class="px-3 py-1 {{ $jenisClass }} rounded-full text-xs font-semibold">{{ $jenisLabel }}</span>
+                            </td>
                             <td class="px-4 py-3 text-sm text-gray-600">{{ $namaLokasi }}</td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-[#674c1d]">Rp {{ number_format($janji->nominal, 0, ',', '.') }}</p>
@@ -261,10 +283,17 @@
                                     {{ $statusLabel }}
                                 </span>
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <a href="{{ route('nasabah.tabungan.detail-janji-temu', $janji->id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#674c1d]/10 text-[#674c1d] hover:bg-[#674c1d]/20 transition-colors" title="Lihat detail">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                    </svg>
+                                </a>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center">
+                            <td colspan="8" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

@@ -25,7 +25,7 @@
             </svg>
             <div>
                 <p class="text-sm font-semibold text-blue-700">Informasi Penting</p>
-                <p class="text-sm text-blue-600 mt-1">Hanya transaksi yang dibuat manual yang dapat diedit. Jenis akun, nasabah, dan jenis transaksi tidak dapat diubah.</p>
+                <p class="text-sm text-blue-600 mt-1">Hanya transaksi yang dibuat manual yang dapat diedit. Nasabah dan jenis transaksi tidak dapat diubah.</p>
             </div>
         </div>
     </div>

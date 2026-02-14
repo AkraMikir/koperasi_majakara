@@ -147,8 +147,8 @@
                     </div>
                     <h2 class="text-lg font-bold text-primary font-display">Pengajuan Pending</h2>
                 </div>
-                <a href="{{ route('admin.pengajuan.index') }}" class="text-sm text-[#674c1d] hover:underline font-medium">
-                    Lihat Semua →
+                <a href="{{ route('admin.tabungan.index') }}" class="text-sm text-[#674c1d] hover:underline font-medium">
+                    Ke Tabungan →
                 </a>
             </div>
 
