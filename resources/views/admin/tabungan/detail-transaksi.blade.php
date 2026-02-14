@@ -8,7 +8,18 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Transaksi Tabungan</h1>
+<<<<<<< HEAD
+<<<<<<< Updated upstream
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ??str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+=======
             <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+>>>>>>> 6c04f015aaaf38a6d6dbe432ab9544fa1013630c
+=======
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+=======
+            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ??str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+>>>>>>> ab817ff (before pull)
+>>>>>>> Stashed changes
         </div>
         <div class="flex items-center space-x-3">
             @if(!$transaksi->id_pengajuan_setor && !$transaksi->id_pengajuan_tarik)

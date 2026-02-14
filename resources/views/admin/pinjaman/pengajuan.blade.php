@@ -81,11 +81,16 @@
                         <td class="px-6 py-4 text-sm">{{ $item->durasi }} {{ $item->jenis === 'bulanan' ? 'bulan' : 'minggu' }}</td>
                         <td class="px-6 py-4 text-sm">{{ $item->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
-                            @if($item->pinjaman)
-                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Disetujui</span>
-                            @else
-                                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Pending</span>
-                            @endif
+                            @php
+                                $statusPengajuan = [
+                                    '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Pending'],
+                                    '2' => ['bg' => 'bg-red-100', 'text' => 'text-red-700', 'label' => 'Ditolak'],
+                                    '3' => ['bg' => 'bg-blue-100', 'text' => 'text-blue-700', 'label' => 'Disetujui'],
+                                    '4' => ['bg' => 'bg-green-100', 'text' => 'text-green-700', 'label' => 'Tercairkan'],
+                                ];
+                                $s = $statusPengajuan[$item->status ?? '1'] ?? $statusPengajuan['1'];
+                            @endphp
+                            <span class="px-3 py-1 {{ $s['bg'] }} {{ $s['text'] }} rounded-full text-xs font-semibold">{{ $s['label'] }}</span>
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.pinjaman.detail-pengajuan', $item->id) }}" 

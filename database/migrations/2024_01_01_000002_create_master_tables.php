@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration//ikkkkm
 {
@@ -97,6 +98,14 @@ return new class extends Migration//ikkkkm
             $table->timestamps();
         });
 
+        // 3b. Suku Bunga Tabungan
+        Schema::create('suku_bunga', function (Blueprint $table) {
+            $table->id();
+            $table->string('jenis_bunga', 255);
+            $table->decimal('opsi_val', 5, 4);
+            $table->timestamps();
+        });
+
         // 4. Gadai Masters
         Schema::create('m_barang_gadai', function (Blueprint $table) {
             $table->id();
@@ -144,6 +153,7 @@ return new class extends Migration//ikkkkm
         Schema::dropIfExists('jns_tenor_deposito');
         Schema::dropIfExists('tbl_gadai_spesial');
         Schema::dropIfExists('m_barang_gadai');
+        Schema::dropIfExists('suku_bunga');
         Schema::dropIfExists('master_denda_pinjaman');
         Schema::dropIfExists('master_bunga_pinjaman');
         Schema::dropIfExists('jns_angsuran_minggu');

@@ -146,7 +146,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPengajuan'])->name('reject-pengajuan');
         Route::post('/pengajuan/{id}/cairkan', [\App\Http\Controllers\Admin\PinjamanController::class, 'cairkanPinjaman'])->name('cairkan-pinjaman');
         Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
-        Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
+            Route::get('/pinjaman-lunas', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanLunas'])->name('pinjaman-lunas');
+            Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
         Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
         Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
         Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
@@ -190,9 +191,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanToggleStatus'])->name('toggle-status');
         });
         
-        // Suku Bunga Tabungan (REMOVED)
-        // Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () { ... });
-        
+        // Suku Bunga Tabungan
+        Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganDestroy'])->name('destroy');
+        });
+
         // Tenor Deposito
         Route::prefix('tenor-deposito')->name('tenor-deposito.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoIndex'])->name('index');
@@ -246,9 +254,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoDestroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
         });
-
-        // Jenis Akun (REMOVED)
-        // Route::prefix('jns-akun')->name('jns-akun.')->group(function () { ... });
 
         // Biaya Transfer
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {

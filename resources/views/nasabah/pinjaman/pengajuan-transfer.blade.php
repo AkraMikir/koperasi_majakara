@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    updateDurasiOptions();
+    // Initial update on page load
     updateEstimasi();
 });
 </script>

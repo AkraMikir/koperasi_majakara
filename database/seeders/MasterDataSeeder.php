@@ -69,6 +69,7 @@ class MasterDataSeeder extends Seeder
             // Pinjaman
             ['kode' => 'PNJ', 'nama' => 'Pengajuan', 'deskripsi' => 'Pengajuan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['kode' => 'PMB', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran angsuran pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNCR', 'nama' => 'Pencairan', 'deskripsi' => 'Pencairan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['kode' => 'DPNJM', 'nama' => 'Data Pinjaman', 'deskripsi' => 'Data pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             ['kode' => 'TPNJM', 'nama' => 'Tempo Pinjaman', 'deskripsi' => 'Tempo/jatuh tempo pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             

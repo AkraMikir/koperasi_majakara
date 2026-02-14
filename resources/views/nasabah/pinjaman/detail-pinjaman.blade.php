@@ -93,7 +93,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Bunga</p>
-                    <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga * 100, 2) }}% (Rp {{ number_format($pinjaman->bunga_rp, 0, ',', '.') }})</p>
+                    <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga, 2) }}% (Rp {{ number_format($pinjaman->bunga_rp, 0, ',', '.') }})</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-500 mb-1">Denda</p>
@@ -108,6 +108,42 @@
             </div>
         </div>
     </div>
+
+    <!-- Bukti Transfer (dari admin) -->
+    @if(isset($buktiTransferPinjaman) && $buktiTransferPinjaman->isNotEmpty())
+    <div class="mx-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h2 class="text-lg font-bold text-[#8b6f2f] mb-4 font-display">Bukti Transfer</h2>
+            <p class="text-sm text-gray-500 mb-4">Bukti pembayaran yang diberikan admin sebagai pegangan Anda. Klik untuk preview atau unduh.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                @foreach($buktiTransferPinjaman as $bukti)
+                @php
+                    $filePath = $bukti->file_path ?? null;
+                    $fileExists = $filePath && \Illuminate\Support\Facades\Storage::disk('public')->exists($filePath);
+                    $imageUrl = $fileExists ? asset('storage/' . $filePath) : null;
+                    $fileName = $filePath ? basename($filePath) : 'bukti-transfer';
+                @endphp
+                @if($imageUrl)
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 hover:shadow-md transition-all group">
+                    <div class="aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer" onclick="window.open('{{ $imageUrl }}', '_blank', 'width=800,height=600')">
+                        <img src="{{ $imageUrl }}" alt="Bukti Transfer" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                    </div>
+                    <div class="p-3 flex items-center justify-between gap-2">
+                        <span class="text-xs text-gray-500 truncate flex-1">{{ $fileName }}</span>
+                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#8b6f2f] text-white text-xs font-semibold rounded-lg hover:bg-[#674c1d] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Unduh
+                        </a>
+                    </div>
+                </div>
+                @endif
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Jadwal Angsuran -->
     <div class="mx-4 mb-6">

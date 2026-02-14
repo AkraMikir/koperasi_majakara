@@ -11,7 +11,6 @@ use App\Models\JanjiTemuPinjaman;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
-use App\Models\BuktiFotoPembayaranPinjaman;
 use App\Models\BuktiFoto;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
@@ -116,8 +115,23 @@ class PinjamanController extends Controller
         }
         $semuaAngsuran = $semuaAngsuran->sortBy('tgl_jatuh_tempo')->take(10);
 
+        // Pinjaman Lunas (lunas = 'lunas') dengan total terbayar dari tempo
+        $pinjamanLunas = PinjamanH::where('id_anggota', $idAnggota)
+            ->where('lunas', 'lunas')
+            ->with(['tempoBulanan', 'tempoMingguan'])
+            ->latest()
+            ->get()
+            ->map(function ($p) {
+                $terbayar = $p->jenis === 'bulanan'
+                    ? $p->tempoBulanan->sum('jumlah_terbayar')
+                    : $p->tempoMingguan->sum('jumlah_terbayar');
+                $p->total_terbayar = $terbayar;
+                return $p;
+            });
+
         return view('nasabah.pinjaman.index', [
             'pinjamanAktif' => $pinjamanAktif,
+            'pinjamanLunas' => $pinjamanLunas,
             'totalPinjamanAktif' => $totalPinjamanAktif,
             'sisaPinjaman' => $sisaPinjaman,
             'angsuranTerdekat' => $angsuranTerdekat,
@@ -253,10 +267,7 @@ class PinjamanController extends Controller
             'pin' => 'required|numeric|digits:6',
             'keterangan' => 'nullable|string|max:500',
         ];
-        if (($request->jenis_pencairan ?? 'transfer') === 'transfer') {
-            $rules['bukti_foto'] = 'required|array|min:1';
-            $rules['bukti_foto.*'] = 'image|max:5120';
-        }
+        
         try {
             $validated = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -289,7 +300,7 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
-        $jenisPencairan = $request->jenis_pencairan ?? 'transfer';
+        $jenisPencairan = 'transfer'; // Auto set to transfer for this form
 
         // Bunga dari master_bunga_pinjaman sesuai durasi
         $durasi = (int) $request->durasi;
@@ -299,9 +310,8 @@ class PinjamanController extends Controller
             ->first();
         $bungaPersen = $bungaMaster ? (float) $bungaMaster->bunga_persen : 10.00;
 
-        // ID dari 3 master: P (pinjaman), TF/TN (via), PNJ (pengajuan)
-        $kodeVia = $jenisPencairan === 'tunai' ? 'TN' : 'TF';
-        $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', $kodeVia, 'PNJ');
+        // ID dari 3 master: P (pinjaman), TF (transfer), PNJ (pengajuan)
+        $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', 'TF', 'PNJ');
 
         try {
             $pengajuan = PengajuanPinjaman::create([
@@ -309,27 +319,13 @@ class PinjamanController extends Controller
                 'id_anggota' => $idAnggota,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
-                'jenis' => 'bulanan',
+                'jenis' => 'bulanan', // Auto set to bulanan for transfer
                 'durasi' => $durasi,
                 'jenis_pencairan' => $jenisPencairan,
-                'status' => '1',
+                'status' => '1', // Status 1 = pending
                 'keterangan' => $request->keterangan,
                 'bunga_persen' => $bungaPersen,
             ]);
-
-            // Bukti foto (transfer): simpan ke tbl_bukti_foto seperti tabungan
-            if ($jenisPencairan === 'transfer' && $request->hasFile('bukti_foto')) {
-                foreach ($request->file('bukti_foto') as $file) {
-                    $path = $file->store('bukti_pinjaman', 'public');
-                    BuktiFoto::create([
-                        'owner_id' => $pengajuan->id,
-                        'owner_fitur' => 'P',
-                        'owner_trans' => 'pengajuan',
-                        'file_path' => $path,
-                        'keterangan' => 'Bukti transfer pengajuan pinjaman',
-                    ]);
-                }
-            }
 
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
@@ -608,11 +604,6 @@ class PinjamanController extends Controller
             $query->where('jenis', $request->jenis);
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status', $request->status);
-        }
-
         $pinjaman = $query->paginate(15);
 
         return view('nasabah.pinjaman.pinjaman-aktif', [
@@ -651,6 +642,15 @@ class PinjamanController extends Controller
         $angsuranLunas = $angsuran->where('status_bayar', 'lunas')->count();
         $totalAngsuran = $angsuran->count();
 
+        // Bukti transfer dari pengajuan pembayaran yang sudah disetujui/terlaksana (untuk pegangan nasabah)
+        $buktiTransferPinjaman = PengajuanPembayaranPinjaman::where('pinjaman_id', $id)
+            ->whereIn('status', ['3', '4'])
+            ->with('buktiFoto')
+            ->get()
+            ->pluck('buktiFoto')
+            ->flatten()
+            ->filter(function ($b) { return $b && $b->file_path; });
+
         return view('nasabah.pinjaman.detail-pinjaman', [
             'pinjaman' => $pinjaman,
             'angsuran' => $angsuran,
@@ -660,6 +660,7 @@ class PinjamanController extends Controller
             'progress' => $progress,
             'angsuranLunas' => $angsuranLunas,
             'totalAngsuran' => $totalAngsuran,
+            'buktiTransferPinjaman' => $buktiTransferPinjaman,
         ]);
     }
 
@@ -721,13 +722,13 @@ class PinjamanController extends Controller
             $angsuran = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
                     $q->where('id_anggota', $idAnggota);
                 })
-                ->with(['pinjaman.pengajuan', 'nasabah.user'])
+                ->with(['pinjaman.pengajuan', 'pinjaman.nasabah.user'])
                 ->findOrFail($id);
         } else {
             $angsuran = TempoPinjamanM::whereHas('pinjaman', function($q) use ($idAnggota) {
                     $q->where('id_anggota', $idAnggota);
                 })
-                ->with(['pinjaman.pengajuan', 'nasabah.user'])
+                ->with(['pinjaman.pengajuan', 'pinjaman.nasabah.user'])
                 ->findOrFail($id);
         }
 
@@ -944,10 +945,15 @@ class PinjamanController extends Controller
                 foreach ($request->file('bukti_foto') as $file) {
                     $path = $file->store('bukti-pembayaran-pinjaman', 'public');
                     
-                    BuktiFotoPembayaranPinjaman::create([
-                        'id_pengajuan' => $pengajuan->id,
-                        'file_photo' => $path,
-                        'jenis' => 'bukti_transfer',
+                    // Generate ID for bukti foto: P (pinjaman) + TF (transfer) + PMB (pembayaran)
+                    $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PMB');
+                    
+                    BuktiFoto::create([
+                        'id' => $idBuktiFoto,
+                        'owner_id' => $pengajuan->id,
+                        'owner_fitur' => 'P', // Pinjaman
+                        'owner_trans' => 'PMB', // Pembayaran
+                        'file_path' => $path,
                         'keterangan' => $request->keterangan,
                     ]);
                 }

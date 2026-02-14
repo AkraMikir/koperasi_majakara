@@ -397,8 +397,8 @@ class DashboardController extends Controller
         
         // Cek angsuran telat
         $now = Carbon::now();
-        $angsuranTelatB = TempoPinjamanB::where('pinjaman_id', function($q) use ($idAnggota) { // Fix: use subquery or join since anggota_id removed from Tempo
-                $q->select('id')->from('tbl_pinjaman_h')->where('id_anggota', $idAnggota);
+        $angsuranTelatB = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                $q->where('id_anggota', $idAnggota);
             })
             ->where('status_bayar', 'belum')
             ->where('tgl_jatuh_tempo', '<', $now)
