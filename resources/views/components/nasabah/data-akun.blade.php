@@ -45,7 +45,7 @@ $dataRek = $dummyNasabah->dataRekTemp ?? null;
                     class="bg-gray-50 rounded-xl p-4 border border-gray-100 hover:shadow-md transition-all duration-200">
                     <div class="flex items-center space-x-3">
                         <div
-                            class="w-12 h-12 bg-[#674c1d]/10 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm">
+                            class="w-12 h-12 bg-[#674c1d]/10 rounded-xl flex items-center justify-center flexshrink-0 shadow-sm">
                             <svg class="w-6 h-6 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">

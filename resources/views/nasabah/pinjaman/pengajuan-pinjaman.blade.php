@@ -248,7 +248,8 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman (Bulan) *</label>
                     <select name="durasi" id="durasi-tunai" required
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
+                        onchange="updateEstimasiTunai()">
                         <option value="">Pilih durasi</option>
                         @foreach($durasiList ?? [] as $d)
                         <option value="{{ $d->bulan ?? $d->ket }}" {{ old('durasi') == ($d->bulan ?? $d->ket) ? 'selected' : '' }}>{{ $d->bulan ?? $d->ket }} bulan</option>
@@ -290,17 +291,44 @@
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none">{{ old('keterangan', request('keterangan')) }}</textarea>
                 </div>
 
-                <!-- Estimasi -->
+                <!-- Estimasi & Simulasi (sama seperti form transfer) -->
                 <div class="p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTunai">
                         <div class="flex justify-between items-center">
-                            <span class="text-sm text-gray-600">Nominal:</span>
+                            <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominalTunai">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Bunga:</span>
+                            <span class="font-semibold text-gray-900" id="estimasiBungaTunai">-</span>
+                        </div>
+                        <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
-                            <span class="font-bold text-[#8b6f2f]" id="estimasiTotalTunai">Rp 0</span>
+                            <span class="text-lg font-bold text-[#8b6f2f]" id="estimasiTotalTunai">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
+                            <span class="font-semibold text-gray-900" id="estimasiAngsuranTunai">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mb-6" id="simulasiTableSectionTunai" style="display: none;">
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                        <div class="bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
+                            <h3 class="text-lg font-bold">Simulasi Angsuran Per Bulan</h3>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Bulan</th>
+                                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase">Jatuh Tempo</th>
+                                        <th class="px-4 py-3 text-right text-xs font-semibold text-gray-700 uppercase">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="simulasiTableBodyTunai"></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -523,13 +551,39 @@ function updateEstimasiTunai() {
     const durasi = parseInt(document.getElementById('durasi-tunai').value) || 0;
     if (nominal < 100000 || durasi < 1) {
         document.getElementById('estimasiNominalTunai').textContent = 'Rp 0';
+        document.getElementById('estimasiBungaTunai').textContent = '-';
         document.getElementById('estimasiTotalTunai').textContent = 'Rp 0';
+        document.getElementById('estimasiAngsuranTunai').textContent = 'Rp 0';
+        document.getElementById('simulasiTableSectionTunai').style.display = 'none';
         return;
     }
-    const bunga = nominal * 0.10;
-    const total = nominal + bunga;
-    document.getElementById('estimasiNominalTunai').textContent = 'Rp ' + nominal.toLocaleString('id-ID');
-    document.getElementById('estimasiTotalTunai').textContent = 'Rp ' + Math.round(total).toLocaleString('id-ID');
+    clearTimeout(debounceSimulasi);
+    debounceSimulasi = setTimeout(() => {
+        fetch('{{ route("nasabah.pinjaman.simulasi-angsuran") }}', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+            body: JSON.stringify({ nominal: nominal, durasi: durasi })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (!data.success) return;
+            const d = data.data;
+            document.getElementById('estimasiNominalTunai').textContent = 'Rp ' + d.nominal.toLocaleString('id-ID');
+            document.getElementById('estimasiBungaTunai').textContent = d.bunga_persen + '% (Rp ' + d.bunga_total.toLocaleString('id-ID') + ')';
+            document.getElementById('estimasiTotalTunai').textContent = 'Rp ' + d.total_yang_harus_dibayar.toLocaleString('id-ID');
+            document.getElementById('estimasiAngsuranTunai').textContent = 'Rp ' + d.angsuran_per_bulan.toLocaleString('id-ID');
+            const tbody = document.getElementById('simulasiTableBodyTunai');
+            tbody.innerHTML = '';
+            (d.simulasi || []).forEach(item => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = '<td class="px-4 py-3 text-sm text-gray-900">' + item.bulan + '</td><td class="px-4 py-3 text-sm text-gray-700">' + item.tanggal + '</td><td class="px-4 py-3 text-sm font-semibold text-[#8b6f2f] text-right">Rp ' + item.total.toLocaleString('id-ID') + '</td>';
+                tbody.appendChild(tr);
+            });
+            document.getElementById('simulasiTableSectionTunai').style.display = 'block';
+        })
+        .catch(() => {});
+    }, 400);
 }
 
 function showPinModalTransfer() {

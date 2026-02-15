@@ -77,7 +77,7 @@
                         </td>
                         <td class="px-6 py-4 text-sm">{{ $item->lama_pinjam }} {{ $item->jenis === 'bulanan' ? 'bulan' : 'minggu' }}</td>
                         <td class="px-6 py-4 text-sm">
-                            <p class="font-medium">{{ number_format($item->bunga * 100, 2) }}%</p>
+                            <p class="font-medium">{{ number_format($item->bunga, 2) }}%</p>
                             <p class="text-xs text-gray-500">Rp {{ number_format($item->bunga_rp, 0, ',', '.') }}</p>
                         </td>
                         <td class="px-6 py-4">

@@ -155,30 +155,35 @@
             </div>
             @endif
 
-            <!-- Bukti Foto Transfer -->
-            @if($pengajuan->rekening_tujuan && $pengajuan->buktiFoto->where('jenis', 'bukti_transfer')->count() > 0)
+            <!-- Bukti Foto (Transfer / Serah Terima) -->
+            @if($pengajuan->buktiFoto->count() > 0)
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer</h2>
+                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($pengajuan->buktiFoto->where('jenis', 'bukti_transfer') as $bukti)
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <div class="w-full h-48 bg-gray-100 overflow-hidden">
+                    @foreach($pengajuan->buktiFoto as $bukti)
+                    <div class="border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                        <div class="w-full h-52 bg-gray-100 overflow-hidden flex items-center justify-center">
                             @php
-                                $fileExists = \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_photo);
-                                $baseUrl = request()->getSchemeAndHttpHost();
-                                $imageUrl = $baseUrl . '/storage/' . $bukti->file_photo;
+                                $fileExists = \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path);
+                                $imageUrl = asset('storage/' . $bukti->file_path);
                             @endphp
                             @if($fileExists)
-                            <img src="{{ $imageUrl }}" alt="Bukti Transfer" class="w-full h-full object-cover cursor-pointer" onclick="window.open('{{ $imageUrl }}', '_blank')">
+                            <img src="{{ $imageUrl }}" alt="Bukti" class="w-full h-full object-contain cursor-pointer hover:opacity-95 transition-opacity" onclick="window.open('{{ $imageUrl }}', '_blank', 'noopener')" title="Klik untuk memperbesar">
                             @else
-                            <div class="w-full h-full flex items-center justify-center">
+                            <div class="text-center p-4">
+                                <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"></path></svg>
                                 <p class="text-sm text-gray-500">File tidak ditemukan</p>
                             </div>
                             @endif
                         </div>
                         @if($bukti->keterangan)
-                        <div class="p-3 bg-gray-50">
+                        <div class="p-3 bg-gray-50 border-t border-gray-100">
                             <p class="text-xs text-gray-600">{{ $bukti->keterangan }}</p>
+                        </div>
+                        @endif
+                        @if($fileExists)
+                        <div class="px-3 py-2 bg-white border-t border-gray-100">
+                            <a href="{{ $imageUrl }}" target="_blank" rel="noopener" class="text-xs font-medium text-[#674c1d] hover:underline">Buka / Unduh</a>
                         </div>
                         @endif
                     </div>
@@ -210,37 +215,11 @@
                 </div>
             </div>
 
-            <!-- Foto Serah Terima -->
-            @if($pengajuan->buktiFoto->where('jenis', 'serah_terima')->count() > 0)
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Foto Serah Terima</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    @foreach($pengajuan->buktiFoto->where('jenis', 'serah_terima') as $bukti)
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
-                        <div class="w-full h-48 bg-gray-100 overflow-hidden">
-                            @php
-                                $fileExists = \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_photo);
-                                $baseUrl = request()->getSchemeAndHttpHost();
-                                $imageUrl = $baseUrl . '/storage/' . $bukti->file_photo;
-                            @endphp
-                            @if($fileExists)
-                            <img src="{{ $imageUrl }}" alt="Foto Serah Terima" class="w-full h-full object-cover cursor-pointer" onclick="window.open('{{ $imageUrl }}', '_blank')">
-                            @else
-                            <div class="w-full h-full flex items-center justify-center">
-                                <p class="text-sm text-gray-500">File tidak ditemukan</p>
-                            </div>
-                            @endif
-                        </div>
-                    </div>
-                    @endforeach
-                </div>
-            </div>
-            @endif
             @endif
         </div>
 
-        <!-- Sidebar Actions -->
-        <div class="space-y-6">
+        <!-- Sidebar Actions (sticky) -->
+        <div class="space-y-6 lg:sticky lg:top-6 lg:self-start">
             @if($pengajuan->status === '1')
             <!-- Approve/Reject -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">

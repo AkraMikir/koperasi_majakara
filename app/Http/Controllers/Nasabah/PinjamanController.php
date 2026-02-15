@@ -660,14 +660,15 @@ class PinjamanController extends Controller
         $angsuranLunas = $angsuran->where('status_bayar', 'lunas')->count();
         $totalAngsuran = $angsuran->count();
 
-        // Bukti transfer dari pengajuan pembayaran yang sudah disetujui/terlaksana (untuk pegangan nasabah)
-        $buktiTransferPinjaman = PengajuanPembayaranPinjaman::where('pinjaman_id', $id)
-            ->whereIn('status', ['3', '4'])
-            ->with('buktiFoto')
-            ->get()
-            ->pluck('buktiFoto')
-            ->flatten()
-            ->filter(function ($b) { return $b && $b->file_path; });
+        // Bukti foto pencairan (upload admin saat cairkan pinjaman)
+        $buktiPencairan = collect();
+        if ($pinjaman->id_pengajuan) {
+            $buktiPencairan = BuktiFoto::where('owner_id', $pinjaman->id_pengajuan)
+                ->where('owner_fitur', 'P')
+                ->where('owner_trans', 'PNCR')
+                ->orderBy('created_at')
+                ->get();
+        }
 
         return view('nasabah.pinjaman.detail-pinjaman', [
             'pinjaman' => $pinjaman,
@@ -678,7 +679,7 @@ class PinjamanController extends Controller
             'progress' => $progress,
             'angsuranLunas' => $angsuranLunas,
             'totalAngsuran' => $totalAngsuran,
-            'buktiTransferPinjaman' => $buktiTransferPinjaman,
+            'buktiPencairan' => $buktiPencairan,
         ]);
     }
 
@@ -757,6 +758,17 @@ class PinjamanController extends Controller
         $denda = $this->hitungDenda($angsuran);
         $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
 
+        // Bukti transfer untuk angsuran ini (dari pengajuan pembayaran yang sudah terlaksana)
+        $buktiTransferAngsuran = collect();
+        if ($angsuran->status_bayar === 'lunas') {
+            $pengajuanBayar = PengajuanPembayaranPinjaman::where('tempo_id', $id)
+                ->where('jenis_tempo', $jenis)
+                ->whereIn('status', ['3', '4'])
+                ->with('buktiFoto')
+                ->get();
+            $buktiTransferAngsuran = $pengajuanBayar->pluck('buktiFoto')->flatten()->filter(fn($b) => $b && ($b->file_path ?? null));
+        }
+
         return view('nasabah.pinjaman.detail-angsuran', [
             'angsuran' => $angsuran,
             'jenis' => $jenis,
@@ -764,6 +776,7 @@ class PinjamanController extends Controller
             'isTelat' => $isTelat,
             'denda' => $denda,
             'totalTagihanPlusDenda' => $totalTagihanPlusDenda,
+            'buktiTransferAngsuran' => $buktiTransferAngsuran,
         ]);
     }
 
