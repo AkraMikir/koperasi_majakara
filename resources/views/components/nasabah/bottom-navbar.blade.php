@@ -11,96 +11,94 @@
         }
         return str_contains($currentRoute, $route);
     };
+    $mainNavItems = [
+        ['label' => 'Dashboard', 'route' => 'nasabah.dashboard', 'active' => $currentRoute === 'nasabah.dashboard', 'href' => route('nasabah.dashboard'), 'icon' => 'dashboard'],
+        ['label' => 'Tabungan', 'route' => 'nasabah.tabungan.index', 'active' => $isActive('tabungan'), 'href' => route('nasabah.tabungan.index'), 'icon' => 'tabungan'],
+        ['label' => 'Pinjaman', 'route' => 'nasabah.pinjaman.index', 'active' => $isActive('pinjaman'), 'href' => route('nasabah.pinjaman.index'), 'icon' => 'pinjaman'],
+        ['label' => 'Guide', 'route' => null, 'active' => false, 'href' => '#', 'icon' => 'guide'],
+    ];
+    $moreNavItems = [
+        ['label' => 'Deposito', 'href' => '#', 'icon' => 'deposito', 'active' => false],
+        ['label' => 'Gadai', 'href' => '#', 'icon' => 'gadai', 'active' => false],
+        ['label' => 'Setting', 'href' => route('nasabah.setting.index'), 'icon' => 'setting', 'active' => $isActive('setting')],
+    ];
+    $hasMoreActive = collect($moreNavItems)->contains('active', true);
 @endphp
 
-<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-50 transition-transform duration-300">
-    <div class="w-full px-2">
-        <div class="flex items-center justify-around py-2">
-            <!-- Dashboard -->
-            <a href="{{ route('nasabah.dashboard') }}" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors {{ $currentRoute === 'nasabah.dashboard' ? 'text-[#8b6f2f]' : 'text-gray-600' }}">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-                </svg>
-                <span class="text-xs font-medium">Dashboard</span>
-            </a>
-            
-            <!-- Tabungan -->
-            <a href="{{ route('nasabah.tabungan.index') }}" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors {{ $isActive('tabungan') ? 'text-[#8b6f2f]' : 'text-gray-600' }}">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <span class="text-xs font-medium">Tabungan</span>
-            </a>
-            
-            <!-- Pinjaman -->
-            <a href="{{ route('nasabah.pinjaman.index') }}" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors {{ $isActive('pinjaman') ? 'text-[#8b6f2f]' : 'text-gray-600' }}">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                </svg>
-                <span class="text-xs font-medium">Pinjaman</span>
-            </a>
-            
-            <!-- Guide -->
-            <a href="#" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                </svg>
-                <span class="text-xs font-medium">Guide</span>
-            </a>
-            
-            <!-- Deposito -->
-            <a href="#" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                </svg>
-                <span class="text-xs font-medium">Deposito</span>
-            </a>
-            
-            <!-- Gadai -->
-            <a href="#" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors text-gray-600">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                </svg>
-                <span class="text-xs font-medium">Gadai</span>
-            </a>
-            
-            <!-- Settings -->
-            <a href="{{ route('nasabah.setting.index') }}" class="flex flex-col items-center justify-center space-y-1 px-2 py-2 transition-colors {{ $isActive('setting') ? 'text-[#8b6f2f]' : 'text-gray-600' }}">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                </svg>
-                <span class="text-xs font-medium">Settings</span>
-            </a>
+<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] z-50 transition-transform duration-300 pb-[env(safe-area-inset-bottom)]">
+    <div class="w-full max-w-6xl mx-auto">
+        {{-- Mobile: 4 menu + tombol titik tiga (More) --}}
+        <div class="flex md:hidden items-center justify-between px-2 py-2.5">
+            @foreach ($mainNavItems as $item)
+                <a href="{{ $item['href'] }}" title="{{ $item['label'] }}" class="flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 transition-colors duration-200 rounded-lg active:scale-95 {{ $item['active'] ? 'text-[#8b6f2f] bg-amber-50/80' : 'text-gray-600 hover:bg-gray-50' }}">
+                    @include('components.nasabah.bottom-navbar-icon', ['icon' => $item['icon']])
+                    <span class="text-[10px] sm:text-xs font-medium truncate w-full max-w-[64px] text-center">{{ $item['label'] }}</span>
+                </a>
+            @endforeach
+            {{-- Tombol More (titik 3) --}}
+            <div class="relative flex-1 min-w-0 flex justify-center" id="bottomNavMoreWrap">
+                <button type="button" id="bottomNavMoreBtn" class="flex flex-col items-center justify-center gap-0.5 w-full py-1 rounded-lg transition-colors duration-200 hover:bg-gray-50 active:scale-95 {{ $hasMoreActive ? 'text-[#8b6f2f] bg-amber-50/80' : 'text-gray-600' }}" aria-expanded="false" aria-haspopup="true">
+                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+                    <span class="text-[10px] sm:text-xs font-medium">Lainnya</span>
+                </button>
+                {{-- Dropdown: Deposito, Gadai, Setting --}}
+                <div id="bottomNavMoreMenu" class="absolute bottom-full right-0 mb-1 w-44 rounded-xl bg-white border border-gray-200 shadow-lg py-1 z-50 hidden" role="menu">
+                    @foreach ($moreNavItems as $moreItem)
+                        <a href="{{ $moreItem['href'] }}" role="menuitem" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors {{ $moreItem['active'] ? 'text-[#8b6f2f] bg-amber-50' : 'text-gray-700 hover:bg-gray-50' }}">
+                            @include('components.nasabah.bottom-navbar-icon', ['icon' => $moreItem['icon'], 'size' => 'w-5 h-5'])
+                            <span>{{ $moreItem['label'] }}</span>
+                        </a>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+
+        {{-- Tablet & desktop: satu baris, semua 7 menu --}}
+        <div class="hidden md:flex items-center justify-around py-3 px-4">
+            @foreach (array_merge($mainNavItems, $moreNavItems) as $item)
+                @php $item = is_array($item) ? $item : []; $active = $item['active'] ?? $isActive($item['route'] ?? ''); @endphp
+                <a href="{{ $item['href'] ?? '#' }}" title="{{ $item['label'] }}" class="flex flex-col items-center justify-center gap-1 py-2 px-3 transition-colors duration-200 rounded-xl min-w-16 {{ $active ? 'text-[#8b6f2f] bg-amber-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
+                    @include('components.nasabah.bottom-navbar-icon', ['icon' => $item['icon']])
+                    <span class="text-xs font-medium whitespace-nowrap">{{ $item['label'] }}</span>
+                </a>
+            @endforeach
         </div>
     </div>
 </nav>
 
 <script>
-    // Hide/show bottom navbar on scroll
-    let lastScrollTop = 0;
-    let scrollTimeout;
-    const bottomNavbar = document.getElementById('bottomNavbar');
-    
-    window.addEventListener('scroll', function() {
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        // Clear existing timeout
-        clearTimeout(scrollTimeout);
-        
-        // Hide navbar when scrolling down
-        if (scrollTop > lastScrollTop && scrollTop > 100) {
-            bottomNavbar.style.transform = 'translateY(100%)';
-        } else {
-            // Show navbar when scrolling up
-            bottomNavbar.style.transform = 'translateY(0)';
+    (function() {
+        var lastScrollTop = 0, scrollTimeout;
+        var el = document.getElementById('bottomNavbar');
+        if (el) {
+            window.addEventListener('scroll', function() {
+                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                clearTimeout(scrollTimeout);
+                if (scrollTop > lastScrollTop && scrollTop > 100) el.style.transform = 'translateY(100%)';
+                else el.style.transform = 'translateY(0)';
+                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+                scrollTimeout = setTimeout(function() { el.style.transform = 'translateY(0)'; }, 150);
+            });
         }
-        
-        lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-        
-        // Show navbar after scrolling stops
-        scrollTimeout = setTimeout(function() {
-            bottomNavbar.style.transform = 'translateY(0)';
-        }, 150);
-    });
+        // More menu (titik tiga): toggle + tutup saat klik di luar
+        var moreWrap = document.getElementById('bottomNavMoreWrap');
+        var moreBtn = document.getElementById('bottomNavMoreBtn');
+        var moreMenu = document.getElementById('bottomNavMoreMenu');
+        if (moreBtn && moreMenu) {
+            moreBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                var isOpen = !moreMenu.classList.contains('hidden');
+                moreMenu.classList.toggle('hidden', isOpen);
+                moreBtn.setAttribute('aria-expanded', !isOpen);
+                moreBtn.classList.toggle('text-[#8b6f2f]', !isOpen);
+                moreBtn.classList.toggle('bg-amber-50/80', !isOpen);
+            });
+            document.addEventListener('click', function() {
+                moreMenu.classList.add('hidden');
+                moreBtn.setAttribute('aria-expanded', 'false');
+                moreBtn.classList.remove('text-[#8b6f2f]', 'bg-amber-50/80');
+            });
+            moreWrap && moreWrap.addEventListener('click', function(e) { e.stopPropagation(); });
+        }
+    })();
 </script>
