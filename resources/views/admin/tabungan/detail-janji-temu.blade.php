@@ -71,7 +71,7 @@
                         <div class="p-4 bg-gray-50 rounded-xl border border-gray-100">
                             <p class="text-sm text-gray-500 mb-1">Nominal {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'Setoran' : 'Penarikan' }}</p>
                             <p class="font-bold text-gray-900 text-lg">
-                                Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}
+                                Rp {{ number_format($janjiTemu->transTabungan?->nominal ?? $janjiTemu->nominal, 0, ',', '.') }}
                             </p>
                         </div>
                     </div>
@@ -163,13 +163,17 @@
                     
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nominal {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'Diterima' : 'Diserahkan' }}</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Nominal {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'Diterima' : 'Diserahkan' }} <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-3 text-gray-500 font-medium">Rp</span>
-                                <input type="text" name="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
-                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent outline-none font-bold text-gray-900" 
-                                    readonly>
+                                <input type="text" name="nominal" id="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
+                                    required
+                                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-[#674c1d]/40 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none font-bold text-gray-900 cursor-text"
+                                    placeholder="Klik untuk mengedit nominal"
+                                    oninput="formatCurrency(this)"
+                                    title="Dapat diedit jika nominal belum sesuai dengan yang {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'diterima' : 'diserahkan' }}.">
                             </div>
+                            <p class="text-xs text-gray-500 mt-1">Default: Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}. Edit jika nominal berbeda.</p>
                         </div>
 
                         <div>
@@ -263,5 +267,30 @@ document.addEventListener('keydown', function(event) {
         closePhotoPreview();
     }
 });
+
+// Format nominal saat diketik (titik ribuan)
+function formatCurrency(input) {
+    var value = input.value.replace(/[^\d]/g, '');
+    if (value) {
+        input.value = new Intl.NumberFormat('id-ID').format(value);
+    }
+}
+
+// Saat submit, kirim nominal dalam bentuk angka (tanpa titik)
+var formProses = document.querySelector('form[action*="create-trans-from-janji-temu"]');
+if (formProses) {
+    formProses.addEventListener('submit', function(e) {
+        var nominalInput = document.getElementById('nominal');
+        if (nominalInput) {
+            var value = nominalInput.value.replace(/[^\d]/g, '');
+            var hidden = document.createElement('input');
+            hidden.type = 'hidden';
+            hidden.name = 'nominal';
+            hidden.value = value;
+            nominalInput.removeAttribute('name');
+            this.appendChild(hidden);
+        }
+    });
+}
 </script>
 @endsection

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JanjiTemuUniversal;
+use App\Models\TransTabungan;
 use Illuminate\Http\Request;
 
 class JanjiTemuController extends Controller
@@ -39,7 +40,16 @@ class JanjiTemuController extends Controller
                            ->orderBy('waktu_janji_temu', 'asc')
                            ->paginate(15);
 
-        return view('admin.janji-temu.index', compact('janjiTemu'));
+        // Untuk baris Tabungan: nominal yang ditampilkan = dari trans_tabungan jika sudah diproses
+        $nominalTabunganFromTrans = [];
+        $tabunganIds = collect($janjiTemu->items())->where('fitur', 'Tabungan')->pluck('id_asli')->unique()->filter();
+        if ($tabunganIds->isNotEmpty()) {
+            $nominalTabunganFromTrans = TransTabungan::whereIn('id_janji_temu_tabungan', $tabunganIds)
+                ->pluck('nominal', 'id_janji_temu_tabungan')
+                ->toArray();
+        }
+
+        return view('admin.janji-temu.index', compact('janjiTemu', 'nominalTabunganFromTrans'));
     }
 
     /**
@@ -48,7 +58,7 @@ class JanjiTemuController extends Controller
     public function detail($id)
     {
         // Directly load from JanjiTemuTabungan since ID is from tbl_janji_temu_tabungan
-        $janjiTemu = \App\Models\JanjiTemuTabungan::with(['nasabah', 'lokasi'])
+        $janjiTemu = \App\Models\JanjiTemuTabungan::with(['nasabah', 'lokasi', 'transTabungan'])
             ->findOrFail($id);
 
         return view('admin.janji-temu.detail', [

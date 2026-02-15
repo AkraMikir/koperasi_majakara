@@ -53,7 +53,7 @@
                                 {{ $janjiTemu->jenis ?? 'setoran' }}
                             </span>
                         </div>
-                        <p class="text-2xl font-bold text-[#674c1d]">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
+                        <p class="text-2xl font-bold text-[#674c1d]">Rp {{ number_format($janjiTemu->transTabungan?->nominal ?? $janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
                 </div>
 

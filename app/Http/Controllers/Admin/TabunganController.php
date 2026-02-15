@@ -411,7 +411,7 @@ class TabunganController extends Controller
     public function detailJanjiTemu($id)
     {
         $janjiTemu = JanjiTemuTabungan::with([
-            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto'
+            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto', 'transTabungan'
         ])->findOrFail($id);
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu'));
@@ -465,9 +465,11 @@ class TabunganController extends Controller
             }
         }
 
-        // Update janji temu status to selesai
+        // Update janji temu: status selesai + nominal disamakan dengan yang dipakai di transaksi
+        // (agar semua halaman—admin detail, nasabah detail, list—tampil nominal yang sama)
         $janjiTemu->update([
             'status' => '2',  // Selesai
+            'nominal' => $nominal,  // Sinkronkan dengan nominal transaksi (bisa diedit admin)
             'keterangan_admin' => $request->keterangan_admin,
         ]);
 

@@ -105,13 +105,12 @@ class TabunganController extends Controller
     }
 
     /**
-     * Show the pengajuan transfer page.
+     * Halaman pengajuan transfer tidak dipakai; form sudah ada di Nabung Sekarang.
+     * Redirect ke nabung-sekarang.
      */
     public function pengajuanTransfer()
     {
-        return view('nasabah.tabungan.pengajuan-transfer', [
-            'user' => auth()->user(),
-        ]);
+        return redirect()->route('nasabah.tabungan.nabung-sekarang');
     }
 
     /**
@@ -216,7 +215,7 @@ class TabunganController extends Controller
         $inputPin = (int) $request->pin;
 
         if ($userPin !== $inputPin) {
-            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+            return redirect()->route('nasabah.tabungan.nabung-sekarang')
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
         }
@@ -225,11 +224,19 @@ class TabunganController extends Controller
             // Get nasabah ID from auth
             $idAnggota = $this->getIdAnggota();
 
-            // This method is now only for transfer
-            if ($request->metode ?? 'transfer' === 'transfer') {
+            // This method is now only for transfer (fixed: use parentheses so ($request->metode ?? 'transfer') === 'transfer')
+            $isTransfer = ($request->metode ?? 'transfer') === 'transfer';
+            // #region agent log
+            $logPath = base_path('.cursor/debug.log');
+            if (!is_dir(dirname($logPath))) {
+                @mkdir(dirname($logPath), 0755, true);
+            }
+            file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):submitSetoran', 'message' => 'metode branch check', 'data' => ['request_metode' => $request->metode ?? null, 'isTransfer' => $isTransfer, 'branch_taken' => $isTransfer ? 'transfer' : 'other'], 'hypothesisId' => 'H1', 'runId' => 'post-fix']) . "\n", FILE_APPEND | LOCK_EX);
+            // #endregion
+            if ($isTransfer) {
                 // Validate bukti foto exists
                 if (!$request->hasFile('bukti_foto') || count($request->file('bukti_foto')) == 0) {
-                    return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+                    return redirect()->route('nasabah.tabungan.nabung-sekarang')
                         ->with('error', 'Minimal upload 1 bukti transfer')
                         ->withInput($request->except('pin'));
                 }
@@ -278,7 +285,7 @@ class TabunganController extends Controller
                     ->with('success', 'Pengajuan setoran via transfer berhasil dikirim!');
             }
 
-            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+            return redirect()->route('nasabah.tabungan.nabung-sekarang')
                 ->with('error', 'Metode tidak valid')
                 ->withInput($request->except('pin'));
                 
@@ -289,7 +296,7 @@ class TabunganController extends Controller
             return redirect()->route('nasabah.dashboard')
                 ->with('error', $e->getMessage());
         } catch (\Exception $e) {
-            return redirect()->route('nasabah.tabungan.pengajuan-transfer')
+            return redirect()->route('nasabah.tabungan.nabung-sekarang')
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
                 ->withInput($request->except('pin'));
         }
@@ -537,7 +544,7 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
-            ->with('lokasi')
+            ->with(['lokasi', 'transTabungan'])
             ->latest('tanggal_janji_temu')
             ->paginate(10);
 
@@ -617,7 +624,7 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
-            ->with(['lokasi'])
+            ->with(['lokasi', 'transTabungan'])
             ->findOrFail($id);
 
         $isPast = $janjiTemu->tanggal_janji_temu && $janjiTemu->tanggal_janji_temu->isPast();
@@ -648,11 +655,20 @@ class TabunganController extends Controller
             ->whereDoesntHave('transTabungan')
             ->get();
 
+        $approvedNoTransSum = 0;
         foreach ($pengajuanApproved as $pengajuan) {
+            $approvedNoTransSum += $pengajuan->nominal ?? 0;
             $totalSetoran += $pengajuan->nominal ?? 0;
         }
-
-        return max(0, $totalSetoran - $totalPenarikan);
+        $saldo = max(0, $totalSetoran - $totalPenarikan);
+        // #region agent log
+        $logPath = base_path('.cursor/debug.log');
+        if (!is_dir(dirname($logPath))) {
+            @mkdir(dirname($logPath), 0755, true);
+        }
+        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoran - $approvedNoTransSum, 'totalPenarikan_trans' => $totalPenarikan, 'approvedNoTrans_count' => $pengajuanApproved->count(), 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
+        // #endregion
+        return $saldo;
     }
 
     /**
