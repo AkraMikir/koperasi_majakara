@@ -70,8 +70,8 @@ return new class extends Migration//ikkkkm
 
         // 5. Bukti Foto Universal (untuk semua fitur)
         Schema::create('tbl_bukti_foto', function (Blueprint $table) {
-            $table->string('id', 30)->primary(); // Generated ID, not auto-increment
-            $table->string('owner_id', 30); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
+            $table->string('id', 50)->primary(); // IdGenerator: DDMMYYYY + 4 digit + suffix (e.g. 150220260001TCSJNJT)
+            $table->string('owner_id', 50); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
             $table->string('owner_fitur', 10); // T=Tabungan, P=Pinjaman, G=Gadai, D=Deposito
             $table->string('owner_trans', 20); // Type transaksi: STR, PNR, PNJ, JNJT, dll
             $table->string('file_path', 255);

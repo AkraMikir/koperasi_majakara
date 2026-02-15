@@ -37,8 +37,12 @@ class MasterDataSeeder extends Seeder
             ['ket' => '1', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
             ['ket' => '3', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
             ['ket' => '6', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
-            ['ket' => 'A', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
-            ['ket' => 'B', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '9', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '12', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '15', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '18', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '21', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
+            ['ket' => '24', 'aktif' => 'y', 'created_at' => now(), 'updated_at' => now()],
         ]);
         
         DB::table('jns_angsuran_minggu')->truncate();
