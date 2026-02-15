@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\JanjiTemuUniversal;
+use App\Models\JanjiTemuPinjaman;
 use Illuminate\Http\Request;
 
 class JanjiTemuController extends Controller
@@ -43,11 +44,10 @@ class JanjiTemuController extends Controller
     }
 
     /**
-     * Show detail of a specific janji temu.
+     * Show detail of a specific janji temu (Tabungan).
      */
     public function detail($id)
     {
-        // Directly load from JanjiTemuTabungan since ID is from tbl_janji_temu_tabungan
         $janjiTemu = \App\Models\JanjiTemuTabungan::with(['nasabah', 'lokasi'])
             ->findOrFail($id);
 
@@ -55,5 +55,24 @@ class JanjiTemuController extends Controller
             'janjiTemu' => $janjiTemu,
             'fitur' => 'Tabungan',
         ]);
+    }
+
+    /**
+     * Show detail janji temu pinjaman (tunai). Data utama dari tbl_janji_temu_pinjaman.
+     * Form proses mengupdate janji temu dan memicu setujui + cairkan pengajuan (jika ada).
+     */
+    public function detailPinjaman($id)
+    {
+        $janjiTemu = JanjiTemuPinjaman::with(['nasabah.user', 'nasabah.dataKtp', 'lokasi', 'pengajuan', 'buktiFoto'])
+            ->findOrFail($id);
+
+        $masterBunga = null;
+        $masterDenda = null;
+        if ($janjiTemu->id_pengajuan && $janjiTemu->pengajuan) {
+            $masterBunga = \App\Models\MasterBungaPinjaman::getBungaByDurasi($janjiTemu->pengajuan->durasi);
+            $masterDenda = \App\Models\MasterDendaPinjaman::getDendaAktif();
+        }
+
+        return view('admin.janji-temu.detail-pinjaman', compact('janjiTemu', 'masterBunga', 'masterDenda'));
     }
 }

@@ -85,6 +85,7 @@ return new class extends Migration//ikkkkm
             $table->string('tempo_id', 30);
             $table->string('jenis_tempo', 20)->nullable()->default('bulanan');
             $table->decimal('nominal', 15, 2);
+            $table->string('metode_pembayaran', 20)->nullable()->default('transfer'); // transfer | tunai
             $table->string('rekening_tujuan', 50)->nullable();
             $table->text('keterangan')->nullable();
             $table->text('keterangan_admin')->nullable();
@@ -99,6 +100,7 @@ return new class extends Migration//ikkkkm
         // 5. Janji Temu Pinjaman
         Schema::create('tbl_janji_temu_pinjaman', function (Blueprint $table) {
             $table->string('id', 30)->primary();  // ✅ Generated ID
+            $table->string('id_pengajuan', 30)->nullable();
             $table->foreignId('id_nasabah')->constrained('tbl_nasabah');
             $table->foreignId('lokasi_temu')->constrained('jns_lokasi_perusahaan');
             $table->decimal('nominal', 15, 2);
@@ -108,6 +110,8 @@ return new class extends Migration//ikkkkm
             $table->text('keterangan_admin')->nullable();  // ✅ NEW
             $table->enum('status', ['1', '2', '3'])->default('1');  // ✅ NEW
             $table->timestamps();
+
+            $table->foreign('id_pengajuan')->references('id')->on('tbl_pengajuan_pinjaman')->onDelete('set null');
         });
 
         // 6. Janji Temu Pembayaran

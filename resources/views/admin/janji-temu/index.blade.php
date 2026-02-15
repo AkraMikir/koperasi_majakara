@@ -106,8 +106,9 @@
                             @if($item->fitur == 'Tabungan')
                                 <a href="{{ route('admin.tabungan.detail-janji-temu', $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
                             @elseif($item->fitur == 'Pinjaman')
-                                <!-- Asumsi ada route detail pinjaman -->
-                                <a href="{{ route('admin.pinjaman.detail-pengajuan', $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
+                                <a href="{{ route('admin.pinjaman.detail-pengajuan', $item->id_pengajuan ?? $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
+                            @elseif($item->fitur == 'Pembayaran Pinjaman')
+                                <a href="{{ route('admin.pinjaman.detail-pembayaran', $item->id_pengajuan ?? $item->id_asli) }}" class="text-[#674c1d] hover:text-[#543d16]">Detail →</a>
                             @endif
                         </td>
                     </tr>

@@ -23,6 +23,7 @@ class PengajuanPembayaranPinjaman extends Model
         'tempo_id',
         'jenis_tempo',
         'nominal',
+        'metode_pembayaran',
         'rekening_tujuan',
         'keterangan',
         'keterangan_admin',

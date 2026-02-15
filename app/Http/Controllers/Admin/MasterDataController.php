@@ -24,7 +24,7 @@ class MasterDataController extends Controller
         $stats = [
             'total_bunga_pinjaman' => MasterBungaPinjaman::where('status_aktif', true)->count(),
             'total_denda_pinjaman' => MasterDendaPinjaman::where('status_aktif', true)->count(),
-            'total_suku_bunga_tabungan' => SukuBunga::count(),
+            'total_suku_bunga_tabungan' => 0, // Tabel suku_bunga / fitur suku bunga tabungan sudah tidak dipakai
             'total_tenor_deposito' => JnsTenorDeposito::where('aktif', true)->count(),
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),

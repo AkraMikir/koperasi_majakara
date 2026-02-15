@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class JanjiTemuPinjaman extends Model
 {
@@ -13,6 +14,7 @@ class JanjiTemuPinjaman extends Model
     protected $table = 'tbl_janji_temu_pinjaman';
 
     protected $fillable = [
+        'id',
         'id_pengajuan',
         'id_nasabah',
         'lokasi_temu',
@@ -20,6 +22,8 @@ class JanjiTemuPinjaman extends Model
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
+        'keterangan_admin',
+        'status',
     ];
 
     protected $casts = [
@@ -43,5 +47,10 @@ class JanjiTemuPinjaman extends Model
     public function nasabah(): BelongsTo
     {
         return $this->belongsTo(Nasabah::class, 'id_nasabah');
+    }
+
+    public function buktiFoto(): HasMany
+    {
+        return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
     }
 }

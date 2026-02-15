@@ -10,6 +10,7 @@ use App\Models\TempoPinjamanM;
 use App\Models\Nasabah;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
+use App\Models\JanjiTemuPinjaman;
 use App\Models\BuktiFoto;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\MasterBungaPinjaman;
@@ -38,7 +39,9 @@ class PinjamanController extends Controller
         ];
 
         // Pengajuan terbaru (pending)
+        // Hanya pengajuan via transfer (tunai/janji temu muncul di halaman Janji Temu Universal)
         $pengajuan_terbaru = PengajuanPinjaman::whereDoesntHave('pinjaman')
+            ->where('jenis_pencairan', 'transfer')
             ->with('nasabah.user')
             ->latest()
             ->take(5)
@@ -104,7 +107,7 @@ class PinjamanController extends Controller
      */
     public function detailPengajuan($id)
     {
-        $pengajuan = PengajuanPinjaman::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.pekerjaan', 'pinjaman'])
+        $pengajuan = PengajuanPinjaman::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'nasabah.pekerjaan', 'pinjaman'])
             ->findOrFail($id);
 
         // Get bunga dari master data berdasarkan durasi
@@ -207,7 +210,9 @@ class PinjamanController extends Controller
     {
         $request->validate([
             'tgl_cair' => 'required|date',
-            'bukti_transfer' => 'nullable|image|max:5120',
+            'bukti_transfer' => 'required|image|max:5120',
+        ], [
+            'bukti_transfer.required' => 'Bukti transaksi wajib diupload.',
         ]);
 
         $pengajuan = PengajuanPinjaman::with('pinjaman')->findOrFail($id);
@@ -244,24 +249,18 @@ class PinjamanController extends Controller
             // Generate jadwal angsuran
             $this->generateJadwalAngsuran($pinjaman);
 
-            // Upload bukti transfer dan simpan ke tbl_bukti_foto dengan kode PNCR
-            if ($request->hasFile('bukti_transfer')) {
-                $file = $request->file('bukti_transfer');
-                $path = $file->store('bukti-pencairan-pinjaman', 'public');
-                
-                // Generate ID for bukti foto: P (pinjaman) + TF (transfer) + PNCR (pencairan)
-                // Format: 120220260001PTFPNCR (tanggal + seq + P + TF + PNCR)
-                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PNCR', $request->tgl_cair);
-                
-                BuktiFoto::create([
-                    'id' => $idBuktiFoto,
-                    'owner_id' => $pengajuan->id, // ID pengajuan
-                    'owner_fitur' => 'P', // Pinjaman
-                    'owner_trans' => 'PNCR', // Pencairan
-                    'file_path' => $path,
-                    'keterangan' => 'Bukti transfer pencairan pinjaman',
-                ]);
-            }
+            // Upload bukti transaksi dan simpan ke tbl_bukti_foto dengan kode PNCR
+            $file = $request->file('bukti_transfer');
+            $path = $file->store('bukti-pencairan-pinjaman', 'public');
+            $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PNCR', $request->tgl_cair);
+            BuktiFoto::create([
+                'id' => $idBuktiFoto,
+                'owner_id' => $pengajuan->id,
+                'owner_fitur' => 'P',
+                'owner_trans' => 'PNCR',
+                'file_path' => $path,
+                'keterangan' => 'Bukti transaksi pencairan pinjaman',
+            ]);
 
             // Update status pengajuan menjadi '4' (Terlaksana/Tercair)
             $pengajuan->update([
@@ -277,6 +276,121 @@ class PinjamanController extends Controller
             DB::rollBack();
             return redirect()->back()
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Proses janji temu pinjaman: update tbl_janji_temu_pinjaman, lalu setujui + cairkan pengajuan (sama seperti flow pengajuan).
+     * Dipanggil dari halaman Detail Janji Temu Pinjaman (bukan dari detail pengajuan).
+     */
+    public function prosesJanjiTemuPinjaman(Request $request, $id)
+    {
+        $request->validate([
+            'tgl_cair' => 'required|date',
+            'keterangan_admin' => 'nullable|string|max:500',
+            'bukti_transfer' => 'nullable|image|max:5120',
+        ]);
+
+        $janjiTemu = JanjiTemuPinjaman::findOrFail($id);
+
+        if ($janjiTemu->status == '2') {
+            return redirect()->back()->with('error', 'Janji temu ini sudah diproses sebelumnya.');
+        }
+
+        if (!$janjiTemu->id_pengajuan) {
+            return redirect()->back()->with('error', 'Janji temu ini belum terhubung ke pengajuan pinjaman.');
+        }
+
+        $pengajuan = PengajuanPinjaman::with('pinjaman')->find($janjiTemu->id_pengajuan);
+        if (!$pengajuan) {
+            return redirect()->back()->with('error', 'Data pengajuan tidak ditemukan.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // 1. Update janji temu (keterangan + status selesai)
+            $janjiTemu->update([
+                'status' => '2',
+                'keterangan_admin' => $request->keterangan_admin,
+            ]);
+
+            // 2. Bukti foto: simpan dengan owner = janji temu (mirip tabungan)
+            if ($request->hasFile('bukti_transfer')) {
+                $file = $request->file('bukti_transfer');
+                $path = $file->store('bukti-pencairan-pinjaman', 'public');
+                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TN', 'PNCR', $request->tgl_cair);
+                BuktiFoto::create([
+                    'id' => $idBuktiFoto,
+                    'owner_id' => $janjiTemu->id,
+                    'owner_fitur' => 'P',
+                    'owner_trans' => 'PNCR',
+                    'file_path' => $path,
+                    'keterangan' => 'Bukti pencairan pinjaman (janji temu tunai)',
+                ]);
+            }
+
+            // 3. Jika pengajuan masih pending (1): setujui dulu (buat pinjaman header)
+            if ($pengajuan->status === '1') {
+                $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
+                $masterDenda = MasterDendaPinjaman::getDendaAktif();
+                if (!$masterBunga || !$masterDenda) {
+                    DB::rollBack();
+                    return redirect()->back()->with('error', 'Master bunga/denda belum diatur.');
+                }
+                $nominal = $pengajuan->nominal;
+                $bungaPersen = $masterBunga->bunga_persen;
+                $bungaRp = ($nominal * $bungaPersen) / 100;
+                $kodeVia = 'TN';
+                $idPinjaman = IdGenerator::generate('tbl_pinjaman_h', 'P', $kodeVia, 'DPNJM', now());
+                PinjamanH::create([
+                    'id' => $idPinjaman,
+                    'id_anggota' => $pengajuan->id_anggota,
+                    'id_pengajuan' => $pengajuan->id,
+                    'jumlah_pinjam' => $nominal,
+                    'lama_pinjam' => (int) $pengajuan->durasi,
+                    'ags_bulan' => ($nominal + $bungaRp) / (int) $pengajuan->durasi,
+                    'jenis' => 'bulanan',
+                    'bunga' => $bungaPersen,
+                    'bunga_rp' => $bungaRp,
+                    'denda_persen' => $masterDenda->denda_persen,
+                    'tgl_pinjam' => $request->tgl_cair,
+                    'lunas' => 'belum',
+                ]);
+                $pengajuan->update([
+                    'status' => '3',
+                    'bunga_persen' => $bungaPersen,
+                    'keterangan_admin' => $request->keterangan_admin,
+                ]);
+                $pengajuan->load('pinjaman');
+            }
+
+            $pinjaman = $pengajuan->pinjaman;
+            if (!$pinjaman) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Data pinjaman belum dibuat.');
+            }
+
+            // 4. Cairkan: generate jadwal angsuran, update status 4
+            if (TempoPinjamanB::where('pinjaman_id', $pinjaman->id)->exists()) {
+                DB::rollBack();
+                return redirect()->back()->with('error', 'Pinjaman ini sudah dicairkan sebelumnya.');
+            }
+
+            $pinjaman->update(['tgl_pinjam' => $request->tgl_cair]);
+            $this->generateJadwalAngsuran($pinjaman);
+            $pengajuan->update([
+                'status' => '4',
+                'tgl_cair' => $request->tgl_cair,
+            ]);
+
+            DB::commit();
+
+            return redirect()->route('admin.pinjaman.janji-temu.detail-pinjaman', $janjiTemu->id)
+                ->with('success', 'Janji temu selesai. Pinjaman telah disetujui dan dicairkan; jadwal angsuran telah dibuat.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -616,11 +730,9 @@ class PinjamanController extends Controller
             return 0;
         }
         
-        // Hitung jumlah hari telat (dari H+1 sampai sekarang)
-        $hariTelat = now()->diffInDays($tanggalMulaiDenda, false);
-        
-        // Jika belum ada hari telat, return 0
-        if ($hariTelat < 0) {
+        // Hitung jumlah hari telat (dari H+1 sampai sekarang) — dari tanggalMulaiDenda ke now
+        $hariTelat = (int) $tanggalMulaiDenda->diffInDays(now(), true);
+        if ($hariTelat <= 0) {
             return 0;
         }
 
@@ -706,7 +818,11 @@ class PinjamanController extends Controller
      */
     public function pembayaran(Request $request)
     {
+        // Hanya tampilkan pengajuan pembayaran via transfer. Pembayaran tunai/janji temu dikelola dari Janji Temu Universal.
         $query = PengajuanPembayaranPinjaman::with(['nasabah.user', 'pinjaman.pengajuan', 'janjiTemu.lokasi'])
+            ->where(function ($q) {
+                $q->where('metode_pembayaran', 'transfer')->orWhereNull('metode_pembayaran');
+            })
             ->latest();
 
         // Filter by status
@@ -1003,9 +1119,15 @@ class PinjamanController extends Controller
 
         $pengajuan = PengajuanPembayaranPinjaman::findOrFail($id);
 
-        if ($pengajuan->status !== '3') {
+        // Tunai/janji temu: boleh upload langsung (status 1) atau setelah setujui (status 3)
+        $isTunai = ($pengajuan->metode_pembayaran ?? '') === 'tunai' || (!$pengajuan->rekening_tujuan && $pengajuan->janjiTemu);
+        if (!in_array($pengajuan->status, ['1', '3'])) {
             return redirect()->back()
-                ->with('error', 'Pembayaran harus disetujui terlebih dahulu');
+                ->with('error', 'Status pembayaran tidak valid untuk upload bukti.');
+        }
+        if ($pengajuan->status === '1' && !$isTunai) {
+            return redirect()->back()
+                ->with('error', 'Pembayaran transfer harus disetujui terlebih dahulu.');
         }
 
         try {
@@ -1077,6 +1199,15 @@ class PinjamanController extends Controller
                 'status' => '4', // Terlaksana
                 'tgl_pembayaran' => now(),
             ]);
+
+            // Update janji temu pembayaran jika ada (status selesai, keterangan_admin)
+            $janjiTemu = $pengajuan->janjiTemu;
+            if ($janjiTemu) {
+                $janjiTemu->update([
+                    'status' => '2',
+                    'keterangan_admin' => $request->keterangan,
+                ]);
+            }
 
             DB::commit();
 

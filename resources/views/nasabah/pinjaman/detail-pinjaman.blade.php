@@ -34,22 +34,27 @@
 
     <!-- Statistik Cards -->
     <div class="mx-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <p class="text-sm text-gray-500 mb-1">Total Pinjaman</p>
                 <p class="text-2xl font-bold text-[#8b6f2f]">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</p>
             </div>
             <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <p class="text-sm text-gray-500 mb-1">Total Tagihan</p>
-                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalTagihan, 0, ',', '.') }}</p>
+                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalTagihan ?? 0, 0, ',', '.') }}</p>
+                @if(($totalDenda ?? 0) > 0)
+                <p class="text-xs text-red-600 mt-1">+ Denda berjalan: Rp {{ number_format($totalDenda, 0, ',', '.') }}</p>
+                <p class="text-sm font-semibold text-gray-900 mt-0.5">Total kewajiban: Rp {{ number_format($totalKewajiban ?? $totalTagihan, 0, ',', '.') }}</p>
+                @endif
             </div>
             <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <p class="text-sm text-gray-500 mb-1">Total Terbayar</p>
-                <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalTerbayar, 0, ',', '.') }}</p>
+                <p class="text-2xl font-bold text-green-600">Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }}</p>
             </div>
             <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
                 <p class="text-sm text-gray-500 mb-1">Sisa Pinjaman</p>
-                <p class="text-2xl font-bold text-orange-600">Rp {{ number_format($sisaPinjaman, 0, ',', '.') }}</p>
+                <p class="text-2xl font-bold text-orange-600">Rp {{ number_format($sisaPinjaman ?? 0, 0, ',', '.') }}</p>
+                <p class="text-xs text-gray-500 mt-1">{{ $totalAngsuran ?? 0 }} angsuran · {{ $angsuranLunas ?? 0 }} lunas</p>
             </div>
         </div>
     </div>
@@ -65,8 +70,8 @@
                 <div class="bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
             </div>
             <div class="flex justify-between text-xs text-gray-500">
-                <span>{{ $angsuranLunas }} / {{ $totalAngsuran }} angsuran lunas</span>
-                <span>Rp {{ number_format($totalTerbayar, 0, ',', '.') }} / Rp {{ number_format($totalTagihan, 0, ',', '.') }}</span>
+                <span>{{ $angsuranLunas ?? 0 }} / {{ $totalAngsuran ?? 0 }} angsuran lunas</span>
+                <span>Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }} / Rp {{ number_format($totalKewajiban ?? $totalTagihan ?? 0, 0, ',', '.') }}</span>
             </div>
         </div>
     </div>
@@ -157,8 +162,10 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">No</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jatuh Tempo</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah Tagihan</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Denda</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Terbayar</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Total Harus Bayar</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
                         </tr>
                     </thead>
@@ -166,6 +173,8 @@
                         @forelse($angsuran ?? [] as $item)
                         @php
                             $sisa = max(0, $item->jumlah_tagihan - ($item->jumlah_terbayar ?? 0));
+                            $dendaItem = $item->denda_berjalan ?? 0;
+                            $totalHarusBayar = $sisa + $dendaItem;
                             $isTelat = $item->tgl_jatuh_tempo < now() && $item->status_bayar !== 'lunas';
                         @endphp
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-angsuran', ['id' => $item->id, 'jenis' => $pinjaman->jenis]) }}'">
@@ -180,12 +189,22 @@
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($item->jumlah_tagihan, 0, ',', '.') }}</p>
                             </td>
                             <td class="px-4 py-3">
+                                @if($dendaItem > 0)
+                                <p class="font-semibold text-red-600">Rp {{ number_format($dendaItem, 0, ',', '.') }}</p>
+                                @else
+                                <p class="text-gray-400">—</p>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
                                 <p class="font-semibold {{ $item->jumlah_terbayar >= $item->jumlah_tagihan ? 'text-green-600' : 'text-orange-600' }}">
                                     Rp {{ number_format($item->jumlah_terbayar ?? 0, 0, ',', '.') }}
                                 </p>
                             </td>
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($sisa, 0, ',', '.') }}</p>
+                            </td>
+                            <td class="px-4 py-3">
+                                <p class="font-semibold text-[#8b6f2f]">Rp {{ number_format($totalHarusBayar, 0, ',', '.') }}</p>
                             </td>
                             <td class="px-4 py-3">
                                 <div class="flex items-center justify-between">
@@ -200,7 +219,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="6" class="px-4 py-12 text-center">
+                            <td colspan="8" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>

@@ -248,6 +248,7 @@ class TabunganController extends Controller
                 ]);
 
                 // Handle multiple bukti foto (hanya file, no nominal/keterangan)
+                // id wajib diisi: tbl_bukti_foto pakai id string (bukan auto-increment)
                 if ($request->hasFile('bukti_foto')) {
                     foreach ($request->file('bukti_foto') as $file) {
                         $path = $file->store('bukti_tabungan', 'public');
@@ -262,6 +263,16 @@ class TabunganController extends Controller
                         ]);
                     }
                 }
+
+                // Notifikasi untuk admin
+                \App\Models\AdminNotification::notify(
+                    'tabungan_setor',
+                    'Pengajuan setoran tabungan baru',
+                    'Nasabah mengajukan setoran transfer Rp ' . number_format($pengajuan->nominal, 0, ',', '.'),
+                    route('admin.tabungan.detail-pengajuan-setor', $pengajuan->id),
+                    $pengajuan->id,
+                    'pengajuan_tabungan'
+                );
 
                 return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
                     ->with('success', 'Pengajuan setoran via transfer berhasil dikirim!');
@@ -454,6 +465,18 @@ class TabunganController extends Controller
                 'keterangan' => $request->keterangan,
                 'status' => '1', // Pending
             ]);
+
+            // Notifikasi admin hanya untuk penarikan via transfer (tunai diproses lewat Janji Temu)
+            if ($request->metode === 'transfer') {
+                \App\Models\AdminNotification::notify(
+                    'tabungan_tarik',
+                    'Pengajuan penarikan tabungan (transfer)',
+                    'Nasabah mengajukan penarikan transfer Rp ' . number_format($request->nominal, 0, ',', '.'),
+                    route('admin.tabungan.detail-pengajuan-tarik', $idPengajuan),
+                    $idPengajuan,
+                    'pengajuan_penarikan_tabungan'
+                );
+            }
 
             // 2. If Tunai, also create JanjiTemuTabungan for Universal System
             if ($request->metode === 'tunai') {

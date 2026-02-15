@@ -327,6 +327,15 @@ class PinjamanController extends Controller
                 'bunga_persen' => $bungaPersen,
             ]);
 
+            \App\Models\AdminNotification::notify(
+                'pinjaman',
+                'Pengajuan pinjaman baru',
+                'Nasabah mengajukan pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pinjaman'
+            );
+
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
@@ -504,13 +513,10 @@ class PinjamanController extends Controller
                 'bunga_persen' => $bungaPersen,
             ]);
 
-            \Log::info('Pengajuan cash created successfully', [
-                'pengajuan_id' => $pengajuan->id,
-                'id_anggota' => $pengajuan->id_anggota,
-            ]);
-
-            // Create janji temu
+            // Create janji temu pinjaman (muncul di halaman Janji Temu Universal, bukan Pengajuan Terbaru)
+            $idJanjiTemu = IdGenerator::generate('tbl_janji_temu_pinjaman', 'P', 'TN', 'JNJT');
             JanjiTemuPinjaman::create([
+                'id' => $idJanjiTemu,
                 'id_pengajuan' => $pengajuan->id,
                 'id_nasabah' => $idAnggota,
                 'lokasi_temu' => $request->lokasi_temu,
@@ -518,6 +524,22 @@ class PinjamanController extends Controller
                 'tanggal_janji_temu' => $request->tanggal_janji_temu,
                 'waktu_janji_temu' => $request->waktu_janji_temu,
                 'keterangan' => $request->keterangan,
+                'status' => '1',
+            ]);
+
+            \App\Models\AdminNotification::notify(
+                'janji_temu',
+                'Janji temu pinjaman (tunai)',
+                'Nasabah membuat janji temu pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.'),
+                route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
+                $idJanjiTemu,
+                'janji_temu_pinjaman'
+            );
+
+            \Log::info('Pengajuan tunai + janji temu pinjaman created', [
+                'pengajuan_id' => $pengajuan->id,
+                'janji_temu_id' => $idJanjiTemu,
+                'id_anggota' => $pengajuan->id_anggota,
             ]);
 
             return redirect()->route('nasabah.pinjaman.pengajuan')
@@ -628,17 +650,24 @@ class PinjamanController extends Controller
             ->findOrFail($id);
 
         // Get angsuran berdasarkan jenis
-        $angsuran = $pinjaman->jenis === 'bulanan' 
+        $angsuran = $pinjaman->jenis === 'bulanan'
             ? $pinjaman->tempoBulanan()->orderBy('no_urut')->get()
             : $pinjaman->tempoMingguan()->orderBy('no_urut')->get();
 
-        // Calculate statistics
-        // Sistem bunga di awal: jumlah_pinjam sudah dikurangi bunga_rp
-        // Total tagihan = nominal = jumlah_pinjam + bunga_rp
+        // Hitung denda per angsuran (berjalan jika telat & belum bayar) dan total denda
+        $totalDenda = 0;
+        foreach ($angsuran as $item) {
+            $dendaItem = $this->hitungDenda($item);
+            $item->denda_berjalan = $dendaItem;
+            $totalDenda += $dendaItem;
+        }
+
+        // Total tagihan (pokok + bunga) dan total kewajiban (termasuk denda berjalan)
         $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
+        $totalKewajiban = $totalTagihan + $totalDenda;
         $totalTerbayar = $angsuran->sum('jumlah_terbayar') ?? 0;
-        $sisaPinjaman = max(0, $totalTagihan - $totalTerbayar);
-        $progress = $totalTagihan > 0 ? ($totalTerbayar / $totalTagihan) * 100 : 0;
+        $sisaPinjaman = max(0, $totalKewajiban - $totalTerbayar);
+        $progress = $totalKewajiban > 0 ? ($totalTerbayar / $totalKewajiban) * 100 : 0;
         $angsuranLunas = $angsuran->where('status_bayar', 'lunas')->count();
         $totalAngsuran = $angsuran->count();
 
@@ -656,6 +685,8 @@ class PinjamanController extends Controller
             'pinjaman' => $pinjaman,
             'angsuran' => $angsuran,
             'totalTagihan' => $totalTagihan,
+            'totalDenda' => $totalDenda,
+            'totalKewajiban' => $totalKewajiban,
             'totalTerbayar' => $totalTerbayar,
             'sisaPinjaman' => $sisaPinjaman,
             'progress' => $progress,
@@ -666,47 +697,59 @@ class PinjamanController extends Controller
     }
 
     /**
-     * Show angsuran list.
+     * Show angsuran list grouped by pinjaman (satu baris per pinjaman, nested table angsuran urut bulan terdekat).
      */
     public function angsuran(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
-
         $jenis = $request->get('jenis', 'bulanan');
-        $query = null;
 
-        if ($jenis === 'bulanan') {
-            $query = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
-                    $q->where('id_anggota', $idAnggota);
-                })
-                ->with(['pinjaman.pengajuan'])
-                ->latest('tgl_jatuh_tempo');
-        } else {
-            $query = TempoPinjamanM::whereHas('pinjaman', function($q) use ($idAnggota) {
-                    $q->where('id_anggota', $idAnggota);
-                })
-                ->with(['pinjaman.pengajuan'])
-                ->latest('tgl_jatuh_tempo');
+        // Query pinjaman milik nasabah, dengan tempo diurut dari jatuh tempo terdekat
+        $query = PinjamanH::where('id_anggota', $idAnggota)
+            ->where('lunas', 'belum')
+            ->when($jenis === 'bulanan', function ($q) {
+                $q->with(['tempoBulanan' => fn ($t) => $t->orderBy('tgl_jatuh_tempo', 'asc')]);
+            })
+            ->when($jenis === 'mingguan', function ($q) {
+                $q->with(['tempoMingguan' => fn ($t) => $t->orderBy('tgl_jatuh_tempo', 'asc')]);
+            })
+            ->latest();
+
+        if ($request->filled('status')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->where('status_bayar', $request->status));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->where('status_bayar', $request->status));
+            }
+        }
+        if ($request->filled('tanggal_dari')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari));
+            }
+        }
+        if ($request->filled('tanggal_sampai')) {
+            if ($jenis === 'bulanan') {
+                $query->whereHas('tempoBulanan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai));
+            } else {
+                $query->whereHas('tempoMingguan', fn ($q) => $q->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai));
+            }
         }
 
-        // Filter by status
-        if ($request->has('status') && $request->status !== '') {
-            $query->where('status_bayar', $request->status);
-        }
+        $pinjamanList = $query->paginate(10);
 
-        // Filter by date
-        if ($request->has('tanggal_dari') && $request->tanggal_dari !== '') {
-            $query->whereDate('tgl_jatuh_tempo', '>=', $request->tanggal_dari);
+        // Hitung denda berjalan per angsuran (untuk tampilan di list)
+        foreach ($pinjamanList as $pinjaman) {
+            $tempos = $jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
+            foreach ($tempos as $t) {
+                $t->setRelation('pinjaman', $pinjaman);
+                $t->denda_berjalan = $this->hitungDenda($t);
+            }
         }
-
-        if ($request->has('tanggal_sampai') && $request->tanggal_sampai !== '') {
-            $query->whereDate('tgl_jatuh_tempo', '<=', $request->tanggal_sampai);
-        }
-
-        $angsuran = $query->paginate(20);
 
         return view('nasabah.pinjaman.angsuran', [
-            'angsuran' => $angsuran,
+            'pinjamanList' => $pinjamanList,
             'jenis' => $jenis,
         ]);
     }
@@ -803,11 +846,9 @@ class PinjamanController extends Controller
             return 0;
         }
         
-        // Hitung jumlah hari telat (dari H+1 sampai sekarang)
-        $hariTelat = now()->diffInDays($tanggalMulaiDenda, false);
-        
-        // Jika belum ada hari telat, return 0
-        if ($hariTelat < 0) {
+        // Hitung jumlah hari telat (dari H+1 sampai sekarang) — dari tanggalMulaiDenda ke now
+        $hariTelat = (int) $tanggalMulaiDenda->diffInDays(now(), true);
+        if ($hariTelat <= 0) {
             return 0;
         }
 
@@ -953,6 +994,15 @@ class PinjamanController extends Controller
                 'status' => '1', // Pending
             ]);
 
+            \App\Models\AdminNotification::notify(
+                'pinjaman_pembayaran',
+                'Pengajuan pembayaran pinjaman baru',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pembayaran_pinjaman'
+            );
+
             // Upload bukti foto
             if ($request->hasFile('bukti_foto')) {
                 foreach ($request->file('bukti_foto') as $file) {
@@ -1035,18 +1085,31 @@ class PinjamanController extends Controller
                 'tempo_id' => $request->tempo_id,
                 'jenis_tempo' => $request->jenis_tempo,
                 'nominal' => $request->nominal,
+                'metode_pembayaran' => 'tunai',
                 'keterangan' => $request->keterangan,
                 'status' => '1', // Pending
             ]);
 
-            // Create janji temu
+            \App\Models\AdminNotification::notify(
+                'pinjaman_pembayaran',
+                'Pengajuan pembayaran pinjaman baru (tunai)',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' via janji temu',
+                route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
+                $pengajuan->id,
+                'pengajuan_pembayaran_pinjaman'
+            );
+
+            // Create janji temu pembayaran (id seperti janji temu pinjaman: P-TN-JNJT)
+            $idJanjiTemu = IdGenerator::generate('tbl_janji_temu_pembayaran_pinjaman', 'P', 'TN', 'JNJT');
             JanjiTemuPembayaranPinjaman::create([
+                'id' => $idJanjiTemu,
                 'id_pengajuan' => $pengajuan->id,
                 'lokasi_temu' => $request->lokasi_temu,
                 'nominal' => $request->nominal,
                 'tanggal_janji_temu' => $request->tanggal_janji_temu,
                 'waktu_janji_temu' => $request->waktu_janji_temu,
                 'keterangan' => $request->keterangan,
+                'status' => '1',
             ]);
 
             return redirect()->route('nasabah.pinjaman.status-pembayaran')

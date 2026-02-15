@@ -43,6 +43,7 @@ return new class extends Migration//ikkkkm
             $table->string('id', 30)->primary();
             $table->string('id_pengajuan_setor', 30)->nullable();
             $table->string('id_pengajuan_tarik', 30)->nullable();
+            $table->string('id_janji_temu_tabungan', 30)->nullable();
             $table->foreignId('id_anggota')->constrained('tbl_nasabah')->onDelete('cascade');
             $table->foreignId('id_jns_transaksi')->nullable()->constrained('jns_transaksi')->onDelete('set null');
             $table->foreignId('id_jns_via')->nullable()->constrained('jns_via')->onDelete('set null');
@@ -85,6 +86,9 @@ return new class extends Migration//ikkkkm
     public function down(): void
     {
         Schema::dropIfExists('tbl_bukti_foto');
+        Schema::table('trans_tabungan', function (Blueprint $table) {
+            $table->dropForeign(['id_janji_temu_tabungan']);
+        });
         Schema::dropIfExists('tbl_janji_temu_tabungan');
         Schema::dropIfExists('trans_tabungan');
         Schema::dropIfExists('tbl_pengajuan_penarikan_tabungan');
