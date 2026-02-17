@@ -754,6 +754,14 @@ class PinjamanController extends Controller
      */
     public function pelunasanDipercepat(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can do pelunasan dipercepat
+        if (!app(\App\Services\AdminPermissionService::class)->canPelunasanDipercepat(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat melakukan pelunasan dipercepat.'
+            ], 403);
+        }
+
         $request->validate([
             'potongan' => 'nullable|numeric|min:0',
             'keterangan' => 'nullable|string|max:500',
@@ -1225,6 +1233,11 @@ class PinjamanController extends Controller
      */
     public function createPinjaman()
     {
+        // Authorization: Only Admin Utama can create manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
+        }
+
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
         
@@ -1236,6 +1249,11 @@ class PinjamanController extends Controller
      */
     public function storePinjaman(Request $request)
     {
+        // Authorization: Only Admin Utama can create manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
+        }
+
         $request->validate([
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'nominal' => 'required|numeric|min:100000',
@@ -1301,6 +1319,11 @@ class PinjamanController extends Controller
      */
     public function editPinjaman($id)
     {
+        // Authorization: Only Admin Utama can edit manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::with(['nasabah.user'])->findOrFail($id);
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
@@ -1313,6 +1336,11 @@ class PinjamanController extends Controller
      */
     public function updatePinjaman(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can update manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::findOrFail($id);
 
         // Cek apakah pinjaman sudah ada angsuran yang dibayar
@@ -1379,6 +1407,11 @@ class PinjamanController extends Controller
      */
     public function deletePinjaman($id)
     {
+        // Authorization: Only Admin Utama can delete manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::findOrFail($id);
 
         // Cek apakah pinjaman sudah ada angsuran yang dibayar

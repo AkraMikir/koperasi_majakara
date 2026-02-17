@@ -11,9 +11,11 @@
             <p class="text-gray-600 mt-1">Riwayat semua transaksi tabungan nasabah</p>
         </div>
         <div class="flex items-center space-x-3">
+            @canCrudTabungan
             <a href="{{ route('admin.tabungan.create-transaksi') }}" class="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all text-sm font-medium shadow-md">
                 + Buat Transaksi Manual
             </a>
+            @endcanCrudTabungan
             <a href="{{ route('admin.tabungan.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali
             </a>
@@ -96,17 +98,19 @@
                                     Detail
                                 </a>
                                 @if(!$item->id_pengajuan_setor && !$item->id_pengajuan_tarik)
-                                <a href="{{ route('admin.tabungan.edit-transaksi', $item->id) }}" 
-                                    class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
-                                    Edit
-                                </a>
-                                <form method="POST" action="{{ route('admin.tabungan.destroy-transaksi', $item->id) }}" class="inline" onsubmit="return confirm('Yakin hapus transaksi ini?')">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-medium">
-                                        Hapus
-                                    </button>
-                                </form>
+                                    @canCrudTabungan
+                                    <a href="{{ route('admin.tabungan.edit-transaksi', $item->id) }}" 
+                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
+                                        Edit
+                                    </a>
+                                    <form method="POST" action="{{ route('admin.tabungan.destroy-transaksi', $item->id) }}" class="inline" onsubmit="return confirm('Yakin hapus transaksi ini?')">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-medium">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                    @endcanCrudTabungan
                                 @endif
                             </div>
                         </td>

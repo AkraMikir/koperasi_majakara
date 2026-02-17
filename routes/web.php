@@ -107,8 +107,8 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     });
 });
 
-// Admin Routes
-Route::prefix('admin')->name('admin.')->group(function () {
+// Admin Routes - Protected with authentication and admin role check
+Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Notifikasi Admin
@@ -130,169 +130,219 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     // Tabungan Routes
     Route::prefix('tabungan')->name('tabungan.')->group(function () {
+        // View routes - accessible by all admins
         Route::get('/', [\App\Http\Controllers\Admin\TabunganController::class, 'index'])->name('index');
         Route::get('/pengajuan-setor', [\App\Http\Controllers\Admin\TabunganController::class, 'pengajuanSetor'])->name('pengajuan-setor');
         Route::get('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
-        Route::post('/pengajuan-setor/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveSetor'])->name('approve-setor');
-        Route::post('/pengajuan-setor/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectSetor'])->name('reject-setor');
-        Route::post('/pengajuan-setor/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editPengajuanSetor'])->name('edit-pengajuan-setor');
-        Route::delete('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'deletePengajuanSetor'])->name('delete-pengajuan-setor');
         Route::get('/pengajuan-tarik', [\App\Http\Controllers\Admin\TabunganController::class, 'pengajuanTarik'])->name('pengajuan-tarik');
         Route::get('/pengajuan-tarik/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
+        Route::get('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'transaksi'])->name('transaksi');
+        Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+        Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
+        Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
+
+        // Approval routes - accessible by all admins (Admin Utama & Admin Operasional)
+        Route::post('/pengajuan-setor/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveSetor'])->name('approve-setor');
+        Route::post('/pengajuan-setor/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectSetor'])->name('reject-setor');
         Route::post('/pengajuan-tarik/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveTarik'])->name('approve-tarik');
         Route::post('/pengajuan-tarik/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectTarik'])->name('reject-tarik');
-        Route::get('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'transaksi'])->name('transaksi');
-        Route::get('/transaksi/create', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransaksi'])->name('create-transaksi');
-        Route::post('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'storeTransaksi'])->name('store-transaksi');
-        Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
-        Route::get('/transaksi/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editTransaksi'])->name('edit-transaksi');
-        Route::put('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'updateTransaksi'])->name('update-transaksi');
-        Route::delete('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'destroyTransaksi'])->name('destroy-transaksi');
-
-        Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
         Route::post('/janji-temu/{id}/create-trans', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransFromJanjiTemu'])->name('create-trans-from-janji-temu');
-        Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
+
+        // CRUD Transaksi routes - ONLY Admin Utama (Admin Operasional CANNOT access)
+        Route::middleware('admin.permission:crud-tabungan')->group(function () {
+            Route::get('/transaksi/create', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransaksi'])->name('create-transaksi');
+            Route::post('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'storeTransaksi'])->name('store-transaksi');
+            Route::get('/transaksi/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editTransaksi'])->name('edit-transaksi');
+            Route::put('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'updateTransaksi'])->name('update-transaksi');
+            Route::delete('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'destroyTransaksi'])->name('destroy-transaksi');
+            Route::post('/pengajuan-setor/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editPengajuanSetor'])->name('edit-pengajuan-setor');
+            Route::delete('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'deletePengajuanSetor'])->name('delete-pengajuan-setor');
+        });
     });
     
     // Pinjaman Routes
     Route::prefix('pinjaman')->name('pinjaman.')->group(function () {
+        // View routes - accessible by all admins
         Route::get('/', [\App\Http\Controllers\Admin\PinjamanController::class, 'index'])->name('index');
         Route::get('/pengajuan', [\App\Http\Controllers\Admin\PinjamanController::class, 'pengajuan'])->name('pengajuan');
         Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
+        Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/pinjaman-lunas', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanLunas'])->name('pinjaman-lunas');
+        Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
+        Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
+        Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
+        Route::get('/pembayaran', [\App\Http\Controllers\Admin\PinjamanController::class, 'pembayaran'])->name('pembayaran');
+        Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
+
+        // Approval & Cairkan routes - accessible by all admins (Admin Utama & Admin Operasional)
         Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\PinjamanController::class, 'approvePengajuan'])->name('approve-pengajuan');
         Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPengajuan'])->name('reject-pengajuan');
         Route::post('/pengajuan/{id}/cairkan', [\App\Http\Controllers\Admin\PinjamanController::class, 'cairkanPinjaman'])->name('cairkan-pinjaman');
-        Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
-            Route::get('/pinjaman-lunas', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanLunas'])->name('pinjaman-lunas');
-            Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
-        Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
-        Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
-        Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
-        Route::put('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePinjaman'])->name('update-pinjaman');
-        Route::delete('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'deletePinjaman'])->name('delete-pinjaman');
-        Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
-        Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
-        Route::post('/pinjaman-aktif/{id}/pelunasan-dipercepat', [\App\Http\Controllers\Admin\PinjamanController::class, 'pelunasanDipercepat'])->name('pelunasan-dipercepat');
-        Route::get('/pembayaran', [\App\Http\Controllers\Admin\PinjamanController::class, 'pembayaran'])->name('pembayaran');
-        Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
         Route::post('/pembayaran/{id}/approve', [\App\Http\Controllers\Admin\PinjamanController::class, 'approvePembayaran'])->name('approve-pembayaran');
         Route::post('/pembayaran/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPembayaran'])->name('reject-pembayaran');
         Route::post('/pembayaran/{id}/konfirmasi', [\App\Http\Controllers\Admin\PinjamanController::class, 'konfirmasiPembayaran'])->name('konfirmasi-pembayaran');
         Route::post('/pembayaran/{id}/upload-serah-terima', [\App\Http\Controllers\Admin\PinjamanController::class, 'uploadSerahTerima'])->name('upload-serah-terima');
+
+        // CRUD Pinjaman Aktif routes - ONLY Admin Utama (Admin Operasional CANNOT access)
+        Route::middleware('admin.permission:crud-pinjaman')->group(function () {
+            Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
+            Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
+            Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
+            Route::put('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePinjaman'])->name('update-pinjaman');
+            Route::delete('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'deletePinjaman'])->name('delete-pinjaman');
+        });
+
+        // Pelunasan Dipercepat - ONLY Admin Utama
+        Route::middleware('admin.permission:pelunasan-dipercepat')->group(function () {
+            Route::post('/pinjaman-aktif/{id}/pelunasan-dipercepat', [\App\Http\Controllers\Admin\PinjamanController::class, 'pelunasanDipercepat'])->name('pelunasan-dipercepat');
+        });
     });
     
-    // Master Data Routes
+    // Master Data Routes - View accessible by all admins, CRUD only for Admin Utama
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'index'])->name('index');
         
         // Bunga Pinjaman
         Route::prefix('bunga-pinjaman')->name('bunga-pinjaman.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanToggleStatus'])->name('toggle-status');
+            
+            // CRUD routes - ONLY Admin Utama
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanToggleStatus'])->name('toggle-status');
+            });
         });
         
         // Denda Pinjaman
         Route::prefix('denda-pinjaman')->name('denda-pinjaman.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaPinjamanToggleStatus'])->name('toggle-status');
+            });
         });
         
         // Suku Bunga Tabungan
         Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganDestroy'])->name('destroy');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganDestroy'])->name('destroy');
+            });
         });
 
         // Tenor Deposito
         Route::prefix('tenor-deposito')->name('tenor-deposito.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'tenorDepositoToggleStatus'])->name('toggle-status');
+            });
         });
         
         // Suku Bunga Deposito
         Route::prefix('suku-bunga-deposito')->name('suku-bunga-deposito.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoToggleStatus'])->name('toggle-status');
+            });
         });
         
         // Barang Gadai
         Route::prefix('barang-gadai')->name('barang-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiDestroy'])->name('destroy');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiDestroy'])->name('destroy');
+            });
         });
         
         // Lokasi Perusahaan
         Route::prefix('lokasi-perusahaan')->name('lokasi-perusahaan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanToggleStatus'])->name('toggle-status');
+            });
         });
         
         // Jenis Deposito
         Route::prefix('jenis-deposito')->name('jenis-deposito.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'jenisDepositoToggleStatus'])->name('toggle-status');
+            });
         });
 
         // Biaya Transfer
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferIndex'])->name('index');
-            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
-            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
-            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');
-            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferUpdate'])->name('update');
-            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferDestroy'])->name('destroy');
-            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferToggleStatus'])->name('toggle-status');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferToggleStatus'])->name('toggle-status');
+            });
         });
     });
     
-    // Nasabah Management Routes (rute spesifik harus di atas /{id} agar tidak tertimpa)
+    // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
     Route::prefix('nasabah')->name('nasabah.')->group(function () {
+        // View routes - accessible by all admins
         Route::get('/', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'index'])->name('index');
         Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
-        Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
-        Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
-        Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
-        Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
+        
+        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
+        Route::middleware('admin.permission:manage-nasabah')->group(function () {
+            Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
+            Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
+            Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
+            Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
+        });
     });
     
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');

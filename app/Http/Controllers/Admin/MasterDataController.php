@@ -17,6 +17,16 @@ use Illuminate\Support\Facades\DB;
 class MasterDataController extends Controller
 {
     /**
+     * Check if user has permission to CRUD master data
+     */
+    protected function checkCrudPermission()
+    {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengelola Master Data.');
+        }
+    }
+
+    /**
      * Display master data dashboard.
      */
     public function index()
@@ -45,11 +55,13 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.bunga-pinjaman.create');
     }
 
     public function bungaPinjamanStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
@@ -65,12 +77,14 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanEdit($id)
     {
+        $this->checkCrudPermission();
         $data = MasterBungaPinjaman::findOrFail($id);
         return view('admin.master-data.bunga-pinjaman.edit', compact('data'));
     }
 
     public function bungaPinjamanUpdate(Request $request, $id)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
@@ -96,6 +110,7 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanToggleStatus($id)
     {
+        $this->checkCrudPermission();
         $data = MasterBungaPinjaman::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
@@ -113,11 +128,13 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.denda-pinjaman.create');
     }
 
     public function dendaPinjamanStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'denda_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
@@ -131,12 +148,14 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanEdit($id)
     {
+        $this->checkCrudPermission();
         $data = MasterDendaPinjaman::findOrFail($id);
         return view('admin.master-data.denda-pinjaman.edit', compact('data'));
     }
 
     public function dendaPinjamanUpdate(Request $request, $id)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'denda_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
@@ -160,6 +179,7 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanToggleStatus($id)
     {
+        $this->checkCrudPermission();
         $data = MasterDendaPinjaman::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
@@ -177,11 +197,13 @@ class MasterDataController extends Controller
 
     public function sukuBungaTabunganCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.suku-bunga-tabungan.create');
     }
 
     public function sukuBungaTabunganStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'jenis_bunga' => 'required|string|max:255',
             'opsi_val' => 'required|numeric|min:0|max:100',

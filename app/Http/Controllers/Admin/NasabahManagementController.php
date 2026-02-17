@@ -70,6 +70,14 @@ class NasabahManagementController extends Controller
      */
     public function approveChange(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can approve nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menyetujui perubahan data nasabah.'
+            ], 403);
+        }
+
         $pengajuan = PengajuanPerubahanData::with('nasabah')->findOrFail($id);
 
         if ($pengajuan->status !== 'pending') {
@@ -183,6 +191,14 @@ class NasabahManagementController extends Controller
      */
     public function rejectChange(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can reject nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menolak perubahan data nasabah.'
+            ], 403);
+        }
+
         $pengajuan = PengajuanPerubahanData::findOrFail($id);
 
         if ($pengajuan->status !== 'pending') {
@@ -239,6 +255,14 @@ class NasabahManagementController extends Controller
      */
     public function resetPin(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can reset nasabah PIN
+        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mereset PIN nasabah.'
+            ], 403);
+        }
+
         $nasabah = Nasabah::with('user')->findOrFail($id);
         
         // Validasi input PIN baru
@@ -283,6 +307,14 @@ class NasabahManagementController extends Controller
      */
     public function generateRandomPin()
     {
+        // Authorization: Only Admin Utama can generate random PIN
+        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini.'
+            ], 403);
+        }
+
         $pin = str_pad(rand(100000, 999999), 6, '0', STR_PAD_LEFT);
         
         return response()->json([

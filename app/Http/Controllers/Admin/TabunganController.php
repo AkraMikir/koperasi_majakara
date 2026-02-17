@@ -521,6 +521,14 @@ class TabunganController extends Controller
      */
     public function editPengajuanSetor(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can edit pengajuan
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pengajuan.'
+            ], 403);
+        }
+
         $request->validate([
             'nominal' => 'nullable|numeric|min:10000',
             'keterangan_admin' => 'nullable|string|max:500',
@@ -617,6 +625,11 @@ class TabunganController extends Controller
      */
     public function deletePengajuanSetor($id)
     {
+        // Authorization: Only Admin Utama can delete pengajuan
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pengajuan.');
+        }
+
         $pengajuan = PengajuanTabungan::findOrFail($id);
         
         // Hanya bisa delete jika status masih pending dan belum ada transaksi
@@ -710,6 +723,11 @@ class TabunganController extends Controller
      */
     public function createTransaksi()
     {
+        // Authorization: Only Admin Utama can create manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
+        }
+
         $nasabah = Nasabah::with('user')->get();
 
         return view('admin.tabungan.create-transaksi', compact('nasabah'));
@@ -720,6 +738,11 @@ class TabunganController extends Controller
      */
     public function storeTransaksi(Request $request)
     {
+        // Authorization: Only Admin Utama can create manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
+        }
+
         $request->validate([
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'jenis' => 'required|in:setoran,penarikan',
@@ -776,6 +799,11 @@ class TabunganController extends Controller
      */
     public function editTransaksi($id)
     {
+        // Authorization: Only Admin Utama can edit manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit transaksi manual.');
+        }
+
         $transaksi = TransTabungan::with(['nasabah.user'])->findOrFail($id);
 
         // Only allow edit if created manually (no pengajuan)
@@ -794,6 +822,11 @@ class TabunganController extends Controller
      */
     public function updateTransaksi(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can update manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate transaksi manual.');
+        }
+
         $transaksi = TransTabungan::findOrFail($id);
 
         // Only allow update if created manually
@@ -835,6 +868,11 @@ class TabunganController extends Controller
      */
     public function destroyTransaksi($id)
     {
+        // Authorization: Only Admin Utama can delete manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus transaksi manual.');
+        }
+
         $transaksi = TransTabungan::findOrFail($id);
 
         // Only allow delete if created manually
