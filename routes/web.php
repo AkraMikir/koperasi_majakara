@@ -13,10 +13,10 @@ Route::get('/', function () {
 })->name('welcome');
 
 // Landing Page Routes
-Route::get('/layanan', [\App\Http\Controllers\LandingPageController::class, 'layanan'])->name('landing.layanan');
-Route::get('/keuntungan', [\App\Http\Controllers\LandingPageController::class, 'keuntungan'])->name('landing.keuntungan');
-Route::get('/testimoni', [\App\Http\Controllers\LandingPageController::class, 'testimoni'])->name('landing.testimoni');
-Route::get('/faq', [\App\Http\Controllers\LandingPageController::class, 'faq'])->name('landing.faq');
+Route::get('/layanan', [LandingPageController::class, 'layanan'])->name('landing.layanan');
+Route::get('/keuntungan', [LandingPageController::class, 'keuntungan'])->name('landing.keuntungan');
+Route::get('/testimoni', [LandingPageController::class, 'testimoni'])->name('landing.testimoni');
+Route::get('/faq', [LandingPageController::class, 'faq'])->name('landing.faq');
 
 // Authentication Routes
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
