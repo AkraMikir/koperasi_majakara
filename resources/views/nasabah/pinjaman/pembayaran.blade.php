@@ -157,15 +157,15 @@
                     </div>
                 </div>
 
-                <!-- Tabs: Transfer / Cash -->
+                <!-- Tabs: Transfer / Janji Temu (Cash) -->
                 <div class="mb-6">
-                    <div class="flex border-b border-gray-200">
-                        <button type="button" onclick="showTransferForm()" id="tab-transfer"
-                            class="flex-1 px-4 py-3 font-semibold text-gray-700 border-b-2 border-[#8b6f2f] transition-colors">
+                    <div class="flex border-b border-gray-200 gap-1">
+                        <button type="button" onclick="showTransferForm()" id="tab-transfer" aria-selected="true"
+                            class="tab-payment flex-1 px-4 py-3.5 font-semibold border-b-2 border-[#8b6f2f] text-[#8b6f2f] transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
                             Transfer
                         </button>
-                        <button type="button" onclick="showCashForm()" id="tab-cash"
-                            class="flex-1 px-4 py-3 font-semibold text-gray-500 hover:text-gray-700 transition-colors">
+                        <button type="button" onclick="showCashForm()" id="tab-cash" aria-selected="false"
+                            class="tab-payment flex-1 px-4 py-3.5 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
                             Janji Temu (Cash)
                         </button>
                     </div>
@@ -411,23 +411,32 @@ if (nominalCash) {
     });
 }
 
+function setActiveTab(activeId) {
+    const tabs = document.querySelectorAll('.tab-payment');
+    tabs.forEach(function(tab) {
+        const isActive = tab.id === activeId;
+        tab.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) {
+            tab.classList.remove('border-transparent', 'text-gray-500');
+            tab.classList.add('border-[#8b6f2f]', 'text-[#8b6f2f]');
+        } else {
+            tab.classList.remove('border-[#8b6f2f]', 'text-[#8b6f2f]');
+            tab.classList.add('border-transparent', 'text-gray-500');
+        }
+    });
+}
+
 function showTransferForm() {
     document.getElementById('form-transfer-section').classList.remove('hidden');
     document.getElementById('form-cash-section').classList.add('hidden');
-    document.getElementById('tab-transfer').classList.add('border-[#8b6f2f]', 'text-gray-700');
-    document.getElementById('tab-transfer').classList.remove('text-gray-500');
-    document.getElementById('tab-cash').classList.remove('border-[#8b6f2f]', 'text-gray-700');
-    document.getElementById('tab-cash').classList.add('text-gray-500');
+    setActiveTab('tab-transfer');
     currentFormType = 'transfer';
 }
 
 function showCashForm() {
     document.getElementById('form-transfer-section').classList.add('hidden');
     document.getElementById('form-cash-section').classList.remove('hidden');
-    document.getElementById('tab-cash').classList.add('border-[#8b6f2f]', 'text-gray-700');
-    document.getElementById('tab-cash').classList.remove('text-gray-500');
-    document.getElementById('tab-transfer').classList.remove('border-[#8b6f2f]', 'text-gray-700');
-    document.getElementById('tab-transfer').classList.add('text-gray-500');
+    setActiveTab('tab-cash');
     currentFormType = 'cash';
 }
 

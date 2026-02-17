@@ -43,6 +43,7 @@ return new class extends Migration//ikkkkm
             $table->string('id', 30)->primary();
             $table->string('id_pengajuan_setor', 30)->nullable();
             $table->string('id_pengajuan_tarik', 30)->nullable();
+            $table->string('id_janji_temu_tabungan', 30)->nullable();
             $table->foreignId('id_anggota')->constrained('tbl_nasabah')->onDelete('cascade');
             $table->foreignId('id_jns_transaksi')->nullable()->constrained('jns_transaksi')->onDelete('set null');
             $table->foreignId('id_jns_via')->nullable()->constrained('jns_via')->onDelete('set null');
@@ -69,8 +70,8 @@ return new class extends Migration//ikkkkm
 
         // 5. Bukti Foto Universal (untuk semua fitur)
         Schema::create('tbl_bukti_foto', function (Blueprint $table) {
-            $table->string('id', 30)->primary(); // Generated ID, not auto-increment
-            $table->string('owner_id', 30); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
+            $table->string('id', 50)->primary(); // IdGenerator: DDMMYYYY + 4 digit + suffix (e.g. 150220260001TCSJNJT)
+            $table->string('owner_id', 50); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
             $table->string('owner_fitur', 10); // T=Tabungan, P=Pinjaman, G=Gadai, D=Deposito
             $table->string('owner_trans', 20); // Type transaksi: STR, PNR, PNJ, JNJT, dll
             $table->string('file_path', 255);
@@ -85,6 +86,9 @@ return new class extends Migration//ikkkkm
     public function down(): void
     {
         Schema::dropIfExists('tbl_bukti_foto');
+        Schema::table('trans_tabungan', function (Blueprint $table) {
+            $table->dropForeign(['id_janji_temu_tabungan']);
+        });
         Schema::dropIfExists('tbl_janji_temu_tabungan');
         Schema::dropIfExists('trans_tabungan');
         Schema::dropIfExists('tbl_pengajuan_penarikan_tabungan');

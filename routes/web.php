@@ -297,7 +297,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
-    Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index'); // New Universal Janji Temu
+    Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index');
     // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
     // Halaman Pengajuan dihapus - redirect ke dashboard bila ada yang akses langsung
     Route::get('/pengajuan', fn () => redirect()->route('admin.dashboard', [], 301))->name('pengajuan.index');

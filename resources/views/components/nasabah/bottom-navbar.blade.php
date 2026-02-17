@@ -11,94 +11,215 @@
         }
         return str_contains($currentRoute, $route);
     };
-    $mainNavItems = [
-        ['label' => 'Dashboard', 'route' => 'nasabah.dashboard', 'active' => $currentRoute === 'nasabah.dashboard', 'href' => route('nasabah.dashboard'), 'icon' => 'dashboard'],
-        ['label' => 'Tabungan', 'route' => 'nasabah.tabungan.index', 'active' => $isActive('tabungan'), 'href' => route('nasabah.tabungan.index'), 'icon' => 'tabungan'],
-        ['label' => 'Pinjaman', 'route' => 'nasabah.pinjaman.index', 'active' => $isActive('pinjaman'), 'href' => route('nasabah.pinjaman.index'), 'icon' => 'pinjaman'],
-        ['label' => 'Guide', 'route' => null, 'active' => false, 'href' => '#', 'icon' => 'guide'],
+    $navActive = function($route) use ($currentRoute, $isActive) {
+        if ($route === 'dashboard') return $currentRoute === 'nasabah.dashboard';
+        return $isActive($route);
+    };
+    // Icon: Tabungan=dollar, Pinjaman=tangan+duit, Guide=buku terbuka, Deposito=chart naik, Gadai=gembok
+    $allNavItems = [
+        ['key' => 'dashboard', 'route' => 'nasabah.dashboard', 'label' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
+        ['key' => 'tabungan', 'route' => 'nasabah.tabungan.index', 'label' => 'Tabungan', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+        ['key' => 'pinjaman', 'route' => 'nasabah.pinjaman.index', 'label' => 'Pinjaman', 'icon' => 'M2 10a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4zm0 0V6a2 2 0 012-2h14a2 2 0 012 2v4M6 12h.01M10 12h.01M14 12h.01M18 12h.01'],
+        ['key' => 'guide', 'route' => '#', 'label' => 'Guide', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+        ['key' => 'deposito', 'route' => '#', 'label' => 'Deposito', 'icon' => 'M2 19l10-10 4 4 6-6m0 0v6m0-6h6'],
+        ['key' => 'gadai', 'route' => '#', 'label' => 'Gadai', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
+        ['key' => 'setting', 'route' => 'nasabah.setting.index', 'label' => 'Settings', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
     ];
-    $moreNavItems = [
-        ['label' => 'Deposito', 'href' => '#', 'icon' => 'deposito', 'active' => false],
-        ['label' => 'Gadai', 'href' => '#', 'icon' => 'gadai', 'active' => false],
-        ['label' => 'Setting', 'href' => route('nasabah.setting.index'), 'icon' => 'setting', 'active' => $isActive('setting')],
+    $arcItems = array_values(array_filter($allNavItems, fn($i) => !in_array($i['key'], ['dashboard', 'setting'])));
+    // Posisi arc: dari kiri ke kanan = Tabungan, Pinjaman, Guide, Deposito, Gadai (sama seperti navbar desktop)
+    $arcPositions = [
+        ['x' => -69, 'y' => -12],  // 0 Tabungan (paling kiri)
+        ['x' => -45, 'y' => -54],  // 1 Pinjaman
+        ['x' => 0, 'y' => -70],    // 2 Guide (tengah atas)
+        ['x' => 45, 'y' => -54],   // 3 Deposito
+        ['x' => 69, 'y' => -12],   // 4 Gadai (paling kanan)
     ];
-    $hasMoreActive = collect($moreNavItems)->contains('active', true);
 @endphp
 
-<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-4px_20px_rgba(0,0,0,0.06)] z-50 transition-transform duration-300 pb-[env(safe-area-inset-bottom)]">
-    <div class="w-full max-w-6xl mx-auto">
-        {{-- Mobile: 4 menu + tombol titik tiga (More) --}}
-        <div class="flex md:hidden items-center justify-between px-2 py-2.5">
-            @foreach ($mainNavItems as $item)
-                <a href="{{ $item['href'] }}" title="{{ $item['label'] }}" class="flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 py-1 transition-colors duration-200 rounded-lg active:scale-95 {{ $item['active'] ? 'text-[#8b6f2f] bg-amber-50/80' : 'text-gray-600 hover:bg-gray-50' }}">
-                    @include('components.nasabah.bottom-navbar-icon', ['icon' => $item['icon']])
-                    <span class="text-[10px] sm:text-xs font-medium truncate w-full max-w-[64px] text-center">{{ $item['label'] }}</span>
-                </a>
+<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(103,76,29,0.08)] z-50 transition-transform duration-300">
+    <div class="w-full px-2">
+        {{-- Desktop: full 7-item nav dengan sliding indicator --}}
+        <div id="navBarInner" class="hidden md:flex relative items-end justify-around py-2">
+            <div id="navSlider" class="absolute rounded-2xl bg-[#8b6f2f]/14 shadow-[0_4px_14px_rgba(139,111,47,0.2)] pointer-events-none z-0"
+                 style="height: 44px; width: 48px; left: 0; bottom: 2rem; transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);"></div>
+            @foreach($allNavItems as $item)
+            @php $active = $navActive($item['key']); @endphp
+            <a href="{{ $item['route'] === '#' ? '#' : route($item['route']) }}"
+               class="nav-item group relative z-10 flex flex-col items-center justify-end min-w-[48px] px-1 py-2 rounded-2xl transition-colors duration-200 {{ $active ? 'text-[#8b6f2f]' : 'text-gray-500 hover:text-gray-700' }}"
+               data-nav-key="{{ $item['key'] }}"
+               @if($active) data-nav-active="1" @endif>
+                <span class="flex items-center justify-center w-12 h-10 rounded-2xl transition-all duration-300 ease-out {{ $active ? 'scale-110 -translate-y-1.5' : 'group-hover:scale-105 group-hover:-translate-y-0.5' }}">
+                    <svg class="w-6 h-6 transition-transform duration-300 {{ $active ? 'scale-105' : '' }}" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $item['icon'] }}"></path></svg>
+                </span>
+                <span class="text-xs font-medium mt-1.5 block transition-colors duration-200 {{ $active ? 'text-[#8b6f2f] font-semibold' : '' }}">{{ $item['label'] }}</span>
+            </a>
             @endforeach
-            {{-- Tombol More (titik 3) --}}
-            <div class="relative flex-1 min-w-0 flex justify-center" id="bottomNavMoreWrap">
-                <button type="button" id="bottomNavMoreBtn" class="flex flex-col items-center justify-center gap-0.5 w-full py-1 rounded-lg transition-colors duration-200 hover:bg-gray-50 active:scale-95 {{ $hasMoreActive ? 'text-[#8b6f2f] bg-amber-50/80' : 'text-gray-600' }}" aria-expanded="false" aria-haspopup="true">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
-                    <span class="text-[10px] sm:text-xs font-medium">Lainnya</span>
-                </button>
-                {{-- Dropdown: Deposito, Gadai, Setting --}}
-                <div id="bottomNavMoreMenu" class="absolute bottom-full right-0 mb-1 w-44 rounded-xl bg-white border border-gray-200 shadow-lg py-1 z-50 hidden" role="menu">
-                    @foreach ($moreNavItems as $moreItem)
-                        <a href="{{ $moreItem['href'] }}" role="menuitem" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors {{ $moreItem['active'] ? 'text-[#8b6f2f] bg-amber-50' : 'text-gray-700 hover:bg-gray-50' }}">
-                            @include('components.nasabah.bottom-navbar-icon', ['icon' => $moreItem['icon'], 'size' => 'w-5 h-5'])
-                            <span>{{ $moreItem['label'] }}</span>
-                        </a>
-                    @endforeach
-                </div>
-            </div>
         </div>
 
-        {{-- Tablet & desktop: satu baris, semua 7 menu --}}
-        <div class="hidden md:flex items-center justify-around py-3 px-4">
-            @foreach (array_merge($mainNavItems, $moreNavItems) as $item)
-                @php $item = is_array($item) ? $item : []; $active = $item['active'] ?? $isActive($item['route'] ?? ''); @endphp
-                <a href="{{ $item['href'] ?? '#' }}" title="{{ $item['label'] }}" class="flex flex-col items-center justify-center gap-1 py-2 px-3 transition-colors duration-200 rounded-xl min-w-16 {{ $active ? 'text-[#8b6f2f] bg-amber-50' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' }}">
-                    @include('components.nasabah.bottom-navbar-icon', ['icon' => $item['icon']])
-                    <span class="text-xs font-medium whitespace-nowrap">{{ $item['label'] }}</span>
-                </a>
-            @endforeach
+        {{-- Mobile: 3 item (Dashboard | Burger | Settings) --}}
+        <div class="md:hidden flex items-center justify-around py-3">
+            <a href="{{ route('nasabah.dashboard') }}" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#8b6f2f] transition-colors {{ $currentRoute === 'nasabah.dashboard' ? 'text-[#8b6f2f]' : '' }}">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                <span class="text-xs font-medium">Dashboard</span>
+            </a>
+            <button type="button" id="burgerMenuBtn" class="flex flex-col items-center gap-0.5 text-[#8b6f2f] focus:outline-none focus:ring-2 focus:ring-[#8b6f2f]/30 rounded-2xl px-2 py-1 transition-transform active:scale-95" aria-expanded="false" aria-label="Menu layanan">
+                <span class="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#8b6f2f]/15 shadow-[0_4px_14px_rgba(139,111,47,0.25)]">
+                    <svg id="burgerIconOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    <svg id="burgerIconClose" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </span>
+                <span class="text-xs font-medium mt-1">Menu</span>
+            </button>
+            <a href="{{ route('nasabah.setting.index') }}" class="flex flex-col items-center gap-0.5 text-gray-500 hover:text-[#8b6f2f] transition-colors {{ $isActive('setting') ? 'text-[#8b6f2f]' : '' }}">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span class="text-xs font-medium">Settings</span>
+            </a>
         </div>
     </div>
 </nav>
 
+{{-- Mobile: floating arc menu (setengah lingkaran di atas burger) --}}
+<div id="burgerArcBackdrop" class="md:hidden fixed inset-0 z-40 bg-black/15 opacity-0 pointer-events-none transition-opacity duration-300" aria-hidden="true"></div>
+<div id="burgerArcMenu" class="md:hidden fixed left-1/2 bottom-[4.5rem] z-50 w-[220px] h-[95px] pointer-events-none" style="transform: translate(calc(-50% + 10px), 0);" aria-hidden="true">
+    @foreach($arcItems as $idx => $arcItem)
+    @php $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70]; @endphp
+    <a href="{{ $arcItem['route'] === '#' ? '#' : route($arcItem['route']) }}"
+       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[0_4px_20px_rgba(103,76,29,0.2)] text-[#8b6f2f] border border-[#8b6f2f]/10 hover:bg-[#8b6f2f]/10 active:scale-95"
+       style="margin-left: -24px; margin-top: -24px; --arc-x: {{ $pos['x'] }}px; --arc-y: {{ $pos['y'] }}px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.2s; transition-delay: {{ $idx * 40 }}ms;"
+       title="{{ $arcItem['label'] }}">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $arcItem['icon'] }}"></path></svg>
+    </a>
+    @endforeach
+</div>
+<style>
+#burgerArcMenu .arc-item { transform: translate(var(--arc-x), var(--arc-y)) scale(0); opacity: 0; }
+#burgerArcMenu.open .arc-item { transform: translate(var(--arc-x), var(--arc-y)) scale(1); opacity: 1; }
+#burgerArcMenu.open { pointer-events: auto; }
+</style>
+
 <script>
-    (function() {
-        var lastScrollTop = 0, scrollTimeout;
-        var el = document.getElementById('bottomNavbar');
-        if (el) {
-            window.addEventListener('scroll', function() {
-                var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                clearTimeout(scrollTimeout);
-                if (scrollTop > lastScrollTop && scrollTop > 100) el.style.transform = 'translateY(100%)';
-                else el.style.transform = 'translateY(0)';
-                lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
-                scrollTimeout = setTimeout(function() { el.style.transform = 'translateY(0)'; }, 150);
-            });
+(function() {
+    // --- Mobile: burger toggle & arc menu ---
+    var burgerBtn = document.getElementById('burgerMenuBtn');
+    var burgerArcMenu = document.getElementById('burgerArcMenu');
+    var burgerArcBackdrop = document.getElementById('burgerArcBackdrop');
+    var burgerIconOpen = document.getElementById('burgerIconOpen');
+    var burgerIconClose = document.getElementById('burgerIconClose');
+
+    function openArc() {
+        if (!burgerArcMenu || !burgerArcBackdrop) return;
+        burgerArcMenu.classList.add('open');
+        burgerArcMenu.setAttribute('aria-hidden', 'false');
+        burgerArcBackdrop.classList.remove('pointer-events-none', 'opacity-0');
+        burgerArcBackdrop.classList.add('opacity-100');
+        if (burgerIconOpen) burgerIconOpen.classList.add('hidden');
+        if (burgerIconClose) burgerIconClose.classList.remove('hidden');
+        if (burgerBtn) burgerBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    function closeArc() {
+        if (!burgerArcMenu || !burgerArcBackdrop) return;
+        burgerArcMenu.classList.remove('open');
+        burgerArcMenu.setAttribute('aria-hidden', 'true');
+        burgerArcBackdrop.classList.add('pointer-events-none', 'opacity-0');
+        burgerArcBackdrop.classList.remove('opacity-100');
+        if (burgerIconOpen) burgerIconOpen.classList.remove('hidden');
+        if (burgerIconClose) burgerIconClose.classList.add('hidden');
+        if (burgerBtn) burgerBtn.setAttribute('aria-expanded', 'false');
+    }
+
+    if (burgerBtn) {
+        burgerBtn.addEventListener('click', function() {
+            if (burgerArcMenu && burgerArcMenu.classList.contains('open')) closeArc();
+            else openArc();
+        });
+    }
+    if (burgerArcBackdrop) {
+        burgerArcBackdrop.addEventListener('click', closeArc);
+    }
+    if (burgerArcMenu) {
+        burgerArcMenu.querySelectorAll('.arc-item').forEach(function(link) {
+            link.addEventListener('click', function() { closeArc(); });
+        });
+    }
+
+    // --- Desktop: sliding background (slide setelah click) ---
+    var navInner = document.getElementById('navBarInner');
+    var navSlider = document.getElementById('navSlider');
+    var STORAGE_KEY = 'navPrevKey';
+
+    function positionSlider(el) {
+        if (!navSlider || !el) return;
+        var innerRect = navInner.getBoundingClientRect();
+        var linkRect = el.getBoundingClientRect();
+        var left = linkRect.left - innerRect.left + (el.offsetWidth - 48) / 2;
+        left = Math.max(0, left);
+        navSlider.style.left = left + 'px';
+        navSlider.style.width = '48px';
+    }
+
+    function getLinkByKey(key) {
+        if (!navInner) return null;
+        return navInner.querySelector('.nav-item[data-nav-key="' + key + '"]');
+    }
+
+    function initSlider() {
+        if (!navInner || !navSlider) return;
+        var activeLink = navInner.querySelector('[data-nav-active="1"]');
+        var currentKey = activeLink ? activeLink.getAttribute('data-nav-key') : null;
+        var prevKey = null;
+        try { prevKey = sessionStorage.getItem(STORAGE_KEY); } catch (e) {}
+
+        navSlider.style.transition = 'none';
+
+        if (prevKey && prevKey !== currentKey) {
+            var prevLink = getLinkByKey(prevKey);
+            if (prevLink) {
+                positionSlider(prevLink);
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        navSlider.style.transition = 'left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)';
+                        if (activeLink) positionSlider(activeLink);
+                    });
+                });
+            } else {
+                if (activeLink) positionSlider(activeLink);
+                navSlider.style.transition = 'left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)';
+            }
+        } else {
+            if (activeLink) positionSlider(activeLink);
+            navSlider.style.transition = 'left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1)';
         }
-        // More menu (titik tiga): toggle + tutup saat klik di luar
-        var moreWrap = document.getElementById('bottomNavMoreWrap');
-        var moreBtn = document.getElementById('bottomNavMoreBtn');
-        var moreMenu = document.getElementById('bottomNavMoreMenu');
-        if (moreBtn && moreMenu) {
-            moreBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                var isOpen = !moreMenu.classList.contains('hidden');
-                moreMenu.classList.toggle('hidden', isOpen);
-                moreBtn.setAttribute('aria-expanded', !isOpen);
-                moreBtn.classList.toggle('text-[#8b6f2f]', !isOpen);
-                moreBtn.classList.toggle('bg-amber-50/80', !isOpen);
-            });
-            document.addEventListener('click', function() {
-                moreMenu.classList.add('hidden');
-                moreBtn.setAttribute('aria-expanded', 'false');
-                moreBtn.classList.remove('text-[#8b6f2f]', 'bg-amber-50/80');
-            });
-            moreWrap && moreWrap.addEventListener('click', function(e) { e.stopPropagation(); });
+
+        if (currentKey) {
+            try { sessionStorage.setItem(STORAGE_KEY, currentKey); } catch (e) {}
         }
-    })();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSlider);
+    } else {
+        initSlider();
+    }
+
+    // Hide/show bottom navbar on scroll
+    var lastScrollTop = 0;
+    var scrollTimeout;
+    var bottomNavbar = document.getElementById('bottomNavbar');
+
+    if (bottomNavbar) {
+        window.addEventListener('scroll', function() {
+            var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            clearTimeout(scrollTimeout);
+            if (scrollTop > lastScrollTop && scrollTop > 100) {
+                bottomNavbar.style.transform = 'translateY(100%)';
+            } else {
+                bottomNavbar.style.transform = 'translateY(0)';
+            }
+            lastScrollTop = scrollTop <= 0 ? 0 : scrollTop;
+            scrollTimeout = setTimeout(function() {
+                bottomNavbar.style.transform = 'translateY(0)';
+            }, 150);
+        });
+    }
+})();
 </script>

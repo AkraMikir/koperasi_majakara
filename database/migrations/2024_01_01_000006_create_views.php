@@ -14,6 +14,7 @@ return new class extends Migration//ikkkkm
                 UUID() AS id_view,
                 'Tabungan' AS fitur,
                 jt.id AS id_asli,
+                NULL AS id_pengajuan,
                 jt.id_nasabah AS id_anggota,
                 u.nama AS nama_anggota,
                 jt.tanggal_janji_temu,
@@ -36,6 +37,7 @@ return new class extends Migration//ikkkkm
                 UUID() AS id_view,
                 'Pinjaman' AS fitur,
                 jt.id AS id_asli,
+                jt.id_pengajuan AS id_pengajuan,
                 jt.id_nasabah AS id_anggota,
                 u.nama AS nama_anggota,
                 jt.tanggal_janji_temu,
@@ -43,9 +45,9 @@ return new class extends Migration//ikkkkm
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                '' AS keterangan_admin,     -- Placeholder
-                '1' AS status,              -- Placeholder
-                CAST('other' AS CHAR(50)) AS jenis,
+                IFNULL(jt.keterangan_admin, '') AS keterangan_admin,
+                IFNULL(jt.status, '1') AS status,
+                CAST('pengajuan' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pinjaman jt
             JOIN tbl_nasabah n ON jt.id_nasabah = n.id
@@ -58,6 +60,7 @@ return new class extends Migration//ikkkkm
                 UUID() AS id_view,
                 'Pembayaran Pinjaman' AS fitur,
                 jt.id AS id_asli,
+                jt.id_pengajuan AS id_pengajuan,
                 p.id_anggota AS id_anggota,
                 u.nama AS nama_anggota,
                 jt.tanggal_janji_temu,

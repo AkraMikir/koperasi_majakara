@@ -13,12 +13,15 @@ class JanjiTemuPembayaranPinjaman extends Model
     protected $table = 'tbl_janji_temu_pembayaran_pinjaman';
 
     protected $fillable = [
+        'id',
         'id_pengajuan',
         'lokasi_temu',
         'nominal',
         'tanggal_janji_temu',
         'waktu_janji_temu',
         'keterangan',
+        'keterangan_admin',
+        'status',
     ];
 
     protected $casts = [

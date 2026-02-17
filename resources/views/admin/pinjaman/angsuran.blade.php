@@ -77,13 +77,13 @@
                     @php
                         $tempos = $jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
                     @endphp
-                    <tr class="border-b border-gray-100 hover:bg-gray-50/50 align-top">
-                        <td class="px-4 py-3 text-center text-sm font-semibold text-gray-700">{{ $pinjamanList->firstItem() + $no }}</td>
-                        <td class="px-4 py-3 text-center">
+                    <tr class="border-b border-gray-100 hover:bg-gray-50/50">
+                        <td class="px-4 py-3 text-center align-middle text-sm font-semibold text-gray-700 w-14">{{ $pinjamanList->firstItem() + $no }}</td>
+                        <td class="px-4 py-3 text-center align-middle">
                             <p class="text-sm font-medium text-gray-900">#{{ $pinjaman->id }}</p>
                             <p class="text-xs text-gray-500">{{ ucfirst($pinjaman->jenis) }} · {{ $pinjaman->lama_pinjam }} {{ $pinjaman->jenis === 'bulanan' ? 'bulan' : 'minggu' }}</p>
                         </td>
-                        <td class="px-4 py-3 text-center">
+                        <td class="px-4 py-3 text-center align-middle">
                             <p class="font-semibold text-gray-900">{{ $pinjaman->nasabah->user->nama ?? 'N/A' }}</p>
                             <p class="text-xs text-gray-500">{{ $pinjaman->nasabah->user->email ?? '-' }}</p>
                         </td>
@@ -92,17 +92,18 @@
                                 <table class="w-full text-xs">
                                     <thead>
                                         <tr class="bg-gradient-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
-                                            <th class="px-3 py-2 text-left font-semibold text-[#674c1d]">No</th>
+                                            <th class="px-3 py-2 text-center font-semibold text-[#674c1d]">No</th>
                                             <th class="px-3 py-2 text-left font-semibold text-[#674c1d]">Jatuh Tempo</th>
                                             <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Jumlah Tagihan</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($tempos as $t)
-                                        <tr class="border-t border-[#8b6f2f]/10 hover:bg-amber-50/50 transition-colors">
-                                            <td class="px-3 py-2 font-medium text-gray-700">#{{ $t->no_urut }}</td>
-                                            <td class="px-3 py-2 text-gray-600">{{ $t->tgl_jatuh_tempo->format('d M Y') }}</td>
-                                            <td class="px-3 py-2 text-right font-semibold text-[#674c1d]">Rp {{ number_format($t->jumlah_tagihan, 0, ',', '.') }}</td>
+                                        @php $isTelat = $t->tgl_jatuh_tempo < now() && $t->status_bayar !== 'lunas'; @endphp
+                                        <tr class="{{ $isTelat ? 'bg-red-100 border-l-4 border-red-500' : 'border-t border-[#8b6f2f]/10 hover:bg-amber-50/50' }} transition-colors align-middle">
+                                            <td class="px-3 py-2 text-center align-middle font-medium {{ $isTelat ? 'text-red-800' : 'text-gray-700' }}">#{{ $t->no_urut }}</td>
+                                            <td class="px-3 py-2 align-middle {{ $isTelat ? 'text-red-800 font-medium' : 'text-gray-600' }}">{{ $t->tgl_jatuh_tempo->format('d M Y') }}@if($isTelat) <span class="text-red-600 text-[10px]">(Telat)</span>@endif</td>
+                                            <td class="px-3 py-2 text-right align-middle font-semibold {{ $isTelat ? 'text-red-800' : 'text-[#674c1d]' }}">Rp {{ number_format($t->jumlah_tagihan, 0, ',', '.') }}</td>
                                         </tr>
                                         @endforeach
                                     </tbody>
@@ -115,12 +116,13 @@
                                     <thead>
                                         <tr class="bg-gradient-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
                                             <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Terbayar</th>
-                                            <th class="px-3 py-2 text-left font-semibold text-[#674c1d]">Status</th>
+                                            <th class="px-3 py-2 text-center font-semibold text-[#674c1d]">Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach($tempos as $t)
                                         @php
+                                            $isTelatStatus = $t->tgl_jatuh_tempo < now() && $t->status_bayar !== 'lunas';
                                             $sc = [
                                                 'belum' => ['bg' => 'bg-amber-100', 'text' => 'text-amber-800', 'label' => 'Belum'],
                                                 'lunas' => ['bg' => 'bg-emerald-100', 'text' => 'text-emerald-800', 'label' => 'Lunas'],
@@ -128,9 +130,9 @@
                                             ];
                                             $st = $sc[$t->status_bayar] ?? $sc['belum'];
                                         @endphp
-                                        <tr class="border-t border-[#8b6f2f]/10 hover:bg-amber-50/50 transition-colors">
-                                            <td class="px-3 py-2 text-right font-medium text-gray-700">Rp {{ number_format($t->jumlah_terbayar ?? 0, 0, ',', '.') }}</td>
-                                            <td class="px-3 py-2">
+                                        <tr class="{{ $isTelatStatus ? 'bg-red-100 border-l-4 border-red-500' : 'border-t border-[#8b6f2f]/10 hover:bg-amber-50/50' }} transition-colors align-middle">
+                                            <td class="px-3 py-2 text-right align-middle font-medium {{ $isTelatStatus ? 'text-red-800' : 'text-gray-700' }}">Rp {{ number_format($t->jumlah_terbayar ?? 0, 0, ',', '.') }}</td>
+                                            <td class="px-3 py-2 text-center align-middle">
                                                 <span class="inline-flex px-2 py-0.5 rounded-full {{ $st['bg'] }} {{ $st['text'] }} text-xs font-medium">{{ $st['label'] }}</span>
                                             </td>
                                         </tr>

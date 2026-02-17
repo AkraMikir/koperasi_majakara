@@ -16,6 +16,8 @@ class DatabaseSeeder extends Seeder
             GadaiSeeder::class,
             UserSeeder::class,
             NasabahSeeder::class,
+            JnsLokasiPerusahaanSeeder::class,
+            PinjamanSeeder::class,
         ]);
     }
 }

@@ -36,10 +36,27 @@
                         <p class="text-sm text-gray-600">Nomor HP</p>
                         <p class="font-semibold text-gray-900">{{ $pengajuan->nasabah->user->nomor_hp ?? 'N/A' }}</p>
                     </div>
+                    @if(($pengajuan->jenis_pencairan ?? '') === 'transfer' && $pengajuan->nasabah->dataRek)
+                    <div>
+                        <p class="text-sm text-gray-600">Nomor Rekening</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Bank</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->nasabah->dataRek->nama_bank ?? 'N/A' }}</p>
+                    </div>
+                    @if($pengajuan->nasabah->dataRek->nama_pemilik_rekening ?? null)
+                    <div>
+                        <p class="text-sm text-gray-600">Nama Pemilik Rekening</p>
+                        <p class="font-semibold text-gray-900">{{ $pengajuan->nasabah->dataRek->nama_pemilik_rekening }}</p>
+                    </div>
+                    @endif
+                    @else
                     <div>
                         <p class="text-sm text-gray-600">NIK</p>
                         <p class="font-semibold text-gray-900">{{ $pengajuan->nasabah->dataKtp->nik ?? 'N/A' }}</p>
                     </div>
+                    @endif
                     @if($pengajuan->nasabah->pekerjaan)
                     <div>
                         <p class="text-sm text-gray-600">Pekerjaan</p>
@@ -76,6 +93,12 @@
                             <p class="text-sm text-gray-600">Durasi</p>
                             <p class="font-semibold text-gray-900 mt-2">{{ $pengajuan->durasi }} {{ $pengajuan->jenis === 'bulanan' ? 'bulan' : 'minggu' }}</p>
                         </div>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Metode Pencairan</p>
+                        <span class="inline-block mt-2 px-4 py-2 {{ ($pengajuan->jenis_pencairan ?? 'transfer') === 'transfer' ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700' }} rounded-full text-sm font-semibold">
+                            {{ ($pengajuan->jenis_pencairan ?? 'transfer') === 'transfer' ? 'Transfer' : 'Tunai (Janji Temu)' }}
+                        </span>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Status</p>
@@ -243,10 +266,10 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
                         </div>
                         <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transfer (Opsional)</label>
-                            <input type="file" name="bukti_transfer" accept="image/*"
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transaksi *</label>
+                            <input type="file" name="bukti_transfer" accept="image/*" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                            <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG (Max 5MB)</p>
+                            <p class="text-xs text-gray-500 mt-1">Wajib upload file sebagai bukti. Format: JPG, PNG (Max 5MB)</p>
                         </div>
                         <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
                             <p class="text-sm text-yellow-800">
