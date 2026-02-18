@@ -137,6 +137,16 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pengajuan-tarik', [\App\Http\Controllers\Admin\TabunganController::class, 'pengajuanTarik'])->name('pengajuan-tarik');
         Route::get('/pengajuan-tarik/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
         Route::get('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'transaksi'])->name('transaksi');
+        // CRUD Transaksi routes - MUST be before /transaksi/{id} agar 'create' tidak tertangkap sebagai {id}
+        Route::middleware('admin.permission:crud-tabungan')->group(function () {
+            Route::get('/transaksi/create', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransaksi'])->name('create-transaksi');
+            Route::post('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'storeTransaksi'])->name('store-transaksi');
+            Route::get('/transaksi/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editTransaksi'])->name('edit-transaksi');
+            Route::put('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'updateTransaksi'])->name('update-transaksi');
+            Route::delete('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'destroyTransaksi'])->name('destroy-transaksi');
+            Route::post('/pengajuan-setor/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editPengajuanSetor'])->name('edit-pengajuan-setor');
+            Route::delete('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'deletePengajuanSetor'])->name('delete-pengajuan-setor');
+        });
         Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
         Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
         Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
@@ -147,17 +157,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/pengajuan-tarik/{id}/approve', [\App\Http\Controllers\Admin\TabunganController::class, 'approveTarik'])->name('approve-tarik');
         Route::post('/pengajuan-tarik/{id}/reject', [\App\Http\Controllers\Admin\TabunganController::class, 'rejectTarik'])->name('reject-tarik');
         Route::post('/janji-temu/{id}/create-trans', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransFromJanjiTemu'])->name('create-trans-from-janji-temu');
-
-        // CRUD Transaksi routes - ONLY Admin Utama (Admin Operasional CANNOT access)
-        Route::middleware('admin.permission:crud-tabungan')->group(function () {
-            Route::get('/transaksi/create', [\App\Http\Controllers\Admin\TabunganController::class, 'createTransaksi'])->name('create-transaksi');
-            Route::post('/transaksi', [\App\Http\Controllers\Admin\TabunganController::class, 'storeTransaksi'])->name('store-transaksi');
-            Route::get('/transaksi/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editTransaksi'])->name('edit-transaksi');
-            Route::put('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'updateTransaksi'])->name('update-transaksi');
-            Route::delete('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'destroyTransaksi'])->name('destroy-transaksi');
-            Route::post('/pengajuan-setor/{id}/edit', [\App\Http\Controllers\Admin\TabunganController::class, 'editPengajuanSetor'])->name('edit-pengajuan-setor');
-            Route::delete('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'deletePengajuanSetor'])->name('delete-pengajuan-setor');
-        });
     });
     
     // Pinjaman Routes
@@ -167,6 +166,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pengajuan', [\App\Http\Controllers\Admin\PinjamanController::class, 'pengajuan'])->name('pengajuan');
         Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
         Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        // CRUD Pinjaman - MUST be before /pinjaman-aktif/{id} agar 'create' tidak tertangkap sebagai {id}
+        Route::middleware('admin.permission:crud-pinjaman')->group(function () {
+            Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
+            Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
+            Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
+            Route::put('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePinjaman'])->name('update-pinjaman');
+            Route::delete('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'deletePinjaman'])->name('delete-pinjaman');
+        });
         Route::get('/pinjaman-lunas', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanLunas'])->name('pinjaman-lunas');
         Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
         Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
@@ -182,15 +189,6 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/pembayaran/{id}/reject', [\App\Http\Controllers\Admin\PinjamanController::class, 'rejectPembayaran'])->name('reject-pembayaran');
         Route::post('/pembayaran/{id}/konfirmasi', [\App\Http\Controllers\Admin\PinjamanController::class, 'konfirmasiPembayaran'])->name('konfirmasi-pembayaran');
         Route::post('/pembayaran/{id}/upload-serah-terima', [\App\Http\Controllers\Admin\PinjamanController::class, 'uploadSerahTerima'])->name('upload-serah-terima');
-
-        // CRUD Pinjaman Aktif routes - ONLY Admin Utama (Admin Operasional CANNOT access)
-        Route::middleware('admin.permission:crud-pinjaman')->group(function () {
-            Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
-            Route::post('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'storePinjaman'])->name('store-pinjaman');
-            Route::get('/pinjaman-aktif/{id}/edit', [\App\Http\Controllers\Admin\PinjamanController::class, 'editPinjaman'])->name('edit-pinjaman');
-            Route::put('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'updatePinjaman'])->name('update-pinjaman');
-            Route::delete('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'deletePinjaman'])->name('delete-pinjaman');
-        });
 
         // Pelunasan Dipercepat - ONLY Admin Utama
         Route::middleware('admin.permission:pelunasan-dipercepat')->group(function () {
@@ -325,6 +323,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferDestroy'])->name('destroy');
                 Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferToggleStatus'])->name('toggle-status');
             });
+        });
+
+        // Manajemen Admin Operasional - ONLY Admin Utama (semua route)
+        Route::prefix('admin-operasional')->name('admin-operasional.')->middleware('admin.permission:crud-master-data')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalToggleStatus'])->name('toggle-status');
         });
     });
     

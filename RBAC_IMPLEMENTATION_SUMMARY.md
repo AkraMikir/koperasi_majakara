@@ -206,6 +206,28 @@ Test admin operasional mencoba akses restricted URLs:
 - `/admin/master-data/bunga-pinjaman/create` → Return 403 Forbidden
 - `/admin/nasabah/123/reset-pin` → Return 403 Forbidden
 
+## 🤖 Automated Testing (PHPUnit)
+
+Tes otomatis untuk RBAC tersedia di **`tests/Feature/RbacAdminAccessTest.php`**.
+
+### Menjalankan tes RBAC
+```bash
+php artisan test tests/Feature/RbacAdminAccessTest.php
+```
+
+### Skenario yang dites (27 test cases)
+- **Unauthenticated:** redirect ke login saat akses admin
+- **Nasabah:** dapat 403 saat akses admin dashboard / tabungan
+- **Admin Operasional – dilarang (403):** create transaksi tabungan, create pinjaman, create master data bunga pinjaman, reset PIN nasabah, edit transaksi, edit pinjaman, generate random PIN
+- **Admin Operasional – diizinkan (200):** dashboard, tabungan index/transaksi list, pinjaman index/pinjaman aktif, master data index & view, laporan, nasabah index, notifications
+- **Admin Utama – full access (200):** dashboard, tabungan create transaksi, pinjaman create, master data create, nasabah index, generate random PIN
+
+### Catatan
+- Tes memakai `RefreshDatabase` dan SQLite in-memory.
+- Migrasi view `v_janji_temu_universal` di-skip saat driver SQLite agar kompatibel dengan testing.
+
+---
+
 ## 🚀 Cara Testing Manual
 
 ### 1. Login sebagai Admin Utama
@@ -217,7 +239,7 @@ PIN: 123456
 
 ### 2. Login sebagai Admin Operasional
 ```
-Email: admin.operasional1@koperasi.com
+Email:  
 Password: password123
 PIN: 567890
 ```

@@ -11,8 +11,12 @@ use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\JnsDeposito;
+use App\Models\AdminOperasional;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class MasterDataController extends Controller
 {
@@ -39,7 +43,8 @@ class MasterDataController extends Controller
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
-            'total_biaya_transfer' => 0, 
+            'total_biaya_transfer' => 0,
+            'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -654,5 +659,158 @@ class MasterDataController extends Controller
         $data->save();
 
         return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ==================== MANAJEMEN ADMIN OPERASIONAL ====================
+
+    public function adminOperasionalIndex(Request $request)
+    {
+        $this->checkCrudPermission();
+
+        $query = AdminOperasional::with('user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nomor_hp', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $adminList = $query->latest()->paginate(10)->withQueryString();
+
+        return view('admin.master-data.admin-operasional.index', compact('adminList'));
+    }
+
+    public function adminOperasionalCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.admin-operasional.create');
+    }
+
+    public function adminOperasionalStore(Request $request)
+    {
+        $this->checkCrudPermission();
+
+        $request->validate([
+            'nama'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email',
+            'nomor_hp'              => 'required|string|max:20',
+            'password'              => 'required|string|min:8|confirmed',
+        ], [
+            'nama.required'                 => 'Nama wajib diisi.',
+            'email.required'                => 'Email wajib diisi.',
+            'email.email'                   => 'Format email tidak valid.',
+            'email.unique'                  => 'Email sudah digunakan.',
+            'nomor_hp.required'             => 'Nomor HP wajib diisi.',
+            'password.required'             => 'Password wajib diisi.',
+            'password.min'                  => 'Password minimal 8 karakter.',
+            'password.confirmed'            => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'nama'              => $request->nama,
+                'email'             => $request->email,
+                'nomor_hp'          => $request->nomor_hp,
+                'password'          => Hash::make($request->password),
+                'pin'               => null,
+                'foto'              => 'default-avatar.jpg',
+                'role'              => 'admin_operasional',
+                'email_verified_at' => now(),
+            ]);
+
+            AdminOperasional::create([
+                'user_id' => $user->id,
+                'status'  => 'aktif',
+            ]);
+        });
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil ditambahkan.');
+    }
+
+    public function adminOperasionalEdit($id)
+    {
+        $this->checkCrudPermission();
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+        return view('admin.master-data.admin-operasional.edit', compact('adminOp'));
+    }
+
+    public function adminOperasionalUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+
+        $request->validate([
+            'nama'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $adminOp->user_id,
+            'nomor_hp'  => 'required|string|max:20',
+            'password'  => 'nullable|string|min:8|confirmed',
+        ], [
+            'nama.required'         => 'Nama wajib diisi.',
+            'email.required'        => 'Email wajib diisi.',
+            'email.email'           => 'Format email tidak valid.',
+            'email.unique'          => 'Email sudah digunakan akun lain.',
+            'nomor_hp.required'     => 'Nomor HP wajib diisi.',
+            'password.min'          => 'Password minimal 8 karakter.',
+            'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        DB::transaction(function () use ($request, $adminOp) {
+            $userData = [
+                'nama'     => $request->nama,
+                'email'    => $request->email,
+                'nomor_hp' => $request->nomor_hp,
+            ];
+
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $adminOp->user->update($userData);
+        });
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil diperbarui.');
+    }
+
+    public function adminOperasionalDestroy($id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+
+        // Cegah menghapus diri sendiri
+        if ($adminOp->user_id === auth()->id()) {
+            return redirect()->back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
+        }
+
+        DB::transaction(function () use ($adminOp) {
+            $user = $adminOp->user;
+            $adminOp->delete();
+            $user->delete();
+        });
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil dihapus.');
+    }
+
+    public function adminOperasionalToggleStatus($id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::findOrFail($id);
+        $adminOp->status = $adminOp->status === 'aktif' ? 'nonaktif' : 'aktif';
+        $adminOp->save();
+
+        $statusText = $adminOp->status === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
+        return redirect()->back()->with('success', "Akun Admin Operasional berhasil {$statusText}.");
     }
 }
