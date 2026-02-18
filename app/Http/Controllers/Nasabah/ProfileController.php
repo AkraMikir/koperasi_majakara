@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use App\Models\PengajuanPerubahanData;
 use App\Models\Nasabah;
 use App\Models\Pekerjaan;
@@ -108,6 +109,11 @@ class ProfileController extends Controller
                     'jenis_data' => $jenisData,
                 ]);
 
+                $newPengajuan = PengajuanPerubahanData::where('id_nasabah', $nasabah->id)->where('status', 'pending')->latest()->first();
+                if ($newPengajuan) {
+                    app(ActivityLogService::class)->logSubmitPerubahanData($newPengajuan->id);
+                }
+
                 return redirect()->back()
                     ->with('success', 'Pengajuan perubahan data berhasil dikirim! Menunggu persetujuan admin.');
             }
@@ -151,6 +157,8 @@ class ProfileController extends Controller
                 'user_id' => $user->id,
                 'pengajuan_id' => $id,
             ]);
+
+            app(ActivityLogService::class)->logBatalPerubahanData($id);
 
             return redirect()->back()
                 ->with('success', 'Pengajuan perubahan data berhasil dibatalkan.');

@@ -14,9 +14,11 @@
             <h1 class="text-3xl font-bold text-gray-900 font-display">Jenis Deposito</h1>
             <p class="text-gray-600 mt-1">Kelola tipe-tipe deposito</p>
         </div>
+        @canCrudMasterData
         <a href="{{ route('admin.master-data.jenis-deposito.create') }}" class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md text-sm font-medium">
             + Tambah Data
         </a>
+        @endcanCrudMasterData
     </div>
 
     @if(session('success'))
@@ -50,15 +52,22 @@
                         <td class="px-6 py-4 text-sm font-semibold text-gray-900">{{ $item->nama_jenis }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $item->deskripsi ?? '-' }}</td>
                         <td class="px-6 py-4">
+                            @canCrudMasterData
                             <form action="{{ route('admin.master-data.jenis-deposito.toggle-status', $item->id) }}" method="POST" class="inline">
                                 @csrf
                                 <button type="submit" class="px-3 py-1 rounded-full text-xs font-medium {{ $item->status_aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
                                     {{ $item->status_aktif ? 'Aktif' : 'Nonaktif' }}
                                 </button>
                             </form>
+                            @else
+                            <span class="px-3 py-1 rounded-full text-xs font-medium {{ $item->status_aktif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
+                                {{ $item->status_aktif ? 'Aktif' : 'Nonaktif' }}
+                            </span>
+                            @endcanCrudMasterData
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center space-x-2">
+                                @canCrudMasterData
                                 <a href="{{ route('admin.master-data.jenis-deposito.edit', $item->id) }}" class="p-2 text-[#674c1d] hover:bg-[#674c1d]/10 rounded-lg">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -73,6 +82,9 @@
                                         </svg>
                                     </button>
                                 </form>
+                                @else
+                                <span class="text-xs text-gray-400">View Only</span>
+                                @endcanCrudMasterData
                             </div>
                         </td>
                     </tr>

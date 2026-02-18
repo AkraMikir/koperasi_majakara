@@ -11,6 +11,7 @@ use App\Models\JnsLokasiPerusahaan;
 use App\Models\TransTabungan;
 use App\Models\BuktiFoto; // New Model
 use App\Helpers\IdGenerator; // New Helper
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -281,6 +282,8 @@ class TabunganController extends Controller
                     'pengajuan_tabungan'
                 );
 
+                app(ActivityLogService::class)->logSubmitSetoran($pengajuan->id, $pengajuan->nominal, 'transfer');
+
                 return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
                     ->with('success', 'Pengajuan setoran via transfer berhasil dikirim!');
             }
@@ -396,6 +399,8 @@ class TabunganController extends Controller
                 'status' => '1',                // ✅ Default: Menunggu
             ]);
 
+            app(ActivityLogService::class)->logSubmitJanjiTemuTabungan($id, $request->nominal, 'setoran', $request->tanggal_janji_temu);
+
             // Redirect ke status janji temu
             return redirect()->route('nasabah.tabungan.status-janji-temu')
                 ->with('success', 'Janji temu berhasil dibuat!');
@@ -503,6 +508,8 @@ class TabunganController extends Controller
             }
 
             DB::commit();
+
+            app(ActivityLogService::class)->logSubmitPenarikan($idPengajuan, $request->nominal, $request->metode);
 
             $redirectRoute = $request->metode === 'tunai' 
                 ? 'nasabah.tabungan.status-janji-temu' 

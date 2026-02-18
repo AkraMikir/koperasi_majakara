@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Models\AdminNotification;
 use App\Services\AdminPermissionService;
+use App\Services\ActivityLogService;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,7 +16,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Register ActivityLogService as singleton
+        $this->app->singleton(ActivityLogService::class, function ($app) {
+            return new ActivityLogService();
+        });
     }
 
     /**

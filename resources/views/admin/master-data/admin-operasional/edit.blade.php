@@ -175,7 +175,8 @@
 
                 <!-- Form Actions -->
                 <div class="flex items-center justify-between pt-2 border-t border-gray-100">
-                    <!-- Delete action -->
+                    <!-- Delete action — hanya Admin Utama -->
+                    @canCrudMasterData
                     <form action="{{ route('admin.master-data.admin-operasional.destroy', $adminOp->id) }}" method="POST"
                         onsubmit="return confirm('Yakin ingin menghapus akun ini? Aksi ini tidak dapat dibatalkan.')">
                         @csrf
@@ -188,6 +189,9 @@
                             Hapus Akun
                         </button>
                     </form>
+                    @else
+                    <div></div>
+                    @endcanCrudMasterData
 
                     <div class="flex gap-3">
                         <a href="{{ route('admin.master-data.admin-operasional.index') }}"

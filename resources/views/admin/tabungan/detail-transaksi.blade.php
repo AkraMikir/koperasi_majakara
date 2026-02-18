@@ -8,21 +8,11 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Transaksi Tabungan</h1>
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ??str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
-=======
             <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
->>>>>>> 6c04f015aaaf38a6d6dbe432ab9544fa1013630c
-=======
-            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
-=======
-            <p class="text-gray-600 mt-1">ID Transaksi: {{ $transaksi->id_transaksi ??str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
->>>>>>> ab817ff (before pull)
->>>>>>> Stashed changes
         </div>
         <div class="flex items-center space-x-3">
             @if(!$transaksi->id_pengajuan_setor && !$transaksi->id_pengajuan_tarik)
+            @canCrudTabungan
             <a href="{{ route('admin.tabungan.edit-transaksi', $transaksi->id) }}" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
                 Edit Transaksi
             </a>
@@ -33,6 +23,7 @@
                     Hapus
                 </button>
             </form>
+            @endcanCrudTabungan
             @endif
             <a href="{{ route('admin.tabungan.transaksi') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                 ← Kembali

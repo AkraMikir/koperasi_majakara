@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use App\Models\Nasabah;
 use App\Models\PengajuanPerubahanData;
 use App\Models\User;
@@ -168,6 +169,8 @@ class NasabahManagementController extends Controller
                 'nasabah_id' => $nasabah->id,
             ]);
 
+            app(ActivityLogService::class)->logApprovePerubahanData($pengajuan->id, $nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.nasabah.pending-changes')
                 ->with('success', 'Perubahan data berhasil disetujui dan diterapkan!');
 
@@ -217,6 +220,8 @@ class NasabahManagementController extends Controller
                 'admin_id' => auth()->id(),
                 'pengajuan_id' => $pengajuan->id,
             ]);
+
+            app(ActivityLogService::class)->logRejectPerubahanData($pengajuan->id, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.nasabah.pending-changes')
                 ->with('success', 'Perubahan data ditolak.');
@@ -288,6 +293,8 @@ class NasabahManagementController extends Controller
                 'nasabah_email' => $nasabah->user->email,
                 'timestamp' => now(),
             ]);
+
+            app(ActivityLogService::class)->logResetPin($nasabah->id, $nasabah->user->nama ?? 'N/A');
 
             return redirect()->back()->with('success', 'PIN nasabah berhasil direset. Silakan informasikan PIN baru kepada nasabah melalui WhatsApp.');
         } catch (\Exception $e) {

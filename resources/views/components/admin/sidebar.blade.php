@@ -7,6 +7,7 @@ return str_starts_with($currentRoute, $route) ? 'bg-gradient-to-r from-[#674c1d]
 $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
 $isTabunganActive = str_starts_with($currentRoute, 'admin.tabungan');
 $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
+$isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
 @endphp
 
 <aside id="adminSidebar"
@@ -307,6 +308,42 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
                 </div>
                 <span class="font-medium">Master Data</span>
             </a>
+
+            <!-- Log Aktivitas (hanya Admin Utama) -->
+            @isAdminUtama
+            <div x-data="{ open: {{ $isActivityLogActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isActivityLogActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="font-medium">Log Aktivitas</span>
+                    </div>
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+                    <a href="{{ route('admin.activity-log.nasabah') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.activity-log.nasabah') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Log Nasabah
+                    </a>
+                    <a href="{{ route('admin.activity-log.admin-operasional') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.activity-log.admin-operasional') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Log Admin
+                    </a>
+                </div>
+            </div>
+            @endisAdminUtama
         </nav>
 
         <!-- User Profile Section -->

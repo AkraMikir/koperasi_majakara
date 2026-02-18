@@ -731,6 +731,9 @@ class MasterDataController extends Controller
             ]);
         });
 
+        $newAdmin = AdminOperasional::with('user')->where('user_id', User::where('email', $request->email)->value('id'))->first();
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('create', $request->nama, $newAdmin->id ?? null);
+
         return redirect()->route('admin.master-data.admin-operasional.index')
             ->with('success', 'Akun Admin Operasional berhasil ditambahkan.');
     }
@@ -777,6 +780,8 @@ class MasterDataController extends Controller
             $adminOp->user->update($userData);
         });
 
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('update', $adminOp->user->nama, $adminOp->id);
+
         return redirect()->route('admin.master-data.admin-operasional.index')
             ->with('success', 'Akun Admin Operasional berhasil diperbarui.');
     }
@@ -792,11 +797,15 @@ class MasterDataController extends Controller
             return redirect()->back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
         }
 
+        $namaAdmin = $adminOp->user->nama ?? 'N/A';
+        $adminId = $adminOp->id;
         DB::transaction(function () use ($adminOp) {
             $user = $adminOp->user;
             $adminOp->delete();
             $user->delete();
         });
+
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('delete', $namaAdmin, $adminId);
 
         return redirect()->route('admin.master-data.admin-operasional.index')
             ->with('success', 'Akun Admin Operasional berhasil dihapus.');
@@ -811,6 +820,10 @@ class MasterDataController extends Controller
         $adminOp->save();
 
         $statusText = $adminOp->status === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
+        $action = $adminOp->status === 'aktif' ? 'toggle_aktif' : 'toggle_nonaktif';
+        $adminOp->load('user');
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction($action, $adminOp->user->nama ?? 'N/A', $adminOp->id);
+
         return redirect()->back()->with('success', "Akun Admin Operasional berhasil {$statusText}.");
     }
 }

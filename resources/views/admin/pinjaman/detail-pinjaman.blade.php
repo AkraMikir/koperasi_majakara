@@ -195,7 +195,8 @@
                 </div>
             </div>
 
-            <!-- Pelunasan Dipercepat -->
+            <!-- Pelunasan Dipercepat — hanya Admin Utama -->
+            @canPelunasanDipercepat
             @if($pinjaman->lunas === 'belum')
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Pelunasan Dipercepat</h3>
@@ -285,10 +286,12 @@
                 </div>
             </div>
             @endif
+            @endcanPelunasanDipercepat
         </div>
     </div>
 </div>
 
+@canPelunasanDipercepat
 @if($pinjaman->lunas === 'belum')
 <script>
 function showPelunasanModal() {
@@ -299,5 +302,7 @@ function hidePelunasanModal() {
     document.getElementById('pelunasanModal').classList.add('hidden');
 }
 </script>
+@endif
+@endcanPelunasanDipercepat
 @endif
 @endsection

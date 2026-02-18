@@ -360,6 +360,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
     // Halaman Pengajuan dihapus - redirect ke dashboard bila ada yang akses langsung
     Route::get('/pengajuan', fn () => redirect()->route('admin.dashboard', [], 301))->name('pengajuan.index');
+
+    // Log Aktivitas - hanya Admin Utama yang bisa akses
+    Route::prefix('activity-log')->name('activity-log.')->middleware('admin.utama')->group(function () {
+        Route::get('/nasabah', [\App\Http\Controllers\Admin\ActivityLogController::class, 'nasabah'])->name('nasabah');
+        Route::get('/admin-operasional', [\App\Http\Controllers\Admin\ActivityLogController::class, 'adminOperasional'])->name('admin-operasional');
+    });
 });
 
 // ============================================

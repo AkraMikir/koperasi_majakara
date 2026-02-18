@@ -188,6 +188,7 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-2">
+                                @canCrudMasterData
                                 <a href="{{ route('admin.master-data.admin-operasional.edit', $admin->id) }}"
                                     class="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -207,6 +208,7 @@
                                         Hapus
                                     </button>
                                 </form>
+                                @endcanCrudMasterData
                             </div>
                         </td>
                     </tr>

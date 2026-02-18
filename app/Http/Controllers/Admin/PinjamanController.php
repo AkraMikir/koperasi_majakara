@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use App\Models\PengajuanPinjaman;
 use App\Models\PinjamanH;
 use App\Models\TempoPinjamanB;
@@ -193,6 +194,8 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            app(ActivityLogService::class)->logApprovePengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
                 ->with('success', 'Pengajuan berhasil disetujui dan data pinjaman dibuat. Silakan klik "Cairkan" untuk generate jadwal angsuran dan pencairan dana.');
         } catch (\Exception $e) {
@@ -269,6 +272,8 @@ class PinjamanController extends Controller
             ]);
 
             DB::commit();
+
+            app(ActivityLogService::class)->logCairkanPinjaman($pinjaman->id, $pinjaman->jumlah_pinjam, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
                 ->with('success', 'Pinjaman berhasil dicairkan dan jadwal angsuran telah dibuat');
@@ -416,6 +421,8 @@ class PinjamanController extends Controller
             'status' => '2',
             'keterangan_admin' => $request->keterangan_admin
         ]);
+
+        app(ActivityLogService::class)->logRejectPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.pinjaman.pengajuan')
             ->with('success', 'Pengajuan pinjaman berhasil ditolak');
@@ -817,6 +824,8 @@ class PinjamanController extends Controller
         // Update pinjaman menjadi lunas
         $pinjaman->update(['lunas' => 'lunas']);
 
+        app(ActivityLogService::class)->logPelunasanDipercepat($pinjaman->id, $jumlahBayar, $pinjaman->nasabah->user->nama ?? 'N/A');
+
         return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
             ->with('success', 'Pinjaman berhasil dilunasi dipercepat. Total pembayaran: Rp ' . number_format($jumlahBayar, 0, ',', '.'));
     }
@@ -980,6 +989,8 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            app(ActivityLogService::class)->logApprovePembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pengajuan pembayaran berhasil disetujui dan angsuran diperbarui');
         } catch (\Exception $e) {
@@ -1009,6 +1020,8 @@ class PinjamanController extends Controller
             'status' => '2', // Ditolak
             'keterangan_admin' => $request->keterangan_admin,
         ]);
+
+        app(ActivityLogService::class)->logRejectPembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.pinjaman.pembayaran')
             ->with('success', 'Pengajuan pembayaran ditolak');
@@ -1105,6 +1118,8 @@ class PinjamanController extends Controller
             }
 
             DB::commit();
+
+            app(ActivityLogService::class)->logKonfirmasiPembayaranPinjaman($id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pembayaran berhasil dikonfirmasi dan angsuran diperbarui');
@@ -1304,6 +1319,9 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            $nasabahRecord = Nasabah::with('user')->find($request->id_anggota);
+            app(ActivityLogService::class)->logCreatePinjamanManual($pinjaman->id, $pinjaman->jumlah_pinjam, $nasabahRecord->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.pinjaman-aktif')
                 ->with('success', 'Pinjaman berhasil dibuat');
         } catch (\Exception $e) {
@@ -1431,9 +1449,12 @@ class PinjamanController extends Controller
             TempoPinjamanB::where('pinjaman_id', $id)->delete();
             
             // Hapus pinjaman
+            $nasabahNama = $pinjaman->nasabah->user->nama ?? 'N/A';
             $pinjaman->delete();
 
             DB::commit();
+
+            app(ActivityLogService::class)->logDeletePinjamanManual($id, $nasabahNama);
 
             return redirect()->route('admin.pinjaman.pinjaman-aktif')
                 ->with('success', 'Pinjaman berhasil dihapus');
