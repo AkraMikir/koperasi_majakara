@@ -11,11 +11,26 @@ use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\JnsDeposito;
+use App\Models\AdminOperasional;
+use App\Models\JnsBank;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class MasterDataController extends Controller
 {
+    /**
+     * Check if user has permission to CRUD master data
+     */
+    protected function checkCrudPermission()
+    {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengelola Master Data.');
+        }
+    }
+
     /**
      * Display master data dashboard.
      */
@@ -29,7 +44,9 @@ class MasterDataController extends Controller
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
-            'total_biaya_transfer' => 0, 
+            'total_biaya_transfer' => 0,
+            'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
+            'total_rekening_perusahaan' => JnsBank::count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -45,11 +62,13 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.bunga-pinjaman.create');
     }
 
     public function bungaPinjamanStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
@@ -65,12 +84,14 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanEdit($id)
     {
+        $this->checkCrudPermission();
         $data = MasterBungaPinjaman::findOrFail($id);
         return view('admin.master-data.bunga-pinjaman.edit', compact('data'));
     }
 
     public function bungaPinjamanUpdate(Request $request, $id)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
@@ -96,6 +117,7 @@ class MasterDataController extends Controller
 
     public function bungaPinjamanToggleStatus($id)
     {
+        $this->checkCrudPermission();
         $data = MasterBungaPinjaman::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
@@ -113,11 +135,13 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.denda-pinjaman.create');
     }
 
     public function dendaPinjamanStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'denda_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
@@ -131,12 +155,14 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanEdit($id)
     {
+        $this->checkCrudPermission();
         $data = MasterDendaPinjaman::findOrFail($id);
         return view('admin.master-data.denda-pinjaman.edit', compact('data'));
     }
 
     public function dendaPinjamanUpdate(Request $request, $id)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'denda_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
@@ -160,6 +186,7 @@ class MasterDataController extends Controller
 
     public function dendaPinjamanToggleStatus($id)
     {
+        $this->checkCrudPermission();
         $data = MasterDendaPinjaman::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
@@ -177,11 +204,13 @@ class MasterDataController extends Controller
 
     public function sukuBungaTabunganCreate()
     {
+        $this->checkCrudPermission();
         return view('admin.master-data.suku-bunga-tabungan.create');
     }
 
     public function sukuBungaTabunganStore(Request $request)
     {
+        $this->checkCrudPermission();
         $request->validate([
             'jenis_bunga' => 'required|string|max:255',
             'opsi_val' => 'required|numeric|min:0|max:100',
@@ -632,5 +661,230 @@ class MasterDataController extends Controller
         $data->save();
 
         return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ==================== REKENING PERUSAHAAN (JNS_BANK) ====================
+
+    public function rekeningPerusahaanIndex()
+    {
+        $data = JnsBank::orderBy('pemilik')->orderBy('bank')->paginate(15);
+        return view('admin.master-data.rekening-perusahaan.index', compact('data'));
+    }
+
+    public function rekeningPerusahaanCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.rekening-perusahaan.create');
+    }
+
+    public function rekeningPerusahaanStore(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'pemilik' => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
+            'no_rek' => 'required|string|max:30',
+            'bank' => 'required|string|max:50',
+        ]);
+        JnsBank::create($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil ditambahkan');
+    }
+
+    public function rekeningPerusahaanEdit($id)
+    {
+        $this->checkCrudPermission();
+        $data = JnsBank::findOrFail($id);
+        return view('admin.master-data.rekening-perusahaan.edit', compact('data'));
+    }
+
+    public function rekeningPerusahaanUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'pemilik' => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
+            'no_rek' => 'required|string|max:30',
+            'bank' => 'required|string|max:50',
+        ]);
+        $data = JnsBank::findOrFail($id);
+        $data->update($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil diupdate');
+    }
+
+    public function rekeningPerusahaanDestroy($id)
+    {
+        $this->checkCrudPermission();
+        $data = JnsBank::findOrFail($id);
+        $data->delete();
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil dihapus');
+    }
+
+    // ==================== MANAJEMEN ADMIN OPERASIONAL ====================
+
+    public function adminOperasionalIndex(Request $request)
+    {
+        $this->checkCrudPermission();
+
+        $query = AdminOperasional::with('user');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function ($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('nomor_hp', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $adminList = $query->latest()->paginate(10)->withQueryString();
+
+        return view('admin.master-data.admin-operasional.index', compact('adminList'));
+    }
+
+    public function adminOperasionalCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.admin-operasional.create');
+    }
+
+    public function adminOperasionalStore(Request $request)
+    {
+        $this->checkCrudPermission();
+
+        $request->validate([
+            'nama'                  => 'required|string|max:255',
+            'email'                 => 'required|email|unique:users,email',
+            'nomor_hp'              => 'required|string|max:20',
+            'password'              => 'required|string|min:8|confirmed',
+        ], [
+            'nama.required'                 => 'Nama wajib diisi.',
+            'email.required'                => 'Email wajib diisi.',
+            'email.email'                   => 'Format email tidak valid.',
+            'email.unique'                  => 'Email sudah digunakan.',
+            'nomor_hp.required'             => 'Nomor HP wajib diisi.',
+            'password.required'             => 'Password wajib diisi.',
+            'password.min'                  => 'Password minimal 8 karakter.',
+            'password.confirmed'            => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        DB::transaction(function () use ($request) {
+            $user = User::create([
+                'nama'              => $request->nama,
+                'email'             => $request->email,
+                'nomor_hp'          => $request->nomor_hp,
+                'password'          => Hash::make($request->password),
+                'pin'               => null,
+                'foto'              => 'default-avatar.jpg',
+                'role'              => 'admin_operasional',
+                'email_verified_at' => now(),
+            ]);
+
+            AdminOperasional::create([
+                'user_id' => $user->id,
+                'status'  => 'aktif',
+            ]);
+        });
+
+        $newAdmin = AdminOperasional::with('user')->where('user_id', User::where('email', $request->email)->value('id'))->first();
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('create', $request->nama, $newAdmin->id ?? null);
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil ditambahkan.');
+    }
+
+    public function adminOperasionalEdit($id)
+    {
+        $this->checkCrudPermission();
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+        return view('admin.master-data.admin-operasional.edit', compact('adminOp'));
+    }
+
+    public function adminOperasionalUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+
+        $request->validate([
+            'nama'      => 'required|string|max:255',
+            'email'     => 'required|email|unique:users,email,' . $adminOp->user_id,
+            'nomor_hp'  => 'required|string|max:20',
+            'password'  => 'nullable|string|min:8|confirmed',
+        ], [
+            'nama.required'         => 'Nama wajib diisi.',
+            'email.required'        => 'Email wajib diisi.',
+            'email.email'           => 'Format email tidak valid.',
+            'email.unique'          => 'Email sudah digunakan akun lain.',
+            'nomor_hp.required'     => 'Nomor HP wajib diisi.',
+            'password.min'          => 'Password minimal 8 karakter.',
+            'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        DB::transaction(function () use ($request, $adminOp) {
+            $userData = [
+                'nama'     => $request->nama,
+                'email'    => $request->email,
+                'nomor_hp' => $request->nomor_hp,
+            ];
+
+            if ($request->filled('password')) {
+                $userData['password'] = Hash::make($request->password);
+            }
+
+            $adminOp->user->update($userData);
+        });
+
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('update', $adminOp->user->nama, $adminOp->id);
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil diperbarui.');
+    }
+
+    public function adminOperasionalDestroy($id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::with('user')->findOrFail($id);
+
+        // Cegah menghapus diri sendiri
+        if ($adminOp->user_id === auth()->id()) {
+            return redirect()->back()->with('error', 'Anda tidak dapat menghapus akun sendiri.');
+        }
+
+        $namaAdmin = $adminOp->user->nama ?? 'N/A';
+        $adminId = $adminOp->id;
+        DB::transaction(function () use ($adminOp) {
+            $user = $adminOp->user;
+            $adminOp->delete();
+            $user->delete();
+        });
+
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction('delete', $namaAdmin, $adminId);
+
+        return redirect()->route('admin.master-data.admin-operasional.index')
+            ->with('success', 'Akun Admin Operasional berhasil dihapus.');
+    }
+
+    public function adminOperasionalToggleStatus($id)
+    {
+        $this->checkCrudPermission();
+
+        $adminOp = AdminOperasional::findOrFail($id);
+        $adminOp->status = $adminOp->status === 'aktif' ? 'nonaktif' : 'aktif';
+        $adminOp->save();
+
+        $statusText = $adminOp->status === 'aktif' ? 'diaktifkan' : 'dinonaktifkan';
+        $action = $adminOp->status === 'aktif' ? 'toggle_aktif' : 'toggle_nonaktif';
+        $adminOp->load('user');
+        app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction($action, $adminOp->user->nama ?? 'N/A', $adminOp->id);
+
+        return redirect()->back()->with('success', "Akun Admin Operasional berhasil {$statusText}.");
     }
 }

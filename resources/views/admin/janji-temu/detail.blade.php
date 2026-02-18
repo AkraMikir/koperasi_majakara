@@ -89,7 +89,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal</p>
-                        <p class="font-semibold text-[[#674c1d]] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($janjiTemu->transTabungan?->nominal ?? $janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -136,15 +136,22 @@
                 <form method="POST" action="{{ route('admin.tabungan.create-trans-from-janji-temu', $janjiTemu->id) }}" enctype="multipart/form-data">
                     @csrf
                     <div class="space-y-4">
+                        @php
+                            $isSetoran = ($janjiTemu->jenis ?? 'setoran') === 'setoran';
+                            $labelNominal = $isSetoran ? 'Nominal Diterima' : 'Nominal Diserahkan';
+                        @endphp
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Nominal <span class="text-red-500">*</span></label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $labelNominal }} <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                                 <input type="text" name="nominal" id="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
-                                    required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
-                                    oninput="formatCurrency(this)">
+                                    required
+                                    class="w-full pl-10 pr-4 py-2.5 bg-white border border-[#674c1d]/40 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none cursor-text text-gray-900 font-semibold"
+                                    placeholder="Klik untuk mengedit nominal"
+                                    oninput="formatCurrency(this)"
+                                    title="Field ini dapat diedit. Ubah jika nominal belum sesuai dengan yang {{ $isSetoran ? 'diterima' : 'diserahkan' }}.">
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">Nominal default: Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Default dari janji temu: Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}. Edit jika nominal {{ $isSetoran ? 'diterima' : 'diserahkan' }} berbeda.</p>
                         </div>
 
                         <div>
@@ -153,7 +160,7 @@
                                 <div class="foto-upload-item">
                                     <div class="relative">
                                         <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                                            class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none
+                                            class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
                                             file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
                                             file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                                     </div>
@@ -172,7 +179,7 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan Admin</label>
                             <textarea name="keterangan_admin" rows="3" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none resize-none"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none resize-none"
                                 placeholder="Tambahkan catatan atau keterangan admin..."></textarea>
                             <p class="text-xs text-gray-500 mt-1">Catatan: Keterangan nasabah akan otomatis digunakan dalam transaksi</p>
                         </div>
@@ -229,7 +236,7 @@
         newItem.innerHTML = `
             <div class="flex-1 relative">
                 <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                    class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none
+                    class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
                     file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
                     file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
             </div>

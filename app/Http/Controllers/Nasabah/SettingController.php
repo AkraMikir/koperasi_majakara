@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Nasabah;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\OtpService;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -88,6 +89,8 @@ class SettingController extends Controller
                 'user_id' => $user->id,
                 'email' => $user->email,
             ]);
+
+            app(ActivityLogService::class)->logUbahPassword();
 
             return redirect()->back()
                 ->with('success', 'Password berhasil diubah! Gunakan password baru Anda untuk login selanjutnya.');
@@ -308,6 +311,8 @@ class SettingController extends Controller
                 'user_id' => $user->id,
                 'email' => $user->email,
             ]);
+
+            app(ActivityLogService::class)->logUbahPin();
 
             return redirect()->back()
                 ->with('success_pin', 'PIN berhasil diubah! Gunakan PIN baru Anda untuk transaksi selanjutnya.');

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use App\Models\PengajuanPinjaman;
 use App\Models\User;
 use App\Models\PinjamanH;
@@ -10,6 +11,7 @@ use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
 use App\Models\JanjiTemuPinjaman;
 use App\Models\JnsLokasiPerusahaan;
+use App\Models\JnsBank;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFoto;
@@ -340,6 +342,8 @@ class PinjamanController extends Controller
                 'pengajuan_pinjaman'
             );
 
+            app(ActivityLogService::class)->logSubmitPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, 'transfer');
+
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
@@ -547,6 +551,8 @@ class PinjamanController extends Controller
                 'janji_temu_id' => $idJanjiTemu,
                 'id_anggota' => $pengajuan->id_anggota,
             ]);
+
+            app(ActivityLogService::class)->logSubmitPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, 'janji temu');
 
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
@@ -931,6 +937,8 @@ class PinjamanController extends Controller
 
         // Get lokasi untuk janji temu
         $lokasi = JnsLokasiPerusahaan::all();
+        // Rekening perusahaan untuk dropdown transfer
+        $rekeningPerusahaan = JnsBank::orderBy('bank')->orderBy('pemilik')->get();
 
         return view('nasabah.pinjaman.pembayaran', [
             'pinjamanAktif' => $pinjamanAktif,
@@ -938,6 +946,7 @@ class PinjamanController extends Controller
             'selectedAngsuran' => $selectedAngsuran,
             'angsuranList' => $angsuranList,
             'lokasi' => $lokasi,
+            'rekeningPerusahaan' => $rekeningPerusahaan,
             'jenis' => $jenis,
         ]);
     }
@@ -1029,6 +1038,8 @@ class PinjamanController extends Controller
                 }
             }
 
+            app(ActivityLogService::class)->logSubmitPembayaranPinjaman($pengajuan->id, $request->nominal, 'transfer');
+
             return redirect()->route('nasabah.pinjaman.status-pembayaran')
                 ->with('success', 'Pengajuan pembayaran berhasil dikirim!');
         } catch (\Exception $e) {
@@ -1119,6 +1130,8 @@ class PinjamanController extends Controller
                 'keterangan' => $request->keterangan,
                 'status' => '1',
             ]);
+
+            app(ActivityLogService::class)->logSubmitJanjiTemuPembayaran($idJanjiTemu, $request->nominal, $request->tanggal_janji_temu);
 
             return redirect()->route('nasabah.pinjaman.status-pembayaran')
                 ->with('success', 'Pengajuan janji temu pembayaran berhasil dikirim!');

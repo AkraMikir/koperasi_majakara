@@ -105,7 +105,17 @@
                 </div>
                 <div class="hidden md:block text-left">
                     <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->nama ?? 'Admin' }}</p>
-                    <p class="text-xs text-gray-500">{{ auth()->user()->role ?? 'Admin' }}</p>
+                    @php
+                        $roleBadge = $permissionService->getRoleBadgeColor(auth()->user());
+                        $roleDisplay = $permissionService->getRoleDisplayName(auth()->user());
+                    @endphp
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium 
+                        @if($roleBadge === 'danger') bg-red-100 text-red-800
+                        @elseif($roleBadge === 'warning') bg-yellow-100 text-yellow-800
+                        @else bg-gray-100 text-gray-800
+                        @endif">
+                        {{ $roleDisplay }}
+                    </span>
                 </div>
                 <svg class="w-5 h-5 text-gray-400 hidden md:block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>

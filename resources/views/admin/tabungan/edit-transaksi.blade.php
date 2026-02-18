@@ -8,18 +8,7 @@
     <div class="flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Edit Transaksi</h1>
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ??$transaksi->id }}</p>
-=======
             <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ?? $transaksi->id }}</p>
->>>>>>> 6c04f015aaaf38a6d6dbe432ab9544fa1013630c
-=======
-            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ?? $transaksi->id }}</p>
-=======
-            <p class="text-gray-600 mt-1">ID: {{ $transaksi->id_transaksi ??$transaksi->id }}</p>
->>>>>>> ab817ff (before pull)
->>>>>>> Stashed changes
         </div>
         <div class="flex items-center space-x-3">
             <a href="{{ route('admin.tabungan.detail-transaksi', $transaksi->id) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
@@ -135,7 +124,7 @@
                 <a href="{{ route('admin.tabungan.detail-transaksi', $transaksi->id) }}" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-center">
                     Batal
                 </a>
-                <button type="submit" class="flex-1 px-4 py-3 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-xl font-semibold hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all">
+                <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-[[#674c1d]] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all">
                     Update Transaksi
                 </button>
             </div>

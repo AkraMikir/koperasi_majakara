@@ -87,7 +87,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal</p>
-                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($item->transTabungan?->nominal ?? $item->nominal, 0, ',', '.') }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Lokasi</p>

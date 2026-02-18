@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\ActivityLogService;
 use App\Models\PengajuanPinjaman;
 use App\Models\PinjamanH;
 use App\Models\TempoPinjamanB;
@@ -58,11 +59,18 @@ class PinjamanController extends Controller
         // Angsuran jatuh tempo hari ini
         $angsuran_jatuh_tempo = $this->getAngsuranJatuhTempo();
 
+        // Pembayaran terbaru (pengajuan pembayaran yang baru ditambahkan nasabah)
+        $pembayaran_terbaru = PengajuanPembayaranPinjaman::with(['nasabah.user', 'pinjaman'])
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('admin.pinjaman.index', compact(
             'stats',
             'pengajuan_terbaru',
             'pinjaman_aktif_terbaru',
-            'angsuran_jatuh_tempo'
+            'angsuran_jatuh_tempo',
+            'pembayaran_terbaru'
         ));
     }
 
@@ -193,6 +201,8 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            app(ActivityLogService::class)->logApprovePengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
                 ->with('success', 'Pengajuan berhasil disetujui dan data pinjaman dibuat. Silakan klik "Cairkan" untuk generate jadwal angsuran dan pencairan dana.');
         } catch (\Exception $e) {
@@ -269,6 +279,8 @@ class PinjamanController extends Controller
             ]);
 
             DB::commit();
+
+            app(ActivityLogService::class)->logCairkanPinjaman($pinjaman->id, $pinjaman->jumlah_pinjam, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
                 ->with('success', 'Pinjaman berhasil dicairkan dan jadwal angsuran telah dibuat');
@@ -416,6 +428,8 @@ class PinjamanController extends Controller
             'status' => '2',
             'keterangan_admin' => $request->keterangan_admin
         ]);
+
+        app(ActivityLogService::class)->logRejectPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.pinjaman.pengajuan')
             ->with('success', 'Pengajuan pinjaman berhasil ditolak');
@@ -687,7 +701,10 @@ class PinjamanController extends Controller
             $buktiTransferAngsuran = $pengajuanBayar->pluck('buktiFoto')->flatten()->filter(fn($b) => $b && ($b->file_path ?? null));
         }
 
-        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran'));
+        // Denda yang dihitung (untuk tampilan angsuran telat, konsisten dengan nasabah)
+        $dendaDisplay = $this->hitungDenda($angsuran, $angsuran->pinjaman);
+
+        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran', 'dendaDisplay'));
     }
 
     /**
@@ -754,6 +771,14 @@ class PinjamanController extends Controller
      */
     public function pelunasanDipercepat(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can do pelunasan dipercepat
+        if (!app(\App\Services\AdminPermissionService::class)->canPelunasanDipercepat(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat melakukan pelunasan dipercepat.'
+            ], 403);
+        }
+
         $request->validate([
             'potongan' => 'nullable|numeric|min:0',
             'keterangan' => 'nullable|string|max:500',
@@ -808,6 +833,8 @@ class PinjamanController extends Controller
         
         // Update pinjaman menjadi lunas
         $pinjaman->update(['lunas' => 'lunas']);
+
+        app(ActivityLogService::class)->logPelunasanDipercepat($pinjaman->id, $jumlahBayar, $pinjaman->nasabah->user->nama ?? 'N/A');
 
         return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
             ->with('success', 'Pinjaman berhasil dilunasi dipercepat. Total pembayaran: Rp ' . number_format($jumlahBayar, 0, ',', '.'));
@@ -972,6 +999,8 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            app(ActivityLogService::class)->logApprovePembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pengajuan pembayaran berhasil disetujui dan angsuran diperbarui');
         } catch (\Exception $e) {
@@ -1001,6 +1030,8 @@ class PinjamanController extends Controller
             'status' => '2', // Ditolak
             'keterangan_admin' => $request->keterangan_admin,
         ]);
+
+        app(ActivityLogService::class)->logRejectPembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.pinjaman.pembayaran')
             ->with('success', 'Pengajuan pembayaran ditolak');
@@ -1097,6 +1128,8 @@ class PinjamanController extends Controller
             }
 
             DB::commit();
+
+            app(ActivityLogService::class)->logKonfirmasiPembayaranPinjaman($id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pembayaran berhasil dikonfirmasi dan angsuran diperbarui');
@@ -1211,6 +1244,9 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            $pengajuan->load('nasabah.user');
+            app(ActivityLogService::class)->logProsesJanjiTemuPembayaranPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Foto serah terima berhasil diupload dan pembayaran dikonfirmasi');
         } catch (\Exception $e) {
@@ -1225,6 +1261,11 @@ class PinjamanController extends Controller
      */
     public function createPinjaman()
     {
+        // Authorization: Only Admin Utama can create manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
+        }
+
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
         
@@ -1236,6 +1277,11 @@ class PinjamanController extends Controller
      */
     public function storePinjaman(Request $request)
     {
+        // Authorization: Only Admin Utama can create manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
+        }
+
         $request->validate([
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'nominal' => 'required|numeric|min:100000',
@@ -1286,6 +1332,9 @@ class PinjamanController extends Controller
 
             DB::commit();
 
+            $nasabahRecord = Nasabah::with('user')->find($request->id_anggota);
+            app(ActivityLogService::class)->logCreatePinjamanManual($pinjaman->id, $pinjaman->jumlah_pinjam, $nasabahRecord->user->nama ?? 'N/A');
+
             return redirect()->route('admin.pinjaman.pinjaman-aktif')
                 ->with('success', 'Pinjaman berhasil dibuat');
         } catch (\Exception $e) {
@@ -1301,6 +1350,11 @@ class PinjamanController extends Controller
      */
     public function editPinjaman($id)
     {
+        // Authorization: Only Admin Utama can edit manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::with(['nasabah.user'])->findOrFail($id);
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
@@ -1313,6 +1367,11 @@ class PinjamanController extends Controller
      */
     public function updatePinjaman(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can update manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::findOrFail($id);
 
         // Cek apakah pinjaman sudah ada angsuran yang dibayar
@@ -1379,6 +1438,11 @@ class PinjamanController extends Controller
      */
     public function deletePinjaman($id)
     {
+        // Authorization: Only Admin Utama can delete manual pinjaman
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pinjaman manual.');
+        }
+
         $pinjaman = PinjamanH::findOrFail($id);
 
         // Cek apakah pinjaman sudah ada angsuran yang dibayar
@@ -1398,9 +1462,12 @@ class PinjamanController extends Controller
             TempoPinjamanB::where('pinjaman_id', $id)->delete();
             
             // Hapus pinjaman
+            $nasabahNama = $pinjaman->nasabah->user->nama ?? 'N/A';
             $pinjaman->delete();
 
             DB::commit();
+
+            app(ActivityLogService::class)->logDeletePinjamanManual($id, $nasabahNama);
 
             return redirect()->route('admin.pinjaman.pinjaman-aktif')
                 ->with('success', 'Pinjaman berhasil dihapus');

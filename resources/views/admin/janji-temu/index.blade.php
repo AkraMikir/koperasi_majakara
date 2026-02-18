@@ -97,7 +97,13 @@
                             <span class="text-sm text-gray-700">{{ $item->lokasi }}</span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="font-medium text-[#674c1d]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</span>
+                            @php
+                                $nominalMap = $nominalTabunganFromTrans ?? [];
+                                $nominalDisplay = ($item->fitur ?? '') === 'Tabungan' && isset($nominalMap[$item->id_asli])
+                                    ? $nominalMap[$item->id_asli]
+                                    : $item->nominal;
+                            @endphp
+                            <span class="font-medium text-[#674c1d]">Rp {{ number_format($nominalDisplay, 0, ',', '.') }}</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="text-sm text-gray-500">{{ Str::limit($item->keterangan, 30) }}</span>

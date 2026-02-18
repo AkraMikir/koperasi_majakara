@@ -131,6 +131,7 @@ return new class extends Migration//ikkkkm
         Schema::create('admin_operasional', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->timestamps();
         });
 

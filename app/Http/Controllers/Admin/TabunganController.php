@@ -9,6 +9,7 @@ use App\Models\TransTabungan;
 use App\Models\JanjiTemuTabungan;
 use App\Models\Nasabah;
 use App\Models\BuktiFotoTabungan;
+use App\Services\ActivityLogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -164,10 +165,16 @@ class TabunganController extends Controller
                 Log::info('Transaksi tabungan created successfully', ['id' => $idTransaksi]);
             }
 
-            // Update status to approved (status '2') - after transaksi created
-            $pengajuan->update(['status' => '2']);
+            // Update status to approved (status '2') + simpan keterangan_admin jika ada
+            $updateData = ['status' => '2'];
+            if ($request->filled('keterangan_admin')) {
+                $updateData['keterangan_admin'] = $request->keterangan_admin;
+            }
+            $pengajuan->update($updateData);
 
             DB::commit();
+
+            app(ActivityLogService::class)->logApproveSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.tabungan.pengajuan-setor')
                 ->with('success', 'Pengajuan setoran berhasil disetujui dan transaksi telah dibuat');
@@ -195,11 +202,13 @@ class TabunganController extends Controller
             'keterangan_admin' => 'required|string'
         ]);
 
-        $pengajuan = PengajuanTabungan::findOrFail($id);
+        $pengajuan = PengajuanTabungan::with('nasabah.user')->findOrFail($id);
         $pengajuan->update([
             'status' => '3',
             'keterangan_admin' => $request->keterangan_admin
         ]);
+
+        app(ActivityLogService::class)->logRejectSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.tabungan.pengajuan-setor')
             ->with('success', 'Pengajuan setoran ditolak');
@@ -321,6 +330,8 @@ class TabunganController extends Controller
             'tgl_transaksi' => now(),
         ]);
 
+        app(ActivityLogService::class)->logApproveTarik($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
         return redirect()->route('admin.tabungan.pengajuan-tarik')
             ->with('success', 'Pengajuan penarikan berhasil disetujui dan transfer telah dilakukan');
     }
@@ -334,7 +345,7 @@ class TabunganController extends Controller
             'keterangan_admin' => 'required|string'
         ]);
 
-        $pengajuan = PengajuanPenarikanTabungan::findOrFail($id);
+        $pengajuan = PengajuanPenarikanTabungan::with('nasabah.user')->findOrFail($id);
 
         // Penarikan tunai diproses via Janji Temu
         if ($pengajuan->metode_transfer !== 'transfer') {
@@ -346,6 +357,8 @@ class TabunganController extends Controller
             'status' => '3',
             'keterangan_admin' => $request->keterangan_admin
         ]);
+
+        app(ActivityLogService::class)->logRejectTarik($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         return redirect()->route('admin.tabungan.pengajuan-tarik')
             ->with('success', 'Pengajuan penarikan ditolak');
@@ -411,7 +424,7 @@ class TabunganController extends Controller
     public function detailJanjiTemu($id)
     {
         $janjiTemu = JanjiTemuTabungan::with([
-            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto'
+            'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto', 'transTabungan'
         ])->findOrFail($id);
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu'));
@@ -465,9 +478,11 @@ class TabunganController extends Controller
             }
         }
 
-        // Update janji temu status to selesai
+        // Update janji temu: status selesai + nominal disamakan dengan yang dipakai di transaksi
+        // (agar semua halaman—admin detail, nasabah detail, list—tampil nominal yang sama)
         $janjiTemu->update([
             'status' => '2',  // Selesai
+            'nominal' => $nominal,  // Sinkronkan dengan nominal transaksi (bisa diedit admin)
             'keterangan_admin' => $request->keterangan_admin,
         ]);
 
@@ -510,6 +525,8 @@ class TabunganController extends Controller
             'tgl_transaksi' => now(),
         ]);
 
+        app(ActivityLogService::class)->logProsesJanjiTemuTabungan($idTransaksi, $nominal, $janjiTemu->nasabah->user->nama ?? 'N/A', $isWithdrawal ? 'penarikan' : 'setoran');
+
         return redirect()->route('admin.janji-temu.index')
             ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
     }
@@ -519,6 +536,14 @@ class TabunganController extends Controller
      */
     public function editPengajuanSetor(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can edit pengajuan
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pengajuan.'
+            ], 403);
+        }
+
         $request->validate([
             'nominal' => 'nullable|numeric|min:10000',
             'keterangan_admin' => 'nullable|string|max:500',
@@ -615,6 +640,11 @@ class TabunganController extends Controller
      */
     public function deletePengajuanSetor($id)
     {
+        // Authorization: Only Admin Utama can delete pengajuan
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pengajuan.');
+        }
+
         $pengajuan = PengajuanTabungan::findOrFail($id);
         
         // Hanya bisa delete jika status masih pending dan belum ada transaksi
@@ -708,6 +738,11 @@ class TabunganController extends Controller
      */
     public function createTransaksi()
     {
+        // Authorization: Only Admin Utama can create manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
+        }
+
         $nasabah = Nasabah::with('user')->get();
 
         return view('admin.tabungan.create-transaksi', compact('nasabah'));
@@ -718,6 +753,11 @@ class TabunganController extends Controller
      */
     public function storeTransaksi(Request $request)
     {
+        // Authorization: Only Admin Utama can create manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
+        }
+
         $request->validate([
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'jenis' => 'required|in:setoran,penarikan',
@@ -765,6 +805,9 @@ class TabunganController extends Controller
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
 
+        $nasabahRecord = \App\Models\Nasabah::with('user')->find($request->id_anggota);
+        app(ActivityLogService::class)->logCreateTransaksiManual($idTransaksi, $request->nominal, $nasabahRecord->user->nama ?? 'N/A', $request->jenis);
+
         return redirect()->route('admin.tabungan.transaksi')
             ->with('success', "Transaksi {$request->jenis} berhasil dibuat dengan ID: {$idTransaksi}");
     }
@@ -774,6 +817,11 @@ class TabunganController extends Controller
      */
     public function editTransaksi($id)
     {
+        // Authorization: Only Admin Utama can edit manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit transaksi manual.');
+        }
+
         $transaksi = TransTabungan::with(['nasabah.user'])->findOrFail($id);
 
         // Only allow edit if created manually (no pengajuan)
@@ -792,6 +840,11 @@ class TabunganController extends Controller
      */
     public function updateTransaksi(Request $request, $id)
     {
+        // Authorization: Only Admin Utama can update manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate transaksi manual.');
+        }
+
         $transaksi = TransTabungan::findOrFail($id);
 
         // Only allow update if created manually
@@ -824,6 +877,8 @@ class TabunganController extends Controller
             'tgl_transaksi' => $request->tgl_transaksi,
         ]);
 
+        app(ActivityLogService::class)->logEditTransaksiManual($id, $transaksi->nasabah->user->nama ?? 'N/A');
+
         return redirect()->route('admin.tabungan.detail-transaksi', $id)
             ->with('success', 'Transaksi berhasil diupdate');
     }
@@ -833,7 +888,12 @@ class TabunganController extends Controller
      */
     public function destroyTransaksi($id)
     {
-        $transaksi = TransTabungan::findOrFail($id);
+        // Authorization: Only Admin Utama can delete manual transactions
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus transaksi manual.');
+        }
+
+        $transaksi = TransTabungan::with('nasabah.user')->findOrFail($id);
 
         // Only allow delete if created manually
         if ($transaksi->id_pengajuan_setor || $transaksi->id_pengajuan_tarik) {
@@ -841,7 +901,10 @@ class TabunganController extends Controller
                 ->with('error', 'Transaksi dari pengajuan tidak dapat dihapus');
         }
 
+        $nasabahNama = $transaksi->nasabah->user->nama ?? 'N/A';
         $transaksi->delete();
+
+        app(ActivityLogService::class)->logDeleteTransaksiManual($id, $nasabahNama);
 
         return redirect()->route('admin.tabungan.transaksi')
             ->with('success', 'Transaksi berhasil dihapus');

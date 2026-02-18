@@ -7,6 +7,11 @@ return new class extends Migration//ikkkkm
 {
     public function up(): void
     {
+        // SQLite tidak mendukung CREATE OR REPLACE VIEW - skip saat testing
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
+
         // View untuk menggabungkan semua janji temu dari berbagai fitur
         DB::statement("
             CREATE OR REPLACE VIEW v_janji_temu_universal AS 
@@ -82,6 +87,9 @@ return new class extends Migration//ikkkkm
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') {
+            return;
+        }
         DB::statement("DROP VIEW IF EXISTS v_janji_temu_universal");
     }
 };

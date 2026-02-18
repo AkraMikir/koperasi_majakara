@@ -69,8 +69,10 @@ return new class extends Migration//ikkkkm
         });
 
         // 5. Bukti Foto Universal (untuk semua fitur)
+        // Kolom id dan owner_id menggunakan VARCHAR(50) agar cukup menampung
+        // ID hasil IdGenerator (format: DDMMYYYY + 4 digit + suffix, e.g. 150220260001TCSJNJT)
         Schema::create('tbl_bukti_foto', function (Blueprint $table) {
-            $table->string('id', 50)->primary(); // IdGenerator: DDMMYYYY + 4 digit + suffix (e.g. 150220260001TCSJNJT)
+            $table->string('id', 50)->primary();
             $table->string('owner_id', 50); // ID dari tabel owner (pengajuan, janji temu, transaksi, dll)
             $table->string('owner_fitur', 10); // T=Tabungan, P=Pinjaman, G=Gadai, D=Deposito
             $table->string('owner_trans', 20); // Type transaksi: STR, PNR, PNJ, JNJT, dll

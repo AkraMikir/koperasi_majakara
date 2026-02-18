@@ -58,7 +58,6 @@
                         </span>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Status Pinjaman</p>
                         <span class="inline-block mt-2 px-4 py-2 {{ $angsuran->pinjaman->lunas === 'lunas' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-sm font-semibold">
                             {{ ucfirst($angsuran->pinjaman->lunas ?? 'belum') }}
                         </span>
@@ -94,16 +93,15 @@
                         <p class="font-semibold text-[#8b6f2f] text-xl">Rp {{ number_format($angsuran->jumlah_tagihan - $angsuran->jumlah_terbayar, 0, ',', '.') }}</p>
                     </div>
                     @php
-                        $denda = $angsuran->denda ?? 0;
                         $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
                             ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
                             : 0;
-                        $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
+                        $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + ($dendaDisplay ?? 0);
                     @endphp
-                    @if($denda > 0 || ($hariTelat > 0 && $angsuran->status_bayar !== 'lunas'))
+                    @if(($dendaDisplay ?? 0) > 0 || ($hariTelat > 0 && $angsuran->status_bayar !== 'lunas'))
                     <div>
                         <p class="text-sm text-gray-600">Denda</p>
-                        <p class="font-semibold text-red-600 text-xl">Rp {{ number_format($denda, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-red-600 text-xl">Rp {{ number_format($dendaDisplay ?? 0, 0, ',', '.') }}</p>
                         @if($hariTelat > 0)
                         <p class="text-xs text-red-500 mt-1">Telat {{ $hariTelat }} hari</p>
                         @endif
@@ -120,7 +118,6 @@
                     </div>
                     @endif
                     <div>
-                        <p class="text-sm text-gray-600">Status</p>
                         @php
                             $statusConfig = [
                                 'belum' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Belum Lunas'],

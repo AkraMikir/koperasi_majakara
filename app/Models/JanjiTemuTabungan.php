@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class JanjiTemuTabungan extends Model
 {
@@ -45,6 +46,15 @@ class JanjiTemuTabungan extends Model
     public function lokasi(): BelongsTo
     {
         return $this->belongsTo(JnsLokasiPerusahaan::class, 'lokasi_temu');
+    }
+
+    /**
+     * Transaksi tabungan yang dibuat dari janji temu ini (jika sudah diproses).
+     * Dipakai untuk menampilkan nominal yang benar (dari transaksi) setelah admin edit saat proses.
+     */
+    public function transTabungan(): HasOne
+    {
+        return $this->hasOne(TransTabungan::class, 'id_janji_temu_tabungan', 'id');
     }
 
     /**

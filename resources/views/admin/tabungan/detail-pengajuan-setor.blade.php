@@ -73,6 +73,7 @@
                         <div class="flex items-center justify-between mb-2">
                             <p class="text-sm text-gray-600">Nominal Setoran</p>
                             @if($pengajuan->status == '1')
+                            @canCrudTabungan
                             <button onclick="toggleEditNominal()" id="btn-edit-nominal"
                                 class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-xs font-semibold">
                                 <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,6 +83,7 @@
                                 </svg>
                                 Edit
                             </button>
+                            @endcanCrudTabungan
                             @endif
                         </div>
                         <div id="nominal-display">
@@ -89,6 +91,7 @@
                                 {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</p>
                         </div>
                         @if($pengajuan->status == '1')
+                        @canCrudTabungan
                         <div id="nominal-edit" class="hidden">
                             <input type="text" id="input-nominal"
                                 value="{{ number_format($pengajuan->nominal ?? 0, 0, '', '') }}"
@@ -96,6 +99,7 @@
                                 oninput="formatNominalInput(this)">
                             <p class="text-xs text-gray-500 mt-1">Min: Rp 10.000</p>
                         </div>
+                        @endcanCrudTabungan
                         @endif
                     </div>
 
@@ -256,6 +260,7 @@
                         Tolak Pengajuan
                     </button>
 
+                    @canCrudTabungan
                     <form method="POST" action="{{ route('admin.tabungan.delete-pengajuan-setor', $pengajuan->id) }}"
                         onsubmit="return confirm('Yakin hapus? Tidak dapat dibatalkan!')">
                         @csrf
@@ -270,6 +275,7 @@
                             Hapus Pengajuan
                         </button>
                     </form>
+                    @endcanCrudTabungan
                 </div>
             </div>
 
@@ -329,11 +335,20 @@ function formatNominalInput(input) {
 }
 
 function showApproveModal() {
-    // Ambil nominal dari input (jika sedang edit) atau dari display value
+    // Ambil nominal: dari input-edit (Admin Utama) atau dari displayed text (Admin Operasional)
     const nominalInput = document.getElementById('input-nominal');
-    const nominal = nominalInput.value.replace(/\D/g, '');
+    let nominal;
 
-    if (parseInt(nominal) < 10000) {
+    if (nominalInput) {
+        // Admin Utama: bisa edit nominal, ambil dari input field
+        nominal = nominalInput.value.replace(/\D/g, '');
+    } else {
+        // Admin Operasional: tidak ada input edit, ambil dari teks yang ditampilkan
+        const displayText = document.getElementById('nominal-display').querySelector('p').textContent;
+        nominal = displayText.replace(/\D/g, '');
+    }
+
+    if (!nominal || parseInt(nominal) < 10000) {
         alert('Nominal minimal Rp 10.000');
         return;
     }
@@ -343,19 +358,14 @@ function showApproveModal() {
     document.getElementById('modal-nominal-display').textContent =
         'Rp ' + parseInt(nominal).toLocaleString('id-ID');
 
-    // Check apakah nominal sudah diedit
-    const originalNominal =
-        '{{ $pengajuan->nominal > 0 ? $pengajuan->nominal : ($pengajuan->janjiTemu->nominal ?? 0) }}';
-    const isEdited = (nominal !== originalNominal.replace(/\D/g, ''));
-
-    // Set form action based on whether nominal was edited or not
     const form = document.getElementById('approveForm');
-    if (isEdited) {
-        // Jika diedit, submit ke edit route (akan update nominal + buat transaksi + update status)
+
+    if (nominalInput && editingNominal) {
+        // Admin Utama yang sudah mengubah nominal → gunakan edit route (update nominal + approve)
         form.action = '{{ route("admin.tabungan.edit-pengajuan-setor", $pengajuan->id) }}';
     } else {
-        // Jika tidak diedit, bisa langsung approve tapi tetap dengan modal untuk keterangan
-        form.action = '{{ route("admin.tabungan.edit-pengajuan-setor", $pengajuan->id) }}';
+        // Admin Operasional ATAU Admin Utama tanpa edit nominal → gunakan approve route biasa
+        form.action = '{{ route("admin.tabungan.approve-setor", $pengajuan->id) }}';
     }
 
     // Show modal
