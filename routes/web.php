@@ -325,6 +325,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             });
         });
 
+        // Rekening Perusahaan (jns_bank)
+        Route::prefix('rekening-perusahaan')->name('rekening-perusahaan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'rekeningPerusahaanDestroy'])->name('destroy');
+            });
+        });
+
         // Manajemen Admin Operasional - ONLY Admin Utama (semua route)
         Route::prefix('admin-operasional')->name('admin-operasional.')->middleware('admin.permission:crud-master-data')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalIndex'])->name('index');

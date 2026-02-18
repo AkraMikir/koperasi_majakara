@@ -224,7 +224,7 @@ class ActivityLogService
         );
     }
 
-    public function logApprovePengajuanPinjaman(int $pengajuanId, float $nominal, string $nasabahNama): void
+    public function logApprovePengajuanPinjaman(string $pengajuanId, float $nominal, string $nasabahNama): void
     {
         $this->log(
             'approve_pengajuan_pinjaman',
@@ -236,7 +236,7 @@ class ActivityLogService
         );
     }
 
-    public function logRejectPengajuanPinjaman(int $pengajuanId, float $nominal, string $nasabahNama, string $alasan = ''): void
+    public function logRejectPengajuanPinjaman(string $pengajuanId, float $nominal, string $nasabahNama, string $alasan = ''): void
     {
         $this->log(
             'reject_pengajuan_pinjaman',
@@ -248,7 +248,7 @@ class ActivityLogService
         );
     }
 
-    public function logCairkanPinjaman(int $pinjamanId, float $nominal, string $nasabahNama): void
+    public function logCairkanPinjaman(string $pinjamanId, float $nominal, string $nasabahNama): void
     {
         $this->log(
             'cairkan_pinjaman',
@@ -260,7 +260,7 @@ class ActivityLogService
         );
     }
 
-    public function logApprovePembayaranPinjaman(int $pembayaranId, float $nominal, string $nasabahNama): void
+    public function logApprovePembayaranPinjaman(string $pembayaranId, float $nominal, string $nasabahNama): void
     {
         $this->log(
             'approve_pembayaran_pinjaman',
@@ -272,7 +272,7 @@ class ActivityLogService
         );
     }
 
-    public function logRejectPembayaranPinjaman(int $pembayaranId, float $nominal, string $nasabahNama, string $alasan = ''): void
+    public function logRejectPembayaranPinjaman(string $pembayaranId, float $nominal, string $nasabahNama, string $alasan = ''): void
     {
         $this->log(
             'reject_pembayaran_pinjaman',
@@ -284,7 +284,7 @@ class ActivityLogService
         );
     }
 
-    public function logKonfirmasiPembayaranPinjaman(int $pembayaranId, float $nominal, string $nasabahNama): void
+    public function logKonfirmasiPembayaranPinjaman(string $pembayaranId, float $nominal, string $nasabahNama): void
     {
         $this->log(
             'konfirmasi_pembayaran_pinjaman',
@@ -296,7 +296,19 @@ class ActivityLogService
         );
     }
 
-    public function logPelunasanDipercepat(int $pinjamanId, float $sisaTagihan, string $nasabahNama): void
+    public function logProsesJanjiTemuPembayaranPinjaman(string $pengajuanId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'proses_janji_temu_pembayaran_pinjaman',
+            'pinjaman',
+            "Memproses janji temu pembayaran pinjaman Rp " . number_format($nominal, 0, ',', '.') . " dari nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'PengajuanPembayaranPinjaman',
+            $pengajuanId
+        );
+    }
+
+    public function logPelunasanDipercepat(string $pinjamanId, float $sisaTagihan, string $nasabahNama): void
     {
         $this->log(
             'pelunasan_dipercepat',
@@ -308,7 +320,7 @@ class ActivityLogService
         );
     }
 
-    public function logCreatePinjamanManual(int $pinjamanId, float $nominal, string $nasabahNama): void
+    public function logCreatePinjamanManual(string $pinjamanId, float $nominal, string $nasabahNama): void
     {
         $this->log(
             'create_pinjaman_manual',
@@ -320,7 +332,7 @@ class ActivityLogService
         );
     }
 
-    public function logDeletePinjamanManual(int $pinjamanId, string $nasabahNama): void
+    public function logDeletePinjamanManual(string $pinjamanId, string $nasabahNama): void
     {
         $this->log(
             'delete_pinjaman_manual',

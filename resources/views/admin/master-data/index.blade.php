@@ -154,6 +154,24 @@
                 <p class="text-xs text-gray-400 mt-0.5">Antar bank</p>
             </a>
 
+            {{-- Rekening Perusahaan --}}
+            <a href="{{ route('admin.master-data.rekening-perusahaan.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-[#674c1d]/30 transition-all duration-200">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-teal-500 to-teal-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-0.5">{{ $stats['total_rekening_perusahaan'] ?? 0 }}</p>
+                <p class="text-sm font-medium text-gray-700">Rekening Perusahaan</p>
+                <p class="text-xs text-gray-400 mt-0.5">BCA, Mandiri, dll</p>
+            </a>
+
             {{-- Admin Operasional (hanya tampil untuk Admin Utama) --}}
             @isAdminUtama
             <a href="{{ route('admin.master-data.admin-operasional.index') }}"

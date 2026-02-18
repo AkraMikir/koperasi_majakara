@@ -12,6 +12,7 @@ use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\JnsDeposito;
 use App\Models\AdminOperasional;
+use App\Models\JnsBank;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +46,7 @@ class MasterDataController extends Controller
             'total_jenis_deposito' => 0, 
             'total_biaya_transfer' => 0,
             'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
+            'total_rekening_perusahaan' => JnsBank::count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -659,6 +661,65 @@ class MasterDataController extends Controller
         $data->save();
 
         return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ==================== REKENING PERUSAHAAN (JNS_BANK) ====================
+
+    public function rekeningPerusahaanIndex()
+    {
+        $data = JnsBank::orderBy('pemilik')->orderBy('bank')->paginate(15);
+        return view('admin.master-data.rekening-perusahaan.index', compact('data'));
+    }
+
+    public function rekeningPerusahaanCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.rekening-perusahaan.create');
+    }
+
+    public function rekeningPerusahaanStore(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'pemilik' => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
+            'no_rek' => 'required|string|max:30',
+            'bank' => 'required|string|max:50',
+        ]);
+        JnsBank::create($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil ditambahkan');
+    }
+
+    public function rekeningPerusahaanEdit($id)
+    {
+        $this->checkCrudPermission();
+        $data = JnsBank::findOrFail($id);
+        return view('admin.master-data.rekening-perusahaan.edit', compact('data'));
+    }
+
+    public function rekeningPerusahaanUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'pemilik' => 'required|string|max:100',
+            'nama' => 'required|string|max:100',
+            'no_rek' => 'required|string|max:30',
+            'bank' => 'required|string|max:50',
+        ]);
+        $data = JnsBank::findOrFail($id);
+        $data->update($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil diupdate');
+    }
+
+    public function rekeningPerusahaanDestroy($id)
+    {
+        $this->checkCrudPermission();
+        $data = JnsBank::findOrFail($id);
+        $data->delete();
+        return redirect()->route('admin.master-data.rekening-perusahaan.index')
+            ->with('success', 'Rekening perusahaan berhasil dihapus');
     }
 
     // ==================== MANAJEMEN ADMIN OPERASIONAL ====================

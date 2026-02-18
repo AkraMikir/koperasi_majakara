@@ -196,12 +196,18 @@
                             </p>
                         </div>
 
-                        <!-- Rekening Tujuan -->
+                        <!-- Rekening Tujuan (dari Master Rekening Perusahaan) -->
                         <div class="mb-6">
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Rekening Tujuan *</label>
-                            <input type="text" name="rekening_tujuan" required
-                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
-                                placeholder="Masukkan rekening tujuan transfer">
+                            <select name="rekening_tujuan" required
+                                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all">
+                                <option value="">-- Pilih Rekening Tujuan Transfer --</option>
+                                @foreach($rekeningPerusahaan ?? [] as $rek)
+                                <option value="{{ $rek->bank }} - {{ $rek->no_rek }} ({{ $rek->pemilik }})">
+                                    {{ $rek->bank }} - {{ $rek->no_rek }} - {{ $rek->nama }} ({{ $rek->pemilik }})
+                                </option>
+                                @endforeach
+                            </select>
                         </div>
 
                         <!-- Upload Bukti Transfer -->

@@ -59,11 +59,18 @@ class PinjamanController extends Controller
         // Angsuran jatuh tempo hari ini
         $angsuran_jatuh_tempo = $this->getAngsuranJatuhTempo();
 
+        // Pembayaran terbaru (pengajuan pembayaran yang baru ditambahkan nasabah)
+        $pembayaran_terbaru = PengajuanPembayaranPinjaman::with(['nasabah.user', 'pinjaman'])
+            ->latest()
+            ->take(10)
+            ->get();
+
         return view('admin.pinjaman.index', compact(
             'stats',
             'pengajuan_terbaru',
             'pinjaman_aktif_terbaru',
-            'angsuran_jatuh_tempo'
+            'angsuran_jatuh_tempo',
+            'pembayaran_terbaru'
         ));
     }
 
@@ -694,7 +701,10 @@ class PinjamanController extends Controller
             $buktiTransferAngsuran = $pengajuanBayar->pluck('buktiFoto')->flatten()->filter(fn($b) => $b && ($b->file_path ?? null));
         }
 
-        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran'));
+        // Denda yang dihitung (untuk tampilan angsuran telat, konsisten dengan nasabah)
+        $dendaDisplay = $this->hitungDenda($angsuran, $angsuran->pinjaman);
+
+        return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran', 'dendaDisplay'));
     }
 
     /**
@@ -1233,6 +1243,9 @@ class PinjamanController extends Controller
             }
 
             DB::commit();
+
+            $pengajuan->load('nasabah.user');
+            app(ActivityLogService::class)->logProsesJanjiTemuPembayaranPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Foto serah terima berhasil diupload dan pembayaran dikonfirmasi');

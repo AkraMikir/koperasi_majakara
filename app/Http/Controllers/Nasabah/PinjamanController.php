@@ -10,6 +10,7 @@ use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
 use App\Models\JanjiTemuPinjaman;
 use App\Models\JnsLokasiPerusahaan;
+use App\Models\JnsBank;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFoto;
@@ -930,6 +931,8 @@ class PinjamanController extends Controller
 
         // Get lokasi untuk janji temu
         $lokasi = JnsLokasiPerusahaan::all();
+        // Rekening perusahaan untuk dropdown transfer
+        $rekeningPerusahaan = JnsBank::orderBy('bank')->orderBy('pemilik')->get();
 
         return view('nasabah.pinjaman.pembayaran', [
             'pinjamanAktif' => $pinjamanAktif,
@@ -937,6 +940,7 @@ class PinjamanController extends Controller
             'selectedAngsuran' => $selectedAngsuran,
             'angsuranList' => $angsuranList,
             'lokasi' => $lokasi,
+            'rekeningPerusahaan' => $rekeningPerusahaan,
             'jenis' => $jenis,
         ]);
     }

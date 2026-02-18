@@ -80,7 +80,6 @@
                     </div>
                     @endif
                     <div>
-                        <p class="text-sm text-gray-600">Status</p>
                         @php
                             $statusConfig = [
                                 '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Pending'],

@@ -81,7 +81,6 @@
                         <p class="font-semibold text-gray-900">{{ number_format($pinjaman->denda_persen, 2) }}%</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-600">Status</p>
                         <span
                             class="inline-block mt-2 px-4 py-2 {{ $pinjaman->status === 'telaksana' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-sm font-semibold">
                             {{ ucfirst($pinjaman->status) }}
@@ -304,5 +303,4 @@ function hidePelunasanModal() {
 </script>
 @endif
 @endcanPelunasanDipercepat
-@endif
 @endsection
