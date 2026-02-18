@@ -53,7 +53,7 @@
 
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +118,7 @@
                 </div>
 
                 <!-- Kalkulator Estimasi -->
-                <div class="mb-6 p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
+                <div class="mb-6 p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSection">
                         <div class="flex justify-between items-center">
@@ -147,7 +147,7 @@
                 <!-- Simulasi Tabel Angsuran -->
                 <div class="mb-6" id="simulasiTableSection" style="display: none;">
                     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
+                        <div class="bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
                             <h3 class="text-lg font-bold">Simulasi Angsuran Per Bulan</h3>
                         </div>
                         <div class="overflow-x-auto">
@@ -174,7 +174,7 @@
 
                 <!-- Submit Button -->
                 <button type="button" id="btnSubmitPengajuan"
-                    class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                    class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
                     Ajukan Pinjaman
                 </button>
                 <a href="{{ route('nasabah.pinjaman.pengajuan') }}" class="block w-full mt-3 py-3 text-center text-gray-600 hover:text-gray-800 transition-colors">

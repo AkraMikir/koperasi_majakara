@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
@@ -51,7 +51,7 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full md:w-auto px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-lg hover:shadow-xl">
+                    <button type="submit" class="w-full md:w-auto px-6 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-lg hover:shadow-xl">
                         Filter
                     </button>
                 </div>
@@ -72,7 +72,7 @@
             @if(count($pengajuan) > 0)
             <div class="overflow-x-auto">
                 <table class="w-full">
-                    <thead class="bg-gradient-to-r from-[#674c1d]/10 to-[#8b6f2f]/10">
+                    <thead class="bg-linear-to-r from-[#674c1d]/10 to-[#8b6f2f]/10">
                         <tr>
                             <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Tanggal</th>
                             <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Jenis</th>
@@ -158,7 +158,7 @@
                 </svg>
                 <p class="text-xl font-semibold text-gray-700 mb-2">Tidak Ada Pengajuan Pending</p>
                 <p class="text-gray-500 mb-6">Semua pengajuan Anda sudah diproses atau belum ada pengajuan</p>
-                <a href="{{ route('nasabah.dashboard') }}" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-lg hover:shadow-xl">
+                <a href="{{ route('nasabah.dashboard') }}" class="inline-flex items-center px-6 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-lg hover:shadow-xl">
                     Kembali ke Dashboard
                 </a>
             </div>

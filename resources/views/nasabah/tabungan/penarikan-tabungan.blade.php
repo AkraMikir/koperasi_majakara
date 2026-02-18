@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Info Saldo -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-white/80 text-sm mb-2">Saldo Tersedia</p>
@@ -30,9 +30,9 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Metode Tunai -->
-                <button onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
+                <button onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
                     <div class="flex items-center gap-4 mb-3">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
@@ -52,9 +52,9 @@
                 </button>
 
                 <!-- Metode Transfer -->
-                <button onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
+                <button onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
                     <div class="flex items-center gap-4 mb-3">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
@@ -191,7 +191,7 @@
                 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="button" onclick="showPinModal()" id="submit-btn" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
+                    <button type="button" onclick="showPinModal()" id="submit-btn" class="w-full py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed">
                         Ajukan Penarikan
                     </button>
                     <a href="{{ route('nasabah.tabungan.index') }}" class="block w-full mt-3 py-3 text-center text-gray-600 hover:text-gray-800 transition-colors">
@@ -206,7 +206,7 @@
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -256,7 +256,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -289,7 +289,7 @@
             <button onclick="closePinModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
                 Batal
             </button>
-            <button onclick="verifyAndSubmit()" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+            <button onclick="verifyAndSubmit()" class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
                 Verifikasi
             </button>
         </div>
@@ -321,11 +321,11 @@
         const btnTransfer = document.getElementById('btn-transfer');
         
         // Reset all
-        btnTunai.classList.remove('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
-        btnTransfer.classList.remove('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
+        btnTunai.classList.remove('border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
+        btnTransfer.classList.remove('border-[#674c1d]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
         
         if (metode === 'tunai') {
-            btnTunai.classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
+            btnTunai.classList.add('border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
             
             // Show Tunai Section & Validation
             document.getElementById('tunai-section').classList.remove('hidden');
@@ -338,7 +338,7 @@
             document.getElementById('nama_bank').removeAttribute('required');
             document.getElementById('no_rekening').removeAttribute('required');
         } else {
-            btnTransfer.classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
+            btnTransfer.classList.add('border-[#674c1d]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#4a3514]/10');
             
             // Hide Tunai Section & Remove Validation
             document.getElementById('tunai-section').classList.add('hidden');

@@ -85,14 +85,14 @@
                             @endif
                         </div>
                         <div id="nominal-display">
-                            <p class="font-semibold text-[#674c1d] text-2xl">Rp
+                            <p class="font-semibold text-[[#674c1d]] text-2xl">Rp
                                 {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</p>
                         </div>
                         @if($pengajuan->status == '1')
                         <div id="nominal-edit" class="hidden">
                             <input type="text" id="input-nominal"
                                 value="{{ number_format($pengajuan->nominal ?? 0, 0, '', '') }}"
-                                class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none text-lg font-semibold"
+                                class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none text-lg font-semibold"
                                 oninput="formatNominalInput(this)">
                             <p class="text-xs text-gray-500 mt-1">Min: Rp 10.000</p>
                         </div>
@@ -124,7 +124,7 @@
                     @if($pengajuan->status == '1')
                     <div class="pt-4 border-t border-gray-200">
                         <button onclick="showApproveModal()"
-                            class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                            class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -151,7 +151,7 @@
 
                         <div class="mb-4">
                             <p class="text-sm text-gray-700 mb-2">Nominal yang akan disetujui:</p>
-                            <p id="modal-nominal-display" class="text-2xl font-bold text-[#674c1d]"></p>
+                            <p id="modal-nominal-display" class="text-2xl font-bold text-[[#674c1d]]"></p>
                         </div>
 
                         <div class="mb-4">
@@ -159,7 +159,7 @@
                                 Keterangan Admin <span class="text-gray-400">(Opsional)</span>
                             </label>
                             <textarea name="keterangan_admin" rows="3"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
                                 placeholder="Tambahkan catatan tambahan jika diperlukan..."></textarea>
                             <p class="text-xs text-gray-500 mt-1">Keterangan ini akan dilihat oleh nasabah</p>
                         </div>
@@ -188,7 +188,9 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($pengajuan->buktiFoto as $index => $bukti)
                     <div class="border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                        onclick="showPhotoPreview('{{ asset('storage/' . $bukti->file_path) }}', 'Bukti Transfer #{{ $index + 1 }}')">
+                        data-preview-src="{{ asset('storage/' . $bukti->file_path) }}"
+                        data-preview-label="Bukti Transfer #{{ $index + 1 }}"
+                        onclick="showPhotoPreview(this.dataset.previewSrc, this.dataset.previewLabel)">
                         <div class="w-full h-64 bg-gray-100 overflow-hidden group">
                             @if(Storage::disk('public')->exists($bukti->file_path))
                             <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Transfer"
@@ -246,7 +248,7 @@
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan</h3>
                 <div class="space-y-3">
                     <button onclick="showRejectModal()"
-                        class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                        class="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                         <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M6 18L18 6M6 6l12 12"></path>
@@ -259,7 +261,7 @@
                         @csrf
                         @method('DELETE')
                         <button type="submit"
-                            class="w-full px-4 py-3 bg-gradient-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-medium shadow-md">
+                            class="w-full px-4 py-3 bg-linear-to-r from-gray-600 to-gray-700 text-white rounded-lg hover:from-gray-700 hover:to-gray-800 transition-all font-medium shadow-md">
                             <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
@@ -283,7 +285,7 @@
                                 Alasan Penolakan <span class="text-red-500">*</span>
                             </label>
                             <textarea name="keterangan_admin" rows="4" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
                                 placeholder="Masukkan alasan penolakan..."></textarea>
                             <p class="text-xs text-gray-500 mt-1">Alasan ini akan dilihat oleh nasabah</p>
                         </div>

@@ -77,7 +77,7 @@
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                         <input type="text" name="nominal" id="nominal" 
                             value="{{ number_format($transaksi->nominal, 0, '.', '') }}" required
-                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
+                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none text-lg font-semibold"
                             oninput="formatCurrency(this)">
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Minimal: Rp 10.000</p>
@@ -88,13 +88,13 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Transaksi *</label>
                     <input type="datetime-local" name="tgl_transaksi" 
                         value="{{ $transaksi->tgl_transaksi->format('Y-m-d\TH:i') }}" required
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none">
                 </div>
 
                 <!-- Keterangan (editable - BERSIH TANPA PATH FOTO) -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan</label>
-                    <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none" placeholder="Tambahkan keterangan...">{{ $transaksi->keterangan }}</textarea>
+                    <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none resize-none" placeholder="Tambahkan keterangan...">{{ $transaksi->keterangan }}</textarea>
                 </div>
 
                 <!-- Preview Bukti Foto yang Sudah Ada -->
@@ -108,7 +108,7 @@
                         @foreach($buktiFoto as $foto)
                         <div class="relative group">
                             <img src="{{ Storage::url($foto->file_path) }}" alt="Bukti Transfer" 
-                                class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm cursor-pointer hover:border-[#674c1d] transition-all"
+                                class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm cursor-pointer hover:border-[[#674c1d]] transition-all"
                                 onclick="window.open('{{ Storage::url($foto->file_path) }}', '_blank')">
                             <span class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
                                 {{ $loop->iteration }}
@@ -123,7 +123,7 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Baru (Opsional)</label>
                     <input type="file" name="foto_bukti[]" accept="image/jpeg,image/png,image/jpg" multiple
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[[#674c1d]] file:text-white hover:file:bg-[[#4a3514]] file:cursor-pointer"
                         onchange="previewMultipleFoto(this)">
                     <p class="text-xs text-gray-500 mt-1">Bisa upload lebih dari 1 foto. Foto baru akan ditambahkan ke bukti yang sudah ada.</p>
                     <div id="foto-preview" class="hidden mt-3 grid grid-cols-2 md:grid-cols-3 gap-3"></div>
@@ -135,7 +135,7 @@
                 <a href="{{ route('admin.tabungan.detail-transaksi', $transaksi->id) }}" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-center">
                     Batal
                 </a>
-                <button type="submit" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                <button type="submit" class="flex-1 px-4 py-3 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-xl font-semibold hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all">
                     Update Transaksi
                 </button>
             </div>
@@ -166,7 +166,7 @@
                     div.className = 'relative group';
                     div.innerHTML = `
                         <img src="${e.target.result}" alt="Preview ${index + 1}" 
-                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[#674c1d] transition-all">
+                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[[#674c1d]] transition-all">
                         <span class="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded-full">
                             Baru ${index + 1}
                         </span>

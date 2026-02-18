@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <!-- Back Button -->
     <div>
-        <a href="{{ route('admin.janji-temu.index') }}" class="inline-flex items-center text-gray-500 hover:text-[#674c1d] transition-colors">
+        <a href="{{ route('admin.janji-temu.index') }}" class="inline-flex items-center text-gray-500 hover:text-[[#674c1d]] transition-colors">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
@@ -19,13 +19,13 @@
         <div class="lg:col-span-2 space-y-6">
             <!-- Data Nasabah Card -->
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[#674c1d]/5 rounded-full -mr-16 -mt-16"></div>
+                <div class="absolute top-0 right-0 w-32 h-32 bg-[[#674c1d]]/5 rounded-full -mr-16 -mt-16"></div>
                 
                 <h2 class="text-xl font-bold text-gray-900 font-display mb-6 relative">Informasi Nasabah</h2>
                 
                 <div class="flex items-start gap-6 relative">
                     <div class="shrink-0">
-                        <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] flex items-center justify-center shadow-lg transform rotate-3">
+                        <div class="w-20 h-20 rounded-2xl bg-linear-to-br from-[[#674c1d]] to-[[#8b6f2f]] flex items-center justify-center shadow-lg transform rotate-3">
                             <span class="text-3xl font-bold text-white font-display">
                                 {{ substr($janjiTemu->nasabah->user->nama, 0, 1) }}
                             </span>
@@ -63,7 +63,7 @@
                             <p class="font-bold text-gray-900 text-lg">
                                 {{ $janjiTemu->tanggal_janji_temu->format('d M Y') }}
                             </p>
-                            <p class="text-sm text-[#674c1d] font-medium mt-1">
+                            <p class="text-sm text-[[#674c1d]] font-medium mt-1">
                                 Pukul {{ $janjiTemu->waktu_janji_temu ? \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu)->format('H:i') : '-' }} WIB
                             </p>
                         </div>
@@ -80,7 +80,7 @@
                         <p class="text-sm text-gray-500 mb-2">Lokasi Pertemuan</p>
                         <div class="flex items-start gap-3">
                             <div class="shrink-0 mt-1">
-                                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-[[#674c1d]]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                 </svg>
@@ -111,15 +111,17 @@
                     @if($janjiTemu->buktiFoto->count() > 0)
                     <div class="pt-4 border-t border-gray-100">
                         <p class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-5 h-5 text-[[#674c1d]]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                             </svg>
                             Bukti Pertemuan / Transaksi
                         </p>
                         <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                             @foreach($janjiTemu->buktiFoto as $bukti)
-                            <div class="group relative aspect-square rounded-xl overflow-hidden border border-gray-200 cursor-pointer hover:ring-2 hover:ring-[#674c1d] transition-all"
-                                onclick="showPhotoPreview('{{ asset('storage/' . $bukti->file_path) }}', 'Bukti #{{ $loop->iteration }}')">
+                            <div class="group relative aspect-square rounded-xl overflow-hidden border border-gray-200 cursor-pointer hover:ring-2 hover:ring-[[#674c1d]] transition-all"
+                                data-preview-src="{{ asset('storage/' . $bukti->file_path) }}"
+                                data-preview-label="Bukti #{{ $loop->iteration }}"
+                                onclick="showPhotoPreview(this.dataset.previewSrc, this.dataset.previewLabel)">
                                 <img src="{{ asset('storage/' . $bukti->file_path) }}" class="w-full h-full object-cover transition-transform group-hover:scale-110">
                                 <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -167,7 +169,7 @@
                             <div class="relative">
                                 <span class="absolute left-4 top-3 text-gray-500 font-medium">Rp</span>
                                 <input type="text" name="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
-                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent outline-none font-bold text-gray-900" 
+                                    class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[[#674c1d]] focus:border-transparent outline-none font-bold text-gray-900" 
                                     readonly>
                             </div>
                         </div>
@@ -175,19 +177,24 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto (Opsional)</label>
                             <input type="file" name="foto_penerimaan[]" multiple 
-                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d]/10 file:text-[#674c1d] hover:file:bg-[#674c1d]/20 transition-all">
+                                class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[[#674c1d]]/10 file:text-[[#674c1d]] hover:file:bg-[[#674c1d]]/20 transition-all">
                             <p class="text-xs text-gray-500 mt-1">Bisa upload foto uang / kwitansi / bukti {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'penerimaan' : 'penyerahan' }}</p>
                         </div>
 
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan Admin</label>
                             <textarea name="keterangan_admin" rows="3" 
-                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent outline-none"
+                                class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[[#674c1d]] focus:border-transparent outline-none"
                                 placeholder="Catatan tambahan..."></textarea>
                         </div>
 
-                        <button type="submit" onclick="return confirm('Apakah Anda yakin uang sudah {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'diterima' : 'diserahkan' }}? Transaksi akan dibuat otomatis.')" 
-                            class="w-full py-3 bg-[#674c1d] hover:bg-[#543d16] text-white font-bold rounded-xl shadow-lg shadow-[#674c1d]/20 transition-all transform hover:-translate-y-1">
+                        @php
+                            $confirmMsg = ($janjiTemu->jenis ?? 'setoran') == 'setoran'
+                                ? 'Apakah Anda yakin uang sudah diterima? Transaksi akan dibuat otomatis.'
+                                : 'Apakah Anda yakin uang sudah diserahkan? Transaksi akan dibuat otomatis.';
+                        @endphp
+                        <button type="submit" data-confirm-message="{{ $confirmMsg }}" onclick="return confirm(this.dataset.confirmMessage)" 
+                            class="w-full py-3 bg-[[#674c1d]] hover:bg-[[#543d16]] text-white font-bold rounded-xl shadow-lg shadow-[[#674c1d]]/20 transition-all transform hover:-translate-y-1">
                             ✅ Selesaikan & Buat Transaksi
                         </button>
                     </div>
@@ -195,7 +202,7 @@
             </div>
             @endif
 
-            <div class="bg-[#674c1d] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div class="bg-[[#674c1d]] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                 <div class="relative z-10">
                     <h3 class="font-bold text-lg mb-2">Status Saat Ini</h3>
@@ -233,7 +240,7 @@
             </svg>
         </button>
         <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-            <div class="p-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] flex justify-between items-center">
+            <div class="p-4 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] flex justify-between items-center">
                 <h3 id="photoTitle" class="text-white font-bold text-lg"></h3>
             </div>
             <div class="p-4 bg-gray-50 max-h-[80vh] overflow-auto">

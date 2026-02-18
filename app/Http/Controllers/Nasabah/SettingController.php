@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -23,7 +25,8 @@ class SettingController extends Controller
      */
     public function index()
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         return view('nasabah.setting.index', [
             'user' => $user,
@@ -40,7 +43,8 @@ class SettingController extends Controller
      */
     public function changePassword(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         // Validasi input
         $request->validate([
@@ -108,7 +112,8 @@ class SettingController extends Controller
      */
     public function sendOtpPasswordReset(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         try {
             // Generate session ID untuk reset password
@@ -160,7 +165,8 @@ class SettingController extends Controller
      */
     public function verifyOtpAndResetPassword(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         // Validasi input
         $request->validate([
@@ -249,7 +255,8 @@ class SettingController extends Controller
      */
     public function changePin(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         // Validasi input
         $request->validate([
@@ -323,7 +330,8 @@ class SettingController extends Controller
      */
     public function getOtpCooldown(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $remaining = $this->otpService->getRemainingCooldown($user->nomor_hp);
 
         return response()->json([

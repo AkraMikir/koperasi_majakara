@@ -89,7 +89,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal</p>
-                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[[#674c1d]] text-2xl">Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
                     </div>
                 </div>
             </div>
@@ -141,7 +141,7 @@
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                                 <input type="text" name="nominal" id="nominal" value="{{ number_format($janjiTemu->nominal, 0, ',', '.') }}" 
-                                    required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                                    required class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
                                     oninput="formatCurrency(this)">
                             </div>
                             <p class="text-xs text-gray-500 mt-1">Nominal default: Rp {{ number_format($janjiTemu->nominal, 0, ',', '.') }}</p>
@@ -153,7 +153,7 @@
                                 <div class="foto-upload-item">
                                     <div class="relative">
                                         <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                                            class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
+                                            class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none
                                             file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
                                             file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                                     </div>
@@ -172,12 +172,12 @@
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan Admin</label>
                             <textarea name="keterangan_admin" rows="3" 
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none resize-none"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none resize-none"
                                 placeholder="Tambahkan catatan atau keterangan admin..."></textarea>
                             <p class="text-xs text-gray-500 mt-1">Catatan: Keterangan nasabah akan otomatis digunakan dalam transaksi</p>
                         </div>
 
-                        <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                        <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                             ✓ Buat Transaksi Tabungan
                         </button>
                     </div>
@@ -229,11 +229,11 @@
         newItem.innerHTML = `
             <div class="flex-1 relative">
                 <input type="file" name="foto_penerimaan[]" accept="image/*" 
-                    class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none
+                    class="file-input w-full text-sm px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none
                     file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold 
                     file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
             </div>
-            <button type="button" onclick="removeFotoInput(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex-shrink-0">
+            <button type="button" onclick="removeFotoInput(this)" class="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors shrink-0">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

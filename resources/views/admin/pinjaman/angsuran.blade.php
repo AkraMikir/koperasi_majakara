@@ -51,7 +51,7 @@
                 </div>
             </div>
             <div class="md:col-span-4">
-                <button type="submit" class="px-6 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
+                <button type="submit" class="px-6 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
                     Filter
                 </button>
             </div>
@@ -63,7 +63,7 @@
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
+                    <tr class="border-b-2 border-[#674c1d]/20 bg-linear-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-14">No</th>
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase">Id Pinjaman</th>
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
@@ -88,10 +88,10 @@
                             <p class="text-xs text-gray-500">{{ $pinjaman->nasabah->user->email ?? '-' }}</p>
                         </td>
                         <td class="px-4 py-3">
-                            <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-gradient-to-b from-amber-50/80 to-white">
+                            <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-linear-to-b from-amber-50/80 to-white">
                                 <table class="w-full text-xs">
                                     <thead>
-                                        <tr class="bg-gradient-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
+                                        <tr class="bg-linear-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
                                             <th class="px-3 py-2 text-center font-semibold text-[#674c1d]">No</th>
                                             <th class="px-3 py-2 text-left font-semibold text-[#674c1d]">Jatuh Tempo</th>
                                             <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Jumlah Tagihan</th>
@@ -111,10 +111,10 @@
                             </div>
                         </td>
                         <td class="px-4 py-3">
-                            <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-gradient-to-b from-amber-50/80 to-white">
+                            <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-linear-to-b from-amber-50/80 to-white">
                                 <table class="w-full text-xs">
                                     <thead>
-                                        <tr class="bg-gradient-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
+                                        <tr class="bg-linear-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
                                             <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Terbayar</th>
                                             <th class="px-3 py-2 text-center font-semibold text-[#674c1d]">Status</th>
                                         </tr>
@@ -145,7 +145,7 @@
                             <div class="flex flex-col gap-1.5 items-center">
                                 @foreach($tempos as $t)
                                 <a href="{{ route('admin.pinjaman.detail-angsuran', $t->id) }}?jenis={{ $jenis }}"
-                                    class="w-full inline-flex items-center justify-center px-2.5 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-xs font-medium shadow-sm">
+                                    class="w-full inline-flex items-center justify-center px-2.5 py-1.5 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-xs font-medium shadow-sm">
                                     Detail #{{ $t->no_urut }}
                                 </a>
                                 @endforeach

@@ -14,7 +14,7 @@
         </div>
         
         <!-- Image Info -->
-        <div id="preview-info" class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
+        <div id="preview-info" class="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black/80 to-transparent p-6 rounded-b-2xl">
             <p class="text-white text-sm text-center"></p>
         </div>
     </div>

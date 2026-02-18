@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Models\AdminNotification;
@@ -25,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
         View::composer('components.admin.header', function ($view) {
             $notificationsUnreadCount = 0;
             $notificationsRecent = collect([]);
-            if (auth()->check()) {
+            if (Auth::check()) {
                 $notificationsUnreadCount = AdminNotification::unread()->count();
                 $notificationsRecent = AdminNotification::query()
                     ->recent(8)

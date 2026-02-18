@@ -53,7 +53,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal Penarikan</p>
-                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[[#674c1d]] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Metode</p>
@@ -85,7 +85,7 @@
                     @endif
                     <div>
                         <p class="text-sm text-gray-600">Saldo Nasabah</p>
-                        <p class="font-semibold text-[#674c1d] text-xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[[#674c1d]] text-xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
                         @if($saldo < $pengajuan->nominal)
                             <p class="text-sm text-red-600 mt-1 font-semibold">⚠ Saldo tidak mencukupi</p>
                             <p class="text-xs text-gray-500 mt-1">Kekurangan: Rp {{ number_format($pengajuan->nominal - $saldo, 0, ',', '.') }}</p>
@@ -148,7 +148,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Bank Pengirim (Koperasi)</label>
                         <select name="bank_pengirim" id="bank_pengirim" required 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
                             onchange="calculateBiaya()">
                             <option value="">Pilih Bank</option>
                             <option value="BCA">BCA</option>
@@ -175,7 +175,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer *</label>
                         <input type="file" name="foto_bukti_tf_admin" accept="image/jpeg,image/png,image/jpg" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[[#674c1d]] file:text-white hover:file:bg-[[#4a3514]] file:cursor-pointer"
                             onchange="previewFoto(this)">
                         <div id="foto-preview" class="hidden mt-3">
                             <img src="" alt="Preview" class="max-w-full max-h-48 rounded-lg border border-gray-200 shadow-sm">
@@ -185,7 +185,7 @@
                     @endif
 
                     @if($saldo >= $pengajuan->nominal)
-                    <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                    <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                         ✓ Setujui Penarikan
                     </button>
                     @else
@@ -199,7 +199,7 @@
             <!-- Reject Button -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan Lain</h3>
-                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                     ✗ Tolak Pengajuan
                 </button>
             </div>
@@ -212,7 +212,7 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
-                            <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
+                            <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
                         </div>
                         <div class="flex space-x-3">
                             <button type="button" onclick="hideRejectModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
@@ -230,15 +230,18 @@
     </div>
 </div>
 
+<div id="pengajuan-tarik-data" class="hidden" data-nama-bank="{{ e($pengajuan->nama_bank ?? '') }}" data-nominal="{{ (float) ($pengajuan->nominal ?? 0) }}"></div>
+
 @push('scripts')
 <script>
     // Biaya transfer logic (Simplified, DB table not available yet)
-    const biayaData = {}; 
+    const biayaData = {};
 
     function calculateBiaya() {
         const bankPengirim = document.getElementById('bank_pengirim').value;
-        const bankPenerima = '{{ $pengajuan->nama_bank }}';
-        const nominal = {{ $pengajuan->nominal }};
+        const dataEl = document.getElementById('pengajuan-tarik-data');
+        const bankPenerima = dataEl ? dataEl.getAttribute('data-nama-bank') || '' : '';
+        const nominal = dataEl ? parseFloat(dataEl.getAttribute('data-nominal')) || 0 : 0;
 
         if (!bankPengirim) {
             return;

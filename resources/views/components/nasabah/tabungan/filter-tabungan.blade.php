@@ -56,12 +56,12 @@
     
     <!-- Action Buttons -->
     <div class="flex gap-2">
-        <button type="submit" class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#4a3514] text-white rounded-xl hover:from-[#4a3514] hover:to-[#674c1d] transition-all flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105">
+        <button type="submit" class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#4a3514] text-white rounded-xl hover:from-[#4a3514] hover:to-[#674c1d] transition-all flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
             </svg>
         </button>
-        <a href="{{ $action }}" class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:from-[#d4af37] hover:to-[#8b6f2f] transition-all flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105">
+        <a href="{{ $action }}" class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:from-[#d4af37] hover:to-[#8b6f2f] transition-all flex items-center justify-center shadow-md hover:shadow-lg transform hover:scale-105">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
             </svg>

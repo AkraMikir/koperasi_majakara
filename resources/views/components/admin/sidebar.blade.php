@@ -1,7 +1,7 @@
 @php
 $currentRoute = request()->route()->getName() ?? '';
 $isActive = function($route) use ($currentRoute) {
-return str_starts_with($currentRoute, $route) ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' :
+return str_starts_with($currentRoute, $route) ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' :
 'text-gray-700 hover:bg-gray-100';
 };
 $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
@@ -14,7 +14,7 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
     <div class="flex flex-col h-full">
         <!-- Logo Section -->
         <div
-            class="flex items-center justify-center h-20 px-6 border-b border-gray-200 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f]">
+            class="flex items-center justify-center h-20 px-6 border-b border-gray-200 bg-linear-to-r from-[#674c1d] to-[#8b6f2f]">
             <div class="flex items-center space-x-3">
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm">
                     <span class="text-white font-bold text-2xl">K</span>
@@ -44,7 +44,7 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
             <!-- Tabungan (expandable) -->
             <div x-data="{ open: {{ $isTabunganActive ? 'true' : 'false' }} }" class="space-y-1">
                 <button type="button" @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isTabunganActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isTabunganActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
                     <div class="flex items-center">
                         <div class="w-10 h-10 flex items-center justify-center mr-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,7 +90,7 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
             <!-- Pinjaman (expandable) -->
             <div x-data="{ open: {{ $isPinjamanActive ? 'true' : 'false' }} }" class="space-y-1">
                 <button type="button" @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isPinjamanActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isPinjamanActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
                     <div class="flex items-center">
                         <div class="w-10 h-10 flex items-center justify-center mr-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -178,7 +178,7 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
             <!-- Laporan Keuangan (expandable) -->
             <div x-data="{ open: {{ $isLaporanActive ? 'true' : 'false' }} }" class="space-y-1">
                 <button type="button" @click="open = !open"
-                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isLaporanActive ? 'bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isLaporanActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
                     <div class="flex items-center">
                         <div class="w-10 h-10 flex items-center justify-center mr-3">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -313,7 +313,7 @@ $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
         <div class="px-4 py-4 border-t border-gray-200">
             <div class="flex items-center px-4 py-3 rounded-xl bg-gray-50">
                 <div
-                    class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
+                    class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
                     {{ substr(auth()->user()->nama ?? 'A', 0, 1) }}
                 </div>
                 <div class="ml-3 flex-1">

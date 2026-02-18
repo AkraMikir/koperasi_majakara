@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <div class="flex items-center justify-between">
                     <div>
@@ -160,7 +160,7 @@
                     </div>
                     <div class="p-3 flex items-center justify-between gap-2">
                         <span class="text-xs text-gray-500 truncate flex-1">{{ $bukti->keterangan ?: $fileName }}</span>
-                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#8b6f2f] text-white text-xs font-semibold rounded-lg hover:bg-[#674c1d] transition-colors">
+                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#8b6f2f] text-white text-xs font-semibold rounded-lg hover:bg-[#674c1d] transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>

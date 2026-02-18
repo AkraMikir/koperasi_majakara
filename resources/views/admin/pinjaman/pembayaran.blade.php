@@ -6,7 +6,7 @@
 <div class="space-y-6">
     @if(session('success'))
     <div class="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
-        <div class="flex-shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+        <div class="shrink-0 w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
             <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
             </svg>
@@ -16,7 +16,7 @@
     @endif
     @if(session('error'))
     <div class="bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
-        <div class="flex-shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+        <div class="shrink-0 w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
             <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>
@@ -54,7 +54,7 @@
                     <option value="4" {{ request('status') == '4' ? 'selected' : '' }}>Terlaksana</option>
                 </select>
             </div>
-            <button type="submit" class="px-6 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
+            <button type="submit" class="px-6 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
                 Filter
             </button>
         </form>
@@ -65,7 +65,7 @@
         <div class="overflow-x-auto">
             <table class="w-full min-w-[720px]">
                 <thead>
-                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/8 to-[#8b6f2f]/8">
+                    <tr class="border-b-2 border-[#674c1d]/20 bg-linear-to-r from-[#674c1d]/8 to-[#8b6f2f]/8">
                         <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide w-40">ID</th>
                         <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide">Nasabah</th>
                         <th class="px-5 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wide w-32">Pinjaman</th>

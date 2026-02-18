@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Status Pembayaran Pinjaman</h1>
                 <p class="text-white/90 text-sm">Lihat status pengajuan pembayaran Anda</p>

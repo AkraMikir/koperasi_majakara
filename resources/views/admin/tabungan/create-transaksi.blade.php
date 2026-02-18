@@ -27,7 +27,7 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nasabah *</label>
                     <select name="id_anggota" id="id_anggota" required 
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none"
                         onchange="updateSaldoInfo()">
                         <option value="">Pilih Nasabah</option>
                         @foreach($nasabah as $n)
@@ -41,7 +41,7 @@
                 <!-- Jenis Transaksi -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Transaksi *</label>
-                    <select name="jenis" id="jenis" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
+                    <select name="jenis" id="jenis" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none"
                         onchange="updateSaldoInfo()">
                         <option value="setoran">Setoran</option>
                         <option value="penarikan">Penarikan</option>
@@ -51,7 +51,7 @@
                 <!-- Via -->
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Via *</label>
-                    <select name="via" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                    <select name="via" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none">
                         <option value="transfer">Transfer</option>
                         <option value="cash">Cash</option>
                     </select>
@@ -63,7 +63,7 @@
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                         <input type="text" name="nominal" id="nominal" placeholder="0" required
-                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
+                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none text-lg font-semibold"
                             oninput="formatCurrency(this); checkSaldo();">
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Minimal: Rp 10.000</p>
@@ -76,20 +76,20 @@
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Transaksi *</label>
                     <input type="datetime-local" name="tgl_transaksi" value="{{ now()->format('Y-m-d\TH:i') }}" required
-                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none">
                 </div>
 
                 <!-- Keterangan -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Keterangan</label>
-                    <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none resize-none" placeholder="Tambahkan keterangan..."></textarea>
+                    <textarea name="keterangan" rows="3" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[[#674c1d]] focus:ring-2 focus:ring-[[#674c1d]]/20 outline-none resize-none" placeholder="Tambahkan keterangan..."></textarea>
                 </div>
 
                 <!-- Upload Foto Bukti (Multiple) -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer (Opsional)</label>
                     <input type="file" name="foto_bukti[]" accept="image/jpeg,image/png,image/jpg" multiple
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[[#674c1d]] file:text-white hover:file:bg-[[#4a3514]] file:cursor-pointer"
                         onchange="previewMultipleFoto(this)">
                     <p class="text-xs text-gray-500 mt-1">Bisa upload lebih dari 1 foto. Max 5MB per foto.</p>
                     <div id="foto-preview" class="hidden mt-3 grid grid-cols-2 md:grid-cols-3 gap-3"></div>
@@ -101,7 +101,7 @@
                 <a href="{{ route('admin.tabungan.transaksi') }}" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors text-center">
                     Batal
                 </a>
-                <button type="submit" id="submit-btn" class="flex-1 px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                <button type="submit" id="submit-btn" class="flex-1 px-4 py-3 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-xl font-semibold hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all">
                     Buat Transaksi
                 </button>
             </div>
@@ -135,7 +135,7 @@
                     div.className = 'relative group';
                     div.innerHTML = `
                         <img src="${e.target.result}" alt="Preview ${index + 1}" 
-                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[#674c1d] transition-all">
+                            class="w-full h-32 object-cover rounded-lg border-2 border-gray-200 shadow-sm group-hover:border-[[#674c1d]] transition-all">
                         <span class="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
                             ${index + 1}
                         </span>

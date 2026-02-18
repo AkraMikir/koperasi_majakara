@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
@@ -26,7 +28,8 @@ class PinController extends Controller
      */
     public function updatePin(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         // Validasi input
         $validator = Validator::make($request->all(), [
@@ -105,7 +108,8 @@ class PinController extends Controller
      */
     public function sendOtpLupaPin(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
 
         try {
             // Generate session ID untuk tracking
@@ -161,7 +165,8 @@ class PinController extends Controller
      */
     public function resendOtpLupaPin(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $sessionId = $request->session()->get('lupa_pin_session_id');
 
         if (!$sessionId) {
@@ -212,7 +217,8 @@ class PinController extends Controller
      */
     public function verifyOtpLupaPin(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $sessionId = $request->session()->get('lupa_pin_session_id');
 
         if (!$sessionId) {
@@ -300,7 +306,8 @@ class PinController extends Controller
      */
     public function getCooldown(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         try {
             $remainingCooldown = $this->otpService->getRemainingCooldown($user->nomor_hp);

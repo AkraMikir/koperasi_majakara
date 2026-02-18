@@ -33,17 +33,17 @@
         <form method="GET" action="{{ route('admin.tabungan.pengajuan-tarik') }}" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama nasabah atau email..." 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none">
             </div>
             <div>
-                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none">
                     <option value="">Semua Status</option>
                     <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Pending</option>
                     <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Disetujui</option>
                     <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Ditolak</option>
                 </select>
             </div>
-            <button type="submit" class="px-6 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
+            <button type="submit" class="px-6 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all shadow-md font-medium">
                 Filter
             </button>
         </form>
@@ -54,18 +54,18 @@
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal Pengajuan</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
+                    <tr class="border-b-2 border-[[#674c1d]]/20 bg-linear-to-r from-[[#674c1d]]/5 to-[[#8b6f2f]]/5">
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">ID</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Nasabah</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Nominal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Tanggal Pengajuan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($pengajuan as $item)
-                    <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
+                    <tr class="border-b border-gray-100 hover:bg-linear-to-r hover:from-[[#674c1d]]/5 hover:to-[[#8b6f2f]]/5 transition-all">
                         <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>
                         <td class="px-6 py-4">
                             <div>
@@ -74,7 +74,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="font-semibold text-[#674c1d]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
+                            <p class="font-semibold text-[[#674c1d]]">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
                         </td>
                         <td class="px-6 py-4 text-sm">{{ $item->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
@@ -92,7 +92,7 @@
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.tabungan.detail-pengajuan-tarik', $item->id) }}" 
-                                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
+                                class="inline-flex items-center px-4 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all text-sm font-medium">
                                 Detail
                             </a>
                         </td>

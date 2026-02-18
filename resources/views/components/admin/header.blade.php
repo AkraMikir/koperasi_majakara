@@ -100,7 +100,7 @@
         <!-- Profile Dropdown -->
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
+                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
                     {{ substr(auth()->user()->nama ?? 'A', 0, 1) }}
                 </div>
                 <div class="hidden md:block text-left">

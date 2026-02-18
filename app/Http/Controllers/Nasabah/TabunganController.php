@@ -9,9 +9,11 @@ use App\Models\JanjiTemuTabungan;
 use App\Models\BuktiFotoTabungan;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\TransTabungan;
-use App\Models\BuktiFoto; // New Model
-use App\Helpers\IdGenerator; // New Helper
+use App\Models\BuktiFoto;
+use App\Models\User;
+use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 
@@ -70,7 +72,7 @@ class TabunganController extends Controller
             ->get();
 
         return view('nasabah.tabungan.index', [
-            'user' => auth()->user(),
+            'user' => Auth::user(),
             'tabunganInfo' => $tabunganInfo,
             'transaksiTabungan' => $transaksiTabungan,
             'riwayatJanjiTemu' => $riwayatJanjiTemu,
@@ -98,7 +100,7 @@ class TabunganController extends Controller
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
 
         return view('nasabah.tabungan.nabung-sekarang', [
-            'user' => auth()->user(),
+            'user' => Auth::user(),
             'riwayatTabungan' => $riwayatTabungan,
             'lokasi' => $lokasi,
         ]);
@@ -110,7 +112,7 @@ class TabunganController extends Controller
     public function pengajuanTransfer()
     {
         return view('nasabah.tabungan.pengajuan-transfer', [
-            'user' => auth()->user(),
+            'user' => Auth::user(),
         ]);
     }
 
@@ -145,7 +147,7 @@ class TabunganController extends Controller
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
 
         return view('nasabah.tabungan.penarikan-tabungan', [
-            'user' => auth()->user(),
+            'user' => Auth::user(),
             'tabunganInfo' => $tabunganInfo,
             'riwayatPenarikan' => $riwayatPenarikan,
             'lokasi' => $lokasi,
@@ -161,7 +163,8 @@ class TabunganController extends Controller
             'pin' => 'required|numeric|digits:6',
         ]);
 
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         if (!$user->pin) {
             return response()->json([
@@ -189,7 +192,7 @@ class TabunganController extends Controller
     public function submitSetoran(Request $request)
     {
         // Check authentication first
-        if (!auth()->check()) {
+        if (Auth::user() === null) {
             return redirect()->route('login')
                 ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
         }
@@ -202,7 +205,8 @@ class TabunganController extends Controller
         ]);
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         // Check if user has PIN
         if (!$user->pin) {
@@ -268,7 +272,7 @@ class TabunganController extends Controller
                 \App\Models\AdminNotification::notify(
                     'tabungan_setor',
                     'Pengajuan setoran tabungan baru',
-                    'Nasabah mengajukan setoran transfer Rp ' . number_format($pengajuan->nominal, 0, ',', '.'),
+                    'Nasabah mengajukan setoran transfer Rp ' . number_format((float) ($pengajuan->nominal ?? 0), 0, ',', '.'),
                     route('admin.tabungan.detail-pengajuan-setor', $pengajuan->id),
                     $pengajuan->id,
                     'pengajuan_tabungan'
@@ -315,7 +319,7 @@ class TabunganController extends Controller
     public function submitJanjiTemu(Request $request)
     {
         // Check authentication first
-        if (!auth()->check()) {
+        if (Auth::user() === null) {
             return redirect()->route('login')
                 ->with('error', 'Session Anda telah berakhir. Silakan login kembali.');
         }
@@ -339,7 +343,8 @@ class TabunganController extends Controller
         }
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         // Check if user has PIN
         if (!$user->pin) {
@@ -427,7 +432,8 @@ class TabunganController extends Controller
         ]);
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         if (!$user->pin || (int)$user->pin !== (int)$request->pin) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
@@ -660,7 +666,8 @@ class TabunganController extends Controller
      */
     private function getIdAnggota()
     {
-        $user = auth()->user();
+        /** @var User|null $user */
+        $user = Auth::user();
         
         if (!$user) {
             // Don't use abort here as it causes redirect issues

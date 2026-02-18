@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
-use App\Models\PengajuanPerubahanData;
 use App\Models\Nasabah;
+use App\Models\PengajuanPerubahanData;
+use App\Models\User;
 use App\Models\Pekerjaan;
 use App\Models\DataKtp;
 use App\Models\DataRek;
@@ -13,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class ProfileController extends Controller
 {
@@ -21,7 +23,8 @@ class ProfileController extends Controller
      */
     public function submitUpdateRequest(Request $request)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $nasabah = $user->nasabah;
 
         if (!$nasabah) {
@@ -132,7 +135,8 @@ class ProfileController extends Controller
      */
     public function cancelUpdateRequest($id)
     {
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         $nasabah = $user->nasabah;
 
         $pengajuan = PengajuanPerubahanData::where('id', $id)

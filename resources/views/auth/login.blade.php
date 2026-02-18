@@ -84,7 +84,7 @@
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-gray-50 via-amber-50/30 to-gray-50 min-h-screen pattern-bg">
+<body class="bg-linear-to-br from-gray-50 via-amber-50/30 to-gray-50 min-h-screen pattern-bg">
     <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl w-full">
             <!-- Main Card -->
@@ -105,7 +105,7 @@
                         @if(session('success'))
                             <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 rounded-r-xl fade-in-up">
                                 <div class="flex items-center gap-3">
-                                    <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <p class="text-green-800 font-medium">{{ session('success') }}</p>
@@ -117,7 +117,7 @@
                         @if(session('error'))
                             <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl fade-in-up">
                                 <div class="flex items-center gap-3">
-                                    <svg class="w-5 h-5 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                     </svg>
                                     <p class="text-red-800 font-medium">{{ session('error') }}</p>
@@ -147,7 +147,7 @@
                                 @error('email')
                                     <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg fade-in-up">
                                         <div class="flex items-start gap-2">
-                                            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                             <p class="text-sm text-red-700 font-medium">{{ $message }}</p>
@@ -180,7 +180,7 @@
                                 @error('password')
                                     <div class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg fade-in-up">
                                         <div class="flex items-start gap-2">
-                                            <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                             </svg>
                                             <p class="text-sm text-red-700 font-medium">{{ $message }}</p>
@@ -201,7 +201,7 @@
 
                             <!-- Submit Button -->
                             <button type="submit" id="loginButton"
-                                class="w-full px-8 py-3.5 bg-gradient-to-r from-[#674c1d] via-[#8b6f2f] to-[#674c1d] bg-size-200 bg-pos-0 hover:bg-pos-100 text-white rounded-xl transition-all duration-500 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                class="w-full px-8 py-3.5 bg-linear-to-r from-[#674c1d] via-[#8b6f2f] to-[#674c1d] bg-size-200 bg-pos-0 hover:bg-pos-100 text-white rounded-xl transition-all duration-500 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                                 <span id="loginButtonText" class="flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
@@ -255,7 +255,7 @@
                             <!-- Features -->
                             <div class="space-y-4 text-left max-w-sm mx-auto">
                                 <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                         </svg>
@@ -267,7 +267,7 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
@@ -279,7 +279,7 @@
                                 </div>
                                 
                                 <div class="flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
-                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -306,7 +306,7 @@
     <div id="pinModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 fade-in-up">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 mx-auto bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4 pulse-glow">
+                <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4 pulse-glow">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -325,7 +325,7 @@
                             placeholder="••••••" autocomplete="off" inputmode="numeric">
                         <div id="pinError" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg hidden">
                             <div class="flex items-start gap-2">
-                                <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                                 <p class="text-sm text-red-700 font-medium"></p>
@@ -339,7 +339,7 @@
                             Batal
                         </button>
                         <button type="submit" id="verifyPinButton"
-                            class="flex-1 px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+                            class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-lg transition-all font-semibold">
                             <span id="verifyPinButtonText">Verifikasi</span>
                             <span id="verifyPinButtonLoading" class="hidden flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

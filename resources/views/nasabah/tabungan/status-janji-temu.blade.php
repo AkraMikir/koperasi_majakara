@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#d4af37] via-[#8b6f2f] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#d4af37] via-[#8b6f2f] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
@@ -105,7 +105,7 @@
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('nasabah.tabungan.detail-janji-temu', $item->id) }}" 
-                        class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
+                        class="px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
                         Lihat Detail
                     </a>
                 </div>
@@ -117,7 +117,7 @@
                 </svg>
                 <p class="text-gray-500 mb-4">Belum ada janji temu</p>
                 <a href="{{ route('nasabah.tabungan.janji-temu') }}" 
-                    class="inline-block px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                    class="inline-block px-6 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
                     Buat Janji Temu
                 </a>
             </div>

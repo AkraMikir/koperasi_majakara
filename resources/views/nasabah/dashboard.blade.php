@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Hero Section - Total Assets Overview -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
@@ -34,7 +34,7 @@
                     @if(isset($stats['angsuran_terdekat']) && $stats['angsuran_terdekat'])
                     <a href="{{ route('nasabah.pinjaman.angsuran') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -49,7 +49,7 @@
                     @else
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -69,7 +69,7 @@
                             <span class="text-white text-xs font-bold">{{ $stats['pengajuan_pending'] }}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
@@ -84,7 +84,7 @@
                     @else
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
@@ -100,7 +100,7 @@
                     <!-- Transaksi Bulan Ini -->
                     <a href="{{ route('nasabah.tabungan.index') }}" class="bg-white/20 backdrop-blur-sm hover:bg-white/30 rounded-xl p-4 transition-all border border-white/30">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
@@ -134,7 +134,7 @@
                             </svg>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/30 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -148,7 +148,7 @@
                     @else
                     <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
                         <div class="flex items-center gap-3">
-                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-white/20 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -171,7 +171,7 @@
             <!-- Tabungan Card -->
             <a href="{{ route('nasabah.tabungan.index') }}" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#674c1d]/30 group">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -192,7 +192,7 @@
             <!-- Pinjaman Card -->
             <a href="{{ route('nasabah.pinjaman.index') }}" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#8b6f2f]/30 group">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -222,7 +222,7 @@
             <!-- Deposito Card -->
             <a href="#" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#4a3514]/30 group">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#4a3514]/20 to-[#4a3514]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#4a3514]/20 to-[#4a3514]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-[#4a3514]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
@@ -256,7 +256,7 @@
             <!-- Gadai Card -->
             <a href="#" class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-all duration-300 hover:border-[#d4af37]/30 group">
                 <div class="flex items-center justify-between mb-4">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#d4af37]/20 to-[#d4af37]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#d4af37]/20 to-[#d4af37]/10 rounded-xl flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
                         <svg class="w-7 h-7 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                         </svg>
@@ -290,7 +290,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>

@@ -17,10 +17,12 @@ use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
-use PhpOffice\PhpSpreadsheet\Style\Border;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
+/**
+ * Controller laporan keuangan: rekapitulasi, tabungan, pinjaman, angsuran, jatuh tempo, pengajuan.
+ * Export PDF via Barryvdh\DomPDF, Excel via PhpOffice\PhpSpreadsheet.
+ */
 class LaporanKeuanganController extends Controller
 {
     /**
@@ -589,6 +591,9 @@ class LaporanKeuanganController extends Controller
         return $this->downloadSpreadsheet($spreadsheet, 'Laporan-Pengajuan.xlsx');
     }
 
+    /**
+     * @param \PhpOffice\PhpSpreadsheet\Spreadsheet $spreadsheet
+     */
     protected function downloadSpreadsheet(Spreadsheet $spreadsheet, string $filename): StreamedResponse
     {
         $writer = new Xlsx($spreadsheet);

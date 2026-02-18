@@ -17,7 +17,7 @@
         <!-- Pengajuan Tabungan -->
         <a href="{{ route('admin.tabungan.pengajuan-setor') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center">
+                <div class="w-14 h-14 bg-linear-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center">
                     <svg class="w-7 h-7 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                     </svg>
@@ -30,7 +30,7 @@
         <!-- Pengajuan Penarikan Tabungan -->
         <a href="{{ route('admin.tabungan.pengajuan-tarik') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center">
+                <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center">
                     <svg class="w-7 h-7 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"></path>
                     </svg>
@@ -43,7 +43,7 @@
         <!-- Pengajuan Pinjaman -->
         <a href="{{ route('admin.pinjaman.pengajuan') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-blue-500/20 to-blue-500/10 rounded-xl flex items-center justify-center">
+                <div class="w-14 h-14 bg-linear-to-br from-blue-500/20 to-blue-500/10 rounded-xl flex items-center justify-center">
                     <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                     </svg>
@@ -56,7 +56,7 @@
         <!-- Janji Temu -->
         <a href="{{ route('admin.janji-temu.index') }}" class="bg-white rounded-2xl shadow-md p-6 border border-gray-100 hover:shadow-lg transition-all duration-300">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-14 h-14 bg-gradient-to-br from-green-500/20 to-green-500/10 rounded-xl flex items-center justify-center">
+                <div class="w-14 h-14 bg-linear-to-br from-green-500/20 to-green-500/10 rounded-xl flex items-center justify-center">
                     <svg class="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -70,7 +70,7 @@
     <!-- Info Section -->
     <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
         <div class="flex items-start gap-4">
-            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center flex-shrink-0">
+            <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>

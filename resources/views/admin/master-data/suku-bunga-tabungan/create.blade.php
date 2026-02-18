@@ -39,7 +39,7 @@
             </div>
 
             <div class="flex items-center space-x-3 pt-4 border-t">
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-[#4a3514] to-[#674c1d] text-white rounded-xl hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all font-medium shadow-md">
+                <button type="submit" class="px-6 py-3 bg-linear-to-r from-[#4a3514] to-[#674c1d] text-white rounded-xl hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all font-medium shadow-md">
                     Simpan Data
                 </button>
                 <a href="{{ route('admin.master-data.suku-bunga-tabungan.index') }}" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium">

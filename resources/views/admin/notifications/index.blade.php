@@ -50,7 +50,7 @@
                     @csrf
                     <input type="hidden" name="redirect" value="{{ $notif->link ?: url()->current() }}">
                     <button type="submit" class="w-full text-left px-6 py-4 hover:bg-gray-50/50 transition-colors flex items-start gap-4">
-                        <div class="flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
+                        <div class="shrink-0 w-10 h-10 rounded-xl flex items-center justify-center
                             @if($notif->type === 'tabungan_setor') bg-green-100 text-green-700
                             @elseif($notif->type === 'tabungan_tarik') bg-amber-100 text-amber-700
                             @elseif(str_starts_with($notif->type, 'pinjaman')) bg-blue-100 text-blue-700
@@ -74,7 +74,7 @@
                             <p class="text-xs text-gray-400 mt-2">{{ $notif->created_at->format('d M Y, H:i') }} · {{ $notif->created_at->diffForHumans() }}</p>
                         </div>
                         @if($notif->link)
-                            <span class="flex-shrink-0 text-[#674c1d] text-sm font-medium">Buka →</span>
+                            <span class="shrink-0 text-[#674c1d] text-sm font-medium">Buka →</span>
                         @endif
                     </button>
                 </form>

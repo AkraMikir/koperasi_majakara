@@ -243,7 +243,7 @@
                             placeholder="Tambahkan keterangan..."></textarea>
                     </div>
                     <button type="submit" onclick="return confirm('Upload foto akan mengkonfirmasi pembayaran dan memperbarui angsuran. Lanjutkan?')" 
-                        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
+                        class="w-full px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
                         ✓ Upload Bukti & Konfirmasi Pembayaran
                     </button>
                 </form>
@@ -283,11 +283,11 @@
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
                             placeholder="Tambahkan keterangan..."></textarea>
                     </div>
-                    <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                    <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                         ✓ Setujui Pembayaran
                     </button>
                 </form>
-                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                     ✗ Tolak Pembayaran
                 </button>
             </div>
@@ -329,7 +329,7 @@
                             placeholder="Tambahkan keterangan..."></textarea>
                     </div>
                     <button type="submit" onclick="return confirm('Konfirmasi pembayaran akan memperbarui angsuran. Lanjutkan?')" 
-                        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
+                        class="w-full px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
                         ✓ Konfirmasi Pembayaran
                     </button>
                 </form>
@@ -356,7 +356,7 @@
                             placeholder="Tambahkan keterangan..."></textarea>
                     </div>
                     <button type="submit" onclick="return confirm('Upload foto akan mengkonfirmasi pembayaran dan memperbarui angsuran. Lanjutkan?')" 
-                        class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
+                        class="w-full px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
                         ✓ Upload Bukti & Konfirmasi Pembayaran
                     </button>
                 </form>

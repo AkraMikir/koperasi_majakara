@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Status Pengajuan Pinjaman</h1>
                 <p class="text-white/90 text-sm">Lihat status pengajuan pinjaman Anda</p>
@@ -53,7 +53,7 @@
                     </select>
                 </div>
                 <div class="flex items-end">
-                    <button type="submit" class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-2 rounded-xl hover:shadow-lg transition-all">
+                    <button type="submit" class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-2 rounded-xl hover:shadow-lg transition-all">
                         Filter
                     </button>
                 </div>
@@ -76,8 +76,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($pengajuan ?? [] as $item)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pengajuan', $item->id) }}'">
+                        @forelse(($pengajuan ?? []) as $item)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" role="button" tabindex="0" data-href="{{ route('nasabah.pinjaman.detail-pengajuan', $item->id) }}" onclick="window.location.href=this.dataset.href">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $item->tgl_pengajuan->format('d M Y') }}</p>
                                 <p class="text-xs text-gray-500">{{ $item->tgl_pengajuan->format('H:i') }}</p>

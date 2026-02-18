@@ -18,7 +18,7 @@
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
         <div
-            class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+            class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Pembayaran Pinjaman</h1>
                 <p class="text-white/90 text-sm">Pilih pinjaman dan angsuran yang akan dibayar</p>
@@ -120,7 +120,7 @@
 
                 <!-- Informasi Angsuran -->
                 <div
-                    class="mb-6 p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
+                    class="mb-6 p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Informasi Angsuran</h3>
                     <div class="space-y-2">
                         <div class="flex justify-between">
@@ -209,7 +209,7 @@
                             <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer *</label>
                             <div id="bukti-container" class="space-y-3">
                                 <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-[#8b6f2f]/50 transition-colors">
-                                    <div class="flex-shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
+                                    <div class="shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
@@ -238,7 +238,7 @@
                         </div>
 
                         <button type="button" onclick="showPinModal('transfer')"
-                            class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                            class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
                             Ajukan Pembayaran
                         </button>
                     </form>
@@ -306,7 +306,7 @@
                         </div>
 
                         <button type="button" onclick="showPinModal('cash')"
-                            class="w-full bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                            class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
                             Ajukan Janji Temu
                         </button>
                     </form>
@@ -347,7 +347,7 @@
                 Batal
             </button>
             <button onclick="verifyAndSubmit()"
-                class="flex-1 px-4 py-3 bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white rounded-xl font-semibold">
+                class="flex-1 px-4 py-3 bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white rounded-xl font-semibold">
                 Verifikasi
             </button>
         </div>
@@ -447,7 +447,7 @@ function addBuktiField() {
     div.className = 'relative';
     div.innerHTML = `
         <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-            <div class="flex-shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
+            <div class="shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                 </svg>
@@ -457,7 +457,7 @@ function addBuktiField() {
                     class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#8b6f2f] file:text-white hover:file:bg-[#674c1d] cursor-pointer">
                 <p class="text-xs text-gray-500 mt-1">Max 5MB (JPG, PNG, JPEG)</p>
             </div>
-            <button type="button" onclick="this.closest('.relative').remove();" class="flex-shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
+            <button type="button" onclick="this.closest('.relative').remove();" class="shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

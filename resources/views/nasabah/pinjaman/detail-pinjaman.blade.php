@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <div class="flex items-center justify-between">
                     <div>
@@ -67,7 +67,7 @@
                 <span class="text-sm font-semibold text-gray-700">{{ number_format($progress, 1) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                <div class="bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
+                <div class="bg-linear-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
             </div>
             <div class="flex justify-between text-xs text-gray-500">
                 <span>{{ $angsuranLunas ?? 0 }} / {{ $totalAngsuran ?? 0 }} angsuran lunas</span>
@@ -135,7 +135,7 @@
                     </div>
                     <div class="p-3 flex items-center justify-between gap-2">
                         <span class="text-xs text-gray-500 truncate flex-1">{{ $bukti->keterangan ?: $fileName }}</span>
-                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#8b6f2f] text-white text-xs font-semibold rounded-lg hover:bg-[#674c1d] transition-colors">
+                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#8b6f2f] text-white text-xs font-semibold rounded-lg hover:bg-[#674c1d] transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
                             </svg>
@@ -241,7 +241,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h3 class="text-lg font-bold text-[#8b6f2f] mb-4 font-display">Aksi</h3>
             <a href="{{ route('nasabah.pinjaman.pembayaran', ['pinjaman_id' => $pinjaman->id]) }}" 
-                class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                class="w-full inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>

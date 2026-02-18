@@ -44,7 +44,7 @@
             </div>
 
             <div class="flex items-center space-x-3 pt-4 border-t">
-                <button type="submit" class="px-6 py-3 bg-gradient-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all font-medium shadow-md">
+                <button type="submit" class="px-6 py-3 bg-linear-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all font-medium shadow-md">
                     Simpan Data
                 </button>
                 <a href="{{ route('admin.master-data.tenor-deposito.index') }}" class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-medium">

@@ -83,8 +83,11 @@
     @foreach($arcItems as $idx => $arcItem)
     @php $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70]; @endphp
     <a href="{{ $arcItem['route'] === '#' ? '#' : route($arcItem['route']) }}"
-       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[0_4px_20px_rgba(103,76,29,0.2)] text-[#8b6f2f] border border-[#8b6f2f]/10 hover:bg-[#8b6f2f]/10 active:scale-95"
-       style="margin-left: -24px; margin-top: -24px; --arc-x: {{ $pos['x'] }}px; --arc-y: {{ $pos['y'] }}px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.2s; transition-delay: {{ $idx * 40 }}ms;"
+       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[[0_4px_20px_rgba(103,76,29,0.2)]] text-[[#8b6f2f]] border border-[[#8b6f2f]]/10 hover:bg-[[#8b6f2f]]/10 active:scale-95"
+       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.2s;"
+       data-arc-x="{{ $pos['x'] ?? 0 }}"
+       data-arc-y="{{ $pos['y'] ?? -70 }}"
+       data-arc-delay="{{ $idx * 40 }}"
        title="{{ $arcItem['label'] }}">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $arcItem['icon'] }}"></path></svg>
     </a>
@@ -98,6 +101,16 @@
 
 <script>
 (function() {
+    // Apply arc position and delay from data attributes (avoids Blade in style attribute for linter)
+    document.querySelectorAll('#burgerArcMenu .arc-item').forEach(function(el) {
+        var x = el.getAttribute('data-arc-x');
+        var y = el.getAttribute('data-arc-y');
+        var d = el.getAttribute('data-arc-delay');
+        if (x != null) el.style.setProperty('--arc-x', x + 'px');
+        if (y != null) el.style.setProperty('--arc-y', y + 'px');
+        if (d != null) el.style.transitionDelay = d + 'ms';
+    });
+
     // --- Mobile: burger toggle & arc menu ---
     var burgerBtn = document.getElementById('burgerMenuBtn');
     var burgerArcMenu = document.getElementById('burgerArcMenu');

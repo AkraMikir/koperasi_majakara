@@ -174,13 +174,13 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
                                 <textarea name="keterangan_admin" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
                             </div>
-                            <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md mb-3">
+                            <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md mb-3">
                                 ✓ Setujui Pengajuan
                             </button>
                         @endif
                     </form>
                     
-                    <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                    <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                         ✗ Tolak Pengajuan
                     </button>
 
@@ -199,7 +199,7 @@
                         </p>
                     </div>
                     
-                    <button onclick="showCairkanModal()" class="w-full px-4 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#8b6f2f] hover:to-[#a0824d] transition-all font-medium shadow-md">
+                    <button onclick="showCairkanModal()" class="w-full px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#8b6f2f] hover:to-[#a0824d] transition-all font-medium shadow-md">
                         💰 Cairkan Pinjaman
                     </button>
 

@@ -76,13 +76,13 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Jenis</p>
-                        <span class="inline-block mt-2 px-4 py-2 {{ $transaksi->jenis === 'setoran' ? 'bg-[#674c1d]/10 text-[#674c1d]' : 'bg-[#8b6f2f]/10 text-[#8b6f2f]' }} rounded-full text-sm font-semibold">
+                        <span class="inline-block mt-2 px-4 py-2 {{ $transaksi->jenis === 'setoran' ? 'bg-[[#674c1d]]/10 text-[[#674c1d]]' : 'bg-[[#8b6f2f]]/10 text-[[#8b6f2f]]' }} rounded-full text-sm font-semibold">
                             {{ ucfirst($transaksi->jenis) }}
                         </span>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal</p>
-                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[[#674c1d]] text-2xl">Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}</p>
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Via</p>

@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
@@ -84,7 +84,7 @@
                 @if($item->keterangan_admin)
                 <div class="mb-4 p-3 {{ $item->status == '2' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200' }} rounded-lg">
                     <div class="flex items-start gap-2">
-                        <svg class="w-5 h-5 {{ $item->status == '2' ? 'text-green-600' : 'text-red-600' }} mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 {{ $item->status == '2' ? 'text-green-600' : 'text-red-600' }} mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
                         <div class="flex-1">
@@ -99,7 +99,7 @@
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('nasabah.tabungan.detail-pengajuan-setor', $item->id) }}" 
-                        class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
+                        class="px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
                         Lihat Detail
                     </a>
                 </div>
@@ -111,7 +111,7 @@
                 </svg>
                 <p class="text-gray-500 mb-4">Belum ada pengajuan setoran</p>
                 <a href="{{ route('nasabah.tabungan.nabung-sekarang') }}" 
-                    class="inline-block px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+                    class="inline-block px-6 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
                     Buat Pengajuan Setoran
                 </a>
             </div>

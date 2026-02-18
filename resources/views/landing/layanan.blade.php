@@ -254,7 +254,7 @@
                     <!-- Features List -->
                     <div class="space-y-4 mb-8">
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                 </svg>
@@ -265,7 +265,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                                 </svg>
@@ -276,7 +276,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                 </svg>
@@ -289,14 +289,14 @@
                     </div>
                     
                     @if (auth()->check() && auth()->user()->role === 'nasabah')
-                        <a href="{{ route('nasabah.tabungan.index') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
+                        <a href="{{ route('nasabah.tabungan.index') }}" class="inline-flex items-center px-8 py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
                             Mulai Menabung
                             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
+                        <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
                             Daftar Sekarang
                             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -307,32 +307,32 @@
                 
                 <!-- Tabungan Process -->
                 <div class="order-1 lg:order-2">
-                    <div class="bg-gradient-to-br from-[#674c1d]/5 to-[#d4af37]/5 rounded-3xl p-8">
+                    <div class="bg-linear-to-br from-[#674c1d]/5 to-[#d4af37]/5 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-primary mb-8 text-center">Cara Kerja Tabungan</h3>
                         <div class="space-y-6">
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">1</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">1</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Daftar & Verifikasi</h4>
                                     <p class="text-gray-600 text-sm">Lengkapi data diri dan tunggu verifikasi dari admin</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">2</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">2</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Ajukan Setoran</h4>
                                     <p class="text-gray-600 text-sm">Pilih metode setoran: transfer atau tunai dengan janji temu</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">3</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">3</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Admin Approve</h4>
                                     <p class="text-gray-600 text-sm">Admin akan memverifikasi dan menyetujui pengajuan Anda</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">✓</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">✓</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1 border-2 border-green-200">
                                     <h4 class="font-bold text-green-600 mb-1">Saldo Bertambah</h4>
                                     <p class="text-gray-600 text-sm">Setoran masuk dan saldo tabungan Anda bertambah</p>
@@ -346,7 +346,7 @@
     </section>
     
     <!-- Pinjaman Section -->
-    <section id="pinjaman" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+    <section id="pinjaman" class="py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-[#faf9f6] to-white">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <!-- Pinjaman Process -->
@@ -355,28 +355,28 @@
                         <h3 class="text-2xl font-bold text-primary mb-8 text-center">Proses Pengajuan Pinjaman</h3>
                         <div class="space-y-6">
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">1</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">1</div>
                                 <div class="bg-[#674c1d]/5 rounded-xl p-4 flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Isi Form Pengajuan</h4>
                                     <p class="text-gray-600 text-sm">Input nominal dan durasi pinjaman (1-24 bulan)</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">2</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">2</div>
                                 <div class="bg-[#674c1d]/5 rounded-xl p-4 flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Lihat Simulasi</h4>
                                     <p class="text-gray-600 text-sm">Sistem menampilkan tabel simulasi angsuran per bulan</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">3</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">3</div>
                                 <div class="bg-[#674c1d]/5 rounded-xl p-4 flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Review & Approve</h4>
                                     <p class="text-gray-600 text-sm">Admin review pengajuan dan set bunga otomatis</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">✓</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">✓</div>
                                 <div class="bg-green-50 rounded-xl p-4 flex-1 border-2 border-green-200">
                                     <h4 class="font-bold text-green-600 mb-1">Dana Cair</h4>
                                     <p class="text-gray-600 text-sm">Dana dicairkan dan bayar angsuran sesuai jadwal</p>
@@ -472,7 +472,7 @@
                     
                     <div class="space-y-4 mb-8">
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                                 </svg>
@@ -483,7 +483,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
@@ -494,7 +494,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4">
-                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
@@ -507,14 +507,14 @@
                     </div>
                     
                     @if (auth()->check() && auth()->user()->role === 'nasabah')
-                        <a href="#" class="mt-8 inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
+                        <a href="#" class="mt-8 inline-flex items-center px-8 py-4 bg-linear-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
                             Ajukan Deposito
                             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                             </svg>
                         </a>
                     @else
-                        <a href="{{ route('register') }}" class="mt-8 inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
+                        <a href="{{ route('register') }}" class="mt-8 inline-flex items-center px-8 py-4 bg-linear-to-r from-[#d4af37] to-[#8b6f2f] text-white rounded-xl hover:shadow-xl transition-all font-semibold group">
                             Daftar Sekarang
                             <svg class="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -573,7 +573,7 @@
     </section>
     
     <!-- Gadai Section -->
-    <section id="gadai" class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-[#faf9f6]">
+    <section id="gadai" class="py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-white to-[#faf9f6]">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
@@ -611,14 +611,14 @@
                         </div>
                         
                         @if (auth()->check() && auth()->user()->role === 'nasabah')
-                            <a href="#" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:shadow-xl transition-all font-semibold">
+                            <a href="#" class="inline-flex items-center px-8 py-4 bg-linear-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:shadow-xl transition-all font-semibold">
                                 Ajukan Gadai
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                                 </svg>
                             </a>
                         @else
-                            <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:shadow-xl transition-all font-semibold">
+                            <a href="{{ route('register') }}" class="inline-flex items-center px-8 py-4 bg-linear-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl hover:shadow-xl transition-all font-semibold">
                                 Daftar Sekarang
                                 <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
@@ -629,32 +629,32 @@
                 </div>
                 
                 <div>
-                    <div class="bg-gradient-to-br from-[#8b6f2f]/5 to-[#d4af37]/5 rounded-3xl p-8">
+                    <div class="bg-linear-to-br from-[#8b6f2f]/5 to-[#d4af37]/5 rounded-3xl p-8">
                         <h3 class="text-2xl font-bold text-primary mb-8 text-center">Proses Gadai</h3>
                         <div class="space-y-6">
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">1</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">1</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Pilih Barang</h4>
                                     <p class="text-gray-600 text-sm">Tentukan jenis barang berharga yang akan digadaikan</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">2</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">2</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Ajukan & Upload Foto</h4>
                                     <p class="text-gray-600 text-sm">Isi form dengan detail barang dan nominal yang diinginkan</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">3</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">3</div>
                                 <div class="bg-white rounded-xl p-4 shadow-md flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Penilaian Admin</h4>
                                     <p class="text-gray-600 text-sm">Admin menilai barang dan approve pengajuan</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
-                                <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold flex-shrink-0 text-lg">✓</div>
+                                <div class="w-12 h-12 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">✓</div>
                                 <div class="bg-green-50 rounded-xl p-4 flex-1 border-2 border-green-200">
                                     <h4 class="font-bold text-green-600 mb-1">Terima Dana</h4>
                                     <p class="text-gray-600 text-sm">Dana dicairkan, barang tersimpan aman</p>
@@ -680,7 +680,7 @@
             <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <!-- Tabungan -->
                 <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-[#674c1d] transition-all">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -711,7 +711,7 @@
                     <div class="absolute top-4 right-4">
                         <span class="px-3 py-1 bg-[#d4af37] text-white rounded-full text-xs font-bold">POPULER</span>
                     </div>
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -739,7 +739,7 @@
 
                 <!-- Deposito -->
                 <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-[#d4af37] transition-all">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
@@ -767,7 +767,7 @@
 
                 <!-- Gadai -->
                 <div class="bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 hover:border-[#4a3514] transition-all">
-                    <div class="w-14 h-14 bg-gradient-to-br from-[#4a3514] to-[#674c1d] rounded-xl flex items-center justify-center mb-4">
+                    <div class="w-14 h-14 bg-linear-to-br from-[#4a3514] to-[#674c1d] rounded-xl flex items-center justify-center mb-4">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                         </svg>

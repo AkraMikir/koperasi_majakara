@@ -62,7 +62,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Ajukan Pinjaman</h1>
                 <p class="text-white/90 text-sm">Pilih metode pencairan pinjaman Anda</p>
@@ -74,7 +74,7 @@
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -84,9 +84,9 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Metode Transfer -->
-                <button type="button" onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
+                <button type="button" onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
@@ -105,9 +105,9 @@
                 </button>
 
                 <!-- Metode Tunai -->
-                <button type="button" onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
+                <button type="button" onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
@@ -173,7 +173,7 @@
 
 
                 <!-- Estimasi & Simulasi -->
-                <div class="p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
+                <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTransfer">
                         <div class="flex justify-between items-center">
@@ -196,7 +196,7 @@
                 </div>
                 <div class="mb-6" id="simulasiTableSectionTransfer" style="display: none;">
                     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
+                        <div class="bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
                             <h3 class="text-lg font-bold">Simulasi Angsuran Per Bulan</h3>
                         </div>
                         <div class="overflow-x-auto">
@@ -215,7 +215,7 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="button" onclick="showPinModalTransfer()" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                    <button type="button" onclick="showPinModalTransfer()" class="w-full py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
                         Ajukan Pinjaman
                     </button>
                 </div>
@@ -292,7 +292,7 @@
                 </div>
 
                 <!-- Estimasi & Simulasi (sama seperti form transfer) -->
-                <div class="p-6 bg-gradient-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
+                <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTunai">
                         <div class="flex justify-between items-center">
@@ -315,7 +315,7 @@
                 </div>
                 <div class="mb-6" id="simulasiTableSectionTunai" style="display: none;">
                     <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-                        <div class="bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
+                        <div class="bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white p-4">
                             <h3 class="text-lg font-bold">Simulasi Angsuran Per Bulan</h3>
                         </div>
                         <div class="overflow-x-auto">
@@ -334,7 +334,7 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="button" onclick="showPinModalTunai()" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                    <button type="button" onclick="showPinModalTunai()" class="w-full py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
                         Buat Janji Temu
                     </button>
                 </div>
@@ -358,8 +358,8 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse($riwayatPengajuan ?? [] as $pengajuan)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pengajuan', $pengajuan->id) }}'">
+                        @forelse(($riwayatPengajuan ?? []) as $pengajuan)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" role="button" tabindex="0" data-href="{{ route('nasabah.pinjaman.detail-pengajuan', $pengajuan->id) }}" onclick="window.location.href=this.dataset.href">
                             <td class="px-4 py-3 text-sm">
                                 <p class="font-medium text-gray-900">{{ $pengajuan->tgl_pengajuan->format('d M Y') }}</p>
                             </td>
@@ -401,7 +401,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -424,7 +424,7 @@
                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <p id="pin-error-transfer" class="hidden text-sm text-red-600 mt-2"></p>
         </div>
-        <button type="button" onclick="submitFormTransfer()" class="w-full py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">Konfirmasi</button>
+        <button type="button" onclick="submitFormTransfer()" class="w-full py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">Konfirmasi</button>
     </div>
 </div>
 
@@ -433,7 +433,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -456,7 +456,7 @@
                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">
             <p id="pin-error-tunai" class="hidden text-sm text-red-600 mt-2"></p>
         </div>
-        <button type="button" onclick="submitFormTunai()" class="w-full py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">Konfirmasi</button>
+        <button type="button" onclick="submitFormTunai()" class="w-full py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">Konfirmasi</button>
     </div>
 </div>
 
@@ -466,18 +466,18 @@ let debounceSimulasi = null;
 
 function selectMethod(method) {
     document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-        btn.classList.remove('border-[#674c1d]', 'border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
+        btn.classList.remove('border-[#674c1d]', 'border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
         btn.classList.add('border-gray-200');
     });
     document.getElementById('form-transfer-section').classList.add('hidden');
     document.getElementById('form-tunai-section').classList.add('hidden');
 
     if (method === 'transfer') {
-        document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
+        document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
         document.getElementById('form-transfer-section').classList.remove('hidden');
         updateEstimasiTransfer();
     } else {
-        document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
+        document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
         document.getElementById('form-tunai-section').classList.remove('hidden');
         updateEstimasiTunai();
     }

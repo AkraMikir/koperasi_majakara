@@ -94,7 +94,7 @@
                         @else
                             <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
+                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
                             @endif
                         @endif
                     @endif
@@ -181,14 +181,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="pendaftaran" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana cara mendaftar menjadi anggota?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -218,14 +218,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Berapa bunga yang diberikan untuk tabungan?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -251,14 +251,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Apa saja syarat untuk mengajukan pinjaman?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -294,14 +294,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Apakah ada biaya administrasi?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -312,19 +312,19 @@
                             </p>
                             <div class="space-y-3">
                                 <div class="flex items-start space-x-3">
-                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                     <p class="text-gray-700"><strong>Tabungan:</strong> Tanpa biaya admin bulanan</p>
                                 </div>
                                 <div class="flex items-start space-x-3">
-                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                     <p class="text-gray-700"><strong>Pinjaman:</strong> Biaya diinformasikan di awal, tidak ada biaya tersembunyi</p>
                                 </div>
                                 <div class="flex items-start space-x-3">
-                                    <svg class="w-5 h-5 text-green-600 mt-1 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <svg class="w-5 h-5 text-green-600 mt-1 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                     </svg>
                                     <p class="text-gray-700"><strong>Deposito:</strong> Sesuai dengan jenis dan tenor yang dipilih</p>
@@ -338,14 +338,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="teknis" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana cara melakukan transaksi online?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -354,7 +354,7 @@
                             <p class="text-gray-600 mb-4">Setelah verifikasi selesai, Anda dapat melakukan transaksi melalui dashboard:</p>
                             <div class="grid gap-4">
                                 <div class="flex items-start space-x-3 bg-[#674c1d]/5 p-4 rounded-xl">
-                                    <div class="w-8 h-8 bg-[#674c1d] rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-8 h-8 bg-[#674c1d] rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                                         </svg>
@@ -365,7 +365,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-start space-x-3 bg-[#8b6f2f]/5 p-4 rounded-xl">
-                                    <div class="w-8 h-8 bg-[#8b6f2f] rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-8 h-8 bg-[#8b6f2f] rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
@@ -376,7 +376,7 @@
                                     </div>
                                 </div>
                                 <div class="flex items-start space-x-3 bg-[#d4af37]/5 p-4 rounded-xl">
-                                    <div class="w-8 h-8 bg-[#d4af37] rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <div class="w-8 h-8 bg-[#d4af37] rounded-lg flex items-center justify-center shrink-0">
                                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                         </svg>
@@ -398,14 +398,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="keamanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana keamanan data dan dana saya?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -415,7 +415,7 @@
                             <div class="grid md:grid-cols-2 gap-4">
                                 <div class="space-y-3">
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -423,7 +423,7 @@
                                         <p class="text-sm text-gray-700">Enkripsi SSL/TLS 256-bit</p>
                                     </div>
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -431,7 +431,7 @@
                                         <p class="text-sm text-gray-700">PIN verification 6 digit</p>
                                     </div>
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -441,7 +441,7 @@
                                 </div>
                                 <div class="space-y-3">
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -449,7 +449,7 @@
                                         <p class="text-sm text-gray-700">Admin approval untuk transaksi</p>
                                     </div>
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -457,7 +457,7 @@
                                         <p class="text-sm text-gray-700">Monitoring sistem 24/7</p>
                                     </div>
                                     <div class="flex items-start space-x-3">
-                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                                        <div class="w-6 h-6 bg-green-100 rounded-full flex items-center justify-center shrink-0 mt-0.5">
                                             <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
@@ -474,14 +474,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana cara kerja deposito?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -516,14 +516,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#674c1d] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana sistem gadai bekerja?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -552,14 +552,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="layanan" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana sistem angsuran pinjaman?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -567,15 +567,15 @@
                         <div class="pl-16">
                             <p class="text-gray-600 mb-4">Sistem angsuran bulanan yang fleksibel dan transparan:</p>
                             <div class="grid gap-3 mb-4">
-                                <div class="p-4 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5 rounded-xl">
+                                <div class="p-4 bg-linear-to-r from-[#674c1d]/5 to-[#8b6f2f]/5 rounded-xl">
                                     <h5 class="font-semibold text-[#674c1d] mb-2">💵 Bunga Tidak Dipotong Di Awal</h5>
                                     <p class="text-sm text-gray-600">Nominal yang Anda terima = nominal yang diajukan. Bunga dibagi ke setiap angsuran bulanan.</p>
                                 </div>
-                                <div class="p-4 bg-gradient-to-r from-[#8b6f2f]/5 to-[#d4af37]/5 rounded-xl">
+                                <div class="p-4 bg-linear-to-r from-[#8b6f2f]/5 to-[#d4af37]/5 rounded-xl">
                                     <h5 class="font-semibold text-[#8b6f2f] mb-2">📊 Simulasi Real-time</h5>
                                     <p class="text-sm text-gray-600">Lihat tabel simulasi angsuran per bulan sebelum mengajukan.</p>
                                 </div>
-                                <div class="p-4 bg-gradient-to-r from-[#d4af37]/5 to-[#8b6f2f]/5 rounded-xl">
+                                <div class="p-4 bg-linear-to-r from-[#d4af37]/5 to-[#8b6f2f]/5 rounded-xl">
                                     <h5 class="font-semibold text-[#d4af37] mb-2">⏰ Denda Ringan</h5>
                                     <p class="text-sm text-gray-600">Hanya 0,3% per hari jika telat, dan denda berhenti jika sudah ada pembayaran.</p>
                                 </div>
@@ -591,14 +591,14 @@
                 <div class="faq-item bg-white rounded-2xl p-6 shadow-lg border-2 border-gray-100 cursor-pointer" data-category="teknis" onclick="toggleFaq(this)">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-4 flex-1">
-                            <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#d4af37] rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#d4af37] rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
                                 </svg>
                             </div>
                             <span class="font-bold text-lg text-primary pr-4">Bagaimana cara menghubungi customer service?</span>
                         </div>
-                        <svg class="w-6 h-6 text-primary transform transition-transform flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-primary transform transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                         </svg>
                     </div>
@@ -667,9 +667,9 @@
     </section>
 
     <!-- Quick Help Section -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-[#faf9f6] to-white">
         <div class="max-w-7xl mx-auto">
-            <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-12 text-white text-center shadow-2xl">
+            <div class="bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-12 text-white text-center shadow-2xl">
                 <h2 class="font-display text-3xl md:text-4xl font-bold mb-4">
                     Tidak Menemukan Jawaban?
                 </h2>

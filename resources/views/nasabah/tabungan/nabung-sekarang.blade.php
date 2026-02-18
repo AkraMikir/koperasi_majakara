@@ -19,7 +19,7 @@
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
@@ -29,9 +29,9 @@
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <!-- Metode Transfer -->
-                <button onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
+                <button onclick="selectMethod('transfer')" id="btn-transfer" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#8b6f2f] transition-all text-left">
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
                             </svg>
@@ -50,9 +50,9 @@
                 </button>
 
                 <!-- Metode Tunai -->
-                <button onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
+                <button onclick="selectMethod('tunai')" id="btn-tunai" class="group p-6 bg-linear-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200 hover:border-[#674c1d] transition-all text-left">
                     <div class="flex items-center gap-4 mb-4">
-                        <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                        <div class="w-14 h-14 bg-linear-to-br from-[#674c1d] to-[#4a3514] rounded-xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                             </svg>
@@ -118,7 +118,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="button" onclick="showPinModalTransfer()" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                    <button type="button" onclick="showPinModalTransfer()" class="w-full py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
                         Ajukan Setoran
                     </button>
                 </div>
@@ -193,7 +193,7 @@
 
                 <!-- Submit Button -->
                 <div class="pt-4">
-                    <button type="button" onclick="showPinModalTunai()" class="w-full py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
+                    <button type="button" onclick="showPinModalTunai()" class="w-full py-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
                         Buat Janji Temu
                     </button>
                 </div>
@@ -206,7 +206,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -259,7 +259,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -284,7 +284,7 @@
             <p id="pin-error-transfer" class="hidden text-sm text-red-600 mt-2">PIN salah, silakan coba lagi</p>
         </div>
         
-        <button onclick="submitFormTransfer()" class="w-full py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">
+        <button onclick="submitFormTransfer()" class="w-full py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">
             Konfirmasi
         </button>
     </div>
@@ -295,7 +295,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -320,7 +320,7 @@
             <p id="pin-error-tunai" class="hidden text-sm text-red-600 mt-2">PIN salah, silakan coba lagi</p>
         </div>
         
-        <button onclick="submitFormTunai()" class="w-full py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">
+        <button onclick="submitFormTunai()" class="w-full py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">
             Konfirmasi
         </button>
     </div>
@@ -336,7 +336,7 @@
         
         // Update button styles
         document.querySelectorAll('[id^="btn-"]').forEach(btn => {
-            btn.classList.remove('border-[#674c1d]', 'border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
+            btn.classList.remove('border-[#674c1d]', 'border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
             btn.classList.add('border-gray-200');
         });
         
@@ -345,7 +345,7 @@
         document.getElementById('form-tunai-section').classList.add('hidden');
         
         if (method === 'transfer') {
-            document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-gradient-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
+            document.getElementById('btn-transfer').classList.add('border-[#8b6f2f]', 'bg-linear-to-br', 'from-[#8b6f2f]/10', 'to-[#d4af37]/10');
             document.getElementById('form-transfer-section').classList.remove('hidden');
             
             // Add initial bukti field if not exists
@@ -353,7 +353,7 @@
                 addBuktiField();
             }
         } else {
-            document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-gradient-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
+            document.getElementById('btn-tunai').classList.add('border-[#674c1d]', 'bg-linear-to-br', 'from-[#674c1d]/10', 'to-[#8b6f2f]/10');
             document.getElementById('form-tunai-section').classList.remove('hidden');
         }
         
@@ -371,7 +371,7 @@
         div.className = 'relative';
         div.innerHTML = `
             <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
-                <div class="flex-shrink-0 w-10 h-10 bg-[#674c1d] rounded-lg flex items-center justify-center">
+                <div class="shrink-0 w-10 h-10 bg-[#674c1d] rounded-lg flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -383,7 +383,7 @@
                 </div>
                 ${buktiCount > 1 ? `
                 <button type="button" onclick="this.parentElement.parentElement.remove(); buktiCount--;" 
-                    class="flex-shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
+                    class="shrink-0 w-8 h-8 bg-red-100 hover:bg-red-200 text-red-600 rounded-lg flex items-center justify-center transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

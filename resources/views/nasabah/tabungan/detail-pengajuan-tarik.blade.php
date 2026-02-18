@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#d4af37] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#d4af37] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
@@ -130,7 +130,7 @@
             </svg>
         </button>
         <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-            <div class="p-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f]">
+            <div class="p-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f]">
                 <h3 id="photoTitle" class="text-white font-bold text-lg"></h3>
             </div>
             <div class="p-4 bg-gray-50">

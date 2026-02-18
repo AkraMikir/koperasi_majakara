@@ -14,7 +14,7 @@
             <h1 class="text-3xl font-bold text-gray-900 font-display">Suku Bunga Tabungan</h1>
             <p class="text-gray-600 mt-1">Kelola persentase bunga tabungan</p>
         </div>
-        <a href="{{ route('admin.master-data.suku-bunga-tabungan.create') }}" class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md text-sm font-medium">
+        <a href="{{ route('admin.master-data.suku-bunga-tabungan.create') }}" class="px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md text-sm font-medium">
             + Tambah Data
         </a>
     </div>

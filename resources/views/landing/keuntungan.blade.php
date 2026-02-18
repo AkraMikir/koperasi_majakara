@@ -86,7 +86,7 @@
                         @else
                             <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
+                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
                             @endif
                         @endif
                     @endif
@@ -177,7 +177,7 @@
                     
                     <div class="space-y-4">
                         <div class="flex items-start space-x-4 p-4 bg-green-50 rounded-xl">
-                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                                 </svg>
@@ -188,7 +188,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4 p-4 bg-blue-50 rounded-xl">
-                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                                 </svg>
@@ -199,7 +199,7 @@
                             </div>
                         </div>
                         <div class="flex items-start space-x-4 p-4 bg-purple-50 rounded-xl">
-                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center shrink-0">
                                 <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -214,7 +214,7 @@
                 </div>
                 
                 <div>
-                    <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl">
+                    <div class="bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl">
                         <h3 class="text-2xl font-bold mb-6">Standar Keamanan Kami</h3>
                         <div class="space-y-6">
                             <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6">
@@ -252,7 +252,7 @@
     </section>
     
     <!-- Benefit 2: Proses Cepat -->
-    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-[#faf9f6] to-white">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div class="order-2 lg:order-1">
@@ -260,8 +260,8 @@
                         <h3 class="text-3xl font-bold text-primary mb-8 text-center">Efisiensi Waktu</h3>
                         <div class="space-y-6">
                             <div class="flex items-center space-x-4">
-                                <div class="flex-shrink-0">
-                                    <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
+                                <div class="shrink-0">
+                                    <div class="w-16 h-16 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
                                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                                         </svg>
@@ -277,8 +277,8 @@
                             </div>
                             
                             <div class="flex items-center space-x-4">
-                                <div class="flex-shrink-0">
-                                    <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-2xl flex items-center justify-center">
+                                <div class="shrink-0">
+                                    <div class="w-16 h-16 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-2xl flex items-center justify-center">
                                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
@@ -294,8 +294,8 @@
                             </div>
                             
                             <div class="flex items-center space-x-4">
-                                <div class="flex-shrink-0">
-                                    <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
+                                <div class="shrink-0">
+                                    <div class="w-16 h-16 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-2xl flex items-center justify-center">
                                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                         </svg>
@@ -377,7 +377,7 @@
             
             <div class="grid lg:grid-cols-3 gap-8">
                 <!-- Tabungan Comparison -->
-                <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                <div class="bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -403,7 +403,7 @@
                 </div>
 
                 <!-- Deposito Comparison -->
-                <div class="bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                <div class="bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-3xl p-8 text-white shadow-2xl card-hover">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
@@ -429,7 +429,7 @@
                 </div>
 
                 <!-- Pinjaman Comparison -->
-                <div class="bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-3xl p-8 text-white shadow-2xl card-hover">
+                <div class="bg-linear-to-br from-[#8b6f2f] to-[#674c1d] rounded-3xl p-8 text-white shadow-2xl card-hover">
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center mb-6">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
@@ -458,7 +458,7 @@
     </section>
 
     <!-- Benefit 4: Layanan Digital -->
-    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-white to-[#faf9f6]">
+    <section class="py-24 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-white to-[#faf9f6]">
         <div class="max-w-7xl mx-auto">
             <div class="grid lg:grid-cols-2 gap-16 items-center">
                 <div>
@@ -474,7 +474,7 @@
                     
                     <div class="space-y-4 mb-8">
                         <div class="flex items-center space-x-4">
-                            <div class="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-14 h-14 bg-linear-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                                 </svg>
@@ -485,7 +485,7 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <div class="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-14 h-14 bg-linear-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                                 </svg>
@@ -496,7 +496,7 @@
                             </div>
                         </div>
                         <div class="flex items-center space-x-4">
-                            <div class="w-14 h-14 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                            <div class="w-14 h-14 bg-linear-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0">
                                 <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                                 </svg>
@@ -584,7 +584,7 @@
 
             <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-green-500 to-green-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -594,7 +594,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-blue-500 to-blue-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
                         </svg>
@@ -604,7 +604,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-purple-500 to-purple-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path>
                         </svg>
@@ -614,7 +614,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-yellow-500 to-yellow-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
                         </svg>
@@ -624,7 +624,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
                         </svg>
@@ -634,7 +634,7 @@
                 </div>
 
                 <div class="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 card-hover">
-                    <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
+                    <div class="w-16 h-16 bg-linear-to-br from-indigo-500 to-indigo-600 rounded-2xl flex items-center justify-center mb-6 benefit-icon">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>

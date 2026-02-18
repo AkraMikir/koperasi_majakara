@@ -22,9 +22,9 @@
         <form method="GET" action="{{ route('admin.tabungan.saldo-nasabah') }}" class="flex flex-col md:flex-row gap-4">
             <div class="flex-1">
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama nasabah atau email..." 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none">
             </div>
-            <button type="submit" class="px-6 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-medium">
+            <button type="submit" class="px-6 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all shadow-md font-medium">
                 Cari
             </button>
         </form>
@@ -35,17 +35,17 @@
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Total Setoran</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Total Penarikan</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Saldo</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
+                    <tr class="border-b-2 border-[[#674c1d]]/20 bg-linear-to-r from-[[#674c1d]]/5 to-[[#8b6f2f]]/5">
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Nasabah</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Total Setoran</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Total Penarikan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Saldo</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($nasabah as $item)
-                    <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
+                    <tr class="border-b border-gray-100 hover:bg-linear-to-r hover:from-[[#674c1d]]/5 hover:to-[[#8b6f2f]]/5 transition-all">
                         <td class="px-6 py-4">
                             <div>
                                 <p class="font-semibold text-gray-900">{{ $item->user->nama ?? 'N/A' }}</p>
@@ -59,11 +59,11 @@
                             <p class="font-semibold text-red-600">Rp {{ number_format($item->total_penarikan ?? 0, 0, ',', '.') }}</p>
                         </td>
                         <td class="px-6 py-4">
-                            <p class="font-semibold text-[#674c1d] text-lg">Rp {{ number_format($item->saldo ?? 0, 0, ',', '.') }}</p>
+                            <p class="font-semibold text-[[#674c1d]] text-lg">Rp {{ number_format($item->saldo ?? 0, 0, ',', '.') }}</p>
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.tabungan.transaksi') }}?search={{ $item->user->nama ?? '' }}" 
-                                class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
+                                class="inline-flex items-center px-4 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all text-sm font-medium">
                                 Lihat Transaksi
                             </a>
                         </td>

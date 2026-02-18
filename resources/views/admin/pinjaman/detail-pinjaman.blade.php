@@ -104,7 +104,7 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
+                            <tr class="border-b-2 border-[#674c1d]/20 bg-linear-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
                                 <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">No. Urut</th>
                                 <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jatuh Tempo
                                 </th>
@@ -117,7 +117,7 @@
                         <tbody>
                             @forelse($angsuran as $item)
                             <tr
-                                class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
+                                class="border-b border-gray-100 hover:bg-linear-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
                                 <td class="px-4 py-3 text-sm font-medium">#{{ $item->no_urut }}</td>
                                 <td class="px-4 py-3 text-sm">{{ $item->tgl_jatuh_tempo->format('d M Y') }}</td>
                                 <td class="px-4 py-3">
@@ -200,7 +200,7 @@
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Pelunasan Dipercepat</h3>
                 <button onclick="showPelunasanModal()"
-                    class="w-full px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
+                    class="w-full px-4 py-3 bg-linear-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all font-medium shadow-md">
                     Pelunasan
                 </button>
             </div>

@@ -10,7 +10,7 @@
             <h1 class="text-3xl font-bold text-gray-900 font-display">Manajemen Nasabah</h1>
             <p class="text-gray-600 mt-1">Kelola data nasabah koperasi</p>
         </div>
-        <a href="{{ route('admin.nasabah.pending-changes') }}" class="px-5 py-3 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
+        <a href="{{ route('admin.nasabah.pending-changes') }}" class="px-5 py-3 bg-linear-to-r from-yellow-500 to-yellow-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -56,7 +56,7 @@
                         class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                 </div>
             </div>
-            <button type="submit" class="px-6 py-3 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:shadow-lg transition-all">
+            <button type="submit" class="px-6 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:shadow-lg transition-all">
                 Cari
             </button>
             @if(request('search'))
@@ -76,7 +76,7 @@
         @if($nasabahList->count() > 0)
         <div class="overflow-x-auto">
             <table class="w-full">
-                <thead class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white">
+                <thead class="bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white">
                     <tr>
                         <th class="px-6 py-4 text-left text-sm font-semibold">No</th>
                         <th class="px-6 py-4 text-left text-sm font-semibold">Foto</th>
@@ -96,7 +96,7 @@
                             @if($nasabah->user->foto && $nasabah->user->foto !== 'default-avatar.jpg')
                                 <img src="{{ asset('storage/' . $nasabah->user->foto) }}" alt="Foto" class="w-12 h-12 rounded-full object-cover border-2 border-[#674c1d]/20">
                             @else
-                                <div class="w-12 h-12 rounded-full bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] flex items-center justify-center text-white font-bold text-lg">
+                                <div class="w-12 h-12 rounded-full bg-linear-to-br from-[#674c1d] to-[#8b6f2f] flex items-center justify-center text-white font-bold text-lg">
                                     {{ strtoupper(substr($nasabah->user->nama ?? 'N', 0, 1)) }}
                                 </div>
                             @endif
@@ -112,7 +112,7 @@
                             <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Aktif</span>
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <a href="{{ route('admin.nasabah.show', $nasabah->id) }}" class="inline-flex items-center gap-1 px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm">
+                            <a href="{{ route('admin.nasabah.show', $nasabah->id) }}" class="inline-flex items-center gap-1 px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>

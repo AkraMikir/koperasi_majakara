@@ -156,7 +156,7 @@
                         </div>
                         <div class="p-3 flex items-center justify-between gap-2">
                             <span class="text-xs text-gray-500 truncate flex-1">{{ $bukti->keterangan ?: $fileName }}</span>
-                            <a href="{{ $imageUrl }}" target="_blank" rel="noopener" class="flex-shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#674c1d] text-white text-xs font-semibold rounded-lg hover:bg-[#5a4018] transition-colors">
+                            <a href="{{ $imageUrl }}" target="_blank" rel="noopener" class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-[#674c1d] text-white text-xs font-semibold rounded-lg hover:bg-[#5a4018] transition-colors">
                                 Buka / Unduh
                             </a>
                         </div>
@@ -180,7 +180,7 @@
                                 @php
                                     $progressPercent = $angsuran->jumlah_tagihan > 0 ? ($angsuran->jumlah_terbayar / $angsuran->jumlah_tagihan) * 100 : 0;
                                 @endphp
-                                <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] h-3 rounded-full" style="width: {{ number_format($progressPercent, 2) }}%"></div>
+                                <div class="bg-linear-to-r from-[#674c1d] to-[#8b6f2f] h-3 rounded-full" style="width: {{ number_format($progressPercent, 2) }}%"></div>
                             </div>
                             <p class="text-xs text-gray-500 mt-1">{{ number_format($progressPercent, 1) }}%</p>
                         </div>

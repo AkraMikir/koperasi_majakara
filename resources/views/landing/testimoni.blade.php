@@ -88,7 +88,7 @@
                         @else
                             <a href="{{ route('login') }}" class="px-5 py-2.5 text-primary border border-primary rounded-lg hover:bg-primary hover:text-white transition font-medium">Login</a>
                             @if (Route::has('register'))
-                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
+                                <a href="{{ route('register') }}" class="px-6 py-2.5 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition shadow-md font-medium">Register</a>
                             @endif
                         @endif
                     @endif
@@ -174,7 +174,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             AR
                         </div>
                         <div class="ml-4">
@@ -208,7 +208,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             SN
                         </div>
                         <div class="ml-4">
@@ -238,7 +238,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             BS
                         </div>
                         <div class="ml-4">
@@ -272,7 +272,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#d4af37] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#674c1d] to-[#d4af37] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             RW
                         </div>
                         <div class="ml-4">
@@ -302,7 +302,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#8b6f2f] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             DK
                         </div>
                         <div class="ml-4">
@@ -340,7 +340,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#d4af37] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             MS
                         </div>
                         <div class="ml-4">
@@ -373,7 +373,7 @@
                     </div>
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             LH
                         </div>
                         <div class="ml-4">
@@ -403,7 +403,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#8b6f2f] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#8b6f2f] to-[#674c1d] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             AP
                         </div>
                         <div class="ml-4">
@@ -436,7 +436,7 @@
                 <div class="testimonial-card rounded-2xl p-8 shadow-lg border border-gray-100 relative">
                     <div class="quote-icon">"</div>
                     <div class="flex items-center mb-6 relative z-10">
-                        <div class="w-16 h-16 bg-gradient-to-br from-[#d4af37] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl flex-shrink-0">
+                        <div class="w-16 h-16 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-2xl shrink-0">
                             FN
                         </div>
                         <div class="ml-4">
@@ -466,7 +466,7 @@
     </section>
 
     <!-- Trust Indicators -->
-    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-[#faf9f6] to-white">
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-linear-to-br from-[#faf9f6] to-white">
         <div class="max-w-7xl mx-auto">
             <div class="text-center mb-12">
                 <h2 class="font-display text-4xl md:text-5xl font-bold text-primary mb-4">

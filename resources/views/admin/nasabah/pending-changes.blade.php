@@ -24,7 +24,7 @@
     @if(session('success'))
         <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-lg mb-6 shadow-md">
             <div class="flex items-center gap-3">
-                <svg class="w-6 h-6 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-green-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <p class="text-green-800 font-medium">{{ session('success') }}</p>
@@ -35,7 +35,7 @@
     @if(session('error'))
         <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-r-lg mb-6 shadow-md">
             <div class="flex items-center gap-3">
-                <svg class="w-6 h-6 text-red-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-6 h-6 text-red-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                 </svg>
                 <p class="text-red-800 font-medium">{{ session('error') }}</p>
@@ -47,7 +47,7 @@
     <div class="bg-white rounded-2xl shadow-lg border border-gray-200">
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-linear-to-br from-yellow-500 to-orange-500 rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
@@ -69,7 +69,7 @@
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex items-start gap-4">
                                     <!-- Avatar -->
-                                    <div class="w-12 h-12 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0">
+                                    <div class="w-12 h-12 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0">
                                         {{ strtoupper(substr($request->nasabah->user->nama, 0, 1)) }}
                                     </div>
                                     <!-- Info -->
@@ -104,7 +104,7 @@
                                 </div>
                                 <!-- Action Button -->
                                 <button type="button" onclick="openDetailModal('modal{{ $request->id }}')"
-                                        class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm flex items-center gap-2 flex-shrink-0">
+                                        class="px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm flex items-center gap-2 shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
@@ -134,7 +134,7 @@
                     <div id="modal{{ $request->id }}" class="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm hidden z-50 flex items-center justify-center p-4">
                         <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
                             <!-- Header -->
-                            <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] p-6">
+                            <div class="bg-linear-to-r from-[#674c1d] to-[#8b6f2f] p-6">
                                 <div class="flex items-center justify-between">
                                     <div class="flex items-center gap-3">
                                         <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
@@ -158,9 +158,9 @@
                             <!-- Body -->
                             <div class="p-6 overflow-y-auto" style="max-height: calc(90vh - 250px);">
                                 <!-- Nasabah Info -->
-                                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-200">
+                                <div class="bg-linear-to-br from-blue-50 to-indigo-50 rounded-xl p-5 mb-6 border border-blue-200">
                                     <div class="flex items-center gap-4 mb-3">
-                                        <div class="w-14 h-14 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-xl">
+                                        <div class="w-14 h-14 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold text-xl">
                                             {{ strtoupper(substr($request->nasabah->user->nama, 0, 1)) }}
                                         </div>
                                         <div>
@@ -290,7 +290,7 @@
             @else
                 <!-- Empty State -->
                 <div class="text-center py-16">
-                    <div class="w-24 h-24 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <div class="w-24 h-24 bg-linear-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center mx-auto mb-4">
                         <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>

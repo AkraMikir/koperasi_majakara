@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
 use App\Models\PengajuanPinjaman;
+use App\Models\User;
 use App\Models\PinjamanH;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
@@ -18,6 +19,8 @@ use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class PinjamanController extends Controller
 {
@@ -252,7 +255,7 @@ class PinjamanController extends Controller
      */
     public function submitPengajuanTransfer(Request $request)
     {
-        \Log::info('Submit pengajuan request received', [
+        Log::info('Submit pengajuan request received', [
             'all_data' => $request->except('pin'),
             'has_pin' => $request->has('pin'),
         ]);
@@ -271,7 +274,7 @@ class PinjamanController extends Controller
         try {
             $validated = $request->validate($rules);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed', [
+            Log::error('Validation failed', [
                 'errors' => $e->errors(),
                 'request' => $request->except('pin'),
             ]);
@@ -281,8 +284,9 @@ class PinjamanController extends Controller
         }
 
         // Verify PIN
-        $user = auth()->user();
-        
+        /** @var User $user */
+        $user = Auth::user();
+
         if (!$user->pin) {
             return redirect()->back()
                 ->with('error', 'PIN belum diatur. Silakan atur PIN terlebih dahulu di profil Anda.')
@@ -330,7 +334,7 @@ class PinjamanController extends Controller
             \App\Models\AdminNotification::notify(
                 'pinjaman',
                 'Pengajuan pinjaman baru',
-                'Nasabah mengajukan pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                'Nasabah mengajukan pinjaman Rp ' . number_format((float) ($pengajuan->nominal ?? 0), 0, ',', '.') . ' (transfer)',
                 route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
                 $pengajuan->id,
                 'pengajuan_pinjaman'
@@ -339,7 +343,7 @@ class PinjamanController extends Controller
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
-            \Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
+            Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'id_anggota' => $idAnggota,
                 'request' => $request->except('pin'),
@@ -362,7 +366,8 @@ class PinjamanController extends Controller
                 'pin' => 'required|numeric|digits:6',
             ]);
 
-            $user = auth()->user();
+            /** @var User|null $user */
+            $user = Auth::user();
             
             if (!$user) {
                 return response()->json([
@@ -381,7 +386,7 @@ class PinjamanController extends Controller
             $userPin = (int) $user->pin;
             $inputPin = (int) $request->pin;
 
-            \Log::info('Verifying PIN', [
+            Log::info('Verifying PIN', [
                 'user_id' => $user->id,
                 'user_pin' => $userPin,
                 'input_pin' => $inputPin,
@@ -406,7 +411,7 @@ class PinjamanController extends Controller
                 'errors' => $e->errors()
             ], 422);
         } catch (\Exception $e) {
-            \Log::error('Error verifying PIN: ' . $e->getMessage(), [
+            Log::error('Error verifying PIN: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
             ]);
             
@@ -426,7 +431,7 @@ class PinjamanController extends Controller
         $nominalRaw = $request->input('nominal_raw') ?? str_replace(['.', ',', ' '], '', $request->input('nominal'));
         $request->merge(['nominal' => $nominalRaw]);
 
-        \Log::info('Submit janji temu pinjaman request received', [
+        Log::info('Submit janji temu pinjaman request received', [
             'all_data' => $request->except('pin'),
             'has_pin' => $request->has('pin'),
         ]);
@@ -442,7 +447,7 @@ class PinjamanController extends Controller
                 'keterangan' => 'nullable|string|max:500',
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('Validation failed', [
+            Log::error('Validation failed', [
                 'errors' => $e->errors(),
                 'request' => $request->except('pin'),
             ]);
@@ -455,7 +460,8 @@ class PinjamanController extends Controller
         }
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         if (!$user->pin) {
             return redirect()->route('nasabah.pinjaman.janji-temu', [
@@ -491,7 +497,7 @@ class PinjamanController extends Controller
         // ID dari 3 master: P (pinjaman), TN (tunai), PNJ (pengajuan)
         $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', 'TN', 'PNJ');
 
-        \Log::info('Submitting janji temu pinjaman', [
+        Log::info('Submitting janji temu pinjaman', [
             'user_id' => $user->id,
             'id_anggota' => $idAnggota,
             'nominal' => $request->nominal,
@@ -530,13 +536,13 @@ class PinjamanController extends Controller
             \App\Models\AdminNotification::notify(
                 'janji_temu',
                 'Janji temu pinjaman (tunai)',
-                'Nasabah membuat janji temu pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.'),
+                'Nasabah membuat janji temu pinjaman Rp ' . number_format((float) ($pengajuan->nominal ?? 0), 0, ',', '.'),
                 route('admin.pinjaman.detail-pengajuan', $pengajuan->id),
                 $idJanjiTemu,
                 'janji_temu_pinjaman'
             );
 
-            \Log::info('Pengajuan tunai + janji temu pinjaman created', [
+            Log::info('Pengajuan tunai + janji temu pinjaman created', [
                 'pengajuan_id' => $pengajuan->id,
                 'janji_temu_id' => $idJanjiTemu,
                 'id_anggota' => $pengajuan->id_anggota,
@@ -545,7 +551,7 @@ class PinjamanController extends Controller
             return redirect()->route('nasabah.pinjaman.pengajuan')
                 ->with('success', 'Pengajuan pinjaman berhasil dikirim!');
         } catch (\Exception $e) {
-            \Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
+            Log::error('Error creating pengajuan pinjaman: ' . $e->getMessage(), [
                 'user_id' => $user->id,
                 'id_anggota' => $idAnggota,
                 'request' => $request->except('pin'),
@@ -953,7 +959,8 @@ class PinjamanController extends Controller
         ]);
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         if (!$user->pin) {
             return redirect()->back()
@@ -997,7 +1004,7 @@ class PinjamanController extends Controller
             \App\Models\AdminNotification::notify(
                 'pinjaman_pembayaran',
                 'Pengajuan pembayaran pinjaman baru',
-                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' (transfer)',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format((float) ($pengajuan->nominal ?? 0), 0, ',', '.') . ' (transfer)',
                 route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
                 $pengajuan->id,
                 'pengajuan_pembayaran_pinjaman'
@@ -1049,7 +1056,8 @@ class PinjamanController extends Controller
         ]);
 
         // Verify PIN
-        $user = auth()->user();
+        /** @var User $user */
+        $user = Auth::user();
         
         if (!$user->pin) {
             return redirect()->back()
@@ -1093,7 +1101,7 @@ class PinjamanController extends Controller
             \App\Models\AdminNotification::notify(
                 'pinjaman_pembayaran',
                 'Pengajuan pembayaran pinjaman baru (tunai)',
-                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format($pengajuan->nominal, 0, ',', '.') . ' via janji temu',
+                'Nasabah mengajukan pembayaran pinjaman Rp ' . number_format((float) ($pengajuan->nominal ?? 0), 0, ',', '.') . ' via janji temu',
                 route('admin.pinjaman.detail-pembayaran', $pengajuan->id),
                 $pengajuan->id,
                 'pengajuan_pembayaran_pinjaman'
@@ -1165,7 +1173,8 @@ class PinjamanController extends Controller
      */
     private function getIdAnggota()
     {
-        $user = auth()->user();
+        /** @var User|null $user */
+        $user = Auth::user();
         
         if (!$user) {
             abort(401, 'Unauthorized');

@@ -6,7 +6,7 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#d4af37] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-linear-to-br from-[#8b6f2f] via-[#d4af37] to-[#674c1d] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -66,7 +66,7 @@
 
                 <div class="flex items-center gap-3">
                     <a href="{{ route('nasabah.tabungan.detail-pengajuan-tarik', $item->id) }}" 
-                        class="px-4 py-2 bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-lg hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all text-sm font-medium">
+                        class="px-4 py-2 bg-linear-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-lg hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all text-sm font-medium">
                         Lihat Detail
                     </a>
                 </div>
@@ -78,7 +78,7 @@
                 </svg>
                 <p class="text-gray-500 mb-4">Belum ada pengajuan penarikan</p>
                 <a href="{{ route('nasabah.tabungan.penarikan') }}" 
-                    class="inline-block px-6 py-3 bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl font-semibold hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all">
+                    class="inline-block px-6 py-3 bg-linear-to-r from-[#8b6f2f] to-[#d4af37] text-white rounded-xl font-semibold hover:from-[#674c1d] hover:to-[#8b6f2f] transition-all">
                     Buat Pengajuan Penarikan
                 </a>
             </div>
