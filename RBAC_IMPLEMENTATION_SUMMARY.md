@@ -239,7 +239,7 @@ PIN: 123456
 
 ### 2. Login sebagai Admin Operasional
 ```
-Email:  
+Email : admin.operasional1@koperasi.com
 Password: password123
 PIN: 567890
 ```
