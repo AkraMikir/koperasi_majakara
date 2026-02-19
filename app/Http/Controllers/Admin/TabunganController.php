@@ -167,8 +167,11 @@ class TabunganController extends Controller
                 Log::info('Transaksi tabungan created successfully', ['id' => $idTransaksi]);
             }
 
-            // Update status to approved (status '2') + simpan keterangan_admin jika ada
-            $updateData = ['status' => '2'];
+            // Update status to approved (status '2') + simpan keterangan_admin dan siapa yang approve
+            $updateData = [
+                'status' => '2',
+                'approved_by_user_id' => auth()->id(),
+            ];
             if ($request->filled('keterangan_admin')) {
                 $updateData['keterangan_admin'] = $request->keterangan_admin;
             }
@@ -188,6 +191,12 @@ class TabunganController extends Controller
                 'pengajuan_tabungan'
             );
 
+            $transaksi = $pengajuan->transTabungan()->first();
+            if ($transaksi) {
+                return redirect()->route('admin.tabungan.detail-transaksi', $transaksi->id)
+                    ->with('success', 'Pengajuan setoran berhasil disetujui dan transaksi telah dibuat. Silakan cetak struk di bawah.')
+                    ->with('download_struk', true);
+            }
             return redirect()->route('admin.tabungan.pengajuan-setor')
                 ->with('success', 'Pengajuan setoran berhasil disetujui dan transaksi telah dibuat');
                 

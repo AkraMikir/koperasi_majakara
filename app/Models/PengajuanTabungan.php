@@ -23,6 +23,7 @@ class PengajuanTabungan extends Model
         'keterangan',
         'keterangan_admin',
         'status',
+        'approved_by_user_id',
     ];
 
     protected $casts = [
@@ -53,6 +54,12 @@ class PengajuanTabungan extends Model
     public function transTabungan(): HasMany
     {
         return $this->hasMany(TransTabungan::class, 'id_pengajuan_setor');
+    }
+
+    /** Admin yang menyetujui pengajuan (Admin Operasional / Admin Utama). */
+    public function approvedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'approved_by_user_id');
     }
 }
 
