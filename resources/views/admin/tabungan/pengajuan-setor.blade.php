@@ -19,22 +19,31 @@
 
     <!-- Filter Section -->
     <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-        <form method="GET" action="{{ route('admin.tabungan.pengajuan-setor') }}" class="flex flex-col md:flex-row gap-4">
+        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Filter</p>
+        <form method="GET" action="{{ route('admin.tabungan.pengajuan-setor') }}" class="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
             <div class="flex-1">
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama nasabah atau email..." 
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none">
+                <label for="filter-search" class="block text-sm font-medium text-gray-600 mb-1.5">Cari nasabah</label>
+                <input id="filter-search" type="text" name="search" value="{{ request('search') }}" placeholder="Nama atau email nasabah..." 
+                    class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d]/30 focus:border-[#674c1d] outline-none transition-colors placeholder:text-gray-400">
             </div>
-            <div>
-                <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none">
+            <div class="w-full md:w-48">
+                <label for="filter-status" class="block text-sm font-medium text-gray-600 mb-1.5">Status</label>
+                <select id="filter-status" name="status" class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d]/30 focus:border-[#674c1d] outline-none transition-colors bg-white">
                     <option value="">Semua Status</option>
                     <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Pending</option>
                     <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Disetujui</option>
                     <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Ditolak</option>
                 </select>
             </div>
-            <button type="submit" class="px-6 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all shadow-md font-medium">
-                Filter
-            </button>
+            <div class="flex gap-2 pt-6 md:pt-8">
+                <button type="submit" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md font-semibold text-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+                    Terapkan
+                </button>
+                <a href="{{ route('admin.tabungan.pengajuan-setor') }}" class="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors font-medium text-sm">
+                    Reset
+                </a>
+            </div>
         </form>
     </div>
 
@@ -43,14 +52,14 @@
         <div class="overflow-x-auto">
             <table class="w-full">
                 <thead>
-                    <tr class="border-b-2 border-[[#674c1d]]/20 bg-linear-to-r from-[[#674c1d]]/5 to-[[#8b6f2f]]/5">
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">ID</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Nasabah</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Tanggal Pengajuan</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Nominal</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Bukti Foto</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Status</th>
-                        <th class="px-6 py-4 text-left text-xs font-bold text-[[#674c1d]] uppercase">Aksi</th>
+                    <tr class="border-b-2 border-[#674c1d]/20 bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">ID</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Nasabah</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Tanggal Pengajuan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Nominal</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Bukti Foto</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Status</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,7 +68,7 @@
                         // Nominal dari pengajuan (PengajuanTabungan.nominal)
                         $totalNominal = (float) ($item->nominal ?? 0);
                     @endphp
-                    <tr class="border-b border-gray-100 hover:bg-linear-to-r hover:from-[[#674c1d]]/5 hover:to-[[#8b6f2f]]/5 transition-all">
+                    <tr class="border-b border-gray-100 hover:bg-gradient-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
                         <td class="px-6 py-4 text-sm font-medium">#{{ $item->id }}</td>
                         <td class="px-6 py-4">
                             <div>
@@ -70,7 +79,7 @@
                         <td class="px-6 py-4 text-sm">{{ $item->created_at->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
                             @if($totalNominal > 0)
-                                <p class="font-semibold text-[[#674c1d]]">Rp {{ number_format($totalNominal, 0, ',', '.') }}</p>
+                                <p class="font-semibold text-[#674c1d]">Rp {{ number_format($totalNominal, 0, ',', '.') }}</p>
                             @else
                                 <p class="text-sm text-gray-400">-</p>
                             @endif
@@ -95,8 +104,9 @@
                         </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.tabungan.detail-pengajuan-setor', $item->id) }}" 
-                                class="inline-flex items-center px-4 py-2 bg-linear-to-r from-[[#674c1d]] to-[[#8b6f2f]] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[[#674c1d]] transition-all text-sm font-medium">
-                                Detail
+                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-sm hover:shadow font-semibold text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                Lihat
                             </a>
                         </td>
                     </tr>

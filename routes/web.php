@@ -33,7 +33,14 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::get('/dashboard', [NasabahDashboardController::class, 'index'])->name('dashboard');
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
-    
+    Route::get('/guide', [\App\Http\Controllers\Nasabah\GuideController::class, 'index'])->name('guide');
+    Route::prefix('guide')->name('guide.')->group(function () {
+        Route::get('/tabungan-setoran', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganSetoran'])->name('tabungan-setoran');
+        Route::get('/tabungan-penarikan', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganPenarikan'])->name('tabungan-penarikan');
+        Route::get('/pinjaman-pengajuan', [\App\Http\Controllers\Nasabah\GuideController::class, 'pinjamanPengajuan'])->name('pinjaman-pengajuan');
+        Route::get('/pinjaman-pembayaran', [\App\Http\Controllers\Nasabah\GuideController::class, 'pinjamanPembayaran'])->name('pinjaman-pembayaran');
+    });
+
     // PIN Management Routes (DEPRECATED - Moved to Setting)
     Route::prefix('pin')->name('pin.')->group(function () {
         Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');

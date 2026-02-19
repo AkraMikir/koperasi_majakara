@@ -19,6 +19,22 @@ class WhatsAppService
     }
 
     /**
+     * HTTP client untuk Fonnte dengan opsi SSL (untuk menghindari cURL error 60 di Windows).
+     */
+    private function fonnteHttp()
+    {
+        $http = Http::withHeaders(['Authorization' => $this->apiKey])->timeout(30);
+        $verifySsl = config('services.fonnte.verify_ssl', true);
+        $certPath = config('services.fonnte.ssl_cert_path');
+        if ($certPath && is_file($certPath)) {
+            $http = $http->withOptions(['verify' => $certPath]);
+        } elseif ($verifySsl === false) {
+            $http = $http->withOptions(['verify' => false]);
+        }
+        return $http;
+    }
+
+    /**
      * Kirim OTP via WhatsApp menggunakan Fonnte API
      * 
      * @param string $phoneNumber Nomor telepon tujuan (format: 08xxx atau 628xxx)
@@ -58,11 +74,7 @@ class WhatsAppService
             ]);
 
             // Kirim request ke Fonnte API (target 08xxx, countryCode 62 sesuai dokumentasi)
-            $response = Http::withHeaders([
-                'Authorization' => $this->apiKey,
-            ])
-            ->timeout(30)
-            ->post($this->apiUrl, [
+            $response = $this->fonnteHttp()->post($this->apiUrl, [
                 'target' => $target,
                 'message' => $message,
                 'countryCode' => '62',
@@ -178,11 +190,7 @@ class WhatsAppService
                 ];
             }
 
-            $response = Http::withHeaders([
-                'Authorization' => $this->apiKey,
-            ])
-            ->timeout(10)
-            ->get('https://api.fonnte.com/validate');
+            $response = $this->fonnteHttp()->timeout(10)->get('https://api.fonnte.com/validate');
 
             if ($response->successful()) {
                 $data = $response->json();

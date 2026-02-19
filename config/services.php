@@ -48,6 +48,10 @@ return [
         'api_key' => env('FONNTE_API_KEY'),
         'api_url' => env('FONNTE_API_URL', 'https://api.fonnte.com/send'),
         'sender_number' => env('FONNTE_SENDER_NUMBER', '08139552626'),
+        // SSL: set false hanya untuk development lokal jika error "unable to get local issuer certificate"
+        'verify_ssl' => env('FONNTE_VERIFY_SSL', true),
+        // Opsional: path ke cacert.pem (unduh dari https://curl.se/ca/cacert.pem)
+        'ssl_cert_path' => env('FONNTE_SSL_CERT_PATH'),
     ],
 
     /*

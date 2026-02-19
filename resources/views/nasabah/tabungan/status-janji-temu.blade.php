@@ -31,8 +31,40 @@
     </div>
 
     @if(session('success'))
-    <div class="mx-4 mb-4 p-4 bg-green-50 border border-green-200 rounded-xl text-green-800">
-        {{ session('success') }}
+    <div class="mx-4 mb-6">
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-md border border-emerald-100 p-5 flex items-start gap-4">
+            <div class="absolute inset-0 bg-gradient-to-br from-emerald-50/80 to-teal-50/50 pointer-events-none"></div>
+            <div class="absolute top-0 right-0 w-32 h-32 bg-[#d4af37]/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+            <div class="relative flex-shrink-0 w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200/50">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="relative flex-1 min-w-0">
+                <p class="font-bold text-emerald-800 text-lg mb-1">Berhasil!</p>
+                <p class="text-gray-700 text-sm leading-relaxed">{{ session('success') }}</p>
+                <p class="text-gray-500 text-xs mt-2.5 flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+                    Janji temu Anda tercatat. Silakan datang di waktu yang telah dipilih.
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
+    @if(session('error'))
+    <div class="mx-4 mb-6">
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-md border border-red-100 p-5 flex items-start gap-4">
+            <div class="absolute inset-0 bg-gradient-to-br from-red-50/60 to-rose-50/40 pointer-events-none"></div>
+            <div class="relative flex-shrink-0 w-14 h-14 bg-gradient-to-br from-red-400 to-rose-500 rounded-2xl flex items-center justify-center shadow-lg shadow-red-200/40">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="relative flex-1 min-w-0">
+                <p class="font-bold text-red-800 text-lg mb-1">Perhatian</p>
+                <p class="text-gray-700 text-sm">{{ session('error') }}</p>
+            </div>
+        </div>
     </div>
     @endif
 

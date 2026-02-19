@@ -233,7 +233,7 @@
             </div>
 
             <!-- Reject Modal -->
-            <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div id="rejectModal" class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Tolak Pengajuan</h3>
                     <form method="POST" action="{{ route('admin.pinjaman.reject-pengajuan', $pengajuan->id) }}">
@@ -255,7 +255,7 @@
             </div>
 
             <!-- Cairkan Modal -->
-            <div id="cairkanModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+            <div id="cairkanModal" class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Cairkan Pinjaman</h3>
                     <form method="POST" action="{{ route('admin.pinjaman.cairkan-pinjaman', $pengajuan->id) }}" enctype="multipart/form-data">

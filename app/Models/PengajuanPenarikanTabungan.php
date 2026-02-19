@@ -23,6 +23,7 @@ class PengajuanPenarikanTabungan extends Model
         'metode_transfer',
         'no_rekening',
         'nama_bank',
+        'biaya_transfer',
         'foto_bukti_tf_admin',
         'lokasi_temu',
         'tanggal_janji_temu',
@@ -35,6 +36,7 @@ class PengajuanPenarikanTabungan extends Model
     protected $casts = [
         'tgl_pengajuan' => 'datetime',
         'nominal' => 'decimal:2',
+        'biaya_transfer' => 'decimal:2',
         'tanggal_janji_temu' => 'date',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',

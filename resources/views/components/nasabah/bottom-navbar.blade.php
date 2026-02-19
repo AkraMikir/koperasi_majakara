@@ -20,7 +20,7 @@
         ['key' => 'dashboard', 'route' => 'nasabah.dashboard', 'label' => 'Dashboard', 'icon' => 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'],
         ['key' => 'tabungan', 'route' => 'nasabah.tabungan.index', 'label' => 'Tabungan', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
         ['key' => 'pinjaman', 'route' => 'nasabah.pinjaman.index', 'label' => 'Pinjaman', 'icon' => 'M2 10a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4zm0 0V6a2 2 0 012-2h14a2 2 0 012 2v4M6 12h.01M10 12h.01M14 12h.01M18 12h.01'],
-        ['key' => 'guide', 'route' => '#', 'label' => 'Guide', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
+        ['key' => 'guide', 'route' => 'nasabah.guide', 'label' => 'Guide', 'icon' => 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253'],
         ['key' => 'deposito', 'route' => '#', 'label' => 'Deposito', 'icon' => 'M2 19l10-10 4 4 6-6m0 0v6m0-6h6'],
         ['key' => 'gadai', 'route' => '#', 'label' => 'Gadai', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
         ['key' => 'setting', 'route' => 'nasabah.setting.index', 'label' => 'Settings', 'icon' => 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'],
@@ -83,8 +83,8 @@
     @foreach($arcItems as $idx => $arcItem)
     @php $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70]; @endphp
     <a href="{{ $arcItem['route'] === '#' ? '#' : route($arcItem['route']) }}"
-       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[[0_4px_20px_rgba(103,76,29,0.2)]] text-[[#8b6f2f]] border border-[[#8b6f2f]]/10 hover:bg-[[#8b6f2f]]/10 active:scale-95"
-       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.2s;"
+       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#a67c52]/90 to-[#8b6f2f]/95 text-white border-2 border-[#674c1d]/30 shadow-[0_4px_16px_rgba(139,111,47,0.35)] hover:scale-110 hover:shadow-[0_8px_24px_rgba(103,76,29,0.45)] hover:border-[#d4af37]/60 hover:from-[#8b6f2f] hover:to-[#674c1d] hover:ring-2 hover:ring-[#d4af37]/40 active:scale-95 transition-all duration-200 ease-out"
+       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;"
        data-arc-x="{{ $pos['x'] ?? 0 }}"
        data-arc-y="{{ $pos['y'] ?? -70 }}"
        data-arc-delay="{{ $idx * 40 }}"

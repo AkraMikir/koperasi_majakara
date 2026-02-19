@@ -161,24 +161,36 @@
                     </div>
                 </div>
 
-                <!-- Bank Details (for Transfer) -->
+                <!-- Bank Details (for Transfer) - auto-fill dari data rekening nasabah -->
+                @php
+                    $defaultBank = old('nama_bank', $rekeningNasabah->nama_bank ?? '');
+                    $defaultNoRek = old('no_rekening', $rekeningNasabah->no_rekening ?? '');
+                @endphp
                 <div id="bank-section" class="hidden space-y-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bank *</label>
                         <select name="nama_bank" id="nama_bank" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <option value="">Pilih Bank</option>
                             @foreach(['BCA', 'BNI', 'Mandiri', 'BRI', 'CIMB Niaga', 'Permata', 'Bank Lainnya'] as $bank)
-                                <option value="{{ $bank }}" {{ old('nama_bank') == $bank ? 'selected' : '' }}>{{ $bank }}</option>
+                                <option value="{{ $bank }}" {{ $defaultBank == $bank ? 'selected' : '' }}>{{ $bank }}</option>
                             @endforeach
                         </select>
+                        @if($rekeningNasabah && $rekeningNasabah->nama_bank)
+                        <p class="text-xs text-gray-500 mt-1.5">Terisi otomatis dari data rekening Anda</p>
+                        @endif
                     </div>
 
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Rekening *</label>
-                        <input type="text" name="no_rekening" id="no_rekening" placeholder="Masukkan nomor rekening tujuan" value="{{ old('no_rekening') }}"
+                        <input type="text" name="no_rekening" id="no_rekening" placeholder="Masukkan nomor rekening tujuan" value="{{ $defaultNoRek }}"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                        <p class="text-xs text-gray-500 mt-2">Pastikan nomor rekening sudah benar</p>
+                        <p class="text-xs text-gray-500 mt-2">
+                            Pastikan nomor rekening sudah benar.
+                            @if($rekeningNasabah && $rekeningNasabah->no_rekening)
+                                <span class="block mt-0.5">Terisi otomatis dari data rekening Anda.</span>
+                            @endif
+                        </p>
                     </div>
                 </div>
 

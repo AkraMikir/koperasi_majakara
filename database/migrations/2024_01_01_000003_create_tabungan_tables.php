@@ -28,6 +28,7 @@ return new class extends Migration//ikkkkm
             $table->string('metode_transfer', 50)->nullable();
             $table->string('no_rekening', 50)->nullable();
             $table->string('nama_bank', 100)->nullable();
+            $table->decimal('biaya_transfer', 15, 2)->nullable();
             $table->string('foto_bukti_tf_admin', 255)->nullable();
             $table->foreignId('lokasi_temu')->nullable()->constrained('jns_lokasi_perusahaan')->onDelete('set null'); // Added
             $table->date('tanggal_janji_temu')->nullable(); // Added

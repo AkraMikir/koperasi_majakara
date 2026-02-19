@@ -101,6 +101,14 @@
             @if($janjiTemu->keterangan)
             <p class="text-sm text-gray-600 mt-3">{{ $janjiTemu->keterangan }}</p>
             @endif
+            @if($janjiTemu->keterangan_admin)
+            <div class="mt-4 pt-4 border-t border-gray-100">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Keterangan Admin</p>
+                <div class="p-4 bg-amber-50/80 rounded-xl border border-amber-100">
+                    <p class="text-sm text-gray-800">{{ $janjiTemu->keterangan_admin }}</p>
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Map/Location Info -->

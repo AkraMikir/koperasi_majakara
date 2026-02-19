@@ -15,6 +15,23 @@
         </a>
     </div>
 
+    @if(session('error'))
+    <div class="mx-4 mb-4">
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-md border border-red-100 p-4 flex items-start gap-3">
+            <div class="absolute inset-0 bg-gradient-to-br from-red-50/60 to-rose-50/40 pointer-events-none"></div>
+            <div class="relative flex-shrink-0 w-12 h-12 bg-gradient-to-br from-red-400 to-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-200/40">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="relative flex-1 min-w-0">
+                <p class="font-bold text-red-800 text-sm mb-0.5">Perhatian</p>
+                <p class="text-gray-700 text-sm">{{ session('error') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Pilihan Metode -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">

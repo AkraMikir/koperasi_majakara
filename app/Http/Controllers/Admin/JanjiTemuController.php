@@ -14,6 +14,9 @@ class JanjiTemuController extends Controller
      */
     public function index(Request $request)
     {
+        // Tandai sudah dibuka agar badge notifikasi di sidebar hilang
+        session(['admin_janji_temu_seen_at' => now()->toDateTimeString()]);
+
         $query = JanjiTemuUniversal::query();
 
         // Search by Nama Anggota
