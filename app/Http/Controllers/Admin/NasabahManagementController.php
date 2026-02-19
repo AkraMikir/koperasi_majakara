@@ -171,6 +171,16 @@ class NasabahManagementController extends Controller
 
             app(ActivityLogService::class)->logApprovePerubahanData($pengajuan->id, $nasabah->user->nama ?? 'N/A');
 
+            \App\Models\NasabahNotification::notify(
+                $nasabah->id,
+                'profil',
+                'Perubahan data disetujui',
+                'Pengajuan perubahan data profil Anda telah disetujui dan diterapkan.',
+                route('nasabah.profile'),
+                (string) $pengajuan->id,
+                'pengajuan_perubahan_data'
+            );
+
             return redirect()->route('admin.nasabah.pending-changes')
                 ->with('success', 'Perubahan data berhasil disetujui dan diterapkan!');
 
@@ -202,7 +212,7 @@ class NasabahManagementController extends Controller
             ], 403);
         }
 
-        $pengajuan = PengajuanPerubahanData::findOrFail($id);
+        $pengajuan = PengajuanPerubahanData::with('nasabah')->findOrFail($id);
 
         if ($pengajuan->status !== 'pending') {
             return redirect()->back()->with('error', 'Pengajuan sudah diproses sebelumnya.');
@@ -215,6 +225,16 @@ class NasabahManagementController extends Controller
                 'approved_at' => now(),
                 'catatan_admin' => $request->input('catatan_admin', 'Ditolak oleh admin'),
             ]);
+
+            \App\Models\NasabahNotification::notify(
+                $pengajuan->nasabah->id,
+                'profil',
+                'Perubahan data ditolak',
+                'Pengajuan perubahan data profil Anda ditolak. ' . ($request->input('catatan_admin') ?? ''),
+                route('nasabah.profile'),
+                (string) $pengajuan->id,
+                'pengajuan_perubahan_data'
+            );
 
             Log::info('Perubahan data nasabah ditolak', [
                 'admin_id' => auth()->id(),

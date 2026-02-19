@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use App\Models\AdminNotification;
+use App\Models\NasabahNotification;
 use App\Services\AdminPermissionService;
 use App\Services\ActivityLogService;
 
@@ -45,6 +46,18 @@ class AppServiceProvider extends ServiceProvider
                     ->get();
             }
             $view->with(compact('notificationsUnreadCount', 'notificationsRecent'));
+        });
+
+        // Data notifikasi untuk header nasabah (badge + link ke halaman notifikasi)
+        View::composer('components.nasabah.header', function ($view) {
+            $nasabahNotificationsUnreadCount = 0;
+            $nasabahNotificationsRecent = collect([]);
+            if (Auth::check() && auth()->user()->nasabah) {
+                $idAnggota = auth()->user()->nasabah->id;
+                $nasabahNotificationsUnreadCount = NasabahNotification::forAnggota($idAnggota)->unread()->count();
+                $nasabahNotificationsRecent = NasabahNotification::forAnggota($idAnggota)->recent(8)->get();
+            }
+            $view->with(compact('nasabahNotificationsUnreadCount', 'nasabahNotificationsRecent'));
         });
 
         // Register custom Blade directives for role checking

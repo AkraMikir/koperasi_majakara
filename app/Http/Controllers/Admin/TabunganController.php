@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Log;
 use App\Helpers\IdGenerator;
 use App\Models\BuktiFoto;
 use App\Models\BiayaTransfer;
+use App\Models\NasabahNotification;
 
 class TabunganController extends Controller
 {
@@ -166,8 +167,11 @@ class TabunganController extends Controller
                 Log::info('Transaksi tabungan created successfully', ['id' => $idTransaksi]);
             }
 
-            // Update status to approved (status '2') + simpan keterangan_admin jika ada
-            $updateData = ['status' => '2'];
+            // Update status to approved (status '2') + simpan keterangan_admin dan siapa yang approve
+            $updateData = [
+                'status' => '2',
+                'approved_by_user_id' => auth()->id(),
+            ];
             if ($request->filled('keterangan_admin')) {
                 $updateData['keterangan_admin'] = $request->keterangan_admin;
             }
@@ -177,6 +181,22 @@ class TabunganController extends Controller
 
             app(ActivityLogService::class)->logApproveSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
+            NasabahNotification::notify(
+                $pengajuan->id_anggota,
+                'tabungan_setor',
+                'Pengajuan setoran disetujui',
+                'Setoran Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui.',
+                route('nasabah.tabungan.detail-pengajuan-setor', $pengajuan->id),
+                (string) $pengajuan->id,
+                'pengajuan_tabungan'
+            );
+
+            $transaksi = $pengajuan->transTabungan()->first();
+            if ($transaksi) {
+                return redirect()->route('admin.tabungan.detail-transaksi', $transaksi->id)
+                    ->with('success', 'Pengajuan setoran berhasil disetujui dan transaksi telah dibuat. Silakan cetak struk di bawah.')
+                    ->with('download_struk', true);
+            }
             return redirect()->route('admin.tabungan.pengajuan-setor')
                 ->with('success', 'Pengajuan setoran berhasil disetujui dan transaksi telah dibuat');
                 
@@ -210,6 +230,16 @@ class TabunganController extends Controller
         ]);
 
         app(ActivityLogService::class)->logRejectSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+
+        NasabahNotification::notify(
+            $pengajuan->id_anggota,
+            'tabungan_setor',
+            'Pengajuan setoran ditolak',
+            'Pengajuan setoran Anda ditolak. ' . ($request->keterangan_admin ?? ''),
+            route('nasabah.tabungan.detail-pengajuan-setor', $pengajuan->id),
+            (string) $pengajuan->id,
+            'pengajuan_tabungan'
+        );
 
         return redirect()->route('admin.tabungan.pengajuan-setor')
             ->with('success', 'Pengajuan setoran ditolak');
@@ -357,6 +387,16 @@ class TabunganController extends Controller
             (float) ($pengajuan->biaya_transfer ?? 0)
         );
 
+        NasabahNotification::notify(
+            $pengajuan->id_anggota,
+            'tabungan_tarik',
+            'Pengajuan penarikan disetujui',
+            'Penarikan Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Dana akan ditransfer ke rekening Anda.',
+            route('nasabah.tabungan.detail-pengajuan-tarik', $pengajuan->id),
+            (string) $pengajuan->id,
+            'pengajuan_penarikan_tabungan'
+        );
+
         return redirect()->route('admin.tabungan.pengajuan-tarik')
             ->with('success', 'Pengajuan penarikan berhasil disetujui dan transfer telah dilakukan');
     }
@@ -384,6 +424,16 @@ class TabunganController extends Controller
         ]);
 
         app(ActivityLogService::class)->logRejectTarik($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+
+        NasabahNotification::notify(
+            $pengajuan->id_anggota,
+            'tabungan_tarik',
+            'Pengajuan penarikan ditolak',
+            'Pengajuan penarikan Anda ditolak. ' . ($request->keterangan_admin ?? ''),
+            route('nasabah.tabungan.detail-pengajuan-tarik', $pengajuan->id),
+            (string) $pengajuan->id,
+            'pengajuan_penarikan_tabungan'
+        );
 
         return redirect()->route('admin.tabungan.pengajuan-tarik')
             ->with('success', 'Pengajuan penarikan ditolak');

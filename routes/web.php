@@ -34,6 +34,9 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
     Route::get('/guide', [\App\Http\Controllers\Nasabah\GuideController::class, 'index'])->name('guide');
+    Route::get('/notifications', [\App\Http\Controllers\Nasabah\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Nasabah\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Nasabah\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::prefix('guide')->name('guide.')->group(function () {
         Route::get('/tabungan-setoran', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganSetoran'])->name('tabungan-setoran');
         Route::get('/tabungan-penarikan', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganPenarikan'])->name('tabungan-penarikan');
@@ -87,6 +90,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
         Route::get('/pengajuan-tarik/{id}', [TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
         Route::get('/transaksi/{id}', [TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+        Route::get('/transaksi/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'transaksiTabungan'])->name('struk-transaksi');
         Route::get('/janji-temu/{id}', [TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
     });
     
@@ -111,6 +115,9 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::post('/pembayaran/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPembayaran'])->name('submit-janji-temu-pembayaran');
         Route::get('/status-pembayaran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'statusPembayaran'])->name('status-pembayaran');
         Route::get('/pembayaran/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
+        Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
+        Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Nasabah\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
+        Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'angsuran'])->name('struk-angsuran');
     });
 });
 
@@ -155,6 +162,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::delete('/pengajuan-setor/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'deletePengajuanSetor'])->name('delete-pengajuan-setor');
         });
         Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+        Route::get('/transaksi/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'transaksiTabungan'])->name('struk-transaksi');
         Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
         Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
 
@@ -187,6 +195,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
         Route::get('/pembayaran', [\App\Http\Controllers\Admin\PinjamanController::class, 'pembayaran'])->name('pembayaran');
         Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
+        Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
+        Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Admin\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
+        Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'angsuran'])->name('struk-angsuran');
 
         // Approval & Cairkan routes - accessible by all admins (Admin Utama & Admin Operasional)
         Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\PinjamanController::class, 'approvePengajuan'])->name('approve-pengajuan');

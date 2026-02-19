@@ -19,7 +19,8 @@ use App\Models\MasterDendaPinjaman;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
-use App\Helpers\IdGenerator; // Add Helper
+use App\Helpers\IdGenerator;
+use App\Models\NasabahNotification;
 
 class PinjamanController extends Controller
 {
@@ -203,6 +204,16 @@ class PinjamanController extends Controller
 
             app(ActivityLogService::class)->logApprovePengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
+            NasabahNotification::notify(
+                $pengajuan->id_anggota,
+                'pinjaman',
+                'Pengajuan pinjaman disetujui',
+                'Pengajuan pinjaman Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Silakan menunggu proses pencairan.',
+                route('nasabah.pinjaman.detail-pengajuan', $pengajuan->id),
+                (string) $pengajuan->id,
+                'pengajuan_pinjaman'
+            );
+
             return redirect()->route('admin.pinjaman.detail-pengajuan', $id)
                 ->with('success', 'Pengajuan berhasil disetujui dan data pinjaman dibuat. Silakan klik "Cairkan" untuk generate jadwal angsuran dan pencairan dana.');
         } catch (\Exception $e) {
@@ -281,6 +292,16 @@ class PinjamanController extends Controller
             DB::commit();
 
             app(ActivityLogService::class)->logCairkanPinjaman($pinjaman->id, $pinjaman->jumlah_pinjam, $pengajuan->nasabah->user->nama ?? 'N/A');
+
+            NasabahNotification::notify(
+                $pengajuan->id_anggota,
+                'pinjaman',
+                'Pinjaman telah dicairkan',
+                'Pinjaman Anda sebesar Rp ' . number_format($pinjaman->jumlah_pinjam ?? 0, 0, ',', '.') . ' telah dicairkan. Dana telah ditransfer sesuai metode pencairan.',
+                route('nasabah.pinjaman.detail-pinjaman', $pinjaman->id),
+                (string) $pinjaman->id,
+                'pinjaman'
+            );
 
             return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
                 ->with('success', 'Pinjaman berhasil dicairkan dan jadwal angsuran telah dibuat');
@@ -430,6 +451,16 @@ class PinjamanController extends Controller
         ]);
 
         app(ActivityLogService::class)->logRejectPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+
+        NasabahNotification::notify(
+            $pengajuan->id_anggota,
+            'pinjaman',
+            'Pengajuan pinjaman ditolak',
+            'Pengajuan pinjaman Anda ditolak. ' . ($request->keterangan_admin ?? ''),
+            route('nasabah.pinjaman.detail-pengajuan', $pengajuan->id),
+            (string) $pengajuan->id,
+            'pengajuan_pinjaman'
+        );
 
         return redirect()->route('admin.pinjaman.pengajuan')
             ->with('success', 'Pengajuan pinjaman berhasil ditolak');
@@ -1001,6 +1032,16 @@ class PinjamanController extends Controller
 
             app(ActivityLogService::class)->logApprovePembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
+            NasabahNotification::notify(
+                $pengajuan->id_anggota,
+                'pinjaman_pembayaran',
+                'Pembayaran angsuran disetujui',
+                'Pembayaran angsuran Anda telah disetujui dan dicatat.',
+                route('nasabah.pinjaman.detail-pembayaran', $pengajuan->id),
+                (string) $pengajuan->id,
+                'pengajuan_pembayaran_pinjaman'
+            );
+
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pengajuan pembayaran berhasil disetujui dan angsuran diperbarui');
         } catch (\Exception $e) {
@@ -1032,6 +1073,16 @@ class PinjamanController extends Controller
         ]);
 
         app(ActivityLogService::class)->logRejectPembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+
+        NasabahNotification::notify(
+            $pengajuan->id_anggota,
+            'pinjaman_pembayaran',
+            'Pembayaran angsuran ditolak',
+            'Pengajuan pembayaran angsuran Anda ditolak. ' . ($request->keterangan_admin ?? ''),
+            route('nasabah.pinjaman.detail-pembayaran', $pengajuan->id),
+            (string) $pengajuan->id,
+            'pengajuan_pembayaran_pinjaman'
+        );
 
         return redirect()->route('admin.pinjaman.pembayaran')
             ->with('success', 'Pengajuan pembayaran ditolak');
