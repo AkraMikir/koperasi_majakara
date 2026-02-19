@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Helpers\IdGenerator;
 use App\Models\BuktiFoto;
+use App\Models\BiayaTransfer;
 
 class TabunganController extends Controller
 {
@@ -263,7 +264,14 @@ class TabunganController extends Controller
         // Get saldo nasabah
         $saldo = $this->getSaldoNasabah($pengajuan->id_anggota);
 
-        return view('admin.tabungan.detail-pengajuan-tarik', compact('pengajuan', 'saldo'));
+        // Biaya transfer (ditanggung nasabah): untuk tampilan sisa & form
+        $biayaTransferList = BiayaTransfer::where('is_active', true)->get();
+        $biayaDefault = $biayaTransferList->where('bank_penerima', $pengajuan->nama_bank)->first()?->biaya_admin
+            ?? $biayaTransferList->first()?->biaya_admin
+            ?? 0;
+        $biayaDefault = (float) $biayaDefault;
+
+        return view('admin.tabungan.detail-pengajuan-tarik', compact('pengajuan', 'saldo', 'biayaTransferList', 'biayaDefault'));
     }
 
     /**
@@ -287,12 +295,23 @@ class TabunganController extends Controller
             ]);
         }
         
-        // Check saldo
+        // Biaya transfer (ditanggung nasabah)
+        $biayaTransfer = 0;
+        if ($pengajuan->metode_transfer == 'transfer') {
+            $bt = BiayaTransfer::where('is_active', true)
+                ->where('bank_pengirim', $request->bank_pengirim)
+                ->where('bank_penerima', $pengajuan->nama_bank)
+                ->first();
+            $biayaTransfer = $bt ? (float) $bt->biaya_admin : 0;
+        }
+
+        // Check saldo: harus mencukupi nominal + biaya transfer
         $saldo = $this->getSaldoNasabah($pengajuan->id_anggota);
-        
-        if ($saldo < $pengajuan->nominal) {
+        $totalDipotong = $pengajuan->nominal + $biayaTransfer;
+
+        if ($saldo < $totalDipotong) {
             return redirect()->back()
-                ->with('error', 'Saldo nasabah tidak mencukupi');
+                ->with('error', 'Saldo nasabah tidak mencukupi (nominal + biaya transfer). Total yang dipotong: Rp ' . number_format($totalDipotong, 0, ',', '.'));
         }
 
         // Upload foto bukti TF admin (jika transfer)
@@ -301,10 +320,11 @@ class TabunganController extends Controller
             $fotoBuktiPath = $request->file('foto_bukti_tf_admin')->store('bukti_tf_admin', 'public');
         }
 
-        // Update pengajuan with foto
+        // Update pengajuan dengan foto dan biaya transfer (untuk ditampilkan di detail nasabah)
         $pengajuan->update([
             'status' => '2',
             'foto_bukti_tf_admin' => $fotoBuktiPath,
+            'biaya_transfer' => $biayaTransfer,
         ]);
 
         // V2 Logic: Master Data Driven
@@ -318,19 +338,24 @@ class TabunganController extends Controller
         // Generate ID using correct method
         $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
-        // Create transaksi penarikan
+        // Create transaksi penarikan: nominal = total yang didebet dari saldo (nominal + biaya transfer)
         TransTabungan::create([
             'id' => $idTransaksi,
             'id_pengajuan_tarik' => $pengajuan->id,
             'id_anggota' => $pengajuan->id_anggota,
             'id_jns_via' => $idVia,
             'id_jns_transaksi' => $idTrans,
-            'nominal' => $pengajuan->nominal,
+            'nominal' => $totalDipotong,
             'keterangan' => $pengajuan->keterangan,
             'tgl_transaksi' => now(),
         ]);
 
-        app(ActivityLogService::class)->logApproveTarik($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+        app(ActivityLogService::class)->logApproveTarik(
+            $pengajuan->id,
+            (float) $pengajuan->nominal,
+            $pengajuan->nasabah->user->nama ?? 'N/A',
+            (float) ($pengajuan->biaya_transfer ?? 0)
+        );
 
         return redirect()->route('admin.tabungan.pengajuan-tarik')
             ->with('success', 'Pengajuan penarikan berhasil disetujui dan transfer telah dilakukan');

@@ -252,7 +252,7 @@
                     </button>
                 </div>
             </div>
-            <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div id="rejectModal" class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Tolak Pembayaran</h3>
                     <form method="POST" action="{{ route('admin.pinjaman.reject-pembayaran', $pengajuan->id) }}">
@@ -290,7 +290,7 @@
                     ✗ Tolak Pembayaran
                 </button>
             </div>
-            <div id="rejectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            <div id="rejectModal" class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Tolak Pembayaran</h3>
                     <form method="POST" action="{{ route('admin.pinjaman.reject-pembayaran', $pengajuan->id) }}">

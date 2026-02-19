@@ -59,6 +59,26 @@
                     </div>
                 </div>
 
+                @if(($transaksi->jenis ?? '') === 'penarikan' && $transaksi->pengajuanTarik && (float)($transaksi->pengajuanTarik->biaya_transfer ?? 0) > 0)
+                <div class="pt-4 mt-4 border-t border-gray-200 bg-amber-50/50 rounded-xl p-4">
+                    <p class="text-sm font-semibold text-[#674c1d] mb-3">Rincian penarikan (Transfer)</p>
+                    <div class="space-y-2">
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Nominal penarikan (diterima ke rekening)</span>
+                            <span class="font-semibold text-gray-900">Rp {{ number_format((float) $transaksi->pengajuanTarik->nominal, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-600">Biaya transfer admin (ditanggung nasabah)</span>
+                            <span class="font-semibold text-gray-900">Rp {{ number_format((float) $transaksi->pengajuanTarik->biaya_transfer, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm pt-2 border-t border-amber-200">
+                            <span class="text-gray-700 font-medium">Total didebet dari saldo</span>
+                            <span class="font-bold text-red-600">-Rp {{ number_format((float) $transaksi->nominal, 0, ',', '.') }}</span>
+                        </div>
+                    </div>
+                </div>
+                @endif
+
                 @if($transaksi->keterangan)
                 <div class="pt-4 border-t border-gray-200">
                     <p class="text-sm text-gray-600 mb-2">Keterangan</p>

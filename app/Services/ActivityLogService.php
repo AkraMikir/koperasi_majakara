@@ -114,13 +114,23 @@ class ActivityLogService
         );
     }
 
-    public function logApproveTarik(string $pengajuanId, float $nominal, string $nasabahNama): void
+    public function logApproveTarik(string $pengajuanId, float $nominal, string $nasabahNama, float $biayaTransfer = 0): void
     {
+        $properties = ['nominal' => $nominal, 'nasabah' => $nasabahNama];
+        if ($biayaTransfer > 0) {
+            $properties['biaya_transfer'] = $biayaTransfer;
+            $totalDebet = $nominal + $biayaTransfer;
+            $properties['total_didebet'] = $totalDebet;
+        }
+        $desc = "Menyetujui penarikan tabungan Rp " . number_format($nominal, 0, ',', '.') . " untuk nasabah {$nasabahNama}";
+        if ($biayaTransfer > 0) {
+            $desc .= " (biaya transfer Rp " . number_format($biayaTransfer, 0, ',', '.') . " ditanggung nasabah)";
+        }
         $this->log(
             'approve_tarik',
             'tabungan',
-            "Menyetujui penarikan tabungan Rp " . number_format($nominal, 0, ',', '.') . " untuk nasabah {$nasabahNama}",
-            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            $desc,
+            $properties,
             'PengajuanPenarikanTabungan',
             $pengajuanId
         );

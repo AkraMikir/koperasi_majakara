@@ -61,6 +61,14 @@
                     <p class="text-3xl font-bold text-[#8b6f2f]">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                 </div>
 
+                @if($pengajuan->status == '2' && $pengajuan->metode_transfer === 'transfer' && isset($pengajuan->biaya_transfer) && (float)$pengajuan->biaya_transfer > 0)
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Biaya transfer admin (ditanggung nasabah)</p>
+                    <p class="font-semibold text-gray-900">Rp {{ number_format($pengajuan->biaya_transfer, 0, ',', '.') }}</p>
+                    <p class="text-xs text-gray-500 mt-1">Total yang didebet dari saldo: Rp {{ number_format($pengajuan->nominal + $pengajuan->biaya_transfer, 0, ',', '.') }}</p>
+                </div>
+                @endif
+
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-100">
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Metode</p>

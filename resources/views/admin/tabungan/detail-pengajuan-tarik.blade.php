@@ -53,8 +53,14 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal Penarikan</p>
-                        <p class="font-semibold text-[[#674c1d]] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                     </div>
+                    @if($pengajuan->metode_transfer == 'transfer' && isset($biayaDefault))
+                    <div>
+                        <p class="text-sm text-gray-600">Biaya Transfer (ditanggung nasabah)</p>
+                        <p class="font-semibold text-gray-900">Rp {{ number_format($biayaDefault, 0, ',', '.') }}</p>
+                    </div>
+                    @endif
                     <div>
                         <p class="text-sm text-gray-600">Metode</p>
                         <span class="inline-block mt-1 px-3 py-1 {{ $pengajuan->metode_transfer == 'transfer' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700' }} rounded-full text-sm font-semibold">
@@ -85,13 +91,16 @@
                     @endif
                     <div>
                         <p class="text-sm text-gray-600">Saldo Nasabah</p>
-                        <p class="font-semibold text-[[#674c1d]] text-xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
-                        @if($saldo < $pengajuan->nominal)
+                        <p class="font-semibold text-[#674c1d] text-xl">Rp {{ number_format($saldo, 0, ',', '.') }}</p>
+                        @php
+                            $totalDipotong = $pengajuan->nominal + ($pengajuan->metode_transfer == 'transfer' ? (float)($biayaDefault ?? 0) : 0);
+                        @endphp
+                        @if($saldo < $totalDipotong)
                             <p class="text-sm text-red-600 mt-1 font-semibold">⚠ Saldo tidak mencukupi</p>
-                            <p class="text-xs text-gray-500 mt-1">Kekurangan: Rp {{ number_format($pengajuan->nominal - $saldo, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Total dipotong (nominal + biaya transfer): Rp {{ number_format($totalDipotong, 0, ',', '.') }}. Kekurangan: Rp {{ number_format($totalDipotong - $saldo, 0, ',', '.') }}</p>
                         @else
                             <p class="text-sm text-green-600 mt-1 font-semibold">✓ Saldo mencukupi</p>
-                            <p class="text-xs text-gray-500 mt-1">Sisa setelah penarikan: Rp {{ number_format($saldo - $pengajuan->nominal, 0, ',', '.') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">Sisa setelah penarikan (setelah dikurangi nominal + biaya transfer): Rp {{ number_format($saldo - $totalDipotong, 0, ',', '.') }}</p>
                         @endif
                     </div>
                     <div>
@@ -148,7 +157,7 @@
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Bank Pengirim (Koperasi)</label>
                         <select name="bank_pengirim" id="bank_pengirim" required 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
                             onchange="calculateBiaya()">
                             <option value="">Pilih Bank</option>
                             <option value="BCA">BCA</option>
@@ -158,24 +167,28 @@
                         </select>
                     </div>
 
-                    <!-- Biaya Admin (Auto Calculate) -->
-                    <div id="biaya-section" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <!-- Biaya Admin (Auto Calculate) - ditanggung nasabah -->
+                    <div id="biaya-section" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-lg">
                         <div class="flex items-center justify-between mb-2">
-                            <p class="text-sm font-semibold text-gray-700">Biaya Transfer:</p>
-                            <p class="font-bold text-blue-600" id="biaya-display">Rp 0</p>
+                            <p class="text-sm font-semibold text-gray-700">Biaya Transfer (ditanggung nasabah):</p>
+                            <p class="font-bold text-amber-700" id="biaya-display">Rp 0</p>
+                        </div>
+                        <div class="flex items-center justify-between mb-2">
+                            <p class="text-sm font-semibold text-gray-700">Total dikurangi dari saldo:</p>
+                            <p class="font-bold text-gray-900" id="total-dipotong-display">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                         </div>
                         <div class="flex items-center justify-between">
                             <p class="text-sm font-semibold text-gray-700">Total Diterima Nasabah:</p>
                             <p class="font-bold text-green-600" id="total-display">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
                         </div>
-                        <p class="text-xs text-gray-500 mt-2">Biaya admin akan ditanggung koperasi</p>
+                        <p class="text-xs text-amber-700 mt-2 font-medium">Biaya admin ditanggung nasabah (dikurangi dari saldo)</p>
                     </div>
 
                     <!-- Upload Bukti TF Admin -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Upload Bukti Transfer *</label>
                         <input type="file" name="foto_bukti_tf_admin" accept="image/jpeg,image/png,image/jpg" required
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[[#674c1d]] file:text-white hover:file:bg-[[#4a3514]] file:cursor-pointer"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d] file:text-white hover:file:bg-[#4a3514] file:cursor-pointer"
                             onchange="previewFoto(this)">
                         <div id="foto-preview" class="hidden mt-3">
                             <img src="" alt="Preview" class="max-w-full max-h-48 rounded-lg border border-gray-200 shadow-sm">
@@ -184,7 +197,7 @@
                     </div>
                     @endif
 
-                    @if($saldo >= $pengajuan->nominal)
+                    @if($saldo >= $totalDipotong)
                     <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                         ✓ Setujui Penarikan
                     </button>
@@ -199,7 +212,7 @@
             <!-- Reject Button -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Tindakan Lain</h3>
-                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-linear-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
+                <button onclick="showRejectModal()" class="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all font-medium shadow-md">
                     ✗ Tolak Pengajuan
                 </button>
             </div>
@@ -212,7 +225,7 @@
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Penolakan</label>
-                            <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[[#674c1d]] focus:border-[[#674c1d]] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
+                            <textarea name="keterangan_admin" rows="4" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none" placeholder="Masukkan alasan penolakan..."></textarea>
                         </div>
                         <div class="flex space-x-3">
                             <button type="button" onclick="hideRejectModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
@@ -230,53 +243,45 @@
     </div>
 </div>
 
-<div id="pengajuan-tarik-data" class="hidden" data-nama-bank="{{ e($pengajuan->nama_bank ?? '') }}" data-nominal="{{ (float) ($pengajuan->nominal ?? 0) }}"></div>
+<div id="pengajuan-tarik-data" class="hidden"
+    data-nama-bank="{{ e($pengajuan->nama_bank ?? '') }}"
+    data-nominal="{{ (float) ($pengajuan->nominal ?? 0) }}"
+    data-biaya-list="{{ json_encode(isset($biayaTransferList) ? $biayaTransferList->map(fn($b) => ['bank_pengirim' => $b->bank_pengirim, 'bank_penerima' => $b->bank_penerima, 'biaya_admin' => (float)$b->biaya_admin])->values() : []) }}"
+></div>
 
 @push('scripts')
 <script>
-    // Biaya transfer logic (Simplified, DB table not available yet)
-    const biayaData = {};
-
     function calculateBiaya() {
         const bankPengirim = document.getElementById('bank_pengirim').value;
         const dataEl = document.getElementById('pengajuan-tarik-data');
-        const bankPenerima = dataEl ? dataEl.getAttribute('data-nama-bank') || '' : '';
-        const nominal = dataEl ? parseFloat(dataEl.getAttribute('data-nominal')) || 0 : 0;
+        const bankPenerima = dataEl ? (dataEl.getAttribute('data-nama-bank') || '') : '';
+        const nominal = dataEl ? (parseFloat(dataEl.getAttribute('data-nominal')) || 0) : 0;
+        const biayaList = dataEl && dataEl.getAttribute('data-biaya-list') ? JSON.parse(dataEl.getAttribute('data-biaya-list')) : [];
 
         if (!bankPengirim) {
             return;
         }
 
-        // Logic sederhana: Beda bank = 6500, Sama bank = 0
         let biaya = 0;
-        if (bankPenerima && bankPenerima !== 'Bank Lainnya' && !bankPenerima.includes(bankPengirim)) {
-            // Check similarities (e.g. BRI vs BRI)
-            if (bankPenerima.toLowerCase() !== bankPengirim.toLowerCase()) {
-                biaya = 6500;
-            }
-        } else {
-             // Default safe assumption
-             biaya = 6500;
+        const match = biayaList.find(function(b) {
+            return b.bank_pengirim === bankPengirim && (b.bank_penerima === bankPenerima || !bankPenerima);
+        });
+        if (match) {
+            biaya = match.biaya_admin || 0;
+        } else if (biayaList.length) {
+            biaya = biayaList[0].biaya_admin || 0;
         }
-        
-        // Jika sama persis
-        if (bankPenerima && bankPenerima.toLowerCase() === bankPengirim.toLowerCase()) {
-            biaya = 0;
-        }
-        
-        // Removed unused biayaData check
 
-        // Show biaya section
         const biayaSection = document.getElementById('biaya-section');
         biayaSection.classList.remove('hidden');
 
-        // Update display
-        document.getElementById('biaya-display').textContent = 
-            'Rp ' + new Intl.NumberFormat('id-ID').format(biaya);
-        
-        // Nasabah tetap terima full (biaya ditanggung koperasi)
-        document.getElementById('total-display').textContent = 
-            'Rp ' + new Intl.NumberFormat('id-ID').format(nominal);
+        document.getElementById('biaya-display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(biaya);
+        document.getElementById('total-display').textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(nominal);
+        const totalDipotong = nominal + biaya;
+        const totalDipotongEl = document.getElementById('total-dipotong-display');
+        if (totalDipotongEl) {
+            totalDipotongEl.textContent = 'Rp ' + new Intl.NumberFormat('id-ID').format(totalDipotong);
+        }
     }
 
     function previewFoto(input) {

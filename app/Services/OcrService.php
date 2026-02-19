@@ -60,7 +60,7 @@ class OcrService
                 throw new \Exception("Image file not found: {$fullPath}");
             }
 
-            // Run OCR with Indonesian language
+            // Run OCR with Indonesian language (fallback to English if ind.traineddata not installed)
             $ocr = new TesseractOCR($fullPath);
             
             // Set Tesseract path if not in PATH
@@ -69,29 +69,70 @@ class OcrService
                 $ocr->executable($tesseractPath);
             }
             
-            // Configure OCR for better accuracy
-            $ocr->lang('ind'); // Indonesian language
+            // Tessdata directory: folder that contains ind.traineddata / eng.traineddata
+            // Contoh: D:\NEW D\Tesseract-OCR\tessdata (unduh ind.traineddata dari https://github.com/tesseract-ocr/tessdata)
+            $tessdataDir = null;
+            $tessdataEnv = env('TESSDATA_DIR') ?: env('TESSDATA_PREFIX');
+            if ($tessdataEnv) {
+                $tessdataDir = rtrim(str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $tessdataEnv), DIRECTORY_SEPARATOR);
+                if (!str_ends_with(strtolower($tessdataDir), 'tessdata')) {
+                    $tessdataDir .= DIRECTORY_SEPARATOR . 'tessdata';
+                }
+                if (is_dir($tessdataDir)) {
+                    $ocr->tessdataDir($tessdataDir);
+                }
+            }
             
             // Page Segmentation Mode: 6 = Assume uniform block of text
-            // This works well for KTP which has structured layout
             try {
                 $ocr->psm(6);
             } catch (\Exception $e) {
-                // PSM might not be supported in older Tesseract versions, continue without it
                 Log::warning('PSM mode not supported: ' . $e->getMessage());
             }
             
-            // Set DPI (dots per inch) - higher DPI = better quality
-            // KTP images are usually scanned at 300 DPI
             try {
                 $ocr->dpi(300);
             } catch (\Exception $e) {
-                // DPI might not be supported, continue without it
                 Log::warning('DPI setting not supported: ' . $e->getMessage());
             }
             
-            // Run OCR
-            $text = $ocr->run();
+            $text = null;
+            $usedLang = 'ind';
+            $lastException = null;
+            foreach (['ind', 'eng'] as $lang) {
+                $ocrTry = new TesseractOCR($fullPath);
+                if ($tesseractPath) {
+                    $ocrTry->executable($tesseractPath);
+                }
+                if ($tessdataDir && is_dir($tessdataDir)) {
+                    $ocrTry->tessdataDir($tessdataDir);
+                }
+                try {
+                    $ocrTry->psm(6);
+                } catch (\Exception $e) { /* ignore */ }
+                try {
+                    $ocrTry->dpi(300);
+                } catch (\Exception $e) { /* ignore */ }
+                $ocrTry->lang($lang);
+                try {
+                    $text = $ocrTry->run();
+                    $usedLang = $lang;
+                    break;
+                } catch (\Exception $e) {
+                    $lastException = $e;
+                    $msg = $e->getMessage();
+                    if (($lang === 'ind') && (str_contains($msg, 'Failed loading language') || str_contains($msg, 'ind.traineddata') || str_contains($msg, 'tessdata') || str_contains($msg, "Could not load"))) {
+                        Log::warning('OCR: Indonesian (ind) not available, trying English. ' . $msg);
+                        continue;
+                    }
+                    throw $e;
+                }
+            }
+            
+            if ($text === null) {
+                $hint = $lastException ? $lastException->getMessage() : '';
+                throw new \Exception('Tesseract tidak dapat memuat bahasa. Pastikan folder tessdata berisi ind.traineddata atau eng.traineddata. Unduh dari https://github.com/tesseract-ocr/tessdata dan letakkan di folder tessdata (contoh: D:\\NEW D\\Tesseract-OCR\\tessdata). Set TESSDATA_DIR di .env ke path folder tessdata Anda. ' . $hint);
+            }
 
             // Log raw OCR text for debugging
             Log::info('OCR Raw Text:', ['text' => $text]);

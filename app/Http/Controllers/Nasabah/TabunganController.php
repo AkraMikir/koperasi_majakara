@@ -8,6 +8,7 @@ use App\Models\PengajuanPenarikanTabungan;
 use App\Models\JanjiTemuTabungan;
 use App\Models\BuktiFotoTabungan;
 use App\Models\JnsLokasiPerusahaan;
+use App\Models\Nasabah;
 use App\Models\TransTabungan;
 use App\Models\BuktiFoto;
 use App\Models\User;
@@ -146,11 +147,15 @@ class TabunganController extends Controller
         // Get active office locations
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
 
+        // Data rekening nasabah untuk auto-fill form transfer (bank & no rekening)
+        $rekeningNasabah = Nasabah::with('dataRek')->find($idAnggota)?->dataRek;
+
         return view('nasabah.tabungan.penarikan-tabungan', [
             'user' => Auth::user(),
             'tabunganInfo' => $tabunganInfo,
             'riwayatPenarikan' => $riwayatPenarikan,
             'lokasi' => $lokasi,
+            'rekeningNasabah' => $rekeningNasabah,
         ]);
     }
 

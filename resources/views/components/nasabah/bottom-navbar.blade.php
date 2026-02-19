@@ -83,8 +83,8 @@
     @foreach($arcItems as $idx => $arcItem)
     @php $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70]; @endphp
     <a href="{{ $arcItem['route'] === '#' ? '#' : route($arcItem['route']) }}"
-       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[[0_4px_20px_rgba(103,76,29,0.2)]] text-[[#8b6f2f]] border border-[[#8b6f2f]]/10 hover:bg-[[#8b6f2f]]/10 active:scale-95"
-       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, background-color 0.2s;"
+       class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#a67c52]/90 to-[#8b6f2f]/95 text-white border-2 border-[#674c1d]/30 shadow-[0_4px_16px_rgba(139,111,47,0.35)] hover:scale-110 hover:shadow-[0_8px_24px_rgba(103,76,29,0.45)] hover:border-[#d4af37]/60 hover:from-[#8b6f2f] hover:to-[#674c1d] hover:ring-2 hover:ring-[#d4af37]/40 active:scale-95 transition-all duration-200 ease-out"
+       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;"
        data-arc-x="{{ $pos['x'] ?? 0 }}"
        data-arc-y="{{ $pos['y'] ?? -70 }}"
        data-arc-delay="{{ $idx * 40 }}"

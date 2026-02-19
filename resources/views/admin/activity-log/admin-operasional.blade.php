@@ -217,7 +217,7 @@ $roleLabels = [
                                 <tr>
                                     <td class="py-0.5 pr-3 text-gray-500 font-medium capitalize">{{ str_replace('_', ' ', $key) }}</td>
                                     <td class="py-0.5 text-gray-800">
-                                        @if(is_numeric($value) && str_contains($key, 'nominal'))
+                                        @if(is_numeric($value) && (str_contains($key, 'nominal') || $key === 'biaya_transfer' || $key === 'total_didebet'))
                                             Rp {{ number_format($value, 0, ',', '.') }}
                                         @else
                                             {{ $value ?? '-' }}

@@ -8,6 +8,8 @@ $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
 $isTabunganActive = str_starts_with($currentRoute, 'admin.tabungan');
 $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
 $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
+$janjiTemuSeenAt = session('admin_janji_temu_seen_at', '1970-01-01 00:00:00');
+$janjiTemuUnreadCount = \App\Models\JanjiTemuUniversal::where('status', '1')->where('created_at', '>', $janjiTemuSeenAt)->count();
 @endphp
 
 <aside id="adminSidebar"
@@ -163,15 +165,20 @@ $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
                 <span class="font-medium">Gadai</span>
             </a>
 
-            <!-- Janji Temu -->
+            <!-- Janji Temu (badge = data baru sejak terakhir dibuka) -->
             <a href="{{ route('admin.janji-temu.index') }}"
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.janji-temu') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3">
+                <div class="w-10 h-10 flex items-center justify-center mr-3 relative">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
                         </path>
                     </svg>
+                    @if($janjiTemuUnreadCount > 0)
+                    <span class="absolute -top-1 -right-1 min-w-5 h-5 px-1 bg-red-500 rounded-full flex items-center justify-center">
+                        <span class="text-xs text-white font-bold">{{ $janjiTemuUnreadCount > 99 ? '99+' : $janjiTemuUnreadCount }}</span>
+                    </span>
+                    @endif
                 </div>
                 <span class="font-medium">Janji Temu</span>
             </a>
@@ -279,23 +286,6 @@ $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
                 </div>
             </a>
 
-            <!-- Pengajuan -->
-            <a href="{{ route('admin.pengajuan.index') }}"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.pengajuan') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3 relative">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
-                        </path>
-                    </svg>
-                    <span
-                        class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                        <span class="text-xs text-white font-bold">3</span>
-                    </span>
-                </div>
-                <span class="font-medium">Pengajuan</span>
-            </a>
-
             <!-- Master Data -->
             <a href="{{ route('admin.master-data.index') }}"
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.master-data') }}">
@@ -363,5 +353,4 @@ $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
 </aside>
 
 <!-- Overlay for mobile -->
-<div id="sidebarOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden hidden" onclick="toggleSidebar()">
-</div>
+<div id="sidebarOverlay" class="fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-40 lg:hidden hidden" onclick="toggleSidebar()"></div>
