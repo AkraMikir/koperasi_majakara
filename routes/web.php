@@ -34,6 +34,9 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::get('/profile', [NasabahDashboardController::class, 'profile'])->name('profile');
     Route::get('/pengajuan-pending', [NasabahDashboardController::class, 'pengajuanPending'])->name('pengajuan-pending');
     Route::get('/guide', [\App\Http\Controllers\Nasabah\GuideController::class, 'index'])->name('guide');
+    Route::get('/notifications', [\App\Http\Controllers\Nasabah\NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [\App\Http\Controllers\Nasabah\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');
+    Route::post('/notifications/read-all', [\App\Http\Controllers\Nasabah\NotificationController::class, 'markAllRead'])->name('notifications.mark-all-read');
     Route::prefix('guide')->name('guide.')->group(function () {
         Route::get('/tabungan-setoran', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganSetoran'])->name('tabungan-setoran');
         Route::get('/tabungan-penarikan', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganPenarikan'])->name('tabungan-penarikan');
