@@ -69,44 +69,35 @@
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
     <script>
-        // Update time every second
-        function updateTime() {
-            const now = new Date();
-            const options = { 
-                day: 'numeric', 
-                month: 'long', 
-                year: 'numeric',
-                timeZone: 'Asia/Jakarta'
-            };
-            const dateString = now.toLocaleDateString('id-ID', options);
-            const timeString = now.toLocaleTimeString('id-ID', { 
-                hour: '2-digit', 
-                minute: '2-digit', 
-                second: '2-digit',
-                hour12: false,
-                timeZone: 'Asia/Jakarta'
-            }).replace(/:/g, '.');
-            
-            const dateElement = document.getElementById('currentDate');
-            const timeElement = document.querySelector('.time-display');
-            
-            if (dateElement) {
-                dateElement.textContent = dateString;
+        // ─── UPDATE JAM ─────────────────────────────────────────────────────────────
+        // Guard: if (!window.__clockInterval) pastikan setInterval hanya spawn SEKALI.
+        // Tanpa guard ini, setiap Turbo page swap spawn interval baru.
+        // 10x klik sidebar = 10 interval jalan bersamaan = BUG REPEAT!
+        if (!window.__clockInterval) {
+            function updateTime() {
+                const now = new Date();
+                const options = { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'Asia/Jakarta' };
+                const dateString = now.toLocaleDateString('id-ID', options);
+                const timeString = now.toLocaleTimeString('id-ID', {
+                    hour: '2-digit', minute: '2-digit', second: '2-digit',
+                    hour12: false, timeZone: 'Asia/Jakarta'
+                }).replace(/:/g, '.');
+
+                const dateElement = document.getElementById('currentDate');
+                const timeElement = document.querySelector('.time-display');
+                if (dateElement) dateElement.textContent = dateString;
+                if (timeElement) timeElement.textContent = timeString;
             }
-            if (timeElement) {
-                timeElement.textContent = timeString;
-            }
+
+            updateTime();
+            window.__clockInterval = setInterval(updateTime, 1000);
         }
-        
-        // Update immediately and then every second
-        updateTime();
-        setInterval(updateTime, 1000);
-        
-        // Mobile sidebar toggle
-        function toggleSidebar() {
+
+        // ─── MOBILE SIDEBAR TOGGLE ────────────────────────────────────────────────
+        // Dideklarasikan di window agar bisa dipanggil dari atribut HTML onclick=""
+        window.toggleSidebar = function() {
             const sidebar = document.getElementById('adminSidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
             if (sidebar && overlay) {
                 if (sidebar.classList.contains('-translate-x-full')) {
                     sidebar.classList.remove('-translate-x-full');
@@ -117,6 +108,16 @@
                 }
             }
         }
+
+        // ─── TURBO:LOAD EVENT ─────────────────────────────────────────────────────
+        // Dijalankan setiap kali Turbo selesai swap konten halaman (bukan DOMContentLoaded)
+        document.addEventListener('turbo:load', function() {
+            // Auto-tutup sidebar mobile setelah pindah halaman
+            const sidebar = document.getElementById('adminSidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.add('-translate-x-full');
+            if (overlay) overlay.classList.add('hidden');
+        });
     </script>
 </body>
 </html>

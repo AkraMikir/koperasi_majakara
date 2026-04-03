@@ -60,6 +60,9 @@ class AppServiceProvider extends ServiceProvider
             $view->with(compact('nasabahNotificationsUnreadCount', 'nasabahNotificationsRecent'));
         });
 
+        // Register Composer untuk Sidebar (Optimasi Query via Cache)
+        View::composer('components.admin.sidebar', \App\Http\View\Composers\SidebarComposer::class);
+
         // Register custom Blade directives for role checking
         $this->registerBladeDirectives();
     }

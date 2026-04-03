@@ -8,8 +8,11 @@ $isPinjamanActive = str_starts_with($currentRoute, 'admin.pinjaman');
 $isTabunganActive = str_starts_with($currentRoute, 'admin.tabungan');
 $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
 $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
-$janjiTemuSeenAt = session('admin_janji_temu_seen_at', '1970-01-01 00:00:00');
-$janjiTemuUnreadCount = \App\Models\JanjiTemuUniversal::where('status', '1')->where('created_at', '>', $janjiTemuSeenAt)->count();
+$isPettyCashActive = str_starts_with($currentRoute, 'admin.petty-cash');
+
+// Gunakan variabel dari SidebarComposer yang sudah dicache
+$janjiTemuUnreadCount = $sidebarStats['janjiTemuCount'] ?? 0;
+$pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
 @endphp
 
 <aside id="adminSidebar"
@@ -80,8 +83,12 @@ $janjiTemuUnreadCount = \App\Models\JanjiTemuUniversal::where('status', '1')->wh
                         Pengajuan Penarikan
                     </a>
                     <a href="{{ route('admin.tabungan.transaksi') }}"
-                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.transaksi') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
-                        Transaksi
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ request()->routeIs('admin.tabungan.transaksi') && !request('filter') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Semua Transaksi
+                    </a>
+                    <a href="{{ route('admin.tabungan.transaksi', ['filter' => 'saya']) }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ request()->routeIs('admin.tabungan.transaksi') && request('filter') == 'saya' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Riwayat Saya
                     </a>
                     <a href="{{ route('admin.tabungan.saldo-nasabah') }}"
                         class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.tabungan.saldo-nasabah') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
@@ -183,7 +190,123 @@ $janjiTemuUnreadCount = \App\Models\JanjiTemuUniversal::where('status', '1')->wh
                 <span class="font-medium">Janji Temu</span>
             </a>
 
-            <!-- Laporan Keuangan (expandable) -->
+            {{-- ── PETTY CASH (expandable, role-aware) ── --}}
+            <div x-data="{ open: {{ $isPettyCashActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isPettyCashActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3 relative">
+                            {{-- Wallet icon --}}
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                            </svg>
+                            {{-- Badge pending --}}
+                            @if($pettyCashPendingCount > 0)
+                            <span class="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-amber-500 rounded-full flex items-center justify-center">
+                                <span class="text-xs text-white font-bold leading-none">{{ $pettyCashPendingCount > 9 ? '9+' : $pettyCashPendingCount }}</span>
+                            </span>
+                            @endif
+                        </div>
+                        <span class="font-medium">Petty Cash</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        @if($pettyCashPendingCount > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full {{ $isPettyCashActive ? 'bg-white/20 text-white' : '' }}">
+                            {{ $pettyCashPendingCount }}
+                        </span>
+                        @endif
+                        <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
+                </button>
+
+                <div x-show="open"
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+
+                    {{-- Owner: Dashboard + Verifikasi + Laporan --}}
+                    @isAdminUtama
+                    <a href="{{ route('admin.petty-cash.dashboard') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ $currentRoute === 'admin.petty-cash.dashboard' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="{{ route('admin.petty-cash.penerimaan.create') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ str_starts_with($currentRoute, 'admin.petty-cash.penerimaan') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+                        </svg>
+                        Kirim Dana ke Admin
+                    </a>
+                    <a href="{{ route('admin.petty-cash.setoran-approval.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ str_starts_with($currentRoute, 'admin.petty-cash.setoran-approval') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                            Verifikasi Setoran
+                        </div>
+                        @if($pettyCashPendingCount > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">{{ $pettyCashPendingCount }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.petty-cash.laporan') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ $currentRoute === 'admin.petty-cash.laporan' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                        </svg>
+                        Laporan
+                    </a>
+                    @endisAdminUtama
+
+                    {{-- Admin Operasional: Penerimaan + Input Setoran + Setor Kantor --}}
+                    @isAdminOperasional
+                    <a href="{{ route('admin.petty-cash.dashboard') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ $currentRoute === 'admin.petty-cash.dashboard' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+                        </svg>
+                        Dashboard
+                    </a>
+                    <a href="{{ route('admin.petty-cash.penerimaan.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ str_starts_with($currentRoute, 'admin.petty-cash.penerimaan') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <div class="flex items-center">
+                            <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>
+                            </svg>
+                            Penerimaan Dana
+                        </div>
+                        @if($pettyCashPendingCount > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">{{ $pettyCashPendingCount }}</span>
+                        @endif
+                    </a>
+
+                    <a href="{{ route('admin.petty-cash.setoran-kantor.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors
+                        {{ str_starts_with($currentRoute, 'admin.petty-cash.setoran-kantor') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                        </svg>
+                        Setor ke Kantor
+                    </a>
+                    @endisAdminOperasional
+                </div>
+            </div>
+
+            {{-- ── LAPORAN KEUANGAN ── --}}
+
             <div x-data="{ open: {{ $isLaporanActive ? 'true' : 'false' }} }" class="space-y-1">
                 <button type="button" @click="open = !open"
                     class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isLaporanActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
@@ -259,7 +382,7 @@ $janjiTemuUnreadCount = \App\Models\JanjiTemuUniversal::where('status', '1')->wh
 
             <!-- Pengajuan Perubahan Data -->
             @php
-            $pendingCount = \App\Models\PengajuanPerubahanData::where('status', 'pending')->count();
+            $pendingCount = $sidebarStats['perubahanDataCount'] ?? 0;
             @endphp
             <a href="{{ route('admin.nasabah.pending-changes') }}"
                 class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.nasabah.pending-changes') }}">

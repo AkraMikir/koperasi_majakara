@@ -63,7 +63,7 @@ class WhatsAppService
             
             // Pesan OTP
             $message = "Kode OTP Koperasi Majakara Anda adalah: *{$otpCode}*\n\n";
-            $message .= "Kode ini berlaku selama 5 menit.\n";
+            $message .= "Kode ini berlaku selama 1 menit.\n";
             $message .= "Jangan berikan kode ini kepada siapapun termasuk staff Koperasi Majakara.\n\n";
             $message .= "Terima kasih.";
 

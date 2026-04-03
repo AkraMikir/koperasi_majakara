@@ -64,7 +64,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Penghasilan</p>
-                        <p class="font-semibold text-gray-900">Rp {{ number_format($pengajuan->nasabah->pekerjaan->penghasilan ?? 0, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-gray-900">Rp {{ number_format((float) ($pengajuan->nasabah->pekerjaan->penghasilan ?? 0), 0, ',', '.') }}</p>
                     </div>
                     @endif
                 </div>
@@ -80,7 +80,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Nominal Pinjaman</p>
-                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
+                        <p class="font-semibold text-[#674c1d] text-2xl">Rp {{ number_format((float) $pengajuan->nominal, 0, ',', '.') }}</p>
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -140,13 +140,13 @@
                                 (Durasi {{ $masterBunga->durasi_min }}-{{ $masterBunga->durasi_max }} bulan)
                             </p>
                             <p class="text-sm text-blue-800 mb-1">
-                                <strong>Bunga Total:</strong> Rp {{ number_format(($pengajuan->nominal * $masterBunga->bunga_persen) / 100, 0, ',', '.') }}
+                                <strong>Bunga Total:</strong> Rp {{ number_format(((float) $pengajuan->nominal * (float) $masterBunga->bunga_persen) / 100, 0, ',', '.') }}
                             </p>
                             <p class="text-sm text-blue-800 mb-1">
-                                <strong>Yang Diterima Nasabah:</strong> Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}
+                                <strong>Yang Diterima Nasabah:</strong> Rp {{ number_format((float) $pengajuan->nominal, 0, ',', '.') }}
                             </p>
                             <p class="text-sm text-blue-800 mb-1">
-                                <strong>Total Tagihan:</strong> Rp {{ number_format($pengajuan->nominal + (($pengajuan->nominal * $masterBunga->bunga_persen) / 100), 0, ',', '.') }}
+                                <strong>Total Tagihan:</strong> Rp {{ number_format((float) $pengajuan->nominal + (((float) $pengajuan->nominal * (float) $masterBunga->bunga_persen) / 100), 0, ',', '.') }}
                             </p>
                         @else
                             <p class="text-sm text-red-600">Bunga untuk durasi {{ $pengajuan->durasi }} bulan belum diatur di master data!</p>
@@ -192,10 +192,10 @@
                             <strong>Bunga:</strong> {{ $pengajuan->bunga_persen }}%
                         </p>
                         <p class="text-sm text-blue-800 mb-1">
-                            <strong>Total Bunga:</strong> Rp {{ number_format(($pengajuan->nominal * $pengajuan->bunga_persen) / 100, 0, ',', '.') }}
+                            <strong>Total Bunga:</strong> Rp {{ number_format(((float) $pengajuan->nominal * (float) $pengajuan->bunga_persen) / 100, 0, ',', '.') }}
                         </p>
                         <p class="text-sm text-blue-800 mb-1">
-                            <strong>Yang Diterima Nasabah:</strong> Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}
+                            <strong>Yang Diterima Nasabah:</strong> Rp {{ number_format((float) $pengajuan->nominal, 0, ',', '.') }}
                         </p>
                     </div>
                     

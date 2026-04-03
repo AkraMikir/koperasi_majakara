@@ -24,6 +24,7 @@ class PengajuanTabungan extends Model
         'keterangan_admin',
         'status',
         'approved_by_user_id',
+        'metode_bayar',
     ];
 
     protected $casts = [

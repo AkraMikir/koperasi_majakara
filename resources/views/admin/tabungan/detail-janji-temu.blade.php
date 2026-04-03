@@ -156,11 +156,42 @@
             @if($janjiTemu->status == '1')
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                 <h3 class="font-bold text-gray-900 mb-4">Proses Janji Temu</h3>
-                <p class="text-sm text-gray-500 mb-6">
-                    Setelah pertemuan selesai dan uang {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'diterima' : 'diserahkan' }}, proses janji temu ini untuk membuat transaksi {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'setoran' : 'penarikan' }} otomatis.
-                </p>
+                    @if(session('error'))
+                    <div class="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded-xl flex items-center gap-3 mb-4">
+                        <svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <div>
+                            <p class="text-sm font-bold">{{ session('error') }}</p>
+                            @if(str_contains(session('error'), 'Saldo Petty Cash'))
+                            <p class="text-xs mt-1">Saldo Petty Cash Anda saat ini: <span class="font-bold">Rp {{ number_format($adminSaldo, 0, ',', '.') }}</span></p>
+                            @endif
+                        </div>
+                    </div>
+                    @endif
 
-                <form action="{{ route('admin.tabungan.create-trans-from-janji-temu', $janjiTemu->id) }}" method="POST" enctype="multipart/form-data">
+                    @if($janjiTemu->status == '1')
+                    <div class="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="p-2 bg-blue-100 rounded-lg text-blue-600">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-blue-900 italic">Info Petty Cash</p>
+                                @if(($janjiTemu->jenis ?? 'setoran') == 'setoran')
+                                <p class="text-xs text-blue-700">Setoran tunai ini akan otomatis **menambah** saldo Petty Cash Admin.</p>
+                                @else
+                                <p class="text-xs text-blue-700">Penarikan tunai ini akan **mengurangi** saldo Petty Cash Admin Anda.</p>
+                                <p class="text-[10px] text-blue-600 mt-0.5">Saldo Anda: Rp {{ number_format($adminSaldo, 0, ',', '.') }}</p>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('admin.tabungan.create-trans-from-janji-temu', $janjiTemu->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     
                     <div class="space-y-4">

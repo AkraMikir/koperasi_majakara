@@ -28,6 +28,7 @@ class JanjiTemuTabungan extends Model
         'keterangan',
         'keterangan_admin',   // ✅ NEW
         'status',
+        'metode_bayar',
     ];
 
     protected $casts = [

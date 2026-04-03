@@ -9,3 +9,40 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* ─── TURBO DRIVE: Progress Bar Styling ─────────────────────────────────────── */
+.turbo-progress-bar {
+    height: 3px;
+    background: linear-gradient(90deg, #674c1d, #d4af37, #8b6f2f);
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.7);
+}
+
+/* ─── TURBO DRIVE: Page Transition Animasi ──────────────────────────────────── */
+@keyframes turboFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Semua konten utama halaman akan fade-in smooth saat navigasi */
+main > div,
+main > section,
+main > .space-y-6,
+main > .container {
+    animation: turboFadeIn 0.25s ease-out;
+}
+
+/* ─── Tambahan: Micro-animation untuk kartu & item interaktif ─────────────── */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+}

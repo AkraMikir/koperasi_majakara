@@ -141,6 +141,30 @@
 
         <!-- Sidebar Info -->
         <div class="space-y-6">
+            <!-- Admin Pengelola Card -->
+            @if($transaksi->adminPengelola)
+            <div class="bg-gradient-to-br from-blue-50 to-blue-100/50 rounded-2xl shadow-sm p-6 border border-blue-100">
+                <h3 class="text-sm font-bold text-blue-900 font-display mb-3 uppercase tracking-wider">Diproses Oleh</h3>
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-blue-600 text-white rounded-xl flex items-center justify-center font-bold text-xl shadow-inner">
+                        {{ substr($transaksi->adminPengelola->nama ?? 'A', 0, 1) }}
+                    </div>
+                    <div>
+                        <p class="font-bold text-blue-900">{{ $transaksi->adminPengelola->nama }}</p>
+                        <div class="flex items-center gap-2 mt-1">
+                            <span class="text-xs font-semibold text-blue-700 bg-blue-200/50 px-2 py-0.5 rounded-md">Admin</span>
+                            @if($transaksi->is_petty_cash)
+                            <span class="text-xs font-semibold text-amber-700 bg-amber-200/50 px-2 py-0.5 rounded-md flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                Petty Cash
+                            </span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h3 class="text-lg font-bold text-primary font-display mb-4">Informasi</h3>
                 <div class="space-y-3">

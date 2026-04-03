@@ -65,7 +65,7 @@ return [
     */
     'otp' => [
         'length' => env('OTP_LENGTH', 6),
-        'expiry_minutes' => env('OTP_EXPIRY_MINUTES', 5),
+        'expiry_minutes' => env('OTP_EXPIRY_MINUTES', 1), // 1 menit
         'max_attempts' => env('OTP_MAX_ATTEMPTS', 3),
         'cooldown_seconds' => env('OTP_COOLDOWN_SECONDS', 60),
     ],

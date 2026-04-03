@@ -961,8 +961,8 @@
                     @elseif($step == 2)
                     {{-- Step 2: OTP Verification --}}
                     <div class="space-y-6">
-                        {{-- Error Messages --}}
-                        @if(session('error'))
+                        {{-- Error: jangan tampilkan jika baru saja sukses kirim/resend OTP --}}
+                        @if(session('error') && !session('success'))
                         <div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 flex items-start gap-3 animate-shake">
                             <svg class="w-5 h-5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1036,8 +1036,8 @@
                                 <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                                 {{-- Button Kirim OTP with Loading State --}}
                                 <div class="mt-6">
-                                    <button type="submit" name="send_otp_btn" value="1" id="btnSendOtp"
-                                        onclick="setSendOtpAndLoading(this)"
+                                    <button type="button" name="send_otp_btn" value="1" id="btnSendOtp"
+                                        onclick="setSendOtpAndLoading(this); return false;"
                                         class="w-full px-6 py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
                                         <svg class="w-6 h-6" id="iconSend" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
@@ -1133,7 +1133,7 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                                         </svg>
                                         <span class="text-sm text-yellow-800">
-                                            Kode berlaku: <strong id="expiryTimer" class="font-bold text-yellow-900">5:00</strong>
+                                            Kode berlaku: <strong id="expiryTimer" class="font-bold text-yellow-900">1:00</strong>
                                         </span>
                                     </div>
                                 </div>
@@ -1147,7 +1147,7 @@
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
                                             </svg>
                                             <span class="text-sm font-medium">
-                                                Tunggu <span id="cooldownTimer" class="font-bold">{{ $remainingCooldown ?? 0 }}</span> detik
+                                                Tunggu <span id="cooldownTimer" class="font-bold">{{ min(60, (int)($remainingCooldown ?? 0)) }}</span> detik
                                             </span>
                                         </button>
                                     @else
@@ -1172,7 +1172,7 @@
                                             <ul class="space-y-1 list-disc list-inside">
                                                 <li>Pastikan koneksi internet Anda stabil</li>
                                                 <li>Cek folder <strong>Spam/Archive</strong> di WhatsApp</li>
-                                                <li>Tunggu {{ $remainingCooldown ?? 60 }} detik untuk kirim ulang</li>
+                                                <li>Tunggu 1 menit untuk kirim ulang</li>
                                             </ul>
                                         </div>
                                     </div>
@@ -1749,31 +1749,27 @@
             });
     }
 
-    // Set send_otp=1 (hidden input)
+    // Set send_otp=1 dan kirim form sekali saja (cegah double submit yang bikin OTP ke-invalidate)
     function setSendOtpAndLoading(button) {
         const sendOtpInput = document.getElementById('send_otp_input');
-        if (sendOtpInput) sendOtpInput.value = '1';
-        
-        // We do NOT disable the button here immediately, because it might prevent value submission
-        // or the submit event itself in some browsers.
-        // Instead, the visual change happens, and the actual disabling happens in the form submit handler
-        // or via a small timeout if needed.
-        
-        // Trigger visual loading state
+        if (!sendOtpInput) return;
+        if (button.disabled) return; // Sudah diklik, jangan proses lagi
+        sendOtpInput.value = '1';
+
+        // Loading state
         const iconSend = document.getElementById('iconSend');
         const iconLoading = document.getElementById('iconLoading');
         const textSendOtp = document.getElementById('textSendOtp');
-        
         if (iconSend && iconLoading && textSendOtp) {
             iconSend.classList.add('hidden');
             iconLoading.classList.remove('hidden');
             textSendOtp.textContent = 'Mengirim OTP...';
         }
-        
-        // Disable button after a short delay to allow form submit to trigger
-        setTimeout(() => {
-            button.disabled = true;
-        }, 100);
+        button.disabled = true;
+
+        // Submit form sekali (programmatic submit = hanya satu request, tidak double)
+        const form = button.form;
+        if (form) form.submit();
     }
 
     // OTP Boxes Handler
@@ -1888,37 +1884,35 @@
         }, 1000);
     }
 
-    // OTP Expiry Timer (5 minutes countdown)
+    // OTP Expiry Timer: pakai sisa detik dari server (hindari salah timezone)
     function startExpiryTimer() {
         const expiryElement = document.getElementById('expiryTimer');
         if (!expiryElement) return;
-        
-        let totalSeconds = 5 * 60; // 5 minutes
-        
+        let totalSeconds = parseInt('{{ $otpExpiresAtRemainingSeconds ?? 0 }}', 10) || 0;
+        const defaultSeconds = {{ (int) config('services.otp.expiry_minutes', 1) }} * 60;
+        if (totalSeconds <= 0) totalSeconds = defaultSeconds;
+
         function updateDisplay() {
             const minutes = Math.floor(totalSeconds / 60);
             const seconds = totalSeconds % 60;
             expiryElement.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-            
-            // Change color when < 1 minute
             if (totalSeconds < 60) {
                 expiryElement.classList.add('text-red-600');
                 expiryElement.classList.remove('text-yellow-900');
             }
         }
-        
+
         updateDisplay();
-        
+
         const countdown = setInterval(function() {
             totalSeconds--;
+            if (totalSeconds < 0) totalSeconds = 0;
             updateDisplay();
-            
+
             if (totalSeconds <= 0) {
                 clearInterval(countdown);
                 expiryElement.textContent = 'Kadaluarsa';
                 expiryElement.classList.add('text-red-600', 'font-bold');
-                
-                // Show expired message
                 const otpBoxes = document.getElementById('otpBoxes');
                 if (otpBoxes) {
                     otpBoxes.innerHTML = `
@@ -1928,6 +1922,8 @@
                         </div>
                     `;
                 }
+                // Reload agar tombol Kirim Ulang bisa muncul (cooldown = 0 setelah OTP kadaluarsa)
+                setTimeout(function() { window.location.reload(); }, 800);
             }
         }, 1000);
     }

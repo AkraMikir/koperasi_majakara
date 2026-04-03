@@ -21,7 +21,7 @@ class OtpService
         $this->otpLength = (int) config('services.otp.length', 6);
         $this->expiryMinutes = (int) config('services.otp.expiry_minutes', 5);
         $this->maxAttempts = (int) config('services.otp.max_attempts', 3);
-        $this->cooldownSeconds = (int) config('services.otp.cooldown_seconds', 60);
+        $this->cooldownSeconds = min(60, (int) config('services.otp.cooldown_seconds', 60)); // max 1 menit
     }
 
     /**
@@ -62,7 +62,7 @@ class OtpService
             // Generate OTP code (6 digit)
             $otpCode = $this->generateOtpCode();
 
-            // Set expired time (5 menit dari sekarang)
+            // Set expired time (1 menit dari sekarang)
             $expiredAt = Carbon::now()->addMinutes($this->expiryMinutes);
 
             Log::info('Generating OTP', [
@@ -72,7 +72,7 @@ class OtpService
                 'expired_at' => $expiredAt->toDateTimeString(),
             ]);
 
-            // Simpan OTP ke database
+            // Simpan OTP ke database (is_verified eksplisit 0 agar tidak salah baca oleh DB/driver)
             $otp = Otp::create([
                 'user_id' => $userTempId, // Bisa null untuk registration
                 'otp_code' => $otpCode,
@@ -81,7 +81,7 @@ class OtpService
                 'type' => $type,
                 'channel' => 'whatsapp',
                 'expired_at' => $expiredAt->format('Y-m-d H:i:s'), // Convert to string
-                'is_verified' => false,
+                'is_verified' => 0,
                 'created_at' => now()->format('Y-m-d H:i:s'), // Add created_at manually
             ]);
 
@@ -166,11 +166,14 @@ class OtpService
                 ];
             }
 
-            // Cek apakah OTP sudah expired
-            if (Carbon::now()->greaterThan($otp->expired_at)) {
+            // Cek apakah OTP sudah expired (expired_at bisa string dari DB, parse ke Carbon)
+            $expiredAt = $otp->expired_at instanceof \Carbon\Carbon
+                ? $otp->expired_at
+                : Carbon::parse($otp->expired_at);
+            if (Carbon::now()->greaterThan($expiredAt)) {
                 Log::warning('OTP expired', [
                     'otp_id' => $otp->id,
-                    'expired_at' => $otp->expired_at->toDateTimeString(),
+                    'expired_at' => $expiredAt->toDateTimeString(),
                     'now' => Carbon::now()->toDateTimeString(),
                 ]);
 
@@ -213,7 +216,7 @@ class OtpService
     }
 
     /**
-     * Cek cooldown (60 detik antara request OTP)
+     * Cek cooldown (1 menit antara request OTP)
      * 
      * @param string $phoneNumber
      * @return bool True jika boleh request, False jika masih cooldown
@@ -267,8 +270,8 @@ class OtpService
     }
 
     /**
-     * Resend OTP (invalidate old OTP and send new one)
-     * 
+     * Resend OTP: hapus data tbl_otp lama untuk nomor+session ini, lalu kirim OTP baru via WhatsApp.
+     *
      * @param string $phoneNumber
      * @param string $sessionId
      * @param int|null $userTempId
@@ -277,24 +280,32 @@ class OtpService
      */
     public function resend($phoneNumber, $sessionId, $userTempId = null, $type = 'registration')
     {
-        // Invalidate semua OTP lama untuk session ini
-        Otp::where('phone_number', $phoneNumber)
-            ->where('session_id', $sessionId)
-            ->where('is_verified', false)
-            ->update(['is_verified' => true]); // Mark as used to prevent reuse
+        // Hapus SEMUA OTP lama untuk nomor ini + type (agar data lama pasti terhapus, lalu buat & kirim baru)
+        $deleted = Otp::where('phone_number', $phoneNumber)
+            ->where('type', $type)
+            ->delete();
 
-        // Generate dan kirim OTP baru
+        if ($deleted > 0) {
+            Log::info('Resend OTP: deleted old OTP records', [
+                'phone' => $phoneNumber,
+                'type' => $type,
+                'deleted' => $deleted,
+            ]);
+        }
+
+        // Generate dan kirim OTP baru via WhatsApp
         return $this->generateAndSend($phoneNumber, $sessionId, $userTempId, $type);
     }
 
     /**
-     * Get remaining cooldown time in seconds
-     * 
+     * Sisa waktu cooldown kirim ulang (maks 1 menit). Jika OTP terakhir sudah kadaluarsa, return 0 agar bisa kirim ulang.
+     *
      * @param string $phoneNumber
-     * @return int Seconds remaining (0 if no cooldown)
+     * @return int Detik tersisa (0 = boleh kirim ulang)
      */
     public function getRemainingCooldown($phoneNumber)
     {
+        $maxCooldown = 60; // 1 menit
         $lastOtp = Otp::where('phone_number', $phoneNumber)
             ->orderBy('created_at', 'desc')
             ->first();
@@ -303,9 +314,17 @@ class OtpService
             return 0;
         }
 
-        $secondsSinceLastOtp = Carbon::now()->diffInSeconds($lastOtp->created_at);
-        $remaining = $this->cooldownSeconds - $secondsSinceLastOtp;
+        // Jika OTP terakhir sudah kadaluarsa, tidak usah cooldown — user boleh kirim ulang
+        $expiredAt = $lastOtp->expired_at instanceof \Carbon\Carbon
+            ? $lastOtp->expired_at
+            : Carbon::parse($lastOtp->expired_at);
+        if (Carbon::now()->greaterThan($expiredAt)) {
+            return 0;
+        }
 
-        return max(0, $remaining);
+        $secondsSinceLastOtp = Carbon::now()->diffInSeconds($lastOtp->created_at);
+        $remaining = min($this->cooldownSeconds, $maxCooldown) - $secondsSinceLastOtp;
+
+        return min(max(0, (int) $remaining), $maxCooldown);
     }
 }

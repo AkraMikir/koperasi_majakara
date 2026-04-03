@@ -178,7 +178,7 @@
                         <p class="font-semibold mb-1">Penting:</p>
                         <ul class="list-disc list-inside space-y-1">
                             <li>Kode OTP akan dikirim ke: <strong>{{ substr($user->nomor_hp, 0, 4) }}****{{ substr($user->nomor_hp, -3) }}</strong></li>
-                            <li>Kode berlaku selama 5 menit</li>
+                            <li>Kode berlaku selama 1 menit</li>
                             <li>Jangan berikan kode OTP kepada siapapun</li>
                         </ul>
                     </div>

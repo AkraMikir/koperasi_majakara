@@ -32,12 +32,8 @@ class Otp extends Model
 
     protected $casts = [
         'is_verified' => 'boolean',
-    ];
-    
-    // Set dates for date handling
-    protected $dates = [
-        'expired_at',
-        'created_at',
+        'expired_at' => 'datetime',
+        'created_at' => 'datetime',
     ];
 
     /**

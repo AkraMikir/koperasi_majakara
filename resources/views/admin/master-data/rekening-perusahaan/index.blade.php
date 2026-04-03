@@ -25,10 +25,11 @@
                 <thead class="bg-gray-50 border-b border-gray-200">
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">No</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Pemilik</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Nama</th>
-                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">No. Rekening</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Bank</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Pemilik</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">No. Rekening</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase">Cabang / Kode</th>
+                        <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase">Status</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase">Aksi</th>
                     </tr>
                 </thead>
@@ -36,10 +37,30 @@
                     @forelse($data as $index => $item)
                     <tr class="hover:bg-gray-50">
                         <td class="px-6 py-4 text-sm text-gray-900">{{ $data->firstItem() + $index }}</td>
-                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $item->pemilik }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700">{{ $item->nama }}</td>
-                        <td class="px-6 py-4 text-sm font-mono text-[#674c1d]">{{ $item->no_rek }}</td>
-                        <td class="px-6 py-4"><span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold">{{ $item->bank }}</span></td>
+                        <td class="px-6 py-4">
+                            <div class="flex items-center space-x-3">
+                                @if($item->logo_url)
+                                <img src="{{ $item->logo_url }}" alt="{{ $item->bank }}" class="w-8 h-8 object-contain">
+                                @endif
+                                <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs font-bold">{{ $item->bank }}</span>
+                            </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">{{ $item->pemilik }}</div>
+                            <div class="text-xs text-gray-500">{{ $item->nama }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm font-mono font-bold text-[#674c1d]">{{ $item->no_rek }}</td>
+                        <td class="px-6 py-4">
+                            <div class="text-sm text-gray-900">{{ $item->cabang ?? '-' }}</div>
+                            <div class="text-xs text-gray-500">Kode: {{ $item->kode_bank ?? '-' }}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            @if(($item->status ?? 'aktif') == 'aktif')
+                            <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">AKTIF</span>
+                            @else
+                            <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-bold">NON-AKTIF</span>
+                            @endif
+                        </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center space-x-2">
                                 @canCrudMasterData

@@ -384,6 +384,37 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         });
     });
     
+    // Petty Cash Routes
+    Route::prefix('petty-cash')->name('petty-cash.')->group(function () {
+        // Dashboard (Owner)
+        Route::get('/dashboard', [\App\Http\Controllers\Admin\PettyCashController::class, 'dashboard'])->name('dashboard');
+
+        // Laporan
+        Route::get('/laporan', [\App\Http\Controllers\Admin\PettyCashController::class, 'laporan'])->name('laporan');
+
+        // ── Penerimaan Dana (Owner kirim → Admin terima) ──
+        // Owner: form kirim dana
+        Route::get('/penerimaan/create', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanCreate'])->name('penerimaan.create');
+        Route::post('/penerimaan', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanStore'])->name('penerimaan.store');
+        // Admin: daftar & ACC penerimaan
+        Route::get('/penerimaan', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanIndex'])->name('penerimaan.index');
+        Route::post('/penerimaan/{id}/approve', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanApprove'])->name('penerimaan.approve');
+        Route::post('/penerimaan/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanReject'])->name('penerimaan.reject');
+
+
+        Route::post('/transaksi/{id}/approve-tf', [\App\Http\Controllers\Admin\PettyCashController::class, 'approveSetoranTf'])->name('transaksi.approve-tf');
+
+        // ── Setoran Kantor (Admin setor ke Owner) ──
+        Route::get('/setoran-kantor', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranKantorIndex'])->name('setoran-kantor.index');
+        Route::post('/setoran-kantor', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranKantorStore'])->name('setoran-kantor.store');
+
+        // ── Verifikasi Setoran (Owner) ──
+        Route::get('/setoran-approval', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalIndex'])->name('setoran-approval.index');
+        Route::get('/setoran-approval/{id}', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalDetail'])->name('setoran-approval.detail');
+        Route::post('/setoran-approval/{id}/approve', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalApprove'])->name('setoran-approval.approve');
+        Route::post('/setoran-approval/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalReject'])->name('setoran-approval.reject');
+    });
+
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index');

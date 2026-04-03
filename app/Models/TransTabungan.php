@@ -25,13 +25,19 @@ class TransTabungan extends Model
         'nominal',
         'keterangan',
         'tgl_transaksi',
+        // Petty Cash Integration
+        'petty_cash_ref',
+        'is_petty_cash',
+        'admin_pengelola_id',
+        'metode_bayar',
     ];
 
     protected $casts = [
-        'nominal' => 'decimal:2',
-        'tgl_transaksi' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'nominal'           => 'decimal:2',
+        'tgl_transaksi'     => 'datetime',
+        'created_at'        => 'datetime',
+        'updated_at'        => 'datetime',
+        'is_petty_cash'     => 'boolean',
     ];
 
     protected $appends = ['jenis', 'via'];
@@ -105,6 +111,30 @@ class TransTabungan extends Model
     {
         return $this->hasMany(BuktiFoto::class, 'owner_id', 'id')
             ->where('owner_fitur', 'T');
+    }
+
+    /**
+     * Admin yang mengelola / memegang cash nasabah ini.
+     */
+    public function adminPengelola(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'admin_pengelola_id');
+    }
+
+    /**
+     * Record petty cash yang terhubung dengan transaksi ini.
+     */
+    public function pettyCashTransaksi(): BelongsTo
+    {
+        return $this->belongsTo(PettyCashTransaksiNasabah::class, 'petty_cash_ref');
+    }
+
+    /**
+     * Scope: hanya transaksi petty cash.
+     */
+    public function scopePettyCash($query)
+    {
+        return $query->where('is_petty_cash', 1);
     }
 }
 

@@ -7,7 +7,7 @@
     <!-- Page Header -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 font-display">Transaksi Tabungan</h1>
+            <h1 class="text-3xl font-bold text-gray-900 font-display">{{ $title ?? 'Transaksi Tabungan' }}</h1>
             <p class="text-gray-600 mt-1">Riwayat semua transaksi tabungan nasabah</p>
         </div>
         <div class="flex items-center space-x-3">
@@ -46,10 +46,30 @@
             </div>
             <div class="md:col-span-4">
                 <button type="submit" class="px-6 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[#674c1d] transition-all shadow-md font-medium">
-                    Filter
+                    Filter Waktu/Cari
                 </button>
             </div>
         </form>
+    </div>
+
+    <!-- Filter Tab Switch (Riwayat / Petty Cash) -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-2 flex flex-wrap gap-2">
+        <a href="{{ route('admin.tabungan.transaksi') }}" 
+           class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ !request('filter') ? 'bg-[#674c1d] text-white shadow-md' : 'bg-gray-50 text-gray-600 hover:bg-gray-100' }}">
+            Semua Transaksi
+        </a>
+        <a href="{{ route('admin.tabungan.transaksi', ['filter' => 'saya']) }}" 
+           class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 {{ request('filter') == 'saya' ? 'bg-blue-600 text-white shadow-md' : 'bg-blue-50 text-blue-700 hover:bg-blue-100' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+            Riwayat Saya
+            <span class="px-2 py-0.5 rounded-full text-xs {{ request('filter') == 'saya' ? 'bg-white/20 text-white' : 'bg-blue-200 text-blue-800' }}">{{ $myCount ?? 0 }}</span>
+        </a>
+        <a href="{{ route('admin.tabungan.transaksi', ['filter' => 'petty']) }}" 
+           class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all flex items-center gap-2 {{ request('filter') == 'petty' ? 'bg-amber-500 text-white shadow-md' : 'bg-amber-50 text-amber-700 hover:bg-amber-100' }}">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+            Petty Cash
+            <span class="px-2 py-0.5 rounded-full text-xs {{ request('filter') == 'petty' ? 'bg-white/20 text-white' : 'bg-amber-200 text-amber-800' }}">{{ $pettyCount ?? 0 }}</span>
+        </a>
     </div>
 
     <!-- Table Section -->
@@ -65,6 +85,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Via</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Keterangan</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Admin</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
                     </tr>
                 </thead>
@@ -92,21 +113,31 @@
                         <td class="px-6 py-4 text-sm">{{ ucfirst($item->via) }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $item->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4">
+                            @if($item->adminPengelola)
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-semibold border border-blue-100">
+                                    {{ $item->adminPengelola->nama ?? 'Admin' }}
+                                    @if($item->is_petty_cash)
+                                        <svg class="w-3.5 h-3.5 text-amber-500 ml-1" title="Petty Cash" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                                    @endif
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1.5 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium border border-gray-200">
+                                    Sistem
+                                </span>
+                            @endif
+                        </td>
+                        <td class="px-6 py-4">
                             <div class="flex items-center gap-2">
                                 <a href="{{ route('admin.tabungan.detail-transaksi', $item->id) }}" 
-                                    class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[#674c1d] transition-all text-xs font-medium">
+                                    class="inline-flex items-center px-3 py-1.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[[#4a3514]] hover:to-[#674c1d] transition-all text-xs font-medium shadow-sm">
                                     Detail
                                 </a>
                                 @if(!$item->id_pengajuan_setor && !$item->id_pengajuan_tarik)
                                     @canCrudTabungan
-                                    <a href="{{ route('admin.tabungan.edit-transaksi', $item->id) }}" 
-                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-xs font-medium">
-                                        Edit
-                                    </a>
                                     <form method="POST" action="{{ route('admin.tabungan.destroy-transaksi', $item->id) }}" class="inline" onsubmit="return confirm('Yakin hapus transaksi ini?')">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-xs font-medium">
+                                        <button type="submit" class="inline-flex items-center px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg transition-all text-xs font-medium border border-red-100">
                                             Hapus
                                         </button>
                                     </form>

@@ -13,6 +13,7 @@ use App\Models\JnsLokasiPerusahaan;
 use App\Models\JnsDeposito;
 use App\Models\AdminOperasional;
 use App\Models\JnsBank;
+use App\Models\LogoBank;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -674,7 +675,8 @@ class MasterDataController extends Controller
     public function rekeningPerusahaanCreate()
     {
         $this->checkCrudPermission();
-        return view('admin.master-data.rekening-perusahaan.create');
+        $logos = LogoBank::all();
+        return view('admin.master-data.rekening-perusahaan.create', compact('logos'));
     }
 
     public function rekeningPerusahaanStore(Request $request)
@@ -685,8 +687,12 @@ class MasterDataController extends Controller
             'nama' => 'required|string|max:100',
             'no_rek' => 'required|string|max:30',
             'bank' => 'required|string|max:50',
+            'cabang' => 'nullable|string|max:100',
+            'kode_bank' => 'nullable|string|max:10',
+            'status' => 'required|in:aktif,non-aktif',
+            'logo' => 'nullable|string',
         ]);
-        JnsBank::create($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        JnsBank::create($request->all());
         return redirect()->route('admin.master-data.rekening-perusahaan.index')
             ->with('success', 'Rekening perusahaan berhasil ditambahkan');
     }
@@ -695,7 +701,8 @@ class MasterDataController extends Controller
     {
         $this->checkCrudPermission();
         $data = JnsBank::findOrFail($id);
-        return view('admin.master-data.rekening-perusahaan.edit', compact('data'));
+        $logos = LogoBank::all();
+        return view('admin.master-data.rekening-perusahaan.edit', compact('data', 'logos'));
     }
 
     public function rekeningPerusahaanUpdate(Request $request, $id)
@@ -706,9 +713,13 @@ class MasterDataController extends Controller
             'nama' => 'required|string|max:100',
             'no_rek' => 'required|string|max:30',
             'bank' => 'required|string|max:50',
+            'cabang' => 'nullable|string|max:100',
+            'kode_bank' => 'nullable|string|max:10',
+            'status' => 'required|in:aktif,non-aktif',
+            'logo' => 'nullable|string',
         ]);
         $data = JnsBank::findOrFail($id);
-        $data->update($request->only(['pemilik', 'nama', 'no_rek', 'bank']));
+        $data->update($request->all());
         return redirect()->route('admin.master-data.rekening-perusahaan.index')
             ->with('success', 'Rekening perusahaan berhasil diupdate');
     }

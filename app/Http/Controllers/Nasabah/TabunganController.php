@@ -7,6 +7,7 @@ use App\Models\PengajuanTabungan;
 use App\Models\PengajuanPenarikanTabungan;
 use App\Models\JanjiTemuTabungan;
 use App\Models\BuktiFotoTabungan;
+use App\Models\JnsBank;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\Nasabah;
 use App\Models\TransTabungan;
@@ -101,10 +102,14 @@ class TabunganController extends Controller
         // Get lokasi untuk janji temu
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
 
+        // Get data bank aktif
+        $banks = JnsBank::where('status', 'aktif')->get();
+
         return view('nasabah.tabungan.nabung-sekarang', [
             'user' => Auth::user(),
             'riwayatTabungan' => $riwayatTabungan,
             'lokasi' => $lokasi,
+            'banks' => $banks,
         ]);
     }
 

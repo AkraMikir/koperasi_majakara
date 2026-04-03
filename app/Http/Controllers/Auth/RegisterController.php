@@ -1167,60 +1167,7 @@ class RegisterController extends Controller
         // Store phone in session for display
         $request->session()->put('register_phone', $nomorHpDisplay);
 
-        // === CASE 1: User submit OTP code untuk verifikasi ===
-        if ($request->has('otp_code') && $request->isMethod('post')) {
-            \Log::info('User submitting OTP for verification', [
-                'user_temp_id' => $userTempId,
-                'phone' => $nomorHpDisplay,
-            ]);
-
-            // Validate OTP code
-            $validator = Validator::make($request->all(), [
-                'otp_code' => 'required|string|size:6',
-            ], [
-                'otp_code.required' => 'Kode OTP harus diisi',
-                'otp_code.size' => 'Kode OTP harus 6 digit',
-            ]);
-
-            if ($validator->fails()) {
-                return redirect()->route('register', ['step' => 2])
-                    ->withErrors($validator)
-                    ->withInput();
-            }
-
-            // Verify OTP using OtpService (pakai nomor yang sama dengan saat kirim)
-            $verifyResult = $this->otpService->verify(
-                $request->otp_code,
-                $nomorHpDisplay,
-                $sessionId
-            );
-
-            if (!$verifyResult['success']) {
-                \Log::warning('OTP verification failed', [
-                    'user_temp_id' => $userTempId,
-                    'phone' => $nomorHpDisplay,
-                    'message' => $verifyResult['message'],
-                ]);
-
-                return redirect()->route('register', ['step' => 2])
-                    ->with('error', $verifyResult['message'])
-                    ->withInput();
-            }
-
-            // OTP verified successfully
-            \Log::info('OTP verified successfully', [
-                'user_temp_id' => $userTempId,
-                'phone' => $nomorHpDisplay,
-            ]);
-
-            // Set session verified
-            $request->session()->put('register_otp_verified', true);
-            
-            return redirect()->route('register', ['step' => 3])
-                ->with('success', 'Nomor HP berhasil diverifikasi. Silakan buat PIN Anda.');
-        }
-
-        // === CASE 2: User click button "Kirim OTP" atau "Kirim Ulang" ===
+        // === CASE 1: User click "Kirim OTP" atau "Kirim Ulang" — CEK INI DULU agar tidak kena validasi "OTP harus diisi" ===
         if ($request->has('send_otp') && $request->send_otp == '1' && $request->isMethod('post')) {
             \Log::info('User requesting to send OTP', [
                 'user_temp_id' => $userTempId,
@@ -1258,9 +1205,13 @@ class RegisterController extends Controller
                 // Mark that OTP has been sent - Use PERSISTENT session data
                 $request->session()->put('otp_sent_at', now()->toDateTimeString());
                 $request->session()->put('otp_session_id', $sessionId); 
-                // Store expiration - assuming 5 minutes based on OTP duration
-                $request->session()->put('otp_expires_at', now()->addMinutes(5)->toDateTimeString());
-                
+                // Store expiration (sesuai config: 1 menit)
+                $expiryMinutes = (int) config('services.otp.expiry_minutes', 1);
+                $request->session()->put('otp_expires_at', now()->addMinutes($expiryMinutes)->toDateTimeString());
+                // Hapus error & errors lama agar tidak tampil "tidak valid atau sudah digunakan" setelah kirim ulang
+                $request->session()->forget('error');
+                $request->session()->forget('errors');
+
                 \Log::info('OTP sent successfully - Session Updated', [
                     'user_temp_id' => $userTempId,
                     'phone' => $nomorHpDisplay,
@@ -1286,6 +1237,49 @@ class RegisterController extends Controller
                 return redirect()->route('register', ['step' => 2])
                     ->with('error', 'Gagal mengirim OTP: ' . ($otpResult['message'] ?? 'Unknown error'));
             }
+        }
+
+        // === CASE 2: User submit OTP code untuk verifikasi (bukan kirim ulang) ===
+        if ($request->has('otp_code') && $request->filled('otp_code') && $request->isMethod('post')) {
+            \Log::info('User submitting OTP for verification', [
+                'user_temp_id' => $userTempId,
+                'phone' => $nomorHpDisplay,
+            ]);
+
+            $validator = Validator::make($request->all(), [
+                'otp_code' => 'required|string|size:6',
+            ], [
+                'otp_code.required' => 'Kode OTP harus diisi',
+                'otp_code.size' => 'Kode OTP harus 6 digit',
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()->route('register', ['step' => 2])
+                    ->withErrors($validator)
+                    ->withInput();
+            }
+
+            $verifyResult = $this->otpService->verify(
+                $request->otp_code,
+                $nomorHpDisplay,
+                $sessionId
+            );
+
+            if (!$verifyResult['success']) {
+                \Log::warning('OTP verification failed', [
+                    'user_temp_id' => $userTempId,
+                    'phone' => $nomorHpDisplay,
+                    'message' => $verifyResult['message'],
+                ]);
+                return redirect()->route('register', ['step' => 2])
+                    ->with('error', $verifyResult['message'])
+                    ->withInput();
+            }
+
+            \Log::info('OTP verified successfully', ['user_temp_id' => $userTempId, 'phone' => $nomorHpDisplay]);
+            $request->session()->put('register_otp_verified', true);
+            return redirect()->route('register', ['step' => 3])
+                ->with('success', 'Nomor HP berhasil diverifikasi. Silakan buat PIN Anda.');
         }
 
         // === CASE 3: Default - Tampilkan halaman Step 2 ===
@@ -1332,6 +1326,15 @@ class RegisterController extends Controller
                 ->with('error', 'Nomor HP belum tersimpan. Silakan isi nomor HP di Langkah 1 (Data Diri) lalu lanjutkan kembali.');
         }
 
+        // Sisa waktu OTP (detik) dihitung di server; maksimal 60 detik (1 menit) untuk tampilan
+        $otpExpiresAt = $request->session()->get('otp_expires_at');
+        $otpExpiresAtRemainingSeconds = 0;
+        if ($otpExpiresAt) {
+            $expiresAt = \Carbon\Carbon::parse($otpExpiresAt);
+            $otpExpiresAtRemainingSeconds = max(0, (int) $expiresAt->diffInSeconds(now(), false));
+            $otpExpiresAtRemainingSeconds = min(60, $otpExpiresAtRemainingSeconds); // kode berlaku 1 menit saja
+        }
+
         // Tampilkan view dengan data (phone dinormalisasi agar tidak "Nomor tidak ditemukan")
         return view('auth.register', [
             'step' => 2,
@@ -1342,6 +1345,8 @@ class RegisterController extends Controller
             'phone' => $nomorHpDisplay,
             'otpSent' => $otpSent, // Flag apakah OTP sudah dikirim
             'remainingCooldown' => $remainingCooldown, // Seconds remaining for resend
+            'otpExpiresAt' => $otpExpiresAt,
+            'otpExpiresAtRemainingSeconds' => $otpExpiresAtRemainingSeconds, // Untuk timer "Kode berlaku" (hindari bug timezone)
         ]);
     }
 
