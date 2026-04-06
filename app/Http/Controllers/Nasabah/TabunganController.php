@@ -683,13 +683,22 @@ class TabunganController extends Controller
             $approvedNoTransSum += $pengajuan->nominal ?? 0;
             $totalSetoran += $pengajuan->nominal ?? 0;
         }
-        $saldo = max(0, $totalSetoran - $totalPenarikan);
+        $saldo = max(0, $totalSetoran + $approvedNoTransSum - $totalPenarikan);
+
+        // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
+        $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->where('metode_setor', 'saldo_tabungan')
+            ->sum('nominal') ?? 0;
+
+        $saldo = max(0, $saldo - $pendingDepositoTabungan);
+
         // #region agent log
         $logPath = base_path('.cursor/debug.log');
         if (!is_dir(dirname($logPath))) {
             @mkdir(dirname($logPath), 0755, true);
         }
-        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoran - $approvedNoTransSum, 'totalPenarikan_trans' => $totalPenarikan, 'approvedNoTrans_count' => $pengajuanApproved->count(), 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
+        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoran - $approvedNoTransSum, 'totalPenarikan_trans' => $totalPenarikan, 'pendingDeposito_tabungan' => $pendingDepositoTabungan, 'approvedNoTrans_count' => $pengajuanApproved->count(), 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
         // #endregion
         return $saldo;
     }

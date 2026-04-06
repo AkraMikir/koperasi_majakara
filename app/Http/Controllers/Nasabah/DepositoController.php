@@ -1,0 +1,242 @@
+<?php
+
+namespace App\Http\Controllers\Nasabah;
+
+use App\Http\Controllers\Controller;
+use App\Models\DepositoH;
+use App\Models\JnsTenorDeposito;
+use App\Models\PengajuanDeposito;
+use App\Models\PencairanDeposito;
+use App\Models\NasabahNotification;
+use App\Models\SukuBungaDeposito;
+use App\Models\PengajuanTabungan;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class DepositoController extends Controller
+{
+    /**
+     * Dashboard Deposito Nasabah
+     */
+    public function index()
+    {
+        $nasabah = Auth::user()->nasabah;
+
+        // Ambil semua tenor aktif beserta suku bunga-nya
+        $tenors = JnsTenorDeposito::where('aktif', 'y')
+            ->with(['sukuBunga' => function ($q) {
+                $q->where('status', 'aktif')->orderBy('min_nominal');
+            }])
+            ->orderBy('tenor_bulan')
+            ->get();
+
+        // Jenis deposito di-hardcode (tabel jns_deposito belum ada di DB)
+        $jenisDeposito = collect([]);
+
+        // Ambil deposito aktif nasabah
+        $depositoAktif = [];
+        $riwayatPengajuan = [];
+
+        if ($nasabah) {
+            $depositoAktif = DepositoH::where('id_nasabah', $nasabah->id)
+                ->whereIn('status', ['aktif'])
+                ->with('tenor')
+                ->latest()
+                ->get();
+
+            $riwayatPengajuan = PengajuanDeposito::where('id_nasabah', $nasabah->id)
+                ->with('tenor')
+                ->latest()
+                ->take(5)
+                ->get();
+        }
+
+        return view('nasabah.deposito.index', compact(
+            'tenors',
+            'jenisDeposito',
+            'depositoAktif',
+            'riwayatPengajuan'
+        ));
+    }
+
+    /**
+     * Riwayat Seluruh Transaksi Deposito Nasabah
+     */
+    public function riwayat()
+    {
+        $nasabah = Auth::user()->nasabah;
+
+        $riwayat = PengajuanDeposito::where('id_nasabah', $nasabah->id)
+            ->with(['tenor', 'deposito.pencairan'])
+            ->latest()
+            ->paginate(10);
+
+        return view('nasabah.deposito.riwayat', compact('riwayat'));
+    }
+
+    /**
+     * Get saldo nasabah (copied from TabunganController)
+     */
+    private function getSaldoNasabah($idAnggota)
+    {
+        $totalSetoran = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
+            ->sum('nominal') ?? 0;
+
+        $totalPenarikan = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
+            ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
+            ->sum('nominal') ?? 0;
+
+        $pengajuanApproved = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2') // Approved
+            ->whereDoesntHave('transTabungan')
+            ->sum('nominal') ?? 0;
+
+        $saldo = max(0, $totalSetoran + $pengajuanApproved - $totalPenarikan);
+
+        // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses
+        $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->where('metode_setor', 'saldo_tabungan')
+            ->sum('nominal') ?? 0;
+
+        return max(0, $saldo - $pendingDepositoTabungan);
+    }
+
+    /**
+     * Form Pengajuan Deposito
+     */
+    public function pengajuan()
+    {
+        $nasabah = Auth::user()->nasabah;
+
+        $tenors = JnsTenorDeposito::where('aktif', 'y')
+            ->with(['sukuBunga' => function ($q) {
+                $q->where('status', 'aktif')->orderBy('min_nominal');
+            }])
+            ->orderBy('tenor_bulan')
+            ->get();
+
+        // Jenis deposito di-hardcode
+        $jenisDeposito = collect([]);
+
+        // Saldo tabungan nasabah dari history transaksi
+        $saldoTabungan = $nasabah ? $this->getSaldoNasabah($nasabah->id) : 0;
+
+        return view('nasabah.deposito.pengajuan', compact(
+            'tenors',
+            'jenisDeposito',
+            'saldoTabungan'
+        ));
+    }
+
+    /**
+     * Submit Pengajuan Deposito
+     */
+    public function submitPengajuan(Request $request)
+    {
+        $request->validate([
+            'nominal'        => 'required|numeric|min:1000000',
+            'tenor_id'       => 'required|exists:jns_tenor_deposito,id',
+            'metode_setor'   => 'required|in:transfer,saldo_tabungan',
+            'foto_bukti_tf'  => 'nullable|required_if:metode_setor,transfer|image|max:5120',
+        ]);
+
+        $nasabah = Auth::user()->nasabah;
+
+        if ($request->metode_setor === 'saldo_tabungan') {
+            $saldo = $this->getSaldoNasabah($nasabah->id);
+            if ($saldo < $request->nominal) {
+                return back()->with('error', 'Saldo Tabungan tidak mencukupi untuk membuka Deposito.')->withInput();
+            }
+        }
+
+        $data = [
+            'id_nasabah'     => $nasabah->id,
+            'nominal'        => $request->nominal,
+            'tenor_id'       => $request->tenor_id,
+            'metode_setor'   => $request->metode_setor,
+            'status'         => '1',
+            'catatan'        => $request->catatan,
+        ];
+
+        if ($request->hasFile('foto_bukti_tf') && $request->metode_setor === 'transfer') {
+            $data['foto_bukti_tf'] = $request->file('foto_bukti_tf')
+                ->store('deposito/bukti-tf', 'public');
+        }
+
+        $pengajuan = PengajuanDeposito::create($data);
+
+        return redirect()->route('nasabah.deposito.status-pengajuan', $pengajuan->id)
+            ->with('success', 'Pengajuan deposito berhasil dikirim! Kami akan memproses pengajuan Anda.');
+    }
+
+    /**
+     * Status Pengajuan Deposito
+     */
+    public function statusPengajuan($id)
+    {
+        $nasabah = Auth::user()->nasabah;
+
+        $pengajuan = PengajuanDeposito::where('id_nasabah', $nasabah->id)
+            ->with(['tenor'])
+            ->findOrFail($id);
+
+        return view('nasabah.deposito.status-pengajuan', compact('pengajuan'));
+    }
+
+    /**
+     * Detail Deposito Aktif
+     */
+    public function detail($id)
+    {
+        $nasabah = Auth::user()->nasabah;
+
+        $deposito = DepositoH::where('id_nasabah', $nasabah->id)
+            ->with(['tenor', 'bungaHarian', 'transDeposito', 'pencairan'])
+            ->findOrFail($id);
+
+        return view('nasabah.deposito.detail', compact('deposito'));
+    }
+
+    /**
+     * Ajukan Pencairan Deposito
+     */
+    public function ajukanCairkan(Request $request, $id)
+    {
+        $request->validate([
+            'jenis_pencairan' => 'required|in:rek_nasabah,saldo_tabungan',
+        ]);
+
+        $nasabah  = Auth::user()->nasabah;
+        $deposito = DepositoH::where('id_nasabah', $nasabah->id)
+            ->with('tenor')->findOrFail($id);
+
+        // Hitung nominal akhir: pokok + bunga bersih (setelah pajak 20%)
+        $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor->tenor_hari ?? 365) / 365);
+        $pajak       = $bungaKotor * 0.20;
+        $nominalAkhir = $deposito->nominal_awal + $bungaKotor - $pajak;
+
+        // Cek apakah sudah ada request yang pending
+        $existing = PencairanDeposito::where('deposito_id', $deposito->id)
+            ->where('status', 'pending')->first();
+
+        if ($existing) {
+            return back()->with('error', 'Permintaan pencairan sudah diajukan sebelumnya dan masih dalam proses.');
+        }
+
+        // Buat record pencairan
+        PencairanDeposito::create([
+            'deposito_id'     => $deposito->id,
+            'id_nasabah'      => $nasabah->id,
+            'jenis_pencairan' => $request->jenis_pencairan,
+            'metode_pencairan'=> $request->jenis_pencairan, // compat
+            'nominal_akhir'   => $nominalAkhir,
+            'status'          => 'pending',
+            'catatan'         => 'Pengajuan pencairan oleh nasabah via ' .
+                ($request->jenis_pencairan === 'rek_nasabah' ? 'Transfer ke Rekening' : 'Saldo Tabungan'),
+        ]);
+
+        return back()->with('success', 'Permintaan pencairan berhasil diajukan. Admin kami akan segera memprosesnya.');
+    }
+}

@@ -50,7 +50,7 @@
                         <td class="px-6 py-4 text-sm text-gray-700">
                             Rp {{ number_format($item->min_nominal, 0, ',', '.') }} - Rp {{ number_format($item->max_nominal, 0, ',', '.') }}
                         </td>
-                        <td class="px-6 py-4"><span class="text-sm font-bold text-[#d4af37]">{{ $item->bunga }}%</span></td>
+                        <td class="px-6 py-4"><span class="text-sm font-bold text-[#d4af37]">{{ number_format($item->bunga * 100, 2) }}%</span></td>
                         <td class="px-6 py-4">
                             @canCrudMasterData
                             <form action="{{ route('admin.master-data.suku-bunga-deposito.toggle-status', $item->id) }}" method="POST" class="inline">

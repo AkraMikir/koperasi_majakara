@@ -10,7 +10,6 @@ use App\Models\JnsTenorDeposito;
 use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
-use App\Models\JnsDeposito;
 use App\Models\AdminOperasional;
 use App\Models\JnsBank;
 use App\Models\LogoBank;
@@ -41,7 +40,7 @@ class MasterDataController extends Controller
             'total_bunga_pinjaman' => MasterBungaPinjaman::where('status_aktif', true)->count(),
             'total_denda_pinjaman' => MasterDendaPinjaman::where('status_aktif', true)->count(),
             'total_suku_bunga_tabungan' => 0, // Tabel suku_bunga / fitur suku bunga tabungan sudah tidak dipakai
-            'total_tenor_deposito' => JnsTenorDeposito::where('aktif', true)->count(),
+            'total_tenor_deposito' => JnsTenorDeposito::where('aktif', 'y')->count(),
             'total_barang_gadai' => MBarangGadai::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
@@ -519,77 +518,6 @@ class MasterDataController extends Controller
     public function lokasiPerusahaanToggleStatus($id)
     {
         $data = JnsLokasiPerusahaan::findOrFail($id);
-        $data->status_aktif = !$data->status_aktif;
-        $data->save();
-
-        return redirect()->back()->with('success', 'Status berhasil diubah');
-    }
-
-    // ==================== JENIS DEPOSITO ====================
-    
-    public function jenisDepositoIndex()
-    {
-        $data = JnsDeposito::paginate(15);
-        return view('admin.master-data.jenis-deposito.index', compact('data'));
-    }
-
-    public function jenisDepositoCreate()
-    {
-        return view('admin.master-data.jenis-deposito.create');
-    }
-
-    public function jenisDepositoStore(Request $request)
-    {
-        $request->validate([
-            'nama_jenis' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        JnsDeposito::create($request->all());
-
-        return redirect()->route('admin.master-data.jenis-deposito.index')
-            ->with('success', 'Data berhasil ditambahkan');
-    }
-
-    public function jenisDepositoEdit($id)
-    {
-        $data = JnsDeposito::findOrFail($id);
-        return view('admin.master-data.jenis-deposito.edit', compact('data'));
-    }
-
-    public function jenisDepositoUpdate(Request $request, $id)
-    {
-        $request->validate([
-            'nama_jenis' => 'required|string|max:255',
-            'deskripsi' => 'nullable|string',
-        ]);
-
-        $data = JnsDeposito::findOrFail($id);
-        $data->update($request->all());
-
-        return redirect()->route('admin.master-data.jenis-deposito.index')
-            ->with('success', 'Data berhasil diupdate');
-    }
-
-    public function jenisDepositoDestroy($id)
-    {
-        $data = JnsDeposito::findOrFail($id);
-        
-        // Check if jenis deposito has pengajuan
-        if ($data->pengajuan()->count() > 0) {
-            return redirect()->back()
-                ->with('error', 'Tidak dapat menghapus jenis deposito yang masih digunakan');
-        }
-
-        $data->delete();
-
-        return redirect()->route('admin.master-data.jenis-deposito.index')
-            ->with('success', 'Data berhasil dihapus');
-    }
-
-    public function jenisDepositoToggleStatus($id)
-    {
-        $data = JnsDeposito::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
 

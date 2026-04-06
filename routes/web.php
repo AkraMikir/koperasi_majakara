@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Nasabah\DashboardController as NasabahDashboardController;
 use App\Http\Controllers\Nasabah\TabunganController;
+use App\Http\Controllers\Nasabah\DepositoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
 Route::get('/', function () {
@@ -118,6 +119,18 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
         Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Nasabah\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
         Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'angsuran'])->name('struk-angsuran');
+    });
+
+    // Deposito Routes
+    Route::prefix('deposito')->name('deposito.')->group(function () {
+        Route::get('/', [DepositoController::class, 'index'])->name('index');
+        Route::get('/riwayat', [DepositoController::class, 'riwayat'])->name('riwayat');
+        Route::get('/pengajuan', [DepositoController::class, 'pengajuan'])->name('pengajuan');
+        Route::post('/pengajuan', [DepositoController::class, 'submitPengajuan'])->name('submit-pengajuan');
+        Route::get('/pengajuan/{id}/status', [DepositoController::class, 'statusPengajuan'])->name('status-pengajuan');
+        Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
+        // Ajukan pencairan deposito
+        Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
     });
 });
 
@@ -415,7 +428,29 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/setoran-approval/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalReject'])->name('setoran-approval.reject');
     });
 
-    Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
+    // ── Deposito ──
+    Route::prefix('deposito')->name('deposito.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'index'])->name('index');
+        Route::get('/pengajuan', [\App\Http\Controllers\Admin\DepositoController::class, 'pengajuanList'])->name('pengajuan-list');
+        Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'detailPengajuan'])->name('detail-pengajuan');
+        Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\DepositoController::class, 'approve'])->name('approve');
+        Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\DepositoController::class, 'reject'])->name('reject');
+        Route::get('/list', [\App\Http\Controllers\Admin\DepositoController::class, 'depositoList'])->name('deposito-list');
+        Route::get('/list/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'depositoDetail'])->name('deposito-detail');
+
+        // ── Pencairan via Transfer (TF) ──
+        Route::prefix('pencairan-tf')->name('pencairan-tf.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfIndex'])->name('index');
+            Route::get('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfFormShow'])->name('proses-form');
+            Route::post('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfProses'])->name('proses');
+        });
+
+        // ── Pencairan ke Tabungan ──
+        Route::prefix('pencairan-tabungan')->name('pencairan-tabungan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTabunganIndex'])->name('index');
+            Route::post('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTabunganProses'])->name('proses');
+        });
+    });
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index');
     // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
