@@ -895,27 +895,29 @@ class TabunganController extends Controller
     private function getSaldoNasabah($idAnggota)
     {
         // Hitung dari trans_tabungan yang sudah ada
-        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
+        $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
-        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
+        $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
             ->sum('nominal') ?? 0;
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+        $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->with(['buktiFoto'])  // Removed janjiTemu
-            ->get();
+            ->sum('nominal') ?? 0;
 
-        foreach ($pengajuanApproved as $pengajuan) {
-            $nominal = $pengajuan->nominal ?? 0;
-            $totalSetoran += $nominal;
-        }
+        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
 
-        return max(0, $totalSetoran - $totalPenarikan);
+        // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
+        $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->where('metode_setor', 'saldo_tabungan')
+            ->sum('nominal') ?? 0;
+
+        return max(0, $saldo - $pendingDepositoTabungan);
     }
 
     /**

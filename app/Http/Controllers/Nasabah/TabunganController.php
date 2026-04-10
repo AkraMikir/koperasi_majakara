@@ -664,26 +664,26 @@ class TabunganController extends Controller
     private function getSaldoNasabah($idAnggota)
     {
         // Hitung dari trans_tabungan yang sudah ada
-        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
+        $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
-        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
+        $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
             ->sum('nominal') ?? 0;
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+        $pengajuanApprovedCount = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2')
+            ->whereDoesntHave('transTabungan')
+            ->count();
+            
+        $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->get();
+            ->sum('nominal') ?? 0;
 
-        $approvedNoTransSum = 0;
-        foreach ($pengajuanApproved as $pengajuan) {
-            $approvedNoTransSum += $pengajuan->nominal ?? 0;
-            $totalSetoran += $pengajuan->nominal ?? 0;
-        }
-        $saldo = max(0, $totalSetoran + $approvedNoTransSum - $totalPenarikan);
+        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
 
         // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
         $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
@@ -698,7 +698,7 @@ class TabunganController extends Controller
         if (!is_dir(dirname($logPath))) {
             @mkdir(dirname($logPath), 0755, true);
         }
-        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoran - $approvedNoTransSum, 'totalPenarikan_trans' => $totalPenarikan, 'pendingDeposito_tabungan' => $pendingDepositoTabungan, 'approvedNoTrans_count' => $pengajuanApproved->count(), 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
+        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoranTrans, 'totalPenarikan_trans' => $totalPenarikanTrans, 'pendingDeposito_tabungan' => $pendingDepositoTabungan, 'approvedNoTrans_count' => $pengajuanApprovedCount, 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
         // #endregion
         return $saldo;
     }
