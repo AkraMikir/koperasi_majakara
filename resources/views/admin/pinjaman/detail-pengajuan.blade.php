@@ -266,6 +266,14 @@
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
                         </div>
                         <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pencairan *</label>
+                            <select name="metode_pencairan" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                                <option value="kas_utama">Kas Koperasi Utama</option>
+                                <option value="petty_cash">Petty Cash (Fisik)</option>
+                                <option value="petty_tf">Petty Cash (Transfer)</option>
+                            </select>
+                        </div>
+                        <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transaksi *</label>
                             <input type="file" name="bukti_transfer" accept="image/*" required
                                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">

@@ -38,47 +38,59 @@ class TabunganController extends Controller
             'bunga' => 3.5,
             'status' => 'Aktif',
         ];
-        // Filter Transaksi
-        $transQuery = TransTabungan::where('id_anggota', $idAnggota)
-            ->with(['jnsTransaksi', 'jnsVia']);
 
-        if ($request->filled('trans_id')) {
-            $transQuery->where('id', 'like', '%' . $request->trans_id . '%');
-        }
-        if ($request->filled('trans_date')) {
-            $transQuery->whereDate('tgl_transaksi', $request->trans_date);
-        }
-        if ($request->filled('trans_amount')) {
-            $transQuery->where('nominal', $request->trans_amount);
-        }
+        // Optimized Transaksi selection - Unique paginator 'page_trans'
+        $transTabungans = TransTabungan::select('id', 'id_jns_transaksi', 'nominal', 'tgl_transaksi', 'id_jns_via')
+            ->where('id_anggota', $idAnggota)
+            ->with(['jnsTransaksi', 'jnsVia'])
+            ->latest('tgl_transaksi')
+            ->paginate(10, ['*'], 'page_trans')
+            ->withQueryString();
 
-        $transaksiTabungan = $transQuery->latest('tgl_transaksi')
-            ->take($request->anyFilled(['trans_id', 'trans_date', 'trans_amount']) ? 50 : 10)
-            ->get();
+        // Optimized Janji Temu selection - Unique paginator 'page_jt'
+        $janjiTemuTabungans = JanjiTemuTabungan::select('id', 'nominal', 'status', 'tanggal_janji_temu', 'waktu_janji_temu', 'jenis', 'lokasi_temu')
+            ->where('id_nasabah', $idAnggota)
+            ->with('lokasi')
+            ->latest('tanggal_janji_temu')
+            ->paginate(10, ['*'], 'page_jt')
+            ->withQueryString();
 
-        // Filter Janji Temu
-        $apptQuery = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
-            ->with('lokasi');
+        // Optimized Pengajuan Setor (Transfer) - Unique paginator 'page_setor'
+        $pengajuanSetors = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->latest()
+            ->paginate(10, ['*'], 'page_setor')
+            ->withQueryString();
 
-        if ($request->filled('appt_id')) {
-            $apptQuery->where('id', 'like', '%' . $request->appt_id . '%');
-        }
-        if ($request->filled('appt_date')) {
-            $apptQuery->whereDate('tanggal_janji_temu', $request->appt_date);
-        }
-        if ($request->filled('appt_amount')) {
-            $apptQuery->where('nominal', $request->appt_amount);
-        }
+        // Optimized Pengajuan Tarik (Transfer) - Unique paginator 'page_tarik'
+        $pengajuanTariks = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+            ->where('metode_transfer', 'transfer')
+            ->latest()
+            ->paginate(10, ['*'], 'page_tarik')
+            ->withQueryString();
 
-        $riwayatJanjiTemu = $apptQuery->latest('tanggal_janji_temu')
-            ->take($request->anyFilled(['appt_id', 'appt_date', 'appt_amount']) ? 50 : 10)
-            ->get();
+        // Handle AJAX Pagination
+        if ($request->ajax()) {
+            if ($request->section === 'trans') {
+                return view('nasabah.tabungan.partials._table_trans', compact('transTabungans'))->render();
+            }
+            if ($request->section === 'jt') {
+                return view('nasabah.tabungan.partials._table_jt', compact('janjiTemuTabungans'))->render();
+            }
+            if ($request->section === 'setor') {
+                return view('nasabah.tabungan.partials._table_setor', compact('pengajuanSetors'))->render();
+            }
+            if ($request->section === 'tarik') {
+                return view('nasabah.tabungan.partials._table_tarik', compact('pengajuanTariks'))->render();
+            }
+        }
 
         return view('nasabah.tabungan.index', [
             'user' => Auth::user(),
             'tabunganInfo' => $tabunganInfo,
-            'transaksiTabungan' => $transaksiTabungan,
-            'riwayatJanjiTemu' => $riwayatJanjiTemu,
+            'transTabungans' => $transTabungans,
+            'janjiTemuTabungans' => $janjiTemuTabungans,
+            'pengajuanSetors' => $pengajuanSetors,
+            'pengajuanTariks' => $pengajuanTariks,
         ]);
     }
 

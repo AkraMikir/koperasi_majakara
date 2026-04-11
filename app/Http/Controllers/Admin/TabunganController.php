@@ -10,6 +10,7 @@ use App\Models\JanjiTemuTabungan;
 use App\Models\Nasabah;
 use App\Models\BuktiFotoTabungan;
 use App\Services\ActivityLogService;
+use App\Services\PettyCashConstants;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -181,12 +182,14 @@ class TabunganController extends Controller
                     'nasabah_id'       => $pengajuan->id_anggota,
                     'id_jns_transaksi' => $idTrans,
                     'id_jns_via'       => ($request->metode_bayar === 'cash') ? 
-                                          DB::table('jns_via')->where('kode', 'CS')->value('id') : 
-                                          DB::table('jns_via')->where('kode', 'TF')->value('id'),
-                    'id_jns_fitur'     => 1, // Default Simpanan Umum
+                                          PettyCashConstants::VIA_CS : 
+                                          PettyCashConstants::VIA_TF,
+                    'id_jns_fitur'     => PettyCashConstants::FITUR_TABUNGAN, // Simpanan Umum
                     'nominal'          => $nominal,
                     'status'           => 'approved',
                     'keterangan'       => 'Otomatis dari Pengajuan #' . $pengajuan->id,
+                    'ref_table'        => 'trans_tabungan',
+                    'ref_id'           => $idTransaksi,
                     'tgl_transaksi'    => now(),
                 ]);
 
@@ -693,10 +696,12 @@ class TabunganController extends Controller
                 'nasabah_id'       => $idAnggota,
                 'id_jns_transaksi' => $idTrans,
                 'id_jns_via'       => $idVia,
-                'id_jns_fitur'     => 1,
+                'id_jns_fitur'     => PettyCashConstants::FITUR_TABUNGAN,
                 'nominal'          => $nominal,
                 'status'           => 'approved',
                 'keterangan'       => 'Otomatis dari Janji Temu #' . $janjiTemu->id,
+                'ref_table'        => 'trans_tabungan',
+                'ref_id'           => $idTransaksi,
                 'tgl_transaksi'    => now(),
             ]);
 

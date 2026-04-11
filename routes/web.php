@@ -212,6 +212,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::middleware('admin.permission:pelunasan-dipercepat')->group(function () {
             Route::post('/pinjaman-aktif/{id}/pelunasan-dipercepat', [\App\Http\Controllers\Admin\PinjamanController::class, 'pelunasanDipercepat'])->name('pelunasan-dipercepat');
         });
+
+        // Janji Temu Pinjaman — detail view & proses (cairkan)
+        Route::prefix('janji-temu')->name('janji-temu.')->group(function () {
+            Route::get('/detail-pinjaman/{id}', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'detailPinjaman'])->name('detail-pinjaman');
+            Route::post('/proses-pinjaman/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'prosesJanjiTemuPinjaman'])->name('proses-pinjaman');
+        });
     });
     
     // Master Data Routes - View accessible by all admins, CRUD only for Admin Utama
@@ -418,6 +424,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::get('/deposito', function () { return view('admin.deposito.index'); })->name('deposito.index');
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index');
+    Route::post('/janji-temu/tabungan/{id}/cancel', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'cancelTabungan'])->name('janji-temu.cancel-tabungan');
+    Route::post('/janji-temu/pinjaman/{id}/cancel', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'cancelPinjaman'])->name('janji-temu.cancel-pinjaman');
     // Route::get('/nasabah', function () { return view('admin.nasabah.index'); })->name('nasabah.index'); // DEPRECATED - Use NasabahManagementController
     // Halaman Pengajuan dihapus - redirect ke dashboard bila ada yang akses langsung
     Route::get('/pengajuan', fn () => redirect()->route('admin.dashboard', [], 301))->name('pengajuan.index');

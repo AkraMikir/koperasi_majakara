@@ -29,6 +29,7 @@ class PengajuanPembayaranPinjaman extends Model
         'keterangan_admin',
         'status',
         'tgl_pembayaran',
+        'setoran_kantor_id',
     ];
 
     protected $casts = [
@@ -56,5 +57,16 @@ class PengajuanPembayaranPinjaman extends Model
     public function buktiFoto()
     {
         return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
+    }
+
+    public function pettyCashTransaksi(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(PettyCashTransaksiNasabah::class, 'ref_id', 'id')
+                    ->where('ref_table', 'tbl_pengajuan_pembayaran_pinjaman');
+    }
+
+    public function setoranKantor(): BelongsTo
+    {
+        return $this->belongsTo(PettyCashSetoranKantor::class, 'setoran_kantor_id');
     }
 }

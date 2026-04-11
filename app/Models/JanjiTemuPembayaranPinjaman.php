@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Carbon\Carbon;
 
 class JanjiTemuPembayaranPinjaman extends Model
 {
@@ -31,6 +32,44 @@ class JanjiTemuPembayaranPinjaman extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Unified Status logic — sama dengan JanjiTemuTabungan & JanjiTemuPinjaman.
+     */
+    public function getStatusDisplayAttribute(): array
+    {
+        $dateTime = Carbon::parse($this->tanggal_janji_temu);
+        if ($this->waktu_janji_temu) {
+            $time = Carbon::parse($this->waktu_janji_temu);
+            $dateTime->setTime($time->hour, $time->minute);
+        }
+
+        if ($this->status == '2') {
+            return [
+                'label' => 'Terlaksana',
+                'class' => 'bg-green-100 text-green-800'
+            ];
+        }
+
+        if ($this->status == '3') {
+            return [
+                'label' => 'Dibatalkan',
+                'class' => 'bg-red-100 text-red-800'
+            ];
+        }
+
+        if ($dateTime->isPast()) {
+            return [
+                'label' => 'Terlewat',
+                'class' => 'bg-gray-100 text-gray-800'
+            ];
+        }
+
+        return [
+            'label' => 'Akan Datang',
+            'class' => 'bg-blue-100 text-blue-800'
+        ];
+    }
 
     public function pengajuan(): BelongsTo
     {

@@ -85,23 +85,10 @@ class PinjamanController extends Controller
         // Get total angsuran telat
         $totalAngsuranTelat = 0;
         foreach ($pinjamanAktif as $pinjaman) {
-            if ($pinjaman->jenis === 'bulanan') {
-                $telat = $pinjaman->tempoBulanan()
-                    ->where('status_bayar', 'telat')
-                    ->orWhere(function($q) {
-                        $q->where('status_bayar', 'belum')
-                          ->whereDate('tgl_jatuh_tempo', '<', now());
-                    })
-                    ->count();
-            } else {
-                $telat = $pinjaman->tempoMingguan()
-                    ->where('status_bayar', 'telat')
-                    ->orWhere(function($q) {
-                        $q->where('status_bayar', 'belum')
-                          ->whereDate('tgl_jatuh_tempo', '<', now());
-                    })
-                    ->count();
-            }
+            $tempos = $pinjaman->jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
+            $telat = $tempos->filter(function($t) {
+                return $t->status_bayar === 'telat' || ($t->status_bayar === 'belum' && $t->tgl_jatuh_tempo < now());
+            })->count();
             $totalAngsuranTelat += $telat;
         }
 

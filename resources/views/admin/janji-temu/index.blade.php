@@ -19,7 +19,7 @@
 
     <!-- Filter Section -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-        <form action="{{ route('admin.janji-temu.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <form action="{{ route('admin.janji-temu.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-5 gap-4">
             <div class="relative">
                 <input type="text" name="search" value="{{ request('search') }}" 
                     placeholder="Cari nama nasabah..." 
@@ -34,11 +34,23 @@
                     <option value="">Semua Fitur</option>
                     <option value="Tabungan" {{ request('fitur') == 'Tabungan' ? 'selected' : '' }}>Tabungan</option>
                     <option value="Pinjaman" {{ request('fitur') == 'Pinjaman' ? 'selected' : '' }}>Pinjaman</option>
+                    <option value="Pembayaran Pinjaman" {{ request('fitur') == 'Pembayaran Pinjaman' ? 'selected' : '' }}>Pembayaran Pinjaman</option>
+                </select>
+            </div>
+
+            <div>
+                <select name="status" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all outline-none">
+                    <option value="">Semua Status</option>
+                    <option value="akan-datang" {{ request('status') == 'akan-datang' ? 'selected' : '' }}>Akan Datang</option>
+                    <option value="terlewat" {{ request('status') == 'terlewat' ? 'selected' : '' }}>Terlewat</option>
+                    <option value="2" {{ request('status') == '2' ? 'selected' : '' }}>Terlaksana</option>
+                    <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Dibatalkan</option>
                 </select>
             </div>
 
             <div>
                 <input type="date" name="tanggal_dari" value="{{ request('tanggal_dari') }}" 
+                    title="Tanggal dari"
                     class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all outline-none">
             </div>
 
@@ -62,6 +74,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">TANGGAL & WAKTU</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">LOKASI</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">NOMINAL</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">STATUS</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">KET</th>
                         <th class="px-6 py-4 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">AKSI</th>
                     </tr>
@@ -104,6 +117,11 @@
                                     : $item->nominal;
                             @endphp
                             <span class="font-medium text-[#674c1d]">Rp {{ number_format($nominalDisplay, 0, ',', '.') }}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-2 py-1 rounded-full text-[10px] font-bold uppercase {{ $item->status_display['class'] }}">
+                                {{ $item->status_display['label'] }}
+                            </span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="text-sm text-gray-500">{{ Str::limit($item->keterangan, 30) }}</span>

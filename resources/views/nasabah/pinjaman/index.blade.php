@@ -144,6 +144,8 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">ID Pinjaman</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Tanggal Pinjam</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase text-center">Progress</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -152,10 +154,20 @@
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->id }}</td>
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->tgl_pinjam->format('d M Y') }}</td>
                             <td class="px-4 py-3 font-semibold text-gray-900">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-sm font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                                    {{ $pinjaman->payment_progress }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="px-3 py-1 {{ $pinjaman->status_display['class'] }} rounded-full text-xs font-semibold whitespace-nowrap">
+                                    {{ $pinjaman->status_display['label'] }}
+                                </span>
+                            </td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="px-4 py-12 text-center">
+                            <td colspan="5" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
@@ -188,6 +200,7 @@
                         <tr class="border-b-2 border-[#8b6f2f]/20">
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">ID Pinjaman</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah Pinjam</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase text-center">Progress</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Terbayar</th>
                         </tr>
                     </thead>
@@ -196,11 +209,16 @@
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pinjaman', $pinjaman->id) }}'">
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">{{ $pinjaman->id }}</td>
                             <td class="px-4 py-3 font-semibold text-gray-900">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-xs font-bold text-green-700 bg-green-50 px-2 py-1 rounded-lg border border-green-100 italic">
+                                    {{ $pinjaman->payment_progress }}
+                                </span>
+                            </td>
                             <td class="px-4 py-3 font-semibold text-green-600">Rp {{ number_format($pinjaman->total_terbayar ?? 0, 0, ',', '.') }}</td>
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="3" class="px-4 py-12 text-center">
+                            <td colspan="4" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

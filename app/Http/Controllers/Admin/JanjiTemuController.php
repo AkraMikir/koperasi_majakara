@@ -20,23 +20,40 @@ class JanjiTemuController extends Controller
         $query = JanjiTemuUniversal::query();
 
         // Search by Nama Anggota
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where('nama_anggota', 'like', "%{$search}%");
         }
 
-        // Filter by Tanggal
-        if ($request->has('tanggal_dari') && $request->tanggal_dari !== '') {
+        // Filter by Tanggal — gunakan filled() bukan has() untuk hindari illegal operator error
+        if ($request->filled('tanggal_dari')) {
             $query->whereDate('tanggal_janji_temu', '>=', $request->tanggal_dari);
         }
 
-        if ($request->has('tanggal_sampai') && $request->tanggal_sampai !== '') {
+        if ($request->filled('tanggal_sampai')) {
             $query->whereDate('tanggal_janji_temu', '<=', $request->tanggal_sampai);
         }
 
         // Filter by Fitur
-        if ($request->has('fitur') && $request->fitur !== '') {
+        if ($request->filled('fitur')) {
             $query->where('fitur', $request->fitur);
+        }
+
+        // Filter by Status (termasuk computed: terlewat & akan-datang)
+        if ($request->filled('status')) {
+            $status = $request->status;
+            if ($status === 'terlewat') {
+                // Status pending (1) dan waktu janji sudah lewat
+                $query->where('status', '1')
+                      ->whereRaw("CONCAT(tanggal_janji_temu, ' ', IFNULL(waktu_janji_temu, '00:00:00')) < NOW()");
+            } elseif ($status === 'akan-datang') {
+                // Status pending (1) dan waktu janji belum lewat
+                $query->where('status', '1')
+                      ->whereRaw("CONCAT(tanggal_janji_temu, ' ', IFNULL(waktu_janji_temu, '00:00:00')) >= NOW()");
+            } else {
+                // Filter langsung by kode: '2' (Terlaksana) atau '3' (Dibatalkan)
+                $query->where('status', $status);
+            }
         }
 
         $janjiTemu = $query->orderBy('tanggal_janji_temu', 'desc')
@@ -77,5 +94,41 @@ class JanjiTemuController extends Controller
         }
 
         return view('admin.janji-temu.detail-pinjaman', compact('janjiTemu', 'masterBunga', 'masterDenda'));
+    }
+
+    /**
+     * Cancel Janji Temu Tabungan.
+     */
+    public function cancelTabungan(Request $request, $id)
+    {
+        $request->validate([
+            'keterangan_admin' => 'required|string|max:255',
+        ]);
+
+        $janjiTemu = \App\Models\JanjiTemuTabungan::findOrFail($id);
+        $janjiTemu->update([
+            'status' => '3',
+            'keterangan_admin' => $request->keterangan_admin,
+        ]);
+
+        return redirect()->back()->with('success', 'Janji temu tabungan berhasil dibatalkan.');
+    }
+
+    /**
+     * Cancel Janji Temu Pinjaman.
+     */
+    public function cancelPinjaman(Request $request, $id)
+    {
+        $request->validate([
+            'keterangan_admin' => 'required|string|max:255',
+        ]);
+
+        $janjiTemu = JanjiTemuPinjaman::findOrFail($id);
+        $janjiTemu->update([
+            'status' => '3',
+            'keterangan_admin' => $request->keterangan_admin,
+        ]);
+
+        return redirect()->back()->with('success', 'Janji temu pinjaman berhasil dibatalkan.');
     }
 }

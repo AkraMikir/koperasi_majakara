@@ -82,6 +82,11 @@
                                 <td class="px-4 py-3">
                                     <p class="font-medium text-gray-900">{{ $t->nasabah->user->nama ?? '-' }}</p>
                                     <p class="text-xs text-gray-500">ID: {{ $t->nasabah_id }}</p>
+                                    @if($t->jenis_transaksi === 'Angsuran')
+                                        <span class="inline-block mt-1 px-2 py-0.5 bg-orange-100 text-orange-700 rounded text-[10px] font-bold uppercase">Angsuran Pinjaman</span>
+                                    @else
+                                        <span class="inline-block mt-1 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded text-[10px] font-bold uppercase">Setoran Tabungan</span>
+                                    @endif
                                 </td>
                                 <td class="px-4 py-3 text-right font-semibold text-[#674c1d]">
                                     Rp {{ number_format($t->nominal, 0, ',', '.') }}

@@ -59,7 +59,9 @@
                         <tr class="border-b-2 border-[#8b6f2f]/20">
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Tanggal Pinjam</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase text-center">Progress</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jenis</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Lunas</th>
                         </tr>
@@ -83,9 +85,19 @@
                             <td class="px-4 py-3">
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($item->jumlah_pinjam, 0, ',', '.') }}</p>
                             </td>
+                            <td class="px-4 py-3 text-center">
+                                <span class="text-sm font-bold text-gray-700 bg-gray-100 px-2 py-1 rounded-lg">
+                                    {{ $item->payment_progress }}
+                                </span>
+                            </td>
                             <td class="px-4 py-3">
                                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                     {{ ucfirst($item->jenis) }}
+                                </span>
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="px-3 py-1 {{ $item->status_display['class'] }} rounded-full text-xs font-semibold whitespace-nowrap">
+                                    {{ $item->status_display['label'] }}
                                 </span>
                             </td>
                             <td class="px-4 py-3">
@@ -104,7 +116,7 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="5" class="px-4 py-12 text-center">
+                            <td colspan="7" class="px-4 py-12 text-center">
                                 <div class="flex flex-col items-center gap-3">
                                     <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
