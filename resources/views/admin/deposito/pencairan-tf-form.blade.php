@@ -18,10 +18,18 @@
     @php
         $dep = $pencairan->deposito;
         $nasabah = $pencairan->nasabah;
-        $bungaKotor = $dep ? ($dep->nominal_awal * $dep->bunga * (($dep->tenor?->tenor_hari ?? 365) / 365)) : 0;
+        $isEarly = $dep && $dep->tgl_jatuh_tempo > now();
+        $bungaKotor = ($dep && !$isEarly) ? ($dep->nominal_awal * $dep->bunga * (($dep->tenor?->tenor_hari ?? 365) / 365)) : 0;
         $pajak = $bungaKotor * 0.2;
         $estimasiCair = $dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0;
     @endphp
+
+    @if($isEarly)
+    <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-5 rounded-r-xl">
+        <p class="text-sm text-yellow-800 font-bold">INFO: Penarikan Lebih Awal (Early Withdrawal)</p>
+        <p class="text-xs text-yellow-700 mt-1">Deposito ditarik sebelum jatuh tempo. Sesuai kebijakan koperasi, pengembalian kembali 100% nominal awal tanpa bunga berjalan.</p>
+    </div>
+    @endif
 
     <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-5 text-white mb-5">
         <p class="text-white/60 text-xs font-semibold uppercase tracking-widest mb-3">Data Nasabah</p>

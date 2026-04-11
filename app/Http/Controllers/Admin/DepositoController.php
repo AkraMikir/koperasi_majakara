@@ -13,6 +13,7 @@ use App\Models\TransTabungan;
 use App\Models\TransDeposito;
 use App\Models\PencairanDeposito;
 use App\Helpers\IdGenerator;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -266,6 +267,25 @@ class DepositoController extends Controller
         $depositos = $query->paginate(15)->withQueryString();
 
         return view('admin.deposito.deposito-list', compact('depositos'));
+    }
+
+    /**
+     * Export daftar deposito ke PDF
+     */
+    public function exportPdf(Request $request)
+    {
+        $this->checkDepositoPermission();
+
+        $query = DepositoH::with(['nasabah.user', 'tenor'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $depositos = $query->get();
+
+        $pdf = Pdf::loadView('admin.deposito.export-pdf', compact('depositos'));
+        return $pdf->download('laporan-deposito-' . now()->format('Ymd-Hi') . '.pdf');
     }
 
     /**

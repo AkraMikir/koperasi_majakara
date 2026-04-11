@@ -16,19 +16,27 @@
         </div>
     </div>
 
-    <form method="GET" class="flex flex-wrap gap-3 mb-5">
-        <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / no. deposito..." class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d] w-64">
-        <select name="status" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d]">
-            <option value="">Semua Status</option>
-            <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
-            <option value="dicairkan" {{ request('status') === 'dicairkan' ? 'selected' : '' }}>Dicairkan</option>
-            <option value="ditutup" {{ request('status') === 'ditutup' ? 'selected' : '' }}>Ditutup</option>
-        </select>
-        <button type="submit" class="bg-[#674c1d] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#8b6f2f]">Filter</button>
-    </form>
+    <div class="flex flex-wrap items-center justify-between mb-5">
+        <form method="GET" class="flex flex-wrap gap-3">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari nama / no. deposito..." class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d] w-64">
+            <select name="status" class="border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d]">
+                <option value="">Semua Status</option>
+                <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif</option>
+                <option value="dicairkan" {{ request('status') === 'dicairkan' ? 'selected' : '' }}>Dicairkan</option>
+                <option value="ditutup" {{ request('status') === 'ditutup' ? 'selected' : '' }}>Ditutup</option>
+            </select>
+            <button type="submit" class="bg-[#674c1d] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#8b6f2f]">Filter</button>
+        </form>
 
-    <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
-        <table class="w-full text-sm">
+        <a href="{{ route('admin.deposito.export-pdf', request()->all()) }}" class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-700 flex items-center gap-2">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Cetak Laporan PDF
+        </a>
+    </div>
+
+    <div class="bg-white rounded-xl border border-gray-100 shadow-sm">
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm min-w-[800px]">
             <thead class="bg-gray-50 text-gray-600">
                 <tr>
                     <th class="text-left px-4 py-3 font-semibold">No. Deposito</th>
@@ -70,6 +78,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
         <div class="px-5 py-3 border-t border-gray-100">{{ $depositos->links() }}</div>
     </div>
 </div>

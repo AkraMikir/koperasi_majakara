@@ -436,6 +436,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\DepositoController::class, 'approve'])->name('approve');
         Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\DepositoController::class, 'reject'])->name('reject');
         Route::get('/list', [\App\Http\Controllers\Admin\DepositoController::class, 'depositoList'])->name('deposito-list');
+        Route::get('/export-pdf', [\App\Http\Controllers\Admin\DepositoController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/list/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'depositoDetail'])->name('deposito-detail');
 
         // ── Pencairan via Transfer (TF) ──
