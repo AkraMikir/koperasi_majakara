@@ -29,10 +29,48 @@ class PettyCashController extends Controller
      * [Owner] Form kirim dana ke admin.
      * GET /admin/petty-cash/penerimaan/create
      */
-    public function penerimaanCreate()
+    public function penerimaanCreate(Request $request)
     {
+        $query = PettyCashPenerimaan::with(['admin', 'owner'])->latest();
+
+        // 🔍 Filter Logic
+        if ($request->admin_id) {
+            $query->where('admin_id', $request->admin_id);
+        }
+        if ($request->status) {
+            $query->where('status', $request->status);
+        }
+        if ($request->tgl_dari) {
+            $query->whereDate('created_at', '>=', $request->tgl_dari);
+        }
+        if ($request->tgl_sampai) {
+            $query->whereDate('created_at', '<=', $request->tgl_sampai);
+        }
+
+        $pengiriman = $query->paginate(15);
+        
+        // 📊 Recalculate Stats based on filters
+        $stats = [
+            'total'         => (clone $query)->count(),
+            'pending'       => (clone $query)->where('status', 'pending')->count(),
+            'approved'      => (clone $query)->where('status', 'approved')->count(),
+            'rejected'      => (clone $query)->where('status', 'rejected')->count(),
+            'total_nominal' => (clone $query)->where('status', 'approved')->get()->sum(function($item) {
+                return (float)$item->nominal_tf + (float)$item->nominal_cash;
+            })
+        ];
+
         $admins = User::where('role', 'admin_operasional')->get();
-        return view('admin.petty-cash.penerimaan-create', compact('admins'));
+        
+        if ($request->ajax()) {
+            return response()->json([
+                'html'       => view('admin.petty-cash.partials._penerimaan_table', compact('pengiriman'))->render(),
+                'stats'      => $stats,
+                'pagination' => $pengiriman->links()->render()
+            ]);
+        }
+
+        return view('admin.petty-cash.penerimaan-owner', compact('pengiriman', 'stats', 'admins'));
     }
 
     /**
@@ -86,7 +124,7 @@ class PettyCashController extends Controller
             'penerimaan_id' => $id,
         ], $id, 'petty_cash_penerimaan');
 
-        return redirect()->route('admin.petty-cash.dashboard')
+        return redirect()->route('admin.petty-cash.penerimaan.create')
             ->with('success', 'Dana berhasil dikirim. Menunggu konfirmasi Admin.');
     }
 
@@ -305,7 +343,9 @@ class PettyCashController extends Controller
                 'via'         => $t->jnsVia?->nama ?? '-',
                 'via_kode'    => $t->jnsVia?->kode ?? '-',
                 'fitur'       => $t->jnsFitur?->nama ?? '-',
+                'jenis_transaksi' => $t->jenis_transaksi,
                 'pctn_id'     => $t->id,
+                'ref_id'      => $t->ref_id,
             ])->values()->toArray();
 
             $fotoSetoran = null;
@@ -334,6 +374,12 @@ class PettyCashController extends Controller
             // Update transaksi: tandai sudah masuk setoran ini
             PettyCashTransaksiNasabah::whereIn('id', $transaksi->pluck('id'))
                 ->update(['setoran_kantor_id' => $idSetoran]);
+                
+            foreach ($transaksi as $t) {
+                if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
+                    DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => $idSetoran]);
+                }
+            }
 
             // 🔥 PEMISAHAN PENGURANGAN SALDO ADMIN
             $nominalCash = $transaksi->filter(fn($t) => in_array($t->jnsVia?->kode, ['CS', 'TN']))->sum('nominal');
@@ -556,6 +602,13 @@ class PettyCashController extends Controller
         }
 
         // Update transaksi nasabah: lepas dari setoran ini agar bisa disetor ulang
+        $transaksis = PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)->get();
+        foreach ($transaksis as $t) {
+            if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
+                DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => null]);
+            }
+        }
+        
         PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)
             ->update(['setoran_kantor_id' => null]);
 
@@ -572,7 +625,12 @@ class PettyCashController extends Controller
      */
     public function laporan(Request $request)
     {
-        $query = PettyCashSetoranKantor::with(['admin'])->latest();
+        $query = PettyCashSetoranKantor::with([
+            'admin', 
+            'transaksiNasabah.transTabungan',
+            'transaksiNasabah.pengajuanPembayaran',
+            'transaksiNasabah.pengajuanTabungan'
+        ])->latest();
 
         if ($request->admin_id) {
             $query->where('admin_id', $request->admin_id);

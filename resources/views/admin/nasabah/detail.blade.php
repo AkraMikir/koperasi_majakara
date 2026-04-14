@@ -277,7 +277,7 @@
     </div>
 
     <!-- Reset PIN Nasabah - Only for Admin Utama -->
-    @canManageNasabah
+    @if(auth()->check() && app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user()))
     <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-red-100">
         <div class="flex items-center gap-4 mb-6">
             <div class="w-14 h-14 bg-linear-to-br from-red-600 to-red-700 rounded-xl flex items-center justify-center shadow-md">
@@ -363,7 +363,7 @@
             </div>
         </form>
     </div>
-    @endcanManageNasabah
+    @endif
 
     <!-- Pending Changes Alert (jika ada) -->
     @if($pendingChanges->count() > 0)

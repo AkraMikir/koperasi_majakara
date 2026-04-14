@@ -73,8 +73,8 @@ return new class extends Migration//ikkkkm
                 jt.nominal,
                 jl.nama_lokasi AS lokasi,
                 jt.keterangan,
-                '' AS keterangan_admin,     -- Placeholder
-                '1' AS status,              -- Placeholder
+                jt.keterangan_admin AS keterangan_admin,
+                jt.status AS status,
                 CAST('other' AS CHAR(50)) AS jenis,
                 jt.created_at
             FROM tbl_janji_temu_pembayaran_pinjaman jt

@@ -24,7 +24,29 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content -->
         <div class="lg:col-span-2 space-y-6">
-            <!-- Data Nasabah -->
+            @if($errors->any())
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-sm">
+                <p class="font-bold flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Validasi Gagal!
+                </p>
+                <ul class="list-disc pl-5 mt-2 space-y-1 text-sm">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            
+            @if(session('error'))
+            <div class="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded-r-lg shadow-sm">
+                <p class="font-medium flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    {{ session('error') }}
+                </p>
+            </div>
+            @endif
+
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Data Nasabah</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -281,8 +303,16 @@
                 <form method="POST" action="{{ route('admin.pinjaman.approve-pembayaran', $pengajuan->id) }}" onsubmit="return confirm('Apakah Anda yakin ingin menyetujui pembayaran ini?')" class="mb-3">
                     @csrf
                     <div class="mb-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Metode Penerimaan Duit *</label>
+                        <select name="metode_penerimaan" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                            <option value="rek_koperasi">Rekening Kas Utama (Koperasi)</option>
+                            <option value="rek_admin">Rekening Admin (Petty Cash Transfer)</option>
+                            <option value="cash_admin">Tunai Admin (Petty Cash Cash)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan (Opsional)</label>
-                        <textarea name="keterangan" rows="3"
+                        <textarea name="keterangan_admin" rows="3"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
                             placeholder="Tambahkan keterangan..."></textarea>
                     </div>

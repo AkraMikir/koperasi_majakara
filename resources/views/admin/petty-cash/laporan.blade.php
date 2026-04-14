@@ -127,6 +127,7 @@
                                 <table class="w-full text-xs border border-gray-200 rounded-xl overflow-hidden">
                                     <thead class="bg-white">
                                         <tr>
+                                            <th class="px-3 py-2 text-left text-gray-600 w-32">ID</th>
                                             <th class="px-3 py-2 text-left text-gray-600">Nasabah</th>
                                             <th class="px-3 py-2 text-right text-gray-600">Nominal</th>
                                             <th class="px-3 py-2 text-center text-gray-600">Via</th>
@@ -135,7 +136,36 @@
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
                                         @foreach((array) $item->data_potongan as $d)
+                                        @php
+                                            // 1. Ambil langsung dari JSON (data baru)
+                                            $displayId = $d['ref_id'] ?? null;
+                                            
+                                            // 2. Fallback untuk data lama (data_potongan di DB belum ada ref_id)
+                                            if (!$displayId && isset($d['pctn_id'])) {
+                                                $pctn = $item->transaksiNasabah->firstWhere('id', $d['pctn_id']);
+                                                if ($pctn) {
+                                                    // Ambil dari ref_id di tbl petty_cash_transaksi_nasabah
+                                                    $displayId = $pctn->ref_id;
+                                                    
+                                                    // Jika masih null, coba cari via relationship (untuk data yang sangat lama/salah input)
+                                                    if (!$displayId) {
+                                                        // Cek Tabungan
+                                                        if ($pctn->transTabungan) {
+                                                            $displayId = $pctn->transTabungan->id;
+                                                        } 
+                                                        // Cek Pengajuan (Angsuran/Setoran)
+                                                        elseif ($pctn->pengajuanPembayaran) {
+                                                            $displayId = $pctn->pengajuanPembayaran->id;
+                                                        }
+                                                        elseif ($pctn->pengajuanTabungan) {
+                                                            $displayId = $pctn->pengajuanTabungan->id;
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        @endphp
                                         <tr>
+                                            <td class="px-3 py-2 font-mono text-gray-500 whitespace-nowrap">{{ $displayId ?? '-' }}</td>
                                             <td class="px-3 py-2">{{ $d['nama'] ?? '-' }}</td>
                                             <td class="px-3 py-2 text-right font-semibold">Rp {{ number_format($d['nominal'] ?? 0, 0, ',', '.') }}</td>
                                             <td class="px-3 py-2 text-center">{{ $d['via'] ?? '-' }}</td>

@@ -47,6 +47,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Jenis</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Lama</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Bunga</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#674c1d] uppercase">Progress</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Aksi</th>
                     </tr>
                 </thead>
@@ -73,6 +74,11 @@
                             <p class="font-medium">{{ number_format($item->bunga, 2) }}%</p>
                             <p class="text-xs text-gray-500">Rp {{ number_format($item->bunga_rp, 0, ',', '.') }}</p>
                         </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">
+                                {{ $item->payment_progress }}
+                            </span>
+                        </td>
                         <td class="px-6 py-4">
                             <a href="{{ route('admin.pinjaman.detail-pinjaman', $item->id) }}"
                                 class="inline-flex items-center px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all text-sm font-medium">
@@ -82,7 +88,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="px-6 py-12 text-center">
+                        <td colspan="8" class="px-6 py-12 text-center">
                             <div class="flex flex-col items-center gap-3">
                                 <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>

@@ -97,33 +97,61 @@
 
         <!-- Sidebar Actions (sticky) -->
         <div class="space-y-6 lg:sticky lg:top-6 lg:self-start">
-            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h3 class="text-lg font-bold text-primary font-display mb-4">Status</h3>
-                <div class="space-y-3">
-                    @php
-                        // Calculate status based on datetime
-                        $dateTime = \Carbon\Carbon::parse($janjiTemu->tanggal_janji_temu);
-                        if (isset($janjiTemu->waktu_janji_temu)) {
-                            $time = \Carbon\Carbon::parse($janjiTemu->waktu_janji_temu);
-                            $dateTime->setTime($time->hour, $time->minute, $time->second);
-                        }
-                        $isPast = $dateTime->isPast();
-                        $statusLabel = $isPast ? 'Sudah Lewat' : 'Akan Datang';
-                        $statusColor = $isPast ? 'bg-gray-100 text-gray-700' : 'bg-yellow-100 text-yellow-700';
-                    @endphp
-                    <span class="inline-block px-4 py-2 {{ $statusColor }} rounded-full text-sm font-semibold">
-                        {{ $statusLabel }}
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100" x-data="{ openCancel: false }">
+                <h3 class="text-lg font-bold text-primary font-display mb-4">Status & Aksi</h3>
+                <div class="space-y-4">
+                    <span class="inline-block px-4 py-2 {{ $janjiTemu->status_display['class'] }} rounded-full text-sm font-semibold uppercase">
+                        {{ $janjiTemu->status_display['label'] }}
                     </span>
                     <div>
-                        <p class="text-sm text-gray-600">Waktu Tersisa</p>
-                        <p class="font-semibold text-gray-900">
-                            @if($janjiTemu->tanggal_janji_temu < now())
-                                Sudah lewat
-                            @else
-                                {{ $janjiTemu->tanggal_janji_temu->diffForHumans() }}
-                            @endif
-                        </p>
+                        <p class="text-sm text-gray-600">Terakhir Update</p>
+                        <p class="font-semibold text-gray-900">{{ $janjiTemu->updated_at->format('d M Y, H:i') }}</p>
                     </div>
+
+                    @if($janjiTemu->status == '1')
+                    <div class="pt-4 border-t border-gray-100">
+                        <button @click="openCancel = true" class="w-full px-4 py-2 bg-red-50 text-red-600 border border-red-200 rounded-lg hover:bg-red-600 hover:text-white transition-all text-sm font-bold flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                            Batalkan Janji Temu
+                        </button>
+                    </div>
+
+                    <!-- Modal Batal -->
+                    <div x-show="openCancel" 
+                        x-transition:enter="transition ease-out duration-300"
+                        x-transition:enter-start="opacity-0"
+                        x-transition:enter-end="opacity-100"
+                        x-transition:leave="transition ease-in duration-200"
+                        x-transition:leave-start="opacity-100"
+                        x-transition:leave-end="opacity-0"
+                        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+                        x-cloak>
+                        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" @click.away="openCancel = false">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Konfirmasi Pembatalan</h3>
+                            <p class="text-sm text-gray-600 mb-6">Harap berikan alasan pembatalan janji temu ini. Alasan ini akan tercatat dalam sistem.</p>
+                            
+                            <form action="{{ route('admin.janji-temu.cancel-tabungan', $janjiTemu->id) }}" method="POST">
+                                @csrf
+                                <div class="mb-6">
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Pembatalan <span class="text-red-500">*</span></label>
+                                    <textarea name="keterangan_admin" required rows="3" 
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none resize-none"
+                                        placeholder="Contoh: Nasabah tidak datang atau meminta penjadwalan ulang..."></textarea>
+                                </div>
+                                <div class="flex gap-3">
+                                    <button type="button" @click="openCancel = false" class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">
+                                        Batal
+                                    </button>
+                                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors">
+                                        Konfirmasi Batal
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @endif
                 </div>
             </div>
 

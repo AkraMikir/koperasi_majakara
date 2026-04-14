@@ -75,238 +75,150 @@
             </div>
         </div>
 
-    <!-- Riwayat Transaksi -->
-        <div class="mx-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-bold text-[#674c1d] font-display">Riwayat Transaksi</h2>
-                </div>
-                </div>
-                
-                <!-- Filter Section -->
-            <div class="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+    <!-- Container Riwayat Grid Layout -->
+    <div class="mx-4 mb-10 space-y-6">
+        <!-- Row 1: Transaksi & Janji Temu -->
+        <div class="flex flex-col lg:flex-row gap-6">
+            {{-- Tabel Riwayat Transaksi --}}
+            <div id="trans-container" class="w-full lg:w-1/2 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/40 overflow-hidden flex flex-col transition-opacity duration-150 min-h-[600px]">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                    <p class="text-xs font-semibold text-gray-700">Filter Transaksi</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#674c1d] font-display">Riwayat Transaksi</h3>
                     </div>
-                    <x-nasabah.tabungan.filter-tabungan 
-                    action="{{ route('nasabah.tabungan.index') }}"
-                    name-tanggal="trans_date"
-                    name-jumlah="trans_amount"
-                    name-id="trans_id"
-                    placeholder-tanggal="Pilih tanggal"
-                    placeholder-jumlah="Jumlah"
-                    placeholder-id-transaksi="ID Transaksi" />
                 </div>
-                
-                <!-- Table Section -->
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b-2 border-[#674c1d]/20">
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Waktu</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jenis</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jumlah</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Via</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">ID Transaksi</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Keterangan</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-20">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($transaksiTabungan ?? [] as $transaksi)
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-3 text-sm">
-                                <p class="font-medium text-gray-900">{{ $transaksi->tgl_transaksi->format('d M Y') }}</p>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $transaksi->tgl_transaksi->format('H:i') }}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 {{ ($transaksi->jenis ?? '') === 'setoran' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }} rounded-full text-xs font-semibold">
-                                    {{ ucfirst($transaksi->jenis ?? '-') }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <p class="font-semibold {{ ($transaksi->jenis ?? '') === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
-                                    {{ ($transaksi->jenis ?? '') === 'setoran' ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->nominal), 0, ',', '.') }}
-                                </p>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $transaksi->via ? ucfirst($transaksi->via) : '-' }}</td>
-                            <td class="px-4 py-3">
-                                <span class="text-sm text-gray-700 font-mono">{{ $transaksi->id_transaksi ?? $transaksi->id }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600 max-w-[180px]">
-                                <span class="line-clamp-2" title="{{ $transaksi->keterangan }}">{{ Str::limit($transaksi->keterangan ?? '-', 40) }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#674c1d]/10 text-[#674c1d] hover:bg-[#674c1d]/20 transition-colors" title="Lihat detail">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="px-4 py-12 text-center">
-                                <div class="flex flex-col items-center gap-3">
-                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <p class="text-gray-500">Belum ada transaksi</p>
+
+                <div class="ajax-content flex-1 flex flex-col">
+                    @include('nasabah.tabungan.partials._table_trans')
+                </div>
+            </div>
+
+            {{-- Tabel Riwayat Janji Temu --}}
+            <div id="jt-container" class="w-full lg:w-1/2 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/40 overflow-hidden flex flex-col transition-opacity duration-150 min-h-[600px]">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#674c1d] font-display">Riwayat Janji Temu</h3>
                     </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                </div>
+
+                <div class="ajax-content flex-1 flex flex-col">
+                    @include('nasabah.tabungan.partials._table_jt')
                 </div>
             </div>
         </div>
 
-    <!-- Riwayat Janji Temu -->
-        <div class="mx-4 mb-6">
-        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                        </svg>
-                    </div>
-                    <h2 class="text-lg font-bold text-[#674c1d] font-display">Riwayat Janji Temu</h2>
-                </div>
-                </div>
-                
-                <!-- Filter Section -->
-            <div class="mb-4 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                <div class="flex items-center gap-2 mb-3">
-                    <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+        <!-- Row 2: Pengajuan Setor & Tarik -->
+        <div class="flex flex-col lg:flex-row gap-6">
+            {{-- Tabel Riwayat Pengajuan Setor --}}
+            <div id="setor-container" class="w-full lg:w-1/2 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/40 overflow-hidden flex flex-col transition-opacity duration-150 min-h-[600px]">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                             </svg>
-                    <p class="text-xs font-semibold text-gray-700">Filter Janji Temu</p>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#674c1d] font-display">Status Setoran (Transfer)</h3>
                     </div>
-                    <x-nasabah.tabungan.filter-tabungan 
-                    action="{{ route('nasabah.tabungan.index') }}"
-                    name-tanggal="appt_date"
-                    name-jumlah="appt_amount"
-                    name-id="appt_id"
-                    placeholder-tanggal="Pilih tanggal"
-                    placeholder-jumlah="Nominal"
-                    placeholder-id-transaksi="ID Janji Temu" />
                 </div>
-                
-                <!-- Table Section -->
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="border-b-2 border-[#674c1d]/20">
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">ID Janji Temu</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Waktu</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jenis</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Lokasi</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
-                            <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-20">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($riwayatJanjiTemu ?? [] as $janji)
-                        @php
-                            // Parse Date
-                            $tanggal = $janji->tanggal_janji_temu ?? $janji->created_at;
-                            $dateTime = \Carbon\Carbon::parse($tanggal);
-                            
-                            // Parse Time & Display
-                            $displayTime = '-';
-                            if (!empty($janji->waktu_janji_temu)) {
-                                $parsedTime = \Carbon\Carbon::parse($janji->waktu_janji_temu);
-                                $dateTime->setTime($parsedTime->hour, $parsedTime->minute, $parsedTime->second);
-                                $displayTime = $parsedTime->format('H:i');
-                            }
 
-                            // Status Logic
-                            $isPast = $dateTime->isPast();
-                            
-                            if ($janji->status == '2') {
-                                $statusLabel = 'Selesai';
-                                $statusClass = 'bg-green-100 text-green-700';
-                            } elseif ($janji->status == '3') {
-                                $statusLabel = 'Dibatalkan';
-                                $statusClass = 'bg-red-100 text-red-700';
-                            } elseif ($isPast) {
-                                $statusLabel = 'Terlewat';
-                                $statusClass = 'bg-gray-100 text-gray-700';
-                            } else {
-                                $statusLabel = 'Akan Datang';
-                                $statusClass = 'bg-amber-100 text-amber-700';
-                            }
+                <div class="ajax-content flex-1 flex flex-col">
+                    @include('nasabah.tabungan.partials._table_setor')
+                </div>
+            </div>
 
-                            // Location Logic
-                            $namaLokasi = 'N/A';
-                            if (isset($janji->lokasi) && is_object($janji->lokasi)) {
-                                $namaLokasi = $janji->lokasi->nama_lokasi ?? 'N/A';
-                            } elseif (is_string($janji->lokasi)) {
-                                $namaLokasi = $janji->lokasi;
-                            }
-
-                            // Jenis: setoran / penarikan
-                            $jenisLabel = ucfirst($janji->jenis ?? 'setoran');
-                            $jenisClass = ($janji->jenis ?? 'setoran') === 'penarikan' ? 'bg-orange-100 text-orange-700' : 'bg-green-100 text-green-700';
-                        @endphp
-                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
-                            <td class="px-4 py-3">
-                                <span class="text-sm font-mono text-gray-700">{{ $janji->id }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-sm">
-                                <p class="font-medium text-gray-900">{{ $dateTime->format('d M Y') }}</p>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $displayTime }}</td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 {{ $jenisClass }} rounded-full text-xs font-semibold">{{ $jenisLabel }}</span>
-                            </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $namaLokasi }}</td>
-                            <td class="px-4 py-3">
-                                <p class="font-semibold text-[#674c1d]">Rp {{ number_format($janji->nominal, 0, ',', '.') }}</p>
-                            </td>
-                            <td class="px-4 py-3">
-                                <span class="px-3 py-1 {{ $statusClass }} rounded-full text-xs font-semibold whitespace-nowrap">
-                                    {{ $statusLabel }}
-                                </span>
-                            </td>
-                            <td class="px-4 py-3 text-center">
-                                <a href="{{ route('nasabah.tabungan.detail-janji-temu', $janji->id) }}" class="inline-flex items-center justify-center w-9 h-9 rounded-lg bg-[#674c1d]/10 text-[#674c1d] hover:bg-[#674c1d]/20 transition-colors" title="Lihat detail">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                    </svg>
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="8" class="px-4 py-12 text-center">
-                                <div class="flex flex-col items-center gap-3">
-                                    <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                    </svg>
-                                    <p class="text-gray-500">Belum ada janji temu</p>
+            {{-- Tabel Riwayat Pengajuan Tarik --}}
+            <div id="tarik-container" class="w-full lg:w-1/2 bg-white/80 backdrop-blur-md rounded-2xl shadow-xl border border-white/40 overflow-hidden flex flex-col transition-opacity duration-150 min-h-[600px]">
+                <div class="p-6 pb-0">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-linear-to-br from-[#d4af37] via-[#8b6f2f] to-[#674c1d] rounded-xl flex items-center justify-center shadow-md">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-[#674c1d] font-display">Status Penarikan (Transfer)</h3>
                     </div>
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                </div>
+
+                <div class="ajax-content flex-1 flex flex-col">
+                    @include('nasabah.tabungan.partials._table_tarik')
                 </div>
             </div>
         </div>
     </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Function to handle AJAX pagination
+            function handleAjaxPagination(containerId, sectionName) {
+                const container = document.getElementById(containerId);
+                if (!container) return; // Guard clause
+                
+                container.addEventListener('click', function(e) {
+                    const link = e.target.closest('nav.flex a');
+                    if (link && !link.hasAttribute('data-no-ajax')) {
+                        e.preventDefault();
+                        
+                        const url = link.href;
+                        loadSection(containerId, sectionName, url);
+                    }
+                });
+            }
+
+            function loadSection(containerId, sectionName, url) {
+                const container = document.getElementById(containerId);
+                const contentArea = container.querySelector('.ajax-content');
+                
+                // Add loading effect
+                container.classList.add('opacity-60');
+                container.style.pointerEvents = 'none';
+
+                // Append section identifier to URL
+                const ajaxUrl = new URL(url);
+                ajaxUrl.searchParams.append('section', sectionName);
+
+                fetch(ajaxUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.text();
+                })
+                .then(html => {
+                    contentArea.innerHTML = html;
+                    
+                    // Smooth scroll to container top if needed
+                    // container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                })
+                .catch(error => {
+                    console.error('Pagination Error:', error);
+                    // Fallback: full page reload if AJAX fails
+                    window.location.href = url;
+                })
+                .finally(() => {
+                    container.classList.remove('opacity-60');
+                    container.style.pointerEvents = 'auto';
+                });
+            }
+
+            // Initialize pagination for all tables
+            handleAjaxPagination('trans-container', 'trans');
+            handleAjaxPagination('jt-container', 'jt');
+            handleAjaxPagination('setor-container', 'setor');
+            handleAjaxPagination('tarik-container', 'tarik');
+        });
+    </script>
 @endsection
+

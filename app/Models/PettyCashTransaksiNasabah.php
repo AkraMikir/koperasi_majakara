@@ -26,6 +26,8 @@ class PettyCashTransaksiNasabah extends Model
         'bukti_tf',
         'status',
         'keterangan',
+        'ref_table',
+        'ref_id',
         'setoran_kantor_id',
         'tgl_transaksi',
     ];
@@ -97,5 +99,25 @@ class PettyCashTransaksiNasabah extends Model
     public function transTabungan(): HasOne
     {
         return $this->hasOne(TransTabungan::class, 'petty_cash_ref', 'id');
+    }
+
+    public function pengajuanPembayaran(): BelongsTo
+    {
+        return $this->belongsTo(PengajuanPembayaranPinjaman::class, 'ref_id');
+    }
+
+    public function pengajuanTabungan(): BelongsTo
+    {
+        return $this->belongsTo(PengajuanTabungan::class, 'ref_id');
+    }
+
+    public function getJenisTransaksiAttribute()
+    {
+        return match($this->ref_table) {
+            'tbl_pengajuan_tabungan' => 'Tabungan',
+            'tbl_pengajuan_pembayaran_pinjaman' => 'Angsuran',
+            'tbl_pinjaman_h' => 'Pencairan',
+            default => 'Lainnya'
+        };
     }
 }

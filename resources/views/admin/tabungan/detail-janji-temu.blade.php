@@ -237,7 +237,7 @@
             </div>
             @endif
 
-            <div class="bg-[#674c1d] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden">
+            <div class="bg-[#674c1d] rounded-2xl shadow-lg p-6 text-white relative overflow-hidden" x-data="{ openCancel: false }">
                 <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10"></div>
                 <div class="relative z-10">
                     <h3 class="font-bold text-lg mb-2">Status Saat Ini</h3>
@@ -248,6 +248,44 @@
                         <p class="mt-4 text-sm text-white/80">
                             Masih menunggu pertemuan dengan nasabah. Pastikan waktu dan lokasi sudah sesuai.
                         </p>
+
+                        {{-- Tombol Batalkan --}}
+                        <div class="mt-6 pt-4 border-t border-white/10">
+                            <button @click="openCancel = true"
+                                class="w-full px-4 py-2 bg-red-500/20 hover:bg-red-500/40 border border-red-500/30 text-white rounded-xl transition-all text-sm font-bold flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                                Batalkan Janji Temu
+                            </button>
+                        </div>
+
+                        {{-- Modal Konfirmasi Batal --}}
+                        <div x-show="openCancel"
+                            class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 text-gray-900"
+                            x-cloak>
+                            <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-6" @click.away="openCancel = false">
+                                <h3 class="text-xl font-bold mb-2">Konfirmasi Pembatalan</h3>
+                                <p class="text-sm text-gray-600 mb-6">Harap berikan alasan pembatalan janji temu tabungan ini. Alasan ini akan tercatat dalam sistem.</p>
+
+                                <form action="{{ route('admin.janji-temu.cancel-tabungan', $janjiTemu->id) }}" method="POST">
+                                    @csrf
+                                    <div class="mb-6">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Alasan Pembatalan <span class="text-red-500">*</span></label>
+                                        <textarea name="keterangan_admin" required rows="3"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none resize-none"
+                                            placeholder="Contoh: Nasabah tidak datang atau meminta penjadwalan ulang..."></textarea>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button type="button" @click="openCancel = false"
+                                            class="flex-1 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium">Kembali</button>
+                                        <button type="submit"
+                                            class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium">Konfirmasi Batal</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                     @elseif($janjiTemu->status == '2')
                         <span class="inline-flex px-4 py-1.5 rounded-full bg-green-400/20 border border-green-400/30 text-green-100 font-semibold text-sm backdrop-blur-sm">
                             Selesai
@@ -259,12 +297,16 @@
                         <span class="inline-flex px-4 py-1.5 rounded-full bg-red-400/20 border border-red-400/30 text-red-100 font-semibold text-sm backdrop-blur-sm">
                             Dibatalkan
                         </span>
+                        @if($janjiTemu->keterangan_admin)
+                        <p class="mt-3 text-sm text-white/80">{{ $janjiTemu->keterangan_admin }}</p>
+                        @endif
                     @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Photo Preview Modal -->
 <div id="photoPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4" onclick="closePhotoPreview()">

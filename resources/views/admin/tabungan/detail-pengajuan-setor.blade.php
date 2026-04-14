@@ -145,7 +145,7 @@
             <!-- Approve Modal with Keterangan Admin -->
             @if($pengajuan->status == '1')
             <div id="approveModal"
-                class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Setujui Pengajuan</h3>
                     <form id="approveForm" method="POST">

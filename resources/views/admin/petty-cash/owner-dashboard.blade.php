@@ -121,7 +121,7 @@
                 <div class="mt-3">
                      <a href="{{ route('admin.petty-cash.penerimaan.create', ['admin_id' => $admin->id]) }}" 
                         class="block w-full text-center px-3 py-1.5 bg-[#674c1d]/10 text-[#674c1d] rounded-lg text-xs font-semibold hover:bg-[#674c1d]/20 transition-colors">
-                         ➕ Kirim Dana Ke Admin Ini
+                          Kirim Dana Ke Admin Ini
                      </a>
                 </div>
             </div>
