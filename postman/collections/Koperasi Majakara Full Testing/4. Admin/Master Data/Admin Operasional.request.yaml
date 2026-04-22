@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/admin/master-data/admin-operasional"
+method: GET
+order: 2000

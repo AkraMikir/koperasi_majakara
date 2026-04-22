@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/testimoni"
+method: GET
+order: 4000

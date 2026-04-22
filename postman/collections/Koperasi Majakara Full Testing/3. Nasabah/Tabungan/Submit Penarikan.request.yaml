@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/nasabah/tabungan/penarikan"
+method: POST
+order: 3000

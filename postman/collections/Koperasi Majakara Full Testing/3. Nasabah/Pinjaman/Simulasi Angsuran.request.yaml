@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/nasabah/pinjaman/simulasi-angsuran"
+method: POST
+order: 2000

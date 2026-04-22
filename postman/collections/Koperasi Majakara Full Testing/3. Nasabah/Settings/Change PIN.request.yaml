@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/nasabah/setting/change-pin"
+method: POST
+order: 2000
