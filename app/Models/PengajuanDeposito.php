@@ -17,11 +17,12 @@ class PengajuanDeposito extends Model
         'id_nasabah',
         'nominal',
         'tenor_id',
-        'jenis_deposito',
         'metode_setor',
         'foto_bukti_tf',
         'status',
         'catatan',
+        'catatan_admin',
+        'approved_by',
     ];
 
     protected $casts = [
@@ -38,11 +39,6 @@ class PengajuanDeposito extends Model
     public function tenor(): BelongsTo
     {
         return $this->belongsTo(JnsTenorDeposito::class, 'tenor_id');
-    }
-
-    public function jenisDeposito(): BelongsTo
-    {
-        return $this->belongsTo(JnsDeposito::class, 'jenis_deposito');
     }
 
     public function deposito(): HasOne

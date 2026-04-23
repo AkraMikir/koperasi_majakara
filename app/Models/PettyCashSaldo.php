@@ -1,12 +1,11 @@
 <?php
-
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PettyCashSaldo extends Model
+class PettyCashSaldo extends Model 
 {
     use HasFactory;
 
@@ -116,8 +115,43 @@ class PettyCashSaldo extends Model
      */
     public static function validatePenarikanCash($adminId, $nominal): bool
     {
-        $saldoCash = static::getSaldoCash($adminId);
-        return $saldoCash >= $nominal;
+        return static::getSaldoCash($adminId) >= $nominal;
+    }
+
+    /**
+     * Validate transfer balance.
+     */
+    public static function validatePenarikanTransfer($adminId, $nominal): bool
+    {
+        return static::getSaldoTransfer($adminId) >= $nominal;
+    }
+
+    /**
+     * Generic validation based on type.
+     */
+    public static function validatePenarikan($adminId, $nominal, $tipe = 'cash'): bool
+    {
+        return static::getSaldo($adminId, 'admin', $tipe) >= $nominal;
+    }
+
+    /**
+     * Get total saldo (cash + tf) for the owner.
+     */
+    public static function getSaldoOwnerTotal(int $ownerId): float
+    {
+        return static::getSaldo($ownerId, 'owner', 'cash') + 
+               static::getSaldo($ownerId, 'owner', 'transfer');
+    }
+
+    /**
+     * Validate if owner has enough balance for both cash and tf.
+     */
+    public static function validateKirimOwner(int $ownerId, float $cash, float $tf): bool
+    {
+        $saldoCash = static::getSaldo($ownerId, 'owner', 'cash');
+        $saldoTf   = static::getSaldo($ownerId, 'owner', 'transfer');
+        
+        return $saldoCash >= $cash && $saldoTf >= $tf;
     }
 
     // Relationships

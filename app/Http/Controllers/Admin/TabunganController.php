@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 use App\Helpers\IdGenerator;
 use App\Models\BuktiFoto;
 use App\Models\BiayaTransfer;
@@ -81,23 +82,24 @@ class TabunganController extends Controller
             ->latest();
 
         // Filter by status
-        if ($request->has('status') && $request->status !== '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
-            // Default show pending
             $query->where('status', '1');
         }
 
         // Search
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('nasabah.user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('nasabah.user', function($sq) use ($search) {
+                    $sq->where('nama', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        $pengajuan = $query->paginate(15);
+        $pengajuan = $query->paginate(15)->withQueryString();
 
         return view('admin.tabungan.pengajuan-setor', compact('pengajuan'));
     }
@@ -123,6 +125,13 @@ class TabunganController extends Controller
             
             $pengajuan = PengajuanTabungan::with(['buktiFoto', 'transTabungan'])->findOrFail($id);  // Removed janjiTemu
             
+            // Cek apakah sudah diproses
+            if ($pengajuan->status != '1') {
+                DB::rollBack();
+                return redirect()->route('admin.tabungan.pengajuan-setor')
+                    ->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+            }
+
             // Get nominal from pengajuan
             $nominal = $pengajuan->nominal ?? 0;
 
@@ -168,7 +177,7 @@ class TabunganController extends Controller
                 'nominal'            => abs((float) $nominal),
                 'keterangan'         => $pengajuan->keterangan ?? 'Setoran tabungan disetujui',
                 'tgl_transaksi'      => now(),
-                'admin_pengelola_id' => auth()->id(),
+                'admin_pengelola_id' => Auth::id(),
                 'is_petty_cash'      => ($request->metode_bayar !== 'transfer_koperasi') ? 1 : 0,
                 'petty_cash_ref'     => $pettyId,
                 'metode_bayar'       => $request->metode_bayar ?? 'transfer_koperasi',
@@ -178,7 +187,7 @@ class TabunganController extends Controller
             if ($pettyId) {
                 PettyCashTransaksiNasabah::create([
                     'id'               => $pettyId,
-                    'admin_id'         => auth()->id(),
+                    'admin_id'         => Auth::id(),
                     'nasabah_id'       => $pengajuan->id_anggota,
                     'id_jns_transaksi' => $idTrans,
                     'id_jns_via'       => ($request->metode_bayar === 'cash') ? 
@@ -195,7 +204,7 @@ class TabunganController extends Controller
 
                 $pettyType = ($request->metode_bayar === 'cash') ? 'cash' : 'transfer';
                 PettyCashSaldo::updateOrCreateSaldo(
-                    auth()->id(), 
+                    Auth::id(), 
                     'admin', 
                     $nominal, 
                     $pettyId, 
@@ -211,7 +220,7 @@ class TabunganController extends Controller
         // Update status to approved (status '2') + simpan keterangan_admin dan siapa yang approve
         $updateData = [
             'status' => '2',
-            'approved_by_user_id' => auth()->id(),
+            'approved_by_user_id' => Auth::id(),
             'metode_bayar' => $request->metode_bayar ?? 'transfer_koperasi',
         ];
         if ($request->filled('keterangan_admin')) {
@@ -221,7 +230,7 @@ class TabunganController extends Controller
 
             DB::commit();
 
-            app(ActivityLogService::class)->logApproveSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+            app(ActivityLogService::class)->logApproveSetoran($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             NasabahNotification::notify(
                 $pengajuan->id_anggota,
@@ -266,12 +275,18 @@ class TabunganController extends Controller
         ]);
 
         $pengajuan = PengajuanTabungan::with('nasabah.user')->findOrFail($id);
+
+        if ($pengajuan->status != '1') {
+            return redirect()->route('admin.tabungan.pengajuan-setor')
+                ->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
+
         $pengajuan->update([
             'status' => '3',
             'keterangan_admin' => $request->keterangan_admin
         ]);
 
-        app(ActivityLogService::class)->logRejectSetoran($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+        app(ActivityLogService::class)->logRejectSetoran($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         NasabahNotification::notify(
             $pengajuan->id_anggota,
@@ -298,23 +313,24 @@ class TabunganController extends Controller
             ->latest();
 
         // Filter by status
-        if ($request->has('status') && $request->status !== '') {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         } else {
-            // Default show pending
             $query->where('status', '1');
         }
 
         // Search
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('nasabah.user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('nasabah.user', function($sq) use ($search) {
+                    $sq->where('nama', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        $pengajuan = $query->paginate(15);
+        $pengajuan = $query->paginate(15)->withQueryString();
 
         return view('admin.tabungan.pengajuan-tarik', compact('pengajuan'));
     }
@@ -342,8 +358,11 @@ class TabunganController extends Controller
             ?? $biayaTransferList->first()?->biaya_admin
             ?? 0;
         $biayaDefault = (float) $biayaDefault;
+        
+        // Get admin petty cash balance (Transfer)
+        $adminSaldo = PettyCashSaldo::getSaldoTransfer(Auth::id());
 
-        return view('admin.tabungan.detail-pengajuan-tarik', compact('pengajuan', 'saldo', 'biayaTransferList', 'biayaDefault'));
+        return view('admin.tabungan.detail-pengajuan-tarik', compact('pengajuan', 'saldo', 'biayaTransferList', 'biayaDefault', 'adminSaldo'));
     }
 
     /**
@@ -352,6 +371,11 @@ class TabunganController extends Controller
     public function approveTarik(Request $request, $id)
     {
         $pengajuan = PengajuanPenarikanTabungan::findOrFail($id);
+
+        if ($pengajuan->status != '1') {
+            return redirect()->route('admin.tabungan.pengajuan-tarik')
+                ->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
 
         // Penarikan tunai diproses via Janji Temu, bukan di sini
         if ($pengajuan->metode_transfer !== 'transfer') {
@@ -386,61 +410,92 @@ class TabunganController extends Controller
                 ->with('error', 'Saldo nasabah tidak mencukupi (nominal + biaya transfer). Total yang dipotong: Rp ' . number_format($totalDipotong, 0, ',', '.'));
         }
 
-        // Upload foto bukti TF admin (jika transfer)
-        $fotoBuktiPath = null;
-        if ($pengajuan->metode_transfer == 'transfer' && $request->hasFile('foto_bukti_tf_admin')) {
-            $fotoBuktiPath = $request->file('foto_bukti_tf_admin')->store('bukti_tf_admin', 'public');
+        DB::beginTransaction();
+        try {
+            // Upload foto bukti TF admin (jika transfer)
+            $fotoBuktiPath = null;
+            if ($pengajuan->metode_transfer == 'transfer' && $request->hasFile('foto_bukti_tf_admin')) {
+                $fotoBuktiPath = $request->file('foto_bukti_tf_admin')->store('bukti_tf_admin', 'public');
+            }
+
+            // Update pengajuan dengan foto dan biaya transfer
+            $pengajuan->update([
+                'status' => '2',
+                'foto_bukti_tf_admin' => $fotoBuktiPath,
+                'biaya_transfer' => $biayaTransfer,
+            ]);
+
+            // V2 Logic: Master Data Driven
+            $kodeVia = ($pengajuan->metode_transfer == 'transfer') ? 'TF' : 'TN';
+            $kodeTrans = 'PNR';
+
+            // Get IDs
+            $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+            $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+            
+            // Generate ID using correct method
+            $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
+
+            // 🔥 INTEGRASI PETTY CASH: Validasi dan Pemotongan Saldo Transfer Admin
+            // Untuk penarikan via transfer, kita kurangi saldo transfer admin
+            if ($pengajuan->metode_transfer == 'transfer') {
+                if (!PettyCashSaldo::validatePenarikanTransfer(Auth::id(), $pengajuan->nominal)) {
+                    throw new \Exception('Saldo Transfer Petty Cash Anda tidak mencukupi untuk melakukan penarikan ini.');
+                }
+
+                PettyCashSaldo::updateSaldo(
+                    Auth::id(), 
+                    'transfer', 
+                    -(float)$pengajuan->nominal, 
+                    $pengajuan->id, 
+                    'Penarikan Tabungan (Transfer): ' . ($pengajuan->nasabah->user->nama ?? 'Nasabah'),
+                    'tbl_pengajuan_penarikan_tabungan'
+                );
+            }
+
+            // Create transaksi penarikan: nominal = total yang didebet dari saldo nasabah (nominal + biaya transfer)
+            TransTabungan::create([
+                'id' => $idTransaksi,
+                'id_pengajuan_tarik' => $pengajuan->id,
+                'id_anggota' => $pengajuan->id_anggota,
+                'id_jns_via' => $idVia,
+                'id_jns_transaksi' => $idTrans,
+                'nominal' => abs($totalDipotong), // Pastikan selalu positif
+                'keterangan' => $pengajuan->keterangan ?? 'Penarikan tabungan transfer',
+                'tgl_transaksi' => now(),
+                'admin_pengelola_id' => Auth::id(),
+                'is_petty_cash' => 1,
+                'petty_cash_ref' => $pengajuan->id,
+                'metode_bayar' => 'transfer_admin',
+            ]);
+
+            DB::commit();
+
+            app(ActivityLogService::class)->logApproveTarik(
+                $pengajuan->id,
+                (float) $pengajuan->nominal,
+                $pengajuan->nasabah->user->nama ?? 'N/A',
+                (float) ($pengajuan->biaya_transfer ?? 0)
+            );
+
+            NasabahNotification::notify(
+                $pengajuan->id_anggota,
+                'tabungan_tarik',
+                'Pengajuan penarikan disetujui',
+                'Penarikan Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Dana telah ditransfer ke rekening Anda.',
+                route('nasabah.tabungan.detail-pengajuan-tarik', $pengajuan->id),
+                (string) $pengajuan->id,
+                'pengajuan_penarikan_tabungan'
+            );
+
+            return redirect()->route('admin.tabungan.pengajuan-tarik')
+                ->with('success', 'Pengajuan penarikan berhasil disetujui, saldo petty cash telah diperbarui');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error approve penarikan: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Gagal memproses penarikan: ' . $e->getMessage());
         }
-
-        // Update pengajuan dengan foto dan biaya transfer (untuk ditampilkan di detail nasabah)
-        $pengajuan->update([
-            'status' => '2',
-            'foto_bukti_tf_admin' => $fotoBuktiPath,
-            'biaya_transfer' => $biayaTransfer,
-        ]);
-
-        // V2 Logic: Master Data Driven
-        $kodeVia = ($pengajuan->metode_transfer == 'transfer') ? 'TF' : 'TN';
-        $kodeTrans = 'PNR';
-
-        // Get IDs
-        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
-        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
-        
-        // Generate ID using correct method
-        $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
-
-        // Create transaksi penarikan: nominal = total yang didebet dari saldo (nominal + biaya transfer)
-        TransTabungan::create([
-            'id' => $idTransaksi,
-            'id_pengajuan_tarik' => $pengajuan->id,
-            'id_anggota' => $pengajuan->id_anggota,
-            'id_jns_via' => $idVia,
-            'id_jns_transaksi' => $idTrans,
-            'nominal' => $totalDipotong,
-            'keterangan' => $pengajuan->keterangan,
-            'tgl_transaksi' => now(),
-        ]);
-
-        app(ActivityLogService::class)->logApproveTarik(
-            $pengajuan->id,
-            (float) $pengajuan->nominal,
-            $pengajuan->nasabah->user->nama ?? 'N/A',
-            (float) ($pengajuan->biaya_transfer ?? 0)
-        );
-
-        NasabahNotification::notify(
-            $pengajuan->id_anggota,
-            'tabungan_tarik',
-            'Pengajuan penarikan disetujui',
-            'Penarikan Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Dana akan ditransfer ke rekening Anda.',
-            route('nasabah.tabungan.detail-pengajuan-tarik', $pengajuan->id),
-            (string) $pengajuan->id,
-            'pengajuan_penarikan_tabungan'
-        );
-
-        return redirect()->route('admin.tabungan.pengajuan-tarik')
-            ->with('success', 'Pengajuan penarikan berhasil disetujui dan transfer telah dilakukan');
     }
 
     /**
@@ -454,6 +509,11 @@ class TabunganController extends Controller
 
         $pengajuan = PengajuanPenarikanTabungan::with('nasabah.user')->findOrFail($id);
 
+        if ($pengajuan->status != '1') {
+            return redirect()->route('admin.tabungan.pengajuan-tarik')
+                ->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
+        }
+
         // Penarikan tunai diproses via Janji Temu
         if ($pengajuan->metode_transfer !== 'transfer') {
             return redirect()->route('admin.janji-temu.index')
@@ -465,7 +525,7 @@ class TabunganController extends Controller
             'keterangan_admin' => $request->keterangan_admin
         ]);
 
-        app(ActivityLogService::class)->logRejectTarik($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+        app(ActivityLogService::class)->logRejectTarik($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         NasabahNotification::notify(
             $pengajuan->id_anggota,
@@ -491,7 +551,7 @@ class TabunganController extends Controller
 
         // Filter Riwayat Saya / Petty Cash
         if ($request->filter == 'saya') {
-            $query->where('admin_pengelola_id', auth()->id());
+            $query->where('admin_pengelola_id', Auth::id());
             $title = 'Riwayat Proses Saya';
         } elseif ($request->filter == 'petty') {
             $query->where('is_petty_cash', 1);
@@ -500,8 +560,8 @@ class TabunganController extends Controller
             $title = 'Semua Transaksi';
         }
 
-        // Filter by jenis (via relasi jns_transaksi; 'jenis' adalah accessor, bukan kolom DB)
-        if ($request->has('jenis') && $request->jenis !== '') {
+        // Filter by jenis
+        if ($request->filled('jenis')) {
             $kode = $request->jenis === 'setoran' ? 'STR' : ($request->jenis === 'penarikan' ? 'PNR' : null);
             if ($kode) {
                 $query->whereHas('jnsTransaksi', function ($q) use ($kode) {
@@ -511,26 +571,28 @@ class TabunganController extends Controller
         }
 
         // Filter by date
-        if ($request->has('tanggal_dari') && $request->tanggal_dari !== '') {
-            $query->whereDate('tgl_transaksi', '>=', $request->tanggal_dari);
-        }
+        $query->when($request->filled('tanggal_dari'), function($q) use ($request) {
+            $q->whereDate('tgl_transaksi', '>=', $request->tanggal_dari);
+        });
 
-        if ($request->has('tanggal_sampai') && $request->tanggal_sampai !== '') {
-            $query->whereDate('tgl_transaksi', '<=', $request->tanggal_sampai);
-        }
+        $query->when($request->filled('tanggal_sampai'), function($q) use ($request) {
+            $q->whereDate('tgl_transaksi', '<=', $request->tanggal_sampai);
+        });
 
-        // Search
-        if ($request->has('search') && $request->search !== '') {
+        // Search - Use where to group the search conditions
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('nasabah.user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('nasabah.user', function($sq) use ($search) {
+                    $sq->where('nama', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        $transaksi = $query->paginate(20);
+        $transaksi = $query->paginate(20)->withQueryString();
 
-        $myCount = TransTabungan::where('admin_pengelola_id', auth()->id())->count();
+        $myCount = TransTabungan::where('admin_pengelola_id', Auth::id())->count();
         $pettyCount = TransTabungan::where('is_petty_cash', 1)->count();
 
         return view('admin.tabungan.transaksi', compact('transaksi', 'title', 'myCount', 'pettyCount'));
@@ -558,7 +620,7 @@ class TabunganController extends Controller
             'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto', 'transTabungan'
         ])->findOrFail($id);
 
-        $adminSaldo = PettyCashSaldo::getSaldo(auth()->id(), 'admin');
+        $adminSaldo = PettyCashSaldo::getSaldo(Auth::id(), 'admin');
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu', 'adminSaldo'));
     }
@@ -648,13 +710,13 @@ class TabunganController extends Controller
         // 🔥 INTEGRASI PETTY CASH: Validasi Saldo jika Penarikan Tunai
         if ($isWithdrawal) {
             try {
-                if (!PettyCashSaldo::validatePenarikanCash(auth()->id(), $nominal)) {
+                if (!PettyCashSaldo::validatePenarikanCash(Auth::id(), $nominal)) {
                     throw new \Exception("Saldo CASH tidak mencukupi untuk penarikan ini.");
                 }
                 
                 // Pemotongan Saldo Petty Cash Admin (CASH)
                 PettyCashSaldo::updateSaldo(
-                    auth()->id(), 
+                    Auth::id(), 
                     'cash', 
                     -$nominal, 
                     $janjiTemu->id, 
@@ -679,10 +741,10 @@ class TabunganController extends Controller
             'id_anggota'         => $idAnggota,
             'id_jns_via'         => $idVia,
             'id_jns_transaksi'   => $idTrans,
-            'nominal'            => $isWithdrawal ? -$nominal : $nominal, // Simpan negatif di trans_tabungan jika penarikan
+            'nominal'            => (float) $nominal, // Selalu positif
             'keterangan'         => ($isWithdrawal ? '[PENARIKAN TUNAI] ' : '[SETORAN TUNAI] ') . $janjiTemu->keterangan,
             'tgl_transaksi'      => now(),
-            'admin_pengelola_id' => auth()->id(),
+            'admin_pengelola_id' => Auth::id(),
             'is_petty_cash'      => 1,
             'petty_cash_ref'     => $pettyId ?: $janjiTemu->id, // Jika penarikan ref ke janji temu
             'metode_bayar'       => 'cash',
@@ -692,7 +754,7 @@ class TabunganController extends Controller
         if ($pettyId) {
             PettyCashTransaksiNasabah::create([
                 'id'               => $pettyId,
-                'admin_id'         => auth()->id(),
+                'admin_id'         => Auth::id(),
                 'nasabah_id'       => $idAnggota,
                 'id_jns_transaksi' => $idTrans,
                 'id_jns_via'       => $idVia,
@@ -706,7 +768,7 @@ class TabunganController extends Controller
             ]);
 
             PettyCashSaldo::updateOrCreateSaldo(
-                auth()->id(), 
+                Auth::id(), 
                 'admin', 
                 $nominal, 
                 $pettyId, 
@@ -727,7 +789,7 @@ class TabunganController extends Controller
     public function editPengajuanSetor(Request $request, $id)
     {
         // Authorization: Only Admin Utama can edit pengajuan
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pengajuan.'
@@ -831,7 +893,7 @@ class TabunganController extends Controller
     public function deletePengajuanSetor($id)
     {
         // Authorization: Only Admin Utama can delete pengajuan
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pengajuan.');
         }
 
@@ -869,15 +931,17 @@ class TabunganController extends Controller
         $query = Nasabah::with('user');
 
         // Search
-        if ($request->has('search') && $request->search !== '') {
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->whereHas('user', function($sq) use ($search) {
+                    $sq->where('nama', 'like', "%{$search}%")
+                      ->orWhere('email', 'like', "%{$search}%");
+                })->orWhere('id', 'like', "%{$search}%");
             });
         }
 
-        $nasabah = $query->paginate(20);
+        $nasabah = $query->paginate(20)->withQueryString();
 
         // Calculate saldo for each nasabah
         $nasabah->getCollection()->transform(function($item) {
@@ -900,27 +964,30 @@ class TabunganController extends Controller
     private function getSaldoNasabah($idAnggota)
     {
         // Hitung dari trans_tabungan yang sudah ada
-        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
+        $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
-        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
+        $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
-            ->sum('nominal') ?? 0;
+            ->get()
+            ->sum(function($t) { return abs((float)$t->nominal); });
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+        $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->with(['buktiFoto'])  // Removed janjiTemu
-            ->get();
+            ->sum('nominal') ?? 0;
 
-        foreach ($pengajuanApproved as $pengajuan) {
-            $nominal = $pengajuan->nominal ?? 0;
-            $totalSetoran += $nominal;
-        }
+        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
 
-        return max(0, $totalSetoran - $totalPenarikan);
+        // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
+        $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->where('metode_setor', 'saldo_tabungan')
+            ->sum('nominal') ?? 0;
+
+        return max(0, $saldo - $pendingDepositoTabungan);
     }
 
     /**
@@ -929,7 +996,7 @@ class TabunganController extends Controller
     public function createTransaksi()
     {
         // Authorization: Only Admin Utama can create manual transactions
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
         }
 
@@ -944,7 +1011,7 @@ class TabunganController extends Controller
     public function storeTransaksi(Request $request)
     {
         // Authorization: Only Admin Utama can create manual transactions
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat transaksi manual.');
         }
 
@@ -1008,7 +1075,7 @@ class TabunganController extends Controller
     public function editTransaksi($id)
     {
         // Authorization: Only Admin Utama can edit manual transactions
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit transaksi manual.');
         }
 
@@ -1031,7 +1098,7 @@ class TabunganController extends Controller
     public function updateTransaksi(Request $request, $id)
     {
         // Authorization: Only Admin Utama can update manual transactions
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate transaksi manual.');
         }
 
@@ -1079,7 +1146,7 @@ class TabunganController extends Controller
     public function destroyTransaksi($id)
     {
         // Authorization: Only Admin Utama can delete manual transactions
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudTabunganTransaksi(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus transaksi manual.');
         }
 

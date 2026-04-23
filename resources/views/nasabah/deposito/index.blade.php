@@ -1,0 +1,526 @@
+@extends('layouts.nasabah')
+
+@section('title', 'Deposito')
+
+@push('styles')
+<style>
+    .tenor-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    .tenor-card:hover {
+        transform: translateY(-2px);
+    }
+    .deposito-hero {
+        background: linear-gradient(135deg, #4a3514 0%, #674c1d 40%, #8b6f2f 70%, #d4af37 100%);
+        position: relative;
+        overflow: hidden;
+    }
+    .deposito-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -20%;
+        width: 300px;
+        height: 300px;
+        background: rgba(212, 175, 55, 0.15);
+        border-radius: 50%;
+    }
+    .deposito-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -30%;
+        left: -10%;
+        width: 200px;
+        height: 200px;
+        background: rgba(255,255,255, 0.05);
+        border-radius: 50%;
+    }
+    .rate-badge {
+        background: linear-gradient(135deg, #d4af37, #f0d060);
+        color: #3a2800;
+        font-weight: 800;
+    }
+    .simulasi-result {
+        transition: all 0.3s ease;
+    }
+    .deposito-aktif-card {
+        background: linear-gradient(135deg, #fff9ee, #fffdf7);
+        border: 1px solid #d4af37/30;
+    }
+    @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+    }
+    .shimmer-gold {
+        background: linear-gradient(90deg, #d4af37 25%, #f0d060 50%, #d4af37 75%);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+    }
+</style>
+@endpush
+
+@section('content')
+<div class="w-full pb-6">
+
+
+    {{-- ===== TOP SECTION: Active Deposito OR Hero Banner ===== --}}
+    @if($depositoAktif->isNotEmpty())
+    {{-- ===== DEPOSITO AKTIF (menggantikan hero) ===== --}}
+    <div class="bg-gradient-to-br from-[#3a2800] to-[#674c1d] px-4 pt-5 pb-4 relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+        <div class="relative z-10">
+            <div class="flex items-center justify-between mb-3">
+                <div>
+                    <p class="text-[#f0d060] text-xs font-bold uppercase tracking-widest">Deposito Aktif Saya</p>
+                    <p class="text-white/70 text-xs mt-0.5">{{ $depositoAktif->count() }} deposito berjalan</p>
+                </div>
+                <a href="{{ route('nasabah.deposito.pengajuan') }}" class="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition font-semibold">
+                    + Buka Baru
+                </a>
+            </div>
+
+            <div class="space-y-3">
+                @foreach($depositoAktif as $dep)
+                @php
+                    $persen = 0;
+                    $now = now();
+                    if ($dep->tgl_mulai && $dep->tgl_jatuh_tempo) {
+                        $total = $dep->tgl_mulai->diffInDays($dep->tgl_jatuh_tempo);
+                        $lewat = $dep->tgl_mulai->diffInDays($now);
+                        $persen = $total > 0 ? min(100, round(($lewat / $total) * 100)) : 0;
+                    }
+
+                    // Hitung sisa waktu (Bulan & Hari)
+                    $diff = $now->diff($dep->tgl_jatuh_tempo);
+                    $bulanSisa = $diff->y * 12 + $diff->m;
+                    $hariSisaCount = $diff->d;
+                    $isPast = $now->gt($dep->tgl_jatuh_tempo);
+                @endphp
+                <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition">
+                    <div class="flex items-center justify-between mb-2">
+                        <div>
+                            <p class="text-white/60 text-xs font-mono">{{ $dep->nomor_deposito }}</p>
+                            <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor->tenor_bulan ?? '-' }} Bulan</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[#f0d060] font-black text-xl leading-none">{{ number_format($dep->bunga * 100, 2) }}%</p>
+                            <p class="text-white/60 text-xs">p.a.</p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <p class="text-white/60 text-xs">Nominal</p>
+                            <p class="text-white font-bold">Rp {{ number_format($dep->nominal_awal, 0, ',', '.') }}</p>
+                        </div>
+                        <span class="bg-green-400/20 text-green-300 text-xs font-bold px-2 py-0.5 rounded-full border border-green-400/30">Aktif</span>
+                    </div>
+                    {{-- Progress bar --}}
+                    <div class="mb-1.5">
+                        <div class="flex justify-between text-xs text-white/50 mb-1">
+                            <span>Progress Tenor</span>
+                            <span class="{{ ($isPast || ($bulanSisa == 0 && $hariSisaCount <= 7)) ? 'text-red-300' : 'text-white/60' }} font-semibold">
+                                @if($isPast)
+                                    Jatuh Tempo
+                                @else
+                                    {{ $bulanSisa > 0 ? $bulanSisa . ' bulan ' : '' }}{{ $hariSisaCount > 0 || $bulanSisa == 0 ? $hariSisaCount . ' hari ' : '' }}lagi
+                                @endif
+                            </span>
+                        </div>
+                        <div class="w-full bg-white/20 rounded-full h-1.5">
+                            <div class="h-1.5 rounded-full shimmer-gold" style="width: {{ $persen }}%"></div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between text-xs text-white/40">
+                        <span>Mulai: {{ $dep->tgl_mulai?->format('d M Y') }}</span>
+                        <span>Jatuh Tempo: {{ $dep->tgl_jatuh_tempo?->format('d M Y') }}</span>
+                    </div>
+                </a>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    @else
+    {{-- ===== HERO BANNER (tampil jika belum punya deposito aktif) ===== --}}
+    <div class="bg-gradient-to-br from-[#4a3514] to-[#8b6f2f] px-6 py-12 text-center relative overflow-hidden">
+        {{-- Background Decorations --}}
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-50 z-0 text-[#d4af37]">
+            <svg class="absolute -right-20 -top-20 w-96 h-96 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+            <div class="absolute right-10 top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+        </div>
+
+        <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+            <p class="text-[#f0d060] text-xs font-bold uppercase tracking-[0.2em] mb-3">Koperasi Majakara</p>
+            
+            <h1 class="text-white text-3xl md:text-4xl font-bold leading-tight font-display mb-4">
+                Kembangkan Uang Anda<br>
+                <span class="text-[#f0d060]">Lebih Menguntungkan</span>
+            </h1>
+            
+            <p class="text-white/90 text-sm md:text-base mb-1">Nikmati imbal hasil kompetitif hingga</p>
+            <div class="flex items-baseline justify-center gap-1 mb-8">
+                <span class="text-[#f0d060] text-6xl font-black drop-shadow-md">6%</span>
+                <span class="text-white/90 text-xl font-bold">p.a.</span>
+            </div>
+
+            <a href="{{ route('nasabah.deposito.pengajuan') }}" class="inline-flex items-center gap-2 bg-white text-[#674c1d] font-bold px-8 py-3.5 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all text-sm mb-6">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                Buka Deposito Sekarang
+            </a>
+
+            {{-- Feature pills --}}
+            <div class="flex flex-wrap justify-center gap-3">
+                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">🛡️</span> Aman & Terpercaya</div>
+                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">📈</span> Bunga Kompetitif</div>
+                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">⚡</span> Proses Cepat</div>
+            </div>
+        </div>
+    </div>
+    @endif
+
+
+    {{-- ===== SIMULASI CEPAT ===== --}}
+    <div class="mx-4 mt-5 mb-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-9 h-9 bg-gradient-to-br from-[#674c1d] to-[#d4af37] rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 11h.01M12 11h.01M15 11h.01M4 19h16a2 2 0 002-2V7a2 2 0 00-2-2H4a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="text-base font-bold text-[#674c1d]">Simulasi Imbal Hasil</h2>
+                    <p class="text-xs text-gray-500">Hitung estimasi keuntungan deposito Anda</p>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <div>
+                    <label class="text-xs font-semibold text-gray-700 block mb-1">Jumlah Penempatan</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">Rp</span>
+                        <input type="number" id="sim_nominal" placeholder="1.000.000" min="1000000" step="500000"
+                            class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/10"
+                            oninput="hitungSimulasi()">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Minimal Rp 1.000.000</p>
+                </div>
+                <div>
+                    <label class="text-xs font-semibold text-gray-700 block mb-1">Pilih Tenor</label>
+                    <div class="grid grid-cols-4 gap-2">
+                        @php
+                            $tenorOptions = [['bulan' => 1, 'rate' => 6.0], ['bulan' => 3, 'rate' => 7.5], ['bulan' => 6, 'rate' => 9.0], ['bulan' => 12, 'rate' => 12.0]];
+                            $firstTenorRate = 6.0;
+                        @endphp
+                        @foreach($tenors as $t)
+                        @php
+                            // Rate default berdasarkan tenor jika DB kosong
+                            $rateDefault = [1 => 3.75, 3 => 4.50, 6 => 5.25, 12 => 6.00];
+                            $rate = $t->sukuBunga->first()
+                                ? (float)($t->sukuBunga->first()->bunga * 100)
+                                : ($rateDefault[$t->tenor_bulan] ?? 6.00);
+                        @endphp
+                        <button type="button" onclick="selectTenor({{ $t->tenor_bulan }}, {{ $rate }}, this)"
+                            data-bulan="{{ $t->tenor_bulan }}" data-rate="{{ $rate }}"
+                            class="tenor-sim-btn py-2 rounded-xl border-2 text-center transition-all text-xs font-bold border-gray-200 text-gray-600 hover:border-[#674c1d] hover:text-[#674c1d]">
+                            {{ $t->tenor_bulan }}bln
+                        </button>
+                        @endforeach
+                        {{-- Fallback jika tenor kosong --}}
+                        @if($tenors->isEmpty())
+                        <button type="button" onclick="selectTenor(1, 6.0, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">1bln</button>
+                        <button type="button" onclick="selectTenor(3, 7.5, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">3bln</button>
+                        <button type="button" onclick="selectTenor(6, 9.0, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">6bln</button>
+                        <button type="button" onclick="selectTenor(12, 12.0, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">12bln</button>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- Result --}}
+                <div id="sim_result" class="hidden simulasi-result bg-gradient-to-br from-[#faf9f0] to-[#fff9e0] border border-[#d4af37]/30 rounded-xl p-4">
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 mb-1">Estimasi Bunga (sebelum pajak)</p>
+                            <p id="sim_bunga" class="text-lg font-black text-[#674c1d]">Rp 0</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-xs text-gray-500 mb-1">Total Pencairan</p>
+                            <p id="sim_total" class="text-lg font-black text-green-700">Rp 0</p>
+                        </div>
+                    </div>
+                    <div class="mt-3 pt-3 border-t border-[#d4af37]/20">
+                        <div class="flex justify-between text-xs text-gray-500">
+                            <span>Bunga Setelah Pajak (20%)</span>
+                            <span id="sim_bersih" class="font-semibold text-gray-700">Rp 0</span>
+                        </div>
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Pajak Bunga (20%)</span>
+                            <span id="sim_pajak" class="font-semibold text-red-500">Rp 0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== PRODUK DEPOSITO ===== --}}
+    <div class="mx-4 mb-5">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold text-[#674c1d] font-display">Pilihan Produk Deposito</h2>
+            <span class="text-xs text-gray-400">Mulai dari Rp 1 juta</span>
+        </div>
+
+        {{-- Featured / Recommended Product --}}
+        <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-5 mb-4 shadow-lg relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+            <div class="relative z-10">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="rate-badge text-xs px-2.5 py-1 rounded-full">⭐ Rekomendasi</span>
+                    <span class="text-white/70 text-xs">Paling Diminati</span>
+                </div>
+                <div class="flex items-end justify-between mb-4">
+                    <div>
+                        <p class="text-white/80 text-sm">Deposito 12 Bulan</p>
+                        <div class="flex items-baseline gap-1">
+                            <span class="text-[#f0d060] text-5xl font-black">12%</span>
+                            <span class="text-white/80 text-lg font-medium">p.a.</span>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-white/60 text-xs">Mulai dari</p>
+                        <p class="text-white font-bold text-sm">Rp 1.000.000</p>
+                    </div>
+                </div>
+                <div class="flex gap-2 mb-4">
+                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Bunga Tertinggi</span>
+                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Pilihan Terbaik</span>
+                </div>
+                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor=12"
+                    class="shimmer-gold w-full block text-center font-bold text-[#3a2800] py-3 rounded-xl text-sm transition-all active:scale-95">
+                    Buka Deposito →
+                </a>
+            </div>
+        </div>
+
+        {{-- Other tenor products --}}
+        <div class="space-y-3">
+            @php
+                $tenorData = [
+                    ['bulan' => 1, 'rate' => 6.0, 'label' => '1 Bulan'],
+                    ['bulan' => 3, 'rate' => 7.5, 'label' => '3 Bulan'],
+                    ['bulan' => 6, 'rate' => 9.0, 'label' => '6 Bulan'],
+                    ['bulan' => 12, 'rate' => 12.0, 'label' => '12 Bulan'],
+                ];
+            @endphp
+
+            @if($tenors->isEmpty())
+                @foreach($tenorData as $td)
+                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor={{ $td['bulan'] }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-[#674c1d]">
+                            @if($td['bulan'] <= 3)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            @elseif($td['bulan'] <= 6)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @else
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">Deposito {{ $td['label'] }}</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Mulai dari Rp 1.000.000</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[#674c1d] font-black text-xl">{{ number_format($td['rate'], 2) }}%</span>
+                        <p class="text-xs text-gray-400 font-medium">p.a.</p>
+                        <span class="text-[#674c1d] text-xs font-medium">Buka →</span>
+                    </div>
+                </a>
+                @endforeach
+            @else
+                @foreach($tenors as $tenor)
+                @php
+                    // Rate default berdasarkan tenor jika DB kosong
+                    $rateDefault = [1 => 3.75, 3 => 4.50, 6 => 5.25, 12 => 6.00];
+                    $rate = $tenor->sukuBunga->first()
+                        ? (float)($tenor->sukuBunga->first()->bunga * 100)
+                        : ($rateDefault[$tenor->tenor_bulan] ?? 6.00);
+                @endphp
+                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor={{ $tenor->id }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-[#674c1d]">
+                            @if($tenor->tenor_bulan <= 3)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            @elseif($tenor->tenor_bulan <= 6)
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            @else
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            @endif
+                        </div>
+                        <div>
+                            <p class="font-bold text-gray-800 text-sm">Deposito {{ $tenor->tenor_bulan }} Bulan</p>
+                            <p class="text-xs text-gray-500 mt-0.5">Mulai dari Rp 1.000.000</p>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[#674c1d] font-black text-xl">{{ number_format($rate, 2) }}%</span>
+                        <p class="text-xs text-gray-400 font-medium">p.a.</p>
+                        <span class="text-[#674c1d] text-xs font-medium">Buka →</span>
+                    </div>
+                </a>
+                @endforeach
+            @endif
+        </div>
+    </div>
+
+
+
+    {{-- ===== RIWAYAT PENGAJUAN ===== --}}
+    @if($riwayatPengajuan->isNotEmpty())
+    <div class="mx-4 mb-5">
+        <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base font-bold text-[#674c1d] font-display">Riwayat Pengajuan</h2>
+            <a href="{{ route('nasabah.deposito.riwayat') }}" class="text-sm text-[#d4af37] font-bold hover:text-[#674c1d] transition-colors">Lihat Semua →</a>
+        </div>
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
+            @foreach($riwayatPengajuan as $pjn)
+            @php
+                $statusMap = ['1' => ['label' => 'Proses', 'class' => 'bg-amber-100 text-amber-700'], '2' => ['label' => 'Disetujui', 'class' => 'bg-green-100 text-green-700'], '3' => ['label' => 'Ditolak', 'class' => 'bg-red-100 text-red-700']];
+                $st = $statusMap[$pjn->status] ?? $statusMap['1'];
+            @endphp
+            <a href="{{ route('nasabah.deposito.status-pengajuan', $pjn->id) }}" class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 -mx-4 px-4 transition-colors">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">Deposito {{ $pjn->tenor?->tenor_bulan ?? '-' }} Bulan</p>
+                        <p class="text-xs text-gray-500">Rp {{ number_format($pjn->nominal, 0, ',', '.') }} · {{ $pjn->created_at->format('d M Y') }}</p>
+                    </div>
+                </div>
+                <span class="text-xs font-bold px-3 py-1 rounded-full {{ $st['class'] }}">{{ $st['label'] }}</span>
+            </a>
+            @endforeach
+        </div>
+    </div>
+    @endif
+
+    {{-- ===== KEUNGGULAN ===== --}}
+    <div class="mx-4 mb-5">
+        <div class="bg-gradient-to-br from-[#faf9f0] to-white rounded-2xl border border-[#d4af37]/20 p-5">
+            <h2 class="text-base font-bold text-[#674c1d] font-display mb-4">Mengapa Deposito Koperasi Majakara?</h2>
+            <div class="space-y-4">
+                @foreach([
+                    ['icon' => '<svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>', 'title' => 'Imbal Hasil Kompetitif', 'desc' => 'Bunga deposito di atas rata-rata lembaga keuangan lain, mulai 6% hingga 12% p.a.'],
+                    ['icon' => '<svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>', 'title' => 'Aman & Terpercaya', 'desc' => 'Dana Anda dikelola secara profesional di bawah naungan Koperasi berpengalaman.'],
+                    ['icon' => '<svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>', 'title' => 'Proses Cepat & Mudah', 'desc' => 'Pengajuan 100% online, hasil evaluasi dalam 1×24 jam kerja.'],
+                    ['icon' => '<svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>', 'title' => 'Pantau Kapan Saja', 'desc' => 'Monitor perkembangan deposito dan bunga harian langsung dari aplikasi.'],
+                ] as $feat)
+                <div class="flex items-start gap-4">
+                    <div class="w-10 h-10 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center flex-shrink-0">{!! $feat['icon'] !!}</div>
+                    <div>
+                        <p class="font-semibold text-gray-800 text-sm">{{ $feat['title'] }}</p>
+                        <p class="text-xs text-gray-500 mt-0.5">{{ $feat['desc'] }}</p>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+
+    {{-- ===== TABEL SIMULASI SEABANK STYLE ===== --}}
+    <div class="mx-4 mb-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-4 border-b border-gray-100">
+                <h2 class="text-base font-bold text-[#674c1d] font-display">Tabel Simulasi Bunga</h2>
+                <p class="text-xs text-gray-500 mt-1">Contoh perhitungan dengan penempatan Rp 10.000.000</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="bg-[#674c1d]/5">
+                            <th class="px-4 py-3 text-left font-bold text-[#674c1d] border-b border-gray-100">Keterangan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">1 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">3 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">6 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">12 Bulan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $rows = [
+                                ['label' => 'Suku Bunga', 'vals' => ['6,00%', '7,50%', '9,00%', '12,00%']],
+                                ['label' => 'Pokok', 'vals' => ['Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000']],
+                                ['label' => 'Bunga Kotor', 'vals' => ['Rp 47.671', 'Rp 184.932', 'Rp 443.836', 'Rp 1.200.000']],
+                                ['label' => 'Pajak (20%)', 'vals' => ['Rp 9.534', 'Rp 36.986', 'Rp 88.767', 'Rp 240.000'], 'class' => 'text-red-500'],
+                                ['label' => 'Bunga Bersih', 'vals' => ['Rp 38.137', 'Rp 147.946', 'Rp 355.069', 'Rp 960.000'], 'class' => 'text-green-600 font-bold'],
+                                ['label' => 'Total Cair', 'vals' => ['Rp 10.038.137', 'Rp 10.147.946', 'Rp 10.355.069', 'Rp 10.960.000'], 'class' => 'font-black text-[#674c1d]'],
+                            ];
+                        @endphp
+                        @foreach($rows as $i => $row)
+                        <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50' }}">
+                            <td class="px-4 py-3 text-gray-600 border-b border-gray-50 whitespace-nowrap">{{ $row['label'] }}</td>
+                            @foreach($row['vals'] as $v)
+                            <td class="px-4 py-3 text-center border-b border-gray-50 {{ $row['class'] ?? 'text-gray-800' }} whitespace-nowrap">{{ $v }}</td>
+                            @endforeach
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 bg-amber-50/50 border-t border-[#d4af37]/20">
+                <p class="text-xs text-gray-500 italic">*Simulasi di atas adalah estimasi. Bunga aktual mengikuti suku bunga yang berlaku saat pencairan.</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+@push('scripts')
+<script>
+let selectedTenorBulan = 0;
+let selectedRate = 0;
+
+function selectTenor(bulan, rate, el) {
+    selectedTenorBulan = bulan;
+    selectedRate = rate;
+    // Reset styles
+    document.querySelectorAll('.tenor-sim-btn').forEach(b => {
+        b.classList.remove('border-[#674c1d]', 'bg-[#674c1d]', 'text-white');
+        b.classList.add('border-gray-200', 'text-gray-600');
+    });
+    // Active style
+    el.classList.remove('border-gray-200', 'text-gray-600');
+    el.classList.add('border-[#674c1d]', 'bg-[#674c1d]', 'text-white');
+    hitungSimulasi();
+}
+
+function hitungSimulasi() {
+    const nominal = parseFloat(document.getElementById('sim_nominal').value) || 0;
+    if (nominal <= 0 || selectedTenorBulan <= 0) {
+        document.getElementById('sim_result').classList.add('hidden');
+        return;
+    }
+    const hari = selectedTenorBulan * 30;
+    const bungaKotor = nominal * (selectedRate / 100) * (hari / 365);
+    const pajak = bungaKotor * 0.20;
+    const bungaBersih = bungaKotor - pajak;
+    const total = nominal + bungaBersih;
+
+    const fmt = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+    document.getElementById('sim_bunga').textContent = fmt(bungaKotor);
+    document.getElementById('sim_total').textContent = fmt(total);
+    document.getElementById('sim_bersih').textContent = fmt(bungaBersih);
+    document.getElementById('sim_pajak').textContent = fmt(pajak);
+    document.getElementById('sim_result').classList.remove('hidden');
+}
+</script>
+@endpush
+@endsection

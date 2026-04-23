@@ -9,6 +9,11 @@ $isTabunganActive = str_starts_with($currentRoute, 'admin.tabungan');
 $isLaporanActive = str_starts_with($currentRoute, 'admin.laporan');
 $isActivityLogActive = str_starts_with($currentRoute, 'admin.activity-log');
 $isPettyCashActive = str_starts_with($currentRoute, 'admin.petty-cash');
+$isDepositoActive = str_starts_with($currentRoute, 'admin.deposito');
+
+// Deposito pencairan badge counts
+$pendingTf  = \App\Models\PencairanDeposito::where('jenis_pencairan','rek_nasabah')->where('status','pending')->count();
+$pendingTab = \App\Models\PencairanDeposito::where('jenis_pencairan','saldo_tabungan')->where('status','pending')->count();
 
 // Gunakan variabel dari SidebarComposer yang sudah dicache
 $janjiTemuUnreadCount = $sidebarStats['janjiTemuCount'] ?? 0;
@@ -146,18 +151,61 @@ $pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
                 </div>
             </div>
 
-            <!-- Deposito -->
-            <a href="{{ route('admin.deposito.index') }}"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.deposito') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
-                        </path>
+            <!-- Deposito (expandable) -->
+            <div x-data="{ open: {{ $isDepositoActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isDepositoActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="font-medium">Deposito</span>
+                    </div>
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+                    <a href="{{ route('admin.deposito.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.deposito.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Dashboard
+                    </a>
+                    <a href="{{ route('admin.deposito.pengajuan-list') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.pengajuan') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Pengajuan</span>
+                        @php $pendingDeposito = \App\Models\PengajuanDeposito::where('status','1')->count(); @endphp
+                        @if($pendingDeposito > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">{{ $pendingDeposito }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.deposito.deposito-list') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.deposito') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Daftar Deposito
+                    </a>
+                    <a href="{{ route('admin.deposito.pencairan-tf.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.pencairan-tf') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Pencairan TF</span>
+                        @if($pendingTf > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">{{ $pendingTf }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.deposito.pencairan-tabungan.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.pencairan-tabungan') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Pencairan Tabungan</span>
+                        @if($pendingTab > 0)
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">{{ $pendingTab }}</span>
+                        @endif
+                    </a>
                 </div>
-                <span class="font-medium">Deposito</span>
-            </a>
+            </div>
 
             <!-- Gadai -->
             <a href="{{ route('admin.gadai.index') }}"

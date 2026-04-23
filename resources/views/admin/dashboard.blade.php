@@ -54,7 +54,7 @@
                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">+8%</span>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Total Tabungan</h3>
-            <p class="text-3xl font-bold text-[#8b6f2f] mb-1">Rp {{ number_format($stats['total_tabungan'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-3xl font-bold text-[#8b6f2f] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_tabungan'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">Saldo keseluruhan</p>
         </div>
 
@@ -69,7 +69,7 @@
                 <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">{{ $stats['pinjaman_aktif'] ?? 0 }}</span>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Pinjaman Aktif</h3>
-            <p class="text-3xl font-bold text-[#4a3514] mb-1">Rp {{ number_format($stats['total_pinjaman'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-3xl font-bold text-[#4a3514] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_pinjaman'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">Total pinjaman aktif</p>
         </div>
 
@@ -101,7 +101,7 @@
                 </div>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Total Deposito</h3>
-            <p class="text-2xl font-bold text-[#674c1d] mb-1">Rp {{ number_format($stats['total_deposito'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-2xl font-bold text-[#674c1d] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_deposito'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">{{ $stats['deposito_aktif'] ?? 0 }} deposito aktif</p>
         </div>
 
@@ -115,7 +115,7 @@
                 </div>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Total Gadai</h3>
-            <p class="text-2xl font-bold text-[#8b6f2f] mb-1">Rp {{ number_format($stats['total_gadai'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-2xl font-bold text-[#8b6f2f] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_gadai'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">{{ $stats['gadai_aktif'] ?? 0 }} gadai aktif</p>
         </div>
 
@@ -129,7 +129,7 @@
                 </div>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Pendapatan Bulan Ini</h3>
-            <p class="text-2xl font-bold text-[#d4af37] mb-1">Rp {{ number_format($stats['pendapatan_bulan'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-2xl font-bold text-[#d4af37] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['pendapatan_bulan'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">Dari bunga & biaya</p>
         </div>
     </div>

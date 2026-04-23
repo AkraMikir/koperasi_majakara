@@ -256,45 +256,74 @@
 
             <!-- Cairkan Modal -->
             <div id="cairkanModal" class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                <div class="bg-white rounded-2xl p-6 max-w-md w-full">
-                    <h3 class="text-xl font-bold text-gray-900 mb-4">Cairkan Pinjaman</h3>
-                    <form method="POST" action="{{ route('admin.pinjaman.cairkan-pinjaman', $pengajuan->id) }}" enctype="multipart/form-data">
+                <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-gray-100">
+                    <div class="flex items-center justify-between mb-4 pb-4 border-b">
+                        <h3 class="text-xl font-bold text-gray-900 font-display">Cairkan Pinjaman</h3>
+                        <button onclick="hideCairkanModal()" class="text-gray-400 hover:text-gray-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+
+                    <form id="cairkanForm" method="POST" action="{{ route('admin.pinjaman.cairkan-pinjaman', $pengajuan->id) }}" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Tanggal Cair *</label>
                             <input type="date" name="tgl_cair" required value="{{ date('Y-m-d') }}"
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none transition-all">
                         </div>
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Metode Pencairan *</label>
-                            <select name="metode_pencairan" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                                <option value="kas_utama">Kas Koperasi Utama</option>
-                                <option value="petty_cash">Petty Cash (Fisik)</option>
-                                <option value="petty_tf">Petty Cash (Transfer)</option>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Metode Pencairan & Cek Saldo *</label>
+                            
+                            <!-- Petty Cash Info Cards -->
+                            <div class="grid grid-cols-2 gap-3 mb-4">
+                                <div onclick="selectMetode('petty_cash')" id="card_petty_cash" class="cursor-pointer p-3 rounded-xl border-2 border-gray-100 hover:border-[#674c1d] transition-all bg-gray-50 group">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Saldo Cash</p>
+                                    <p class="text-sm font-bold text-gray-900">Rp {{ number_format($adminSaldo->cash, 0, ',', '.') }}</p>
+                                    <div class="mt-2 flex items-center text-[9px] font-medium {{ $adminSaldo->cash >= $pengajuan->nominal ? 'text-green-600' : 'text-red-600' }}">
+                                        <span class="w-2 h-2 rounded-full {{ $adminSaldo->cash >= $pengajuan->nominal ? 'bg-green-500' : 'bg-red-500' }} mr-1"></span>
+                                        {{ $adminSaldo->cash >= $pengajuan->nominal ? 'Saldo Cukup' : 'Saldo Kurang' }}
+                                    </div>
+                                </div>
+                                <div onclick="selectMetode('petty_tf')" id="card_petty_tf" class="cursor-pointer p-3 rounded-xl border-2 border-gray-100 hover:border-[#674c1d] transition-all bg-gray-50 group">
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">Saldo Transfer</p>
+                                    <p class="text-sm font-bold text-gray-900">Rp {{ number_format($adminSaldo->transfer, 0, ',', '.') }}</p>
+                                    <div class="mt-2 flex items-center text-[9px] font-medium {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'text-green-600' : 'text-red-600' }}">
+                                        <span class="w-2 h-2 rounded-full {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'bg-green-500' : 'bg-red-500' }} mr-1"></span>
+                                        {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'Saldo Cukup' : 'Saldo Kurang' }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <select onchange="updateButtonState()" id="metode_pencairan" name="metode_pencairan" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                                <option value="kas_utama">Kas Koperasi Utama (Non Petty Cash)</option>
+                                <option value="petty_cash" {{ $adminSaldo->cash < $pengajuan->nominal ? 'disabled' : '' }}>Petty Cash (Fisik)</option>
+                                <option value="petty_tf" {{ $adminSaldo->transfer < $pengajuan->nominal ? 'disabled' : '' }}>Petty Cash (Transfer)</option>
                             </select>
                         </div>
+
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Transaksi *</label>
-                            <input type="file" name="bukti_transfer" accept="image/*" required
-                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                            <p class="text-xs text-gray-500 mt-1">Wajib upload file sebagai bukti. Format: JPG, PNG (Max 5MB)</p>
+                            <div class="relative group">
+                                <input type="file" name="bukti_transfer" accept="image/*" required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1 italic">Wajib upload bukti pencairan (JPG, PNG, Max 5MB)</p>
                         </div>
-                        <div class="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
-                            <p class="text-sm text-yellow-800">
-                                <strong>⚠️ Perhatian:</strong> Setelah cairkan, sistem akan:
+
+                        <div id="warningBalance" class="hidden p-3 bg-red-50 border border-red-200 rounded-lg mb-4">
+                            <p class="text-xs text-red-600 font-semibold flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path></svg>
+                                Saldo Petty Cash tidak mencukupi untuk nominal Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}
                             </p>
-                            <ul class="text-xs text-yellow-700 mt-2 list-disc list-inside space-y-1">
-                                <li>Membuat data pinjaman di database</li>
-                                <li>Generate jadwal angsuran otomatis</li>
-                                <li>Status pengajuan berubah menjadi TERLAKSANA</li>
-                            </ul>
                         </div>
-                        <div class="flex space-x-3">
-                            <button type="button" onclick="hideCairkanModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+
+                        <div class="flex space-x-3 mt-6">
+                            <button type="button" onclick="hideCairkanModal()" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium">
                                 Batal
                             </button>
-                            <button type="submit" class="flex-1 px-4 py-2 bg-[#674c1d] text-white rounded-lg hover:bg-[#8b6f2f] transition-colors">
-                                Cairkan
+                            <button id="btnSubmitCairkan" type="submit" class="flex-1 px-4 py-2 bg-[#674c1d] text-white rounded-lg hover:bg-[#8b6f2f] disabled:bg-gray-300 disabled:cursor-not-allowed transition-all font-bold shadow-lg shadow-[#674c1d]/20">
+                                ✓ Cairkan
                             </button>
                         </div>
                     </form>
@@ -305,6 +334,10 @@
 </div>
 
 <script>
+    const nominalPengajuan = {{ $pengajuan->nominal }};
+    const saldoCash = {{ $adminSaldo->cash }};
+    const saldoTransfer = {{ $adminSaldo->transfer }};
+
     function showRejectModal() {
         document.getElementById('rejectModal').classList.remove('hidden');
     }
@@ -315,13 +348,61 @@
 
     function showCairkanModal() {
         document.getElementById('cairkanModal').classList.remove('hidden');
+        updateButtonState();
     }
     
     function hideCairkanModal() {
         document.getElementById('cairkanModal').classList.add('hidden');
     }
 
+    function selectMetode(val) {
+        const select = document.getElementById('metode_pencairan');
+        const option = select.querySelector(`option[value="${val}"]`);
+        if (option && !option.disabled) {
+            select.value = val;
+            updateButtonState();
+        }
+    }
+
+    function updateButtonState() {
+        const select = document.getElementById('metode_pencairan');
+        const warning = document.getElementById('warningBalance');
+        const btn = document.getElementById('btnSubmitCairkan');
+        const val = select.value;
+        
+        let isInsufficient = false;
+        
+        // Reset border UI
+        document.getElementById('card_petty_cash').classList.remove('border-[#674c1d]', 'bg-[#674c1d]/5');
+        document.getElementById('card_petty_tf').classList.remove('border-[#674c1d]', 'bg-[#674c1d]/5');
+
+        if (val === 'petty_cash') {
+            document.getElementById('card_petty_cash').classList.add('border-[#674c1d]', 'bg-[#674c1d]/5');
+            if (saldoCash < nominalPengajuan) isInsufficient = true;
+        } else if (val === 'petty_tf') {
+            document.getElementById('card_petty_tf').classList.add('border-[#674c1d]', 'bg-[#674c1d]/5');
+            if (saldoTransfer < nominalPengajuan) isInsufficient = true;
+        }
+
+        if (isInsufficient) {
+            warning.classList.remove('hidden');
+            btn.disabled = true;
+            btn.innerHTML = 'Saldo Tidak Cukup';
+        } else {
+            warning.classList.add('hidden');
+            btn.disabled = false;
+            btn.innerHTML = '✓ Cairkan';
+        }
+    }
+
     // Close modals on outside click
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideRejectModal();
+            hideCairkanModal();
+        }
+    });
+
     document.getElementById('rejectModal')?.addEventListener('click', function(e) {
         if (e.target === this) hideRejectModal();
     });

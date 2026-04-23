@@ -251,21 +251,26 @@ class TabunganController extends Controller
             // Get nasabah ID from auth
             $idAnggota = $this->getIdAnggota();
 
-            // This method is now only for transfer (fixed: use parentheses so ($request->metode ?? 'transfer') === 'transfer')
             $isTransfer = ($request->metode ?? 'transfer') === 'transfer';
-            // #region agent log
-            $logPath = base_path('.cursor/debug.log');
-            if (!is_dir(dirname($logPath))) {
-                @mkdir(dirname($logPath), 0755, true);
-            }
-            file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):submitSetoran', 'message' => 'metode branch check', 'data' => ['request_metode' => $request->metode ?? null, 'isTransfer' => $isTransfer, 'branch_taken' => $isTransfer ? 'transfer' : 'other'], 'hypothesisId' => 'H1', 'runId' => 'post-fix']) . "\n", FILE_APPEND | LOCK_EX);
-            // #endregion
+
             if ($isTransfer) {
                 // Validate bukti foto exists
                 if (!$request->hasFile('bukti_foto') || count($request->file('bukti_foto')) == 0) {
                     return redirect()->route('nasabah.tabungan.nabung-sekarang')
                         ->with('error', 'Minimal upload 1 bukti transfer')
                         ->withInput($request->except('pin'));
+                }
+
+                // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
+                $recentDuplicate = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
+                    ->where('nominal', $request->nominal)
+                    ->where('status', '1')
+                    ->where('created_at', '>=', now()->subSeconds(30))
+                    ->exists();
+
+                if ($recentDuplicate) {
+                    return redirect()->route('nasabah.tabungan.status-pengajuan-setor')
+                        ->with('warning', 'Pengajuan setoran yang sama sudah dikirim. Silakan tunggu beberapa saat.');
                 }
 
                 // Generate ID: Tabungan (T), Transfer (T), Setoran (STR)
@@ -405,6 +410,20 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
+            // Duplicate submission prevention (last 10 seconds)
+            $waktuJanjiTemu = \Carbon\Carbon::parse($request->waktu_janji_temu)->format('H:i:s');
+            $alreadyExists = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
+                ->where('nominal', $request->nominal)
+                ->where('tanggal_janji_temu', $request->tanggal_janji_temu)
+                ->where('waktu_janji_temu', $waktuJanjiTemu)
+                ->where('created_at', '>=', now()->subSeconds(10))
+                ->first();
+
+            if ($alreadyExists) {
+                return redirect()->route('nasabah.tabungan.status-janji-temu')
+                    ->with('success', 'Janji temu Anda telah berhasil dibuat!');
+            }
+
             // Generate ID untuk janji temu
             // Format: DDMMYYYYNNNN + T + CS + JNJT (dengan sequence number untuk uniqueness)
             // Contoh: 04022026001TCSJNJT, 04022026002TCSJNJT
@@ -484,6 +503,18 @@ class TabunganController extends Controller
                 ->withInput($request->except('pin'));
         }
 
+        // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
+        $recentDuplicate = \App\Models\PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+            ->where('nominal', $request->nominal)
+            ->where('status', '1') // pending
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->exists();
+
+        if ($recentDuplicate) {
+            return redirect()->route('nasabah.tabungan.status-pengajuan-tarik')
+                ->with('warning', 'Pengajuan penarikan yang sama sudah dikirim. Silakan tunggu beberapa saat.');
+        }
+
         try {
             DB::beginTransaction();
 
@@ -557,34 +588,57 @@ class TabunganController extends Controller
     /**
      * Show status pengajuan setoran.
      */
-    public function statusPengajuanSetor()
+    public function statusPengajuanSetor(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
+        $status = $request->status;
         
-        $pengajuan = PengajuanTabungan::where('id_anggota', $idAnggota)
-            ->with(['buktiFoto'])  // Removed janjiTemu relation
-            ->latest()
-            ->paginate(10);
+        $query = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->with(['buktiFoto'])
+            ->latest();
+
+        if ($status) {
+            $query->where('status', $status);
+        }
+        
+        $pengajuan = $query->paginate(10)->withQueryString();
 
         return view('nasabah.tabungan.status-pengajuan-setor', [
             'pengajuan' => $pengajuan,
+            'currentStatus' => $status,
         ]);
     }
 
     /**
      * Show status janji temu (setoran tunai) - hanya dari tbl_janji_temu_tabungan.
      */
-    public function statusJanjiTemu()
+    public function statusJanjiTemu(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
+        $status = $request->status;
         
-        $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
+        $query = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
             ->with(['lokasi', 'transTabungan'])
-            ->latest('tanggal_janji_temu')
-            ->paginate(10);
+            ->latest('tanggal_janji_temu');
+
+        // Apply filtering logic based on status categories
+        if ($status) {
+            if ($status === 'akan_datang') {
+                $query->where('status', '1')->where('tanggal_janji_temu', '>=', now()->toDateString());
+            } elseif ($status === 'terlaksana') {
+                $query->where('status', '2');
+            } elseif ($status === 'dibatalkan') {
+                $query->where('status', '3');
+            } elseif ($status === 'terlewat') {
+                $query->where('status', '1')->where('tanggal_janji_temu', '<', now()->toDateString());
+            }
+        }
+        
+        $janjiTemu = $query->paginate(10)->withQueryString();
 
         return view('nasabah.tabungan.status-janji-temu', [
             'janjiTemu' => $janjiTemu,
+            'currentStatus' => $status,
         ]);
     }
 
@@ -671,37 +725,103 @@ class TabunganController extends Controller
     }
 
     /**
+     * Cancel janji temu.
+     */
+    public function cancelJanjiTemu(Request $request, $id)
+    {
+        $idAnggota = $this->getIdAnggota();
+        
+        $request->validate([
+            'pin' => 'required|numeric|digits:6',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if ((int) $user->pin !== (int) $request->pin) {
+            return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
+        }
+
+        $janjiTemu = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Only if pending
+            ->findOrFail($id);
+
+        $janjiTemu->update([
+            'status' => '3', // Dibatalkan
+        ]);
+
+        return redirect()->back()->with('success', 'Janji temu berhasil dibatalkan.');
+    }
+
+    /**
+     * Cancel pengajuan setoran.
+     */
+    public function cancelPengajuanSetor(Request $request, $id)
+    {
+        $idAnggota = $this->getIdAnggota();
+
+        $request->validate([
+            'pin' => 'required|numeric|digits:6',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if ((int) $user->pin !== (int) $request->pin) {
+            return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
+        }
+        
+        $pengajuan = PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Only if pending
+            ->findOrFail($id);
+
+        $pengajuan->update([
+            'status' => '3', // Dibatalkan/Ditolak
+        ]);
+
+        return redirect()->back()->with('success', 'Pengajuan setoran berhasil dibatalkan.');
+    }
+
+    /**
      * Get saldo nasabah.
      */
     private function getSaldoNasabah($idAnggota)
     {
         // Hitung dari trans_tabungan yang sudah ada
-        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
+        $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
             ->sum('nominal') ?? 0;
 
-        $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
+        $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
-            ->sum('nominal') ?? 0;
+            ->get()
+            ->sum(function($t) { return abs((float)$t->nominal); });
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApproved = PengajuanTabungan::where('id_anggota', $idAnggota)
+        $pengajuanApprovedCount = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '2')
+            ->whereDoesntHave('transTabungan')
+            ->count();
+            
+        $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
-            ->get();
+            ->sum('nominal') ?? 0;
 
-        $approvedNoTransSum = 0;
-        foreach ($pengajuanApproved as $pengajuan) {
-            $approvedNoTransSum += $pengajuan->nominal ?? 0;
-            $totalSetoran += $pengajuan->nominal ?? 0;
-        }
-        $saldo = max(0, $totalSetoran - $totalPenarikan);
+        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
+
+        // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
+        $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1') // Pending
+            ->where('metode_setor', 'saldo_tabungan')
+            ->sum('nominal') ?? 0;
+
+        $saldo = max(0, $saldo - $pendingDepositoTabungan);
+
         // #region agent log
         $logPath = base_path('.cursor/debug.log');
         if (!is_dir(dirname($logPath))) {
             @mkdir(dirname($logPath), 0755, true);
         }
-        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoran - $approvedNoTransSum, 'totalPenarikan_trans' => $totalPenarikan, 'approvedNoTrans_count' => $pengajuanApproved->count(), 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
+        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoranTrans, 'totalPenarikan_trans' => $totalPenarikanTrans, 'pendingDeposito_tabungan' => $pendingDepositoTabungan, 'approvedNoTrans_count' => $pengajuanApprovedCount, 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
         // #endregion
         return $saldo;
     }

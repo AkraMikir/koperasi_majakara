@@ -65,7 +65,7 @@
                 <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">+{{ $stats['total_transaksi_hari_ini'] ?? 0 }}</span>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Setoran Hari Ini</h3>
-            <p class="text-3xl font-bold text-[[#4a3514]] mb-1">Rp {{ number_format($stats['total_setoran_hari_ini'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-3xl font-bold text-[[#4a3514]] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_setoran_hari_ini'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">{{ $stats['total_transaksi_hari_ini'] ?? 0 }} transaksi</p>
         </div>
 
@@ -79,7 +79,7 @@
                 </div>
             </div>
             <h3 class="text-sm font-medium text-gray-600 mb-1">Penarikan Hari Ini</h3>
-            <p class="text-3xl font-bold text-[[#d4af37]] mb-1">Rp {{ number_format($stats['total_penarikan_hari_ini'] ?? 0, 0, ',', '.') }}</p>
+            <p class="text-3xl font-bold text-[[#d4af37]] mb-1">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['total_penarikan_hari_ini'] ?? 0) }}</p>
             <p class="text-xs text-gray-500">Total penarikan</p>
         </div>
     </div>

@@ -156,14 +156,17 @@
                 {{-- Decorative light --}}
                 <div class="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
                 
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between">
+                <div class="relative z-10 flex items-center justify-between">
+                    <div>
                         <h3 class="text-3xl font-bold text-white font-display tracking-tight">Kirim Dana Operasional</h3>
-                        <button onclick="closeKirimModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-black/10 text-white hover:bg-black/20 transition-all">
-                            <i class="fas fa-times"></i>
-                        </button>
+                        <p class="text-white/80 text-sm mt-1.5 font-medium tracking-wide">Pindahkan modal kerja ke Admin Teller</p>
                     </div>
-                    <p class="text-white/80 text-sm mt-1.5 font-medium tracking-wide">Pindahkan modal kerja dari Owner ke Admin Teller</p>
+                    <div class="text-right">
+                        <div class="bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/20">
+                            <p class="text-[10px] font-bold text-white/60 uppercase">Dompet Utama Anda</p>
+                            <p class="text-lg font-black text-white">Rp {{ number_format($saldoCash + $saldoTf, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -189,19 +192,27 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
                     <div>
-                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Saldo Transfer (Bank)</label>
+                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
+                            <span>Saldo Transfer (Bank)</span>
+                            <span class="text-[10px] text-blue-600 font-bold">Max: {{ number_format($saldoTf, 0, ',', '.') }}</span>
+                        </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_tf" id="input_tf" oninput="calculateTotal()"
+                                   max="{{ (float)$saldoTf }}"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Saldo Tunai (Cash)</label>
+                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
+                            <span>Saldo Tunai (Cash)</span>
+                            <span class="text-[10px] text-green-600 font-bold">Max: {{ number_format($saldoCash, 0, ',', '.') }}</span>
+                        </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_cash" id="input_cash" oninput="calculateTotal()"
+                                   max="{{ (float)$saldoCash }}"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>

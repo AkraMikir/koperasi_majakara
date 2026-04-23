@@ -45,7 +45,30 @@
 
             <!-- Informasi Pengajuan -->
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
-                <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Informasi Pengajuan</h2>
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-gray-200">
+                    <h2 class="text-lg font-bold text-primary font-display">Informasi Pengajuan</h2>
+                    @if($pengajuan->status == '1')
+                    <div class="px-3 py-1 bg-blue-50 border border-blue-100 rounded-lg flex items-center gap-2">
+                        <div class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></div>
+                        <span class="text-xs font-bold text-blue-700">Petty Cash TF: Rp {{ number_format($adminSaldo, 0, ',', '.') }}</span>
+                    </div>
+                    @endif
+                </div>
+
+                @if(session('error'))
+                <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+                    <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-bold text-red-800">{{ session('error') }}</p>
+                        @if(str_contains(session('error'), 'Petty Cash'))
+                        <p class="text-xs text-red-600 mt-1">Saldo Anda saat ini tidak mencukupi untuk melakukan transfer penarikan nasabah ini.</p>
+                        @endif
+                    </div>
+                </div>
+                @endif
+
                 <div class="space-y-4">
                     <div>
                         <p class="text-sm text-gray-600">Tanggal Pengajuan</p>
@@ -197,13 +220,22 @@
                     </div>
                     @endif
 
-                    @if($saldo >= $totalDipotong)
-                    <button type="submit" class="w-full px-4 py-3 bg-linear-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
+                    @php
+                        $isNasabahSaldoCukup = $saldo >= $totalDipotong;
+                        $isAdminSaldoCukup = ($pengajuan->metode_transfer == 'transfer') ? ($adminSaldo >= $pengajuan->nominal) : true;
+                    @endphp
+
+                    @if($isNasabahSaldoCukup && $isAdminSaldoCukup)
+                    <button type="submit" class="w-full px-4 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all font-medium shadow-md">
                         ✓ Setujui Penarikan
                     </button>
-                    @else
+                    @elseif(!$isNasabahSaldoCukup)
                     <button disabled class="w-full px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium">
-                        Saldo Tidak Mencukupi
+                        Saldo Nasabah Kurang
+                    </button>
+                    @else
+                    <button disabled class="w-full px-4 py-3 bg-gray-300 text-gray-500 rounded-lg cursor-not-allowed font-medium" title="Saldo Petty Cash (TF) Anda: Rp {{ number_format($adminSaldo, 0, ',', '.') }}">
+                        Saldo Petty Cash Kurang
                     </button>
                     @endif
                 </form>
