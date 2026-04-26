@@ -193,31 +193,34 @@ class PinjamanController extends Controller
         }
 
         $bungaPersen = (float) $masterBunga->bunga_persen;
-        $bungaRpRaw = ($nominal * $bungaPersen) / 100;
-        $angsuranRaw = ($nominal + $bungaRpRaw) / $durasi;
+        $bungaRp = ($nominal * $bungaPersen) / 100;
+        $totalKewajiban = $nominal + $bungaRp;
 
-        // Bulatkan angsuran per bulan ke kelipatan 500 terdekat
-        $angsuranBulanan = (int) round($angsuranRaw / 500) * 500;
-        if ($angsuranBulanan == 0) $angsuranBulanan = 500;
-        
-        $totalKewajiban = $angsuranBulanan * $durasi;
-        $bungaRp = $totalKewajiban - $nominal;
-        if ($bungaRp < 0) {
-            $angsuranBulanan = (int) ceil($angsuranRaw / 500) * 500;
-            $totalKewajiban = $angsuranBulanan * $durasi;
-            $bungaRp = $totalKewajiban - $nominal;
+        $angsuranRaw = $totalKewajiban / $durasi;
+
+        // Bulatkan angsuran per bulan ke bawah ke kelipatan 1.000
+        $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+        if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+            $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
         }
 
         $simulasi = [];
         $tanggalMulai = now();
+        $akumulasi = 0;
         for ($i = 1; $i <= $durasi; $i++) {
             $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
+            
+            // Angsuran 1 sampai n-1 menggunakan angsuranBulanan
+            // Angsuran terakhir (n) menggunakan sisa totalKewajiban
+            $tagihan = ($i < $durasi) ? $angsuranBulanan : ($totalKewajiban - $akumulasi);
+            $akumulasi += $tagihan;
+
             $simulasi[] = [
                 'bulan' => $i,
                 'tanggal' => $tanggalJatuhTempo->format('d/m/Y'),
                 'pokok' => 0,
                 'bunga' => 0,
-                'total' => $angsuranBulanan,
+                'total' => (int) round($tagihan, 0),
             ];
         }
 
@@ -663,7 +666,8 @@ class PinjamanController extends Controller
                 'pengajuan',
                 'nasabah.user',
                 'tempoBulanan',
-                'tempoMingguan'
+                'tempoMingguan',
+                'buktiPelunasan'
             ])
             ->findOrFail($id);
 
@@ -999,6 +1003,20 @@ class PinjamanController extends Controller
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
 
+        // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
+        $recentDuplicate = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
+            ->where('pinjaman_id', $request->pinjaman_id)
+            ->where('tempo_id', $request->tempo_id)
+            ->where('nominal', $request->nominal)
+            ->where('status', '1')
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->exists();
+
+        if ($recentDuplicate) {
+            return redirect()->route('nasabah.pinjaman.pembayaran')
+                ->with('warning', 'Pengajuan pembayaran yang sama sudah dikirim. Silakan tunggu beberapa saat.');
+        }
+
         // ID dari 3 master: P (pinjaman), TF (transfer), PMB (pembayaran)
         $idPengajuanPembayaran = IdGenerator::generate('tbl_pengajuan_pembayaran_pinjaman', 'P', 'TF', 'PMB');
 
@@ -1097,6 +1115,20 @@ class PinjamanController extends Controller
         $pinjaman = PinjamanH::where('id', $request->pinjaman_id)
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
+
+        // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
+        $recentDuplicate = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
+            ->where('pinjaman_id', $request->pinjaman_id)
+            ->where('tempo_id', $request->tempo_id)
+            ->where('nominal', $request->nominal)
+            ->where('status', '1')
+            ->where('created_at', '>=', now()->subSeconds(30))
+            ->exists();
+
+        if ($recentDuplicate) {
+            return redirect()->route('nasabah.pinjaman.pembayaran')
+                ->with('warning', 'Pengajuan pembayaran yang sama sudah dikirim. Silakan tunggu beberapa saat.');
+        }
 
         // ID dari 3 master: P (pinjaman), TN (tunai), PMB (pembayaran)
         $idPengajuanPembayaran = IdGenerator::generate('tbl_pengajuan_pembayaran_pinjaman', 'P', 'TN', 'PMB');

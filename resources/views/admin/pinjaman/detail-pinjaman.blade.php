@@ -198,6 +198,26 @@
                 </div>
             </div>
 
+            <!-- Bukti Pelunasan -->
+            @if($pinjaman->buktiPelunasan)
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-primary font-display mb-4">Bukti Pelunasan</h3>
+                <div class="space-y-4">
+                    @php
+                        $filePath = $pinjaman->buktiPelunasan->file_path;
+                        $imageUrl = asset('storage/' . $filePath);
+                    @endphp
+                    <div class="rounded-xl overflow-hidden border border-gray-200 cursor-pointer" onclick="window.open('{{ $imageUrl }}', '_blank')">
+                        <img src="{{ $imageUrl }}" alt="Bukti Pelunasan" class="w-full h-auto hover:scale-105 transition-transform duration-200">
+                    </div>
+                    <a href="{{ $imageUrl }}" download class="w-full inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Unduh Bukti
+                    </a>
+                </div>
+            </div>
+            @endif
+
             <!-- Pelunasan Dipercepat — hanya Admin Utama -->
             @canPelunasanDipercepat
             @if($pinjaman->lunas === 'belum')

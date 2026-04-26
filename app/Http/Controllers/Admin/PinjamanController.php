@@ -182,24 +182,22 @@ class PinjamanController extends Controller
         try {
             DB::beginTransaction();
 
-            // Hitung bunga dengan pembulatan kelipatan 500 per angsuran
+            // Hitung bunga asli (persentase dari nominal)
             $nominal = (float) $pengajuan->nominal;
             $durasi = (int) $pengajuan->durasi;
             $bungaPersen = $masterBunga->bunga_persen;
             
-            $bungaRpRaw = ($nominal * $bungaPersen) / 100;
-            $angsuranRaw = ($nominal + $bungaRpRaw) / $durasi;
+            $bungaRp = ($nominal * $bungaPersen) / 100;
+            $totalKewajiban = $nominal + $bungaRp;
             
-            $angsuranBulanan = (int) round($angsuranRaw / 500) * 500;
-            if ($angsuranBulanan == 0) $angsuranBulanan = 500;
+            $angsuranRaw = $totalKewajiban / $durasi;
             
-            $totalKewajiban = $angsuranBulanan * $durasi;
-            $bungaRp = $totalKewajiban - $nominal;
-            if ($bungaRp < 0) {
-                $angsuranBulanan = (int) ceil($angsuranRaw / 500) * 500;
-                $totalKewajiban = $angsuranBulanan * $durasi;
-                $bungaRp = $totalKewajiban - $nominal;
+            // Bulatkan angsuran per bulan ke bawah ke kelipatan 1.000
+            $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+            if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
             }
+            
             $jumlahPinjam = $nominal;
 
             // Generate ID Pinjaman: P (Pinjaman) TF/TN (Transfer/Tunai) DPNJM (Detail Pinjaman Header)
@@ -475,23 +473,20 @@ class PinjamanController extends Controller
                     DB::rollBack();
                     return redirect()->back()->with('error', 'Master bunga/denda belum diatur.');
                 }
-                // Hitung bunga dengan pembulatan kelipatan 500 per angsuran
+                // Hitung bunga asli (persentase dari nominal)
                 $nominal = (float) $pengajuan->nominal;
                 $durasi = (int) $pengajuan->durasi;
                 $bungaPersen = $masterBunga->bunga_persen;
                 
-                $bungaRpRaw = ($nominal * $bungaPersen) / 100;
-                $angsuranRaw = ($nominal + $bungaRpRaw) / $durasi;
+                $bungaRp = ($nominal * $bungaPersen) / 100;
+                $totalKewajiban = $nominal + $bungaRp;
                 
-                $angsuranBulanan = (int) round($angsuranRaw / 500) * 500;
-                if ($angsuranBulanan == 0) $angsuranBulanan = 500;
+                $angsuranRaw = $totalKewajiban / $durasi;
                 
-                $totalKewajiban = $angsuranBulanan * $durasi;
-                $bungaRp = $totalKewajiban - $nominal;
-                if ($bungaRp < 0) {
-                    $angsuranBulanan = (int) ceil($angsuranRaw / 500) * 500;
-                    $totalKewajiban = $angsuranBulanan * $durasi;
-                    $bungaRp = $totalKewajiban - $nominal;
+                // Bulatkan angsuran per bulan ke bawah ke kelipatan 1.000
+                $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+                if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                    $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
                 }
 
                 $kodeVia = 'TN';
@@ -657,7 +652,8 @@ class PinjamanController extends Controller
             'nasabah.pekerjaan',
             'pengajuan',
             'tempoBulanan',
-            'tempoMingguan'
+            'tempoMingguan',
+            'buktiPelunasan'
         ])->findOrFail($id);
 
         // Get angsuran berdasarkan jenis

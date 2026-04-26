@@ -8,6 +8,16 @@
             <div>
                 <p class="font-bold text-gray-900 text-sm">{{ $item->admin->nama ?? '-' }}</p>
                 <p class="text-[10px] font-mono text-gray-400 mt-0.5 tracking-tighter">{{ $item->id }}</p>
+                @if($item->keterangan)
+                    <p class="text-[10px] text-gray-500 italic mt-1 bg-gray-50 p-1 rounded border border-gray-100 line-clamp-2" title="{{ $item->keterangan }}">
+                        Owner: {{ $item->keterangan }}
+                    </p>
+                @endif
+                @if($item->keterangan_admin && $item->status !== 'pending')
+                    <p class="text-[10px] text-[#674c1d] italic mt-1 bg-amber-50 p-1 rounded border border-amber-100 line-clamp-2" title="{{ $item->keterangan_admin }}">
+                        Admin: {{ $item->keterangan_admin }}
+                    </p>
+                @endif
             </div>
         </div>
     </td>

@@ -236,7 +236,7 @@
 
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
-            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 outline-none text-center text-2xl font-mono tracking-widest"
                 placeholder="••••••"
                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">

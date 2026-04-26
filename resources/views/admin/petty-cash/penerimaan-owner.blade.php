@@ -280,6 +280,13 @@
                     </div>
                 </div>
 
+                {{-- Catatan --}}
+                <div>
+                    <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Catatan (Opsional)</label>
+                    <textarea name="keterangan" rows="2" placeholder="Tambahkan catatan jika diperlukan..."
+                              class="block w-full px-5 py-4 text-sm font-medium border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50 resize-none"></textarea>
+                </div>
+
                 <div class="flex gap-4 pt-4">
                     <button type="submit" class="flex-[3] px-8 py-4.5 bg-[#674c1d] text-white rounded-[1.25rem] text-sm font-black shadow-2xl shadow-[#674c1d]/30 hover:bg-[#4a3514] transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                         <i class="fas fa-paper-plane mr-2"></i>

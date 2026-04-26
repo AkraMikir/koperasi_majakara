@@ -51,6 +51,16 @@
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $item->tgl_penerimaan->format('d M Y, H:i') }}</td>
                         <td class="px-6 py-4">
                             <p class="font-semibold text-gray-900">{{ $item->owner->nama ?? '-' }}</p>
+                            @if($item->keterangan)
+                                <p class="text-[10px] text-gray-500 italic mt-1 bg-gray-50 p-1 rounded border border-gray-100 line-clamp-2" title="{{ $item->keterangan }}">
+                                    Owner: {{ $item->keterangan }}
+                                </p>
+                            @endif
+                            @if($item->keterangan_admin && $item->status !== 'pending')
+                                <p class="text-[10px] text-[#674c1d] italic mt-1 bg-amber-50 p-1 rounded border border-amber-100 line-clamp-2" title="{{ $item->keterangan_admin }}">
+                                    Admin: {{ $item->keterangan_admin }}
+                                </p>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right text-sm">Rp {{ number_format($item->nominal_tf, 0, ',', '.') }}</td>
                         <td class="px-6 py-4 text-right text-sm">Rp {{ number_format($item->nominal_cash, 0, ',', '.') }}</td>
@@ -76,15 +86,12 @@
                                     </svg>
                                 </a>
                                 @endif
-                                {{-- ACC --}}
-                                <form action="{{ route('admin.petty-cash.penerimaan.approve', $item->id) }}" method="POST" class="inline">
-                                    @csrf
-                                    <button type="submit"
-                                            onclick="return confirm(`ACC penerimaan Rp {{ number_format((float) ($item->nominal_tf + $item->nominal_cash), 0, ',', '.') }}? Saldo Anda akan bertambah.`)"
-                                            class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors">
-                                        ACC
-                                    </button>
-                                </form>
+                                {{-- ACC Modal Trigger --}}
+                                <button type="button"
+                                        onclick="document.getElementById('approve-modal-{{ $item->id }}').classList.remove('hidden')"
+                                        class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-semibold hover:bg-green-700 transition-colors">
+                                    ACC
+                                </button>
                                 {{-- Reject --}}
                                 <button type="button"
                                         onclick="document.getElementById('reject-modal-{{ $item->id }}').classList.remove('hidden')"
@@ -97,6 +104,32 @@
                             @endif
                         </td>
                     </tr>
+
+                    {{-- ACC Modal --}}
+                    @if($item->status === 'pending')
+                    <div id="approve-modal-{{ $item->id }}" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4 shadow-2xl">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Terima Dana</h3>
+                            <p class="text-sm text-gray-600 mb-4">Total: Rp {{ number_format($item->nominal_tf + $item->nominal_cash, 0, ',', '.') }}</p>
+                            <form action="{{ route('admin.petty-cash.penerimaan.approve', $item->id) }}" method="POST">
+                                @csrf
+                                <textarea name="keterangan_admin" rows="3"
+                                    placeholder="Catatan penerimaan (Opsional)..."
+                                    class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d] focus:border-transparent mb-4"></textarea>
+                                <div class="flex gap-3">
+                                    <button type="button"
+                                            onclick="document.getElementById('approve-modal-{{ $item->id }}').classList.add('hidden')"
+                                            class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">
+                                        Batal
+                                    </button>
+                                    <button type="submit" class="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-bold hover:bg-green-700">
+                                        SETUJUI
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @endif
 
                     {{-- Reject Modal --}}
                     @if($item->status === 'pending')
@@ -114,8 +147,8 @@
                                             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg text-sm hover:bg-gray-50">
                                         Batal
                                     </button>
-                                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm hover:bg-red-700">
-                                        Tolak
+                                    <button type="submit" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-bold hover:bg-red-700">
+                                        TOLAK
                                     </button>
                                 </div>
                             </form>
