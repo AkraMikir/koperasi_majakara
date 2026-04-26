@@ -174,6 +174,38 @@
                 @csrf
                 
                 <div>
+                    <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Pilih Sumber Dana <span class="text-red-500">*</span></label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#674c1d] transition-colors">
+                            <i class="fas fa-layer-group text-lg"></i>
+                        </div>
+                        <select name="sumber" id="select_sumber" required onchange="updateMaxValues()"
+                                class="block w-full pl-12 pr-4 py-4 text-base font-semibold border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50">
+                            <option value="">-- Pilih Sumber Saldo --</option>
+                            @php
+                                $sourceLabels = [
+                                    'tabungan' => 'Saldo Tabungan',
+                                    'pinjaman' => 'Saldo Pinjaman',
+                                    'petty_cash' => 'Saldo Petty Cash',
+                                    'other' => 'Modal Awal',
+                                ];
+                            @endphp
+                            @foreach($sourceLabels as $key => $label)
+                                @php
+                                    $det = (object)($sourceDetails[$key] ?? ['total_cash' => 0, 'total_tf' => 0]);
+                                    $totalSource = $det->total_cash + $det->total_tf;
+                                @endphp
+                                <option value="{{ $key }}" 
+                                        data-cash="{{ (float)$det->total_cash }}" 
+                                        data-tf="{{ (float)$det->total_tf }}">
+                                    {{ $label }} (Rp {{ number_format($totalSource, 0, ',', '.') }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
+                <div>
                     <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Admin Penerima <span class="text-red-500">*</span></label>
                     <div class="relative group">
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#674c1d] transition-colors">
@@ -194,12 +226,12 @@
                     <div>
                         <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
                             <span>Saldo Transfer (Bank)</span>
-                            <span class="text-[10px] text-blue-600 font-bold">Max: {{ number_format($saldoTf, 0, ',', '.') }}</span>
+                            <span class="text-[10px] text-blue-600 font-bold" id="label_max_tf">Max: 0</span>
                         </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_tf" id="input_tf" oninput="calculateTotal()"
-                                   max="{{ (float)$saldoTf }}"
+                                   max="0"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
@@ -207,12 +239,12 @@
                     <div>
                         <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
                             <span>Saldo Tunai (Cash)</span>
-                            <span class="text-[10px] text-green-600 font-bold">Max: {{ number_format($saldoCash, 0, ',', '.') }}</span>
+                            <span class="text-[10px] text-green-600 font-bold" id="label_max_cash">Max: 0</span>
                         </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_cash" id="input_cash" oninput="calculateTotal()"
-                                   max="{{ (float)$saldoCash }}"
+                                   max="0"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
@@ -360,6 +392,31 @@
         const cash = parseInt(document.getElementById('input_cash').value) || 0;
         const total = tf + cash;
         document.getElementById('display_total').innerText = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    function updateMaxValues() {
+        const select = document.getElementById('select_sumber');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        const maxCash = parseFloat(selectedOption.getAttribute('data-cash')) || 0;
+        const maxTf = parseFloat(selectedOption.getAttribute('data-tf')) || 0;
+        
+        const inputCash = document.getElementById('input_cash');
+        const inputTf = document.getElementById('input_tf');
+        const labelMaxCash = document.getElementById('label_max_cash');
+        const labelMaxTf = document.getElementById('label_max_tf');
+        
+        inputCash.max = maxCash;
+        inputTf.max = maxTf;
+        
+        labelMaxCash.innerText = 'Max: ' + maxCash.toLocaleString('id-ID');
+        labelMaxTf.innerText = 'Max: ' + maxTf.toLocaleString('id-ID');
+        
+        // Reset values if they exceed new max
+        if (parseFloat(inputCash.value) > maxCash) inputCash.value = maxCash;
+        if (parseFloat(inputTf.value) > maxTf) inputTf.value = maxTf;
+        
+        calculateTotal();
     }
 
     document.addEventListener('keydown', function(event) {

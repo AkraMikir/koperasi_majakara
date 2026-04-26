@@ -188,6 +188,11 @@
                     <!-- Status Disetujui - Show Cairkan -->
                     <div class="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                         <p class="text-sm text-blue-800 font-semibold mb-2">✓ Pengajuan telah disetujui</p>
+                        @if($pengajuan->keterangan_admin)
+                            <p class="text-sm text-blue-700 mb-2 italic">
+                                <strong>Catatan Admin:</strong> "{{ $pengajuan->keterangan_admin }}"
+                            </p>
+                        @endif
                         <p class="text-sm text-blue-800 mb-1">
                             <strong>Bunga:</strong> {{ $pengajuan->bunga_persen }}%
                         </p>
@@ -296,9 +301,9 @@
                             </div>
 
                             <select onchange="updateButtonState()" id="metode_pencairan" name="metode_pencairan" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
-                                <option value="kas_utama">Kas Koperasi Utama (Non Petty Cash)</option>
+                                <option value="petty_tf" selected {{ $adminSaldo->transfer < $pengajuan->nominal ? 'disabled' : '' }}>Petty Cash (Transfer)</option>
                                 <option value="petty_cash" {{ $adminSaldo->cash < $pengajuan->nominal ? 'disabled' : '' }}>Petty Cash (Fisik)</option>
-                                <option value="petty_tf" {{ $adminSaldo->transfer < $pengajuan->nominal ? 'disabled' : '' }}>Petty Cash (Transfer)</option>
+                                <option value="kas_utama">Kas Koperasi Utama (Non Petty Cash)</option>
                             </select>
                         </div>
 

@@ -22,6 +22,8 @@ use App\Models\BiayaTransfer;
 use App\Models\NasabahNotification;
 use App\Models\PettyCashTransaksiNasabah;
 use App\Models\PettyCashSaldo;
+use App\Models\User;
+use App\Models\PettyCashOwnerTransaksi;
 
 class TabunganController extends Controller
 {
@@ -35,9 +37,15 @@ class TabunganController extends Controller
             'total_pengajuan_setor' => PengajuanTabungan::where('status', '1')->count(),
             'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->where('metode_transfer', 'transfer')->count(),
             'total_transaksi_hari_ini' => TransTabungan::whereDate('created_at', today())->count(),
+            'count_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
+                    $q->where('kode', 'STR');
+                })->whereDate('created_at', today())->count(),
             'total_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'STR');
                 })->whereDate('created_at', today())->sum('nominal') ?? 0,
+            'count_penarikan_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
+                    $q->where('kode', 'PNR');
+                })->whereDate('created_at', today())->count(),
             'total_penarikan_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'PNR');
                 })->whereDate('created_at', today())->sum('nominal') ?? 0,
@@ -165,6 +173,17 @@ class TabunganController extends Controller
                     'id_trans' => $idTrans,
                 ]);
 
+            // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+            $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', \App\Services\PettyCashConstants::REF_TABUNGAN_STR)
+                ->where('ref_id', $pengajuan->id)
+                ->first();
+
+            if ($existingPc) {
+                DB::rollBack();
+                return redirect()->route('admin.tabungan.pengajuan-setor')
+                    ->with('error', 'Transaksi setoran ini sudah tercatat di Petty Cash.');
+            }
+
             $pettyId = ($request->metode_bayar === 'transfer_admin' || $request->metode_bayar === 'cash') ? 
                         IdGenerator::generate('petty_cash_transaksi_nasabah', 'P', 'CS', 'STR') : null;
 
@@ -215,6 +234,32 @@ class TabunganController extends Controller
             }
 
             Log::info('Transaksi tabungan created successfully', ['id' => $idTransaksi]);
+
+            // 🔥 INTEGRASI OWNER LEDGER: Jika transfer langsung ke Koperasi (Rek Utama Owner)
+            if ($request->metode_bayar === 'transfer_koperasi') {
+                $owner = User::where('role', 'admin_utama')->first();
+                if ($owner) {
+                    PettyCashOwnerTransaksi::create([
+                        'id'              => IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR'),
+                        'user_id'         => $owner->id,
+                        'tipe'            => 'terima_setoran',
+                        'sumber'          => \App\Services\PettyCashConstants::SUMBER_TABUNGAN,
+                        'nominal_cash'    => 0,
+                        'nominal_tf'      => $nominal,
+                        'keterangan'      => "Setoran Tabungan Nasabah: " . ($pengajuan->nasabah->user->nama ?? '-') . " (#{$pengajuan->id})",
+                        'bukti_foto_tf'   => $pengajuan->buktiFoto->first()?->file_path ?? null,
+                        'ref_id'          => $pengajuan->id,
+                        'ref_table'       => 'tbl_pengajuan_tabungan',
+                    ]);
+
+                    // Update Saldo Owner (Transfer)
+                    PettyCashSaldo::buatMutasi(
+                        $owner->id, 'owner', $nominal,
+                        "Setoran Tabungan Nasabah (#{$pengajuan->id})",
+                        $pengajuan->id, 'tbl_pengajuan_tabungan', 'transfer'
+                    );
+                }
+            }
         }
 
         // Update status to approved (status '2') + simpan keterangan_admin dan siapa yang approve
@@ -433,6 +478,15 @@ class TabunganController extends Controller
             $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
             $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
             
+            // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+            $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', \App\Services\PettyCashConstants::REF_TABUNGAN_PNR)
+                ->where('ref_id', $pengajuan->id)
+                ->first();
+            
+            if ($existingPc) {
+                throw new \Exception('Transaksi penarikan ini sudah tercatat di Petty Cash.');
+            }
+
             // Generate ID using correct method
             $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
@@ -620,7 +674,7 @@ class TabunganController extends Controller
             'nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'lokasi', 'buktiFoto', 'transTabungan'
         ])->findOrFail($id);
 
-        $adminSaldo = PettyCashSaldo::getSaldo(Auth::id(), 'admin');
+        $adminSaldo = PettyCashSaldo::getSaldoCash(Auth::id());
 
         return view('admin.tabungan.detail-janji-temu', compact('janjiTemu', 'adminSaldo'));
     }
@@ -631,15 +685,15 @@ class TabunganController extends Controller
     public function createTransFromJanjiTemu(Request $request, $id)
     {
         $request->validate([
-            'nominal' => 'required|string',
+            'nominal'          => 'required|string',
             'keterangan_admin' => 'nullable|string|max:500',
-            'foto_penerimaan.*' => 'nullable|image|max:5120',  // Multiple files
+            'foto_penerimaan.*'=> 'nullable|image|max:5120',  // Multiple files
         ]);
 
         // Parse nominal from formatted currency string (e.g., "Rp 10.000.000")
         $nominalStr = preg_replace('/[^0-9]/', '', $request->nominal);
         $nominal = (float) $nominalStr;
-        
+
         if ($nominal < 10000) {
             return redirect()->back()
                 ->with('error', 'Nominal minimal Rp 10.000')
@@ -654,133 +708,178 @@ class TabunganController extends Controller
                 ->with('error', 'Janji temu ini sudah diproses sebelumnya');
         }
 
-        $idAnggota = $janjiTemu->id_nasabah;
-
-        // Handle foto penerimaan menggunakan tbl_bukti_foto universal
-        // id wajib diisi: tbl_bukti_foto pakai id string (bukan auto-increment)
-        if ($request->hasFile('foto_penerimaan')) {
-            foreach ($request->file('foto_penerimaan') as $file) {
-                $fotoPenerimaan = $file->store('bukti_tabungan', 'public');
-                $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'T', 'CS', 'JNJT');
-                BuktiFoto::create([
-                    'id' => $idBuktiFoto,
-                    'owner_id' => $janjiTemu->id,
-                    'owner_fitur' => 'T',  // Tabungan
-                    'owner_trans' => 'JNJT',  // Janji Temu
-                    'file_path' => $fotoPenerimaan,
-                    'keterangan' => 'Bukti penerimaan janji temu',
-                ]);
-            }
-        }
-
-        // Update janji temu: status selesai + nominal disamakan dengan yang dipakai di transaksi
-        // (agar semua halaman—admin detail, nasabah detail, list—tampil nominal yang sama)
-        $janjiTemu->update([
-            'status' => '2',  // Selesai
-            'nominal' => $nominal,  // Sinkronkan dengan nominal transaksi (bisa diedit admin)
-            'keterangan_admin' => $request->keterangan_admin,
-        ]);
-
-        // Create transaksi tabungan
-        $kodeVia = 'CS';  // Cash (janji temu)
-        
-        // Check Janji Temu Type
+        $idAnggota    = $janjiTemu->id_nasabah;
         $isWithdrawal = isset($janjiTemu->jenis) && $janjiTemu->jenis === 'penarikan';
-        $kodeTrans = $isWithdrawal ? 'PNR' : 'STR';
-        
-        $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
-        $idTrans = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
-        $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
-        // Find related pengajuan tarik if this is a withdrawal
-        $idPengajuanTarik = null;
+        // 🔥 Tugas 4: Validasi saldo SEBELUM ada perubahan data (fail-fast)
         if ($isWithdrawal) {
-            $pengajuanTarik = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
-                ->where('nominal', $nominal)
-                ->where('status', '1') // Pending
-                ->latest()
-                ->first();
-            
-            if ($pengajuanTarik) {
-                $idPengajuanTarik = $pengajuanTarik->id;
-                $pengajuanTarik->update(['status' => '2']); // Approve
-            }
-        }
-
-        // 🔥 INTEGRASI PETTY CASH: Validasi Saldo jika Penarikan Tunai
-        if ($isWithdrawal) {
-            try {
-                if (!PettyCashSaldo::validatePenarikanCash(Auth::id(), $nominal)) {
-                    throw new \Exception("Saldo CASH tidak mencukupi untuk penarikan ini.");
-                }
-                
-                // Pemotongan Saldo Petty Cash Admin (CASH)
-                PettyCashSaldo::updateSaldo(
-                    Auth::id(), 
-                    'cash', 
-                    -$nominal, 
-                    $janjiTemu->id, 
-                    'Penarikan Tunai: ' . ($janjiTemu->nasabah->user->nama ?? 'Nasabah'),
-                    'tbl_janji_temu_tabungan'
-                );
-            } catch (\Exception $e) {
-                DB::rollBack();
+            // 1. Cek Saldo Admin (Petty Cash)
+            $saldoCash = PettyCashSaldo::getSaldoCash(Auth::id());
+            if ($saldoCash < $nominal) {
                 return redirect()->back()
-                    ->with('error', $e->getMessage())
+                    ->with('error', sprintf(
+                        'Saldo CASH Anda tidak mencukupi. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                        number_format($nominal, 0, ',', '.'),
+                        number_format($saldoCash, 0, ',', '.')
+                    ))
+                    ->withInput();
+            }
+
+            // 2. Cek Saldo Nasabah
+            $saldoNasabah = $this->getSaldoNasabah($idAnggota);
+            if ($saldoNasabah < $nominal) {
+                return redirect()->back()
+                    ->with('error', sprintf(
+                        'Saldo NASABAH tidak mencukupi. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                        number_format($nominal, 0, ',', '.'),
+                        number_format($saldoNasabah, 0, ',', '.')
+                    ))
                     ->withInput();
             }
         }
 
-        $pettyId = !$isWithdrawal ? IdGenerator::generate('petty_cash_transaksi_nasabah', 'P', 'CS', 'STR') : null;
+        try {
+            DB::beginTransaction();
 
-        TransTabungan::create([
-            'id'                 => $idTransaksi,
-            'id_pengajuan_setor' => null, 
-            'id_janji_temu_tabungan' => $janjiTemu->id,
-            'id_pengajuan_tarik' => $idPengajuanTarik,
-            'id_anggota'         => $idAnggota,
-            'id_jns_via'         => $idVia,
-            'id_jns_transaksi'   => $idTrans,
-            'nominal'            => (float) $nominal, // Selalu positif
-            'keterangan'         => ($isWithdrawal ? '[PENARIKAN TUNAI] ' : '[SETORAN TUNAI] ') . $janjiTemu->keterangan,
-            'tgl_transaksi'      => now(),
-            'admin_pengelola_id' => Auth::id(),
-            'is_petty_cash'      => 1,
-            'petty_cash_ref'     => $pettyId ?: $janjiTemu->id, // Jika penarikan ref ke janji temu
-            'metode_bayar'       => 'cash',
-        ]);
+            // Handle foto penerimaan menggunakan tbl_bukti_foto universal
+            // id wajib diisi: tbl_bukti_foto pakai id string (bukan auto-increment)
+            if ($request->hasFile('foto_penerimaan')) {
+                foreach ($request->file('foto_penerimaan') as $file) {
+                    $fotoPenerimaan = $file->store('bukti_tabungan', 'public');
+                    $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'T', 'CS', 'JNJT');
+                    BuktiFoto::create([
+                        'id'          => $idBuktiFoto,
+                        'owner_id'    => $janjiTemu->id,
+                        'owner_fitur' => 'T',    // Tabungan
+                        'owner_trans' => 'JNJT', // Janji Temu
+                        'file_path'   => $fotoPenerimaan,
+                        'keterangan'  => 'Bukti penerimaan janji temu',
+                    ]);
+                }
+            }
 
-        // 🔥 INTEGRASI PETTY CASH: Untuk Setoran Cash via Janji Temu
-        if ($pettyId) {
-            PettyCashTransaksiNasabah::create([
-                'id'               => $pettyId,
-                'admin_id'         => Auth::id(),
-                'nasabah_id'       => $idAnggota,
-                'id_jns_transaksi' => $idTrans,
-                'id_jns_via'       => $idVia,
-                'id_jns_fitur'     => PettyCashConstants::FITUR_TABUNGAN,
+            // Update janji temu: status selesai + nominal disamakan dengan yang dipakai di transaksi
+            // (agar semua halaman—admin detail, nasabah detail, list—tampil nominal yang sama)
+            $janjiTemu->update([
+                'status'           => '2',  // Selesai
                 'nominal'          => $nominal,
-                'status'           => 'approved',
-                'keterangan'       => 'Otomatis dari Janji Temu #' . $janjiTemu->id,
-                'ref_table'        => 'trans_tabungan',
-                'ref_id'           => $idTransaksi,
-                'tgl_transaksi'    => now(),
+                'keterangan_admin' => $request->keterangan_admin,
             ]);
 
-            PettyCashSaldo::updateOrCreateSaldo(
-                Auth::id(), 
-                'admin', 
-                $nominal, 
-                $pettyId, 
-                'Setoran dari Janji Temu #' . $janjiTemu->id,
-                'petty_cash_transaksi_nasabah'
+            // Create transaksi tabungan
+            $kodeVia  = 'CS'; // Cash (janji temu)
+            $kodeTrans = $isWithdrawal ? 'PNR' : 'STR';
+
+            $idVia       = DB::table('jns_via')->where('kode', $kodeVia)->value('id');
+            $idTrans     = DB::table('jns_transaksi')->where('kode', $kodeTrans)->value('id');
+            $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
+
+            // Find related pengajuan tarik if this is a withdrawal
+            $idPengajuanTarik = null;
+            if ($isWithdrawal) {
+                $pengajuanTarik = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+                    ->where('nominal', $nominal)
+                    ->where('status', '1') // Pending
+                    ->latest()
+                    ->first();
+
+                if ($pengajuanTarik) {
+                    $idPengajuanTarik = $pengajuanTarik->id;
+                    $pengajuanTarik->update(['status' => '2']); // Approve
+                }
+            }
+
+            // 🔥 Tugas 4: Pemotongan Saldo Petty Cash Admin (CASH) — sudah tervalidasi di atas
+            if ($isWithdrawal) {
+                PettyCashSaldo::updateSaldo(
+                    Auth::id(),
+                    'cash',
+                    -$nominal,
+                    $janjiTemu->id,
+                    'Penarikan Tunai: ' . ($janjiTemu->nasabah->user->nama ?? 'Nasabah'),
+                    'tbl_janji_temu_tabungan'
+                );
+            }
+
+            // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+            $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', \App\Services\PettyCashConstants::REF_JANJI_TEMU)
+                ->where('ref_id', $janjiTemu->id)
+                ->first();
+
+            if ($existingPc) {
+                throw new \Exception('Transaksi janji temu ini sudah tercatat di Petty Cash.');
+            }
+
+            $pettyId = !$isWithdrawal
+                ? IdGenerator::generate('petty_cash_transaksi_nasabah', 'P', 'CS', 'STR')
+                : null;
+
+            TransTabungan::create([
+                'id'                     => $idTransaksi,
+                'id_pengajuan_setor'     => null,
+                'id_janji_temu_tabungan' => $janjiTemu->id,
+                'id_pengajuan_tarik'     => $idPengajuanTarik,
+                'id_anggota'             => $idAnggota,
+                'id_jns_via'             => $idVia,
+                'id_jns_transaksi'       => $idTrans,
+                'nominal'                => (float) $nominal,
+                'keterangan'             => ($isWithdrawal ? '[PENARIKAN TUNAI] ' : '[SETORAN TUNAI] ') . $janjiTemu->keterangan,
+                'tgl_transaksi'          => now(),
+                'admin_pengelola_id'     => Auth::id(),
+                'is_petty_cash'          => 1,
+                'petty_cash_ref'         => $pettyId ?: $janjiTemu->id,
+                'metode_bayar'           => 'cash',
+            ]);
+
+            // 🔥 INTEGRASI PETTY CASH: Untuk Setoran Cash via Janji Temu
+            if ($pettyId) {
+                PettyCashTransaksiNasabah::create([
+                    'id'               => $pettyId,
+                    'admin_id'         => Auth::id(),
+                    'nasabah_id'       => $idAnggota,
+                    'id_jns_transaksi' => $idTrans,
+                    'id_jns_via'       => $idVia,
+                    'id_jns_fitur'     => PettyCashConstants::FITUR_TABUNGAN,
+                    'nominal'          => $nominal,
+                    'status'           => 'approved',
+                    'keterangan'       => 'Otomatis dari Janji Temu #' . $janjiTemu->id,
+                    'ref_table'        => 'trans_tabungan',
+                    'ref_id'           => $idTransaksi,
+                    'tgl_transaksi'    => now(),
+                ]);
+
+                PettyCashSaldo::updateOrCreateSaldo(
+                    Auth::id(),
+                    'admin',
+                    $nominal,
+                    $pettyId,
+                    'Setoran dari Janji Temu #' . $janjiTemu->id,
+                    'petty_cash_transaksi_nasabah'
+                );
+            }
+
+            app(ActivityLogService::class)->logProsesJanjiTemuTabungan(
+                $idTransaksi, $nominal,
+                $janjiTemu->nasabah->user->nama ?? 'N/A',
+                $isWithdrawal ? 'penarikan' : 'setoran'
             );
+
+            DB::commit();
+
+            return redirect()->route('admin.janji-temu.index')
+                ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('createTransFromJanjiTemu error', [
+                'janji_temu_id' => $id,
+                'error'         => $e->getMessage(),
+                'trace'         => $e->getTraceAsString(),
+            ]);
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage())
+                ->withInput();
         }
-
-        app(ActivityLogService::class)->logProsesJanjiTemuTabungan($idTransaksi, $nominal, $janjiTemu->nasabah->user->nama ?? 'N/A', $isWithdrawal ? 'penarikan' : 'setoran');
-
-        return redirect()->route('admin.janji-temu.index')
-            ->with('success', 'Transaksi tabungan berhasil dibuat dari janji temu!');
     }
 
     /**

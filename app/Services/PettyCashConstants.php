@@ -21,7 +21,15 @@ class PettyCashConstants
     const FITUR_GADAI     = 4;
     
     // ref_table
-    const REF_TABUNGAN    = 'tbl_pengajuan_tabungan';
-    const REF_PINJAMAN_H  = 'tbl_pinjaman_h';
-    const REF_PINJAMAN_D  = 'tbl_pengajuan_pembayaran_pinjaman';
+    const REF_TABUNGAN_STR = 'tbl_pengajuan_tabungan';
+    const REF_TABUNGAN_PNR = 'tbl_pengajuan_penarikan_tabungan';
+    const REF_JANJI_TEMU   = 'tbl_janji_temu_tabungan';
+    const REF_PINJAMAN_H   = 'tbl_pinjaman_h';
+    const REF_PINJAMAN_D   = 'tbl_pengajuan_pembayaran_pinjaman';
+
+    // Sumber Transaksi Owner
+    const SUMBER_TABUNGAN = 'tabungan';
+    const SUMBER_PINJAMAN = 'pinjaman';
+    const SUMBER_PETTY    = 'petty_cash';
+    const SUMBER_LAIN     = 'other';
 }

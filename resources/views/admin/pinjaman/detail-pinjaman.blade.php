@@ -215,7 +215,8 @@
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Pelunasan Dipercepat</h3>
                     <form method="POST" action="{{ route('admin.pinjaman.pelunasan-dipercepat', $pinjaman->id) }}"
-                        onsubmit="return confirm('Apakah Anda yakin ingin melakukan pelunasan dipercepat?')">
+                        onsubmit="return confirm('Apakah Anda yakin ingin melakukan pelunasan dipercepat?')"
+                        enctype="multipart/form-data">
                         @csrf
                         @php
                         $totalTagihan = $pinjaman->jumlah_pinjam + $pinjaman->bunga_rp;
@@ -259,6 +260,12 @@
                                                 {{ number_format($totalBayar, 0, ',', '.') }}</span>
                                         </div>
                                     </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Pelunasan <span class="text-red-500">*</span></label>
+                                    <input type="file" name="bukti_foto" accept="image/*" required
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none">
+                                    <p class="text-xs text-gray-500 mt-1">Format: JPG, PNG. Maksimal 10MB.</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Potongan (Opsional,

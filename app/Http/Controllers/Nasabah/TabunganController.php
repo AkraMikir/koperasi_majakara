@@ -410,18 +410,18 @@ class TabunganController extends Controller
             // Get ID anggota after PIN verification
             $idAnggota = $this->getIdAnggota();
 
-            // Duplicate submission prevention (last 10 seconds)
+            // Duplicate submission prevention (last 10 seconds) - use whereDate
             $waktuJanjiTemu = \Carbon\Carbon::parse($request->waktu_janji_temu)->format('H:i:s');
             $alreadyExists = JanjiTemuTabungan::where('id_nasabah', $idAnggota)
                 ->where('nominal', $request->nominal)
-                ->where('tanggal_janji_temu', $request->tanggal_janji_temu)
+                ->whereDate('tanggal_janji_temu', $request->tanggal_janji_temu)
                 ->where('waktu_janji_temu', $waktuJanjiTemu)
                 ->where('created_at', '>=', now()->subSeconds(10))
                 ->first();
 
             if ($alreadyExists) {
                 return redirect()->route('nasabah.tabungan.status-janji-temu')
-                    ->with('success', 'Janji temu Anda telah berhasil dibuat!');
+                    ->with('info', 'Permintaan Anda sedang diproses. Silakan cek daftar janji temu Anda.');
             }
 
             // Generate ID untuk janji temu
@@ -429,8 +429,8 @@ class TabunganController extends Controller
             // Contoh: 04022026001TCSJNJT, 04022026002TCSJNJT
             $id = IdGenerator::generate('tbl_janji_temu_tabungan', 'T', 'CS', 'JNJT');
             
-            // Parse dates
-            $tanggalJanjiTemu = \Carbon\Carbon::parse($request->tanggal_janji_temu . ' ' . $request->waktu_janji_temu);
+            // Parse dates - ensure only date part for tanggal_janji_temu
+            $tanggalJanjiTemu = \Carbon\Carbon::parse($request->tanggal_janji_temu)->startOfDay();
             $waktuJanjiTemu = \Carbon\Carbon::parse($request->waktu_janji_temu)->format('H:i:s');
             
             // Create janji temu
@@ -512,7 +512,7 @@ class TabunganController extends Controller
 
         if ($recentDuplicate) {
             return redirect()->route('nasabah.tabungan.status-pengajuan-tarik')
-                ->with('warning', 'Pengajuan penarikan yang sama sudah dikirim. Silakan tunggu beberapa saat.');
+                ->with('info', 'Permintaan Anda sedang diproses. Silakan cek status penarikan Anda.');
         }
 
         try {
@@ -559,7 +559,7 @@ class TabunganController extends Controller
                     'lokasi_temu' => $request->lokasi_temu,
                     'jenis' => 'penarikan',  // ✅ Set jenis as penarikan
                     'nominal' => $request->nominal,
-                    'tanggal_janji_temu' => $request->tanggal_janji_temu,
+                    'tanggal_janji_temu' => \Carbon\Carbon::parse($request->tanggal_janji_temu)->startOfDay(),
                     'waktu_janji_temu' => $request->waktu_janji_temu,
                     'keterangan' => $request->keterangan,
                     'status' => '1', // Menunggu
@@ -778,6 +778,34 @@ class TabunganController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Pengajuan setoran berhasil dibatalkan.');
+    }
+
+    /**
+     * Cancel pengajuan penarikan.
+     */
+    public function cancelPengajuanTarik(Request $request, $id)
+    {
+        $idAnggota = $this->getIdAnggota();
+
+        $request->validate([
+            'pin' => 'required|numeric|digits:6',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if ((int) $user->pin !== (int) $request->pin) {
+            return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
+        }
+        
+        $pengajuan = PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Only if pending
+            ->findOrFail($id);
+
+        $pengajuan->update([
+            'status' => '3', // Dibatalkan/Ditolak
+        ]);
+
+        return redirect()->back()->with('success', 'Pengajuan penarikan berhasil dibatalkan.');
     }
 
     /**

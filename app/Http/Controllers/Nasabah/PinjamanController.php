@@ -193,25 +193,31 @@ class PinjamanController extends Controller
         }
 
         $bungaPersen = (float) $masterBunga->bunga_persen;
-        $bungaRp = round($nominal * $bungaPersen / 100, 2);
-        $totalKewajiban = $nominal + $bungaRp; // Total yang harus dibayar tepat
+        $bungaRpRaw = ($nominal * $bungaPersen) / 100;
+        $angsuranRaw = ($nominal + $bungaRpRaw) / $durasi;
 
-        // Angsuran: n-1 pertama dibulatkan ke bawah ke ratusan, bulan terakhir = sisa
-        $angsuranBulanan = (int) floor($totalKewajiban / $durasi / 100) * 100;
-        $akumulasi = $angsuranBulanan * ($durasi - 1);
-        $angsuranTerakhir = (int) round($totalKewajiban - $akumulasi, 0);
+        // Bulatkan angsuran per bulan ke kelipatan 500 terdekat
+        $angsuranBulanan = (int) round($angsuranRaw / 500) * 500;
+        if ($angsuranBulanan == 0) $angsuranBulanan = 500;
+        
+        $totalKewajiban = $angsuranBulanan * $durasi;
+        $bungaRp = $totalKewajiban - $nominal;
+        if ($bungaRp < 0) {
+            $angsuranBulanan = (int) ceil($angsuranRaw / 500) * 500;
+            $totalKewajiban = $angsuranBulanan * $durasi;
+            $bungaRp = $totalKewajiban - $nominal;
+        }
 
         $simulasi = [];
         $tanggalMulai = now();
         for ($i = 1; $i <= $durasi; $i++) {
             $tanggalJatuhTempo = $tanggalMulai->copy()->addMonths($i);
-            $totalBulan = ($i < $durasi) ? $angsuranBulanan : $angsuranTerakhir;
             $simulasi[] = [
                 'bulan' => $i,
                 'tanggal' => $tanggalJatuhTempo->format('d/m/Y'),
                 'pokok' => 0,
                 'bunga' => 0,
-                'total' => (int) $totalBulan,
+                'total' => $angsuranBulanan,
             ];
         }
 
@@ -476,6 +482,19 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
+
+        // 🛡️ Guard duplikasi harian: satu nasabah max 1 janji temu pinjaman PENDING per tanggal
+        $sudahAdaHariIni = \App\Models\JanjiTemuPinjaman::where('id_nasabah', $idAnggota)
+            ->whereDate('tanggal_janji_temu', $request->tanggal_janji_temu)
+            ->where('status', '1') // pending
+            ->exists();
+
+        if ($sudahAdaHariIni) {
+            return redirect()->back()
+                ->with('warning', 'Anda sudah memiliki janji temu pembayaran pinjaman yang sedang menunggu untuk tanggal yang sama.')
+                ->withInput($request->except('pin'));
+        }
+
         $durasi = (int) $request->durasi;
 
         // Bunga dari master_bunga_pinjaman sesuai durasi

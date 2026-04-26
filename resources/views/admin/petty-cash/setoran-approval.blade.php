@@ -46,25 +46,38 @@
                                 <p class="text-xs text-gray-500">{{ $s->tgl_setoran->format('d M Y, H:i') }}</p>
                             </div>
                             @if($s->status === 'pending')
-                                <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Menunggu</span>
+                                <span class="ml-auto px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Menunggu Verifikasi Owner</span>
                             @elseif($s->status === 'approved_owner')
-                                <span class="ml-auto px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✓ Disetujui</span>
+                                <div class="ml-auto text-right">
+                                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">✓ Disetujui Owner</span>
+                                    @if($s->tgl_approval)
+                                        <p class="text-[10px] text-gray-500 mt-1">Disetujui: {{ $s->tgl_approval->format('d/m/Y H:i') }}</p>
+                                    @endif
+                                </div>
                             @else
-                                <span class="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">Ditolak</span>
+                                <span class="ml-auto px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">Ditolak Owner</span>
                             @endif
                         </div>
 
-                        <div class="grid grid-cols-3 gap-4 mt-4">
-                            <div>
-                                <p class="text-xs text-gray-500">Total Setoran</p>
-                                <p class="font-bold text-[#674c1d] text-xl mt-0.5">Rp {{ number_format($s->total_setor, 0, ',', '.') }}</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+                            <div class="col-span-1">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Setoran</p>
+                                <p class="font-bold text-[#674c1d] text-lg mt-0.5">Rp {{ number_format($s->total_setor, 0, ',', '.') }}</p>
                             </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Jumlah Nasabah</p>
-                                <p class="font-bold text-gray-900 text-xl mt-0.5">{{ $s->jumlah_nasabah }} orang</p>
+                            <div class="col-span-1">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Tunai / Transfer</p>
+                                <div class="flex items-center gap-2 mt-0.5">
+                                    <span class="text-xs font-semibold text-green-600">Rp {{ number_format($s->nominal_cash, 0, ',', '.') }}</span>
+                                    <span class="text-gray-300">/</span>
+                                    <span class="text-xs font-semibold text-blue-600">Rp {{ number_format($s->nominal_tf, 0, ',', '.') }}</span>
+                                </div>
                             </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Setor Fisik</p>
+                            <div class="col-span-1">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Nasabah</p>
+                                <p class="font-bold text-gray-900 text-lg mt-0.5">{{ $s->jumlah_nasabah }} orang</p>
+                            </div>
+                            <div class="col-span-1">
+                                <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Setor Fisik</p>
                                 <p class="font-semibold text-gray-900 mt-0.5">
                                     {{ $s->sudah_setor_fisik ? '✅ Sudah' : '⏳ Belum' }}
                                 </p>

@@ -169,17 +169,17 @@
 
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
-            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-center text-2xl font-mono tracking-widest"
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                class="w-full px-4 py-5 border-2 border-gray-100 rounded-2xl focus:border-[#674c1d] focus:ring-4 focus:ring-[#674c1d]/10 outline-none text-center text-3xl font-bold tracking-[0.5em] transition-all bg-gray-50 focus:bg-white"
                 placeholder="••••••"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value.length === 6) verifyAndSubmit();">
         </div>
 
         <div class="flex gap-3">
             <button onclick="closePinModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
                 Batal
             </button>
-            <button onclick="verifyAndSubmit()" class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+            <button onclick="verifyAndSubmit()" id="btn-verify-submit" class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
                 Verifikasi
             </button>
         </div>
@@ -232,14 +232,17 @@
         document.getElementById('pin-error').classList.add('hidden');
     }
 
+    let isSubmitting = false;
     function verifyAndSubmit() {
+        if (isSubmitting) return;
+        
         const pin = document.getElementById('pin-input').value;
         
         if (pin.length !== 6) {
-            showPinError('PIN harus 6 digit');
             return;
         }
 
+        isSubmitting = true;
         // Get form
         const form = document.getElementById('form-janji-temu');
         
@@ -249,13 +252,22 @@
         nominalInput.value = nominalRaw; // Set as raw number for server processing
 
         // Add PIN to form
-        const pinInput = document.createElement('input');
-        pinInput.type = 'hidden';
-        pinInput.name = 'pin';
-        pinInput.value = pin;
-        form.appendChild(pinInput);
+        const pinInputHidden = document.createElement('input');
+        pinInputHidden.type = 'hidden';
+        pinInputHidden.name = 'pin';
+        pinInputHidden.value = pin;
+        form.appendChild(pinInputHidden);
 
         // Submit form
+        const submitBtn = document.getElementById('btn-verify-submit');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        `;
+        
         form.submit();
     }
 

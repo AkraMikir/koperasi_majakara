@@ -95,6 +95,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/janji-temu/{id}', [TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
         Route::post('/janji-temu/{id}/cancel', [TabunganController::class, 'cancelJanjiTemu'])->name('cancel-janji-temu');
         Route::post('/pengajuan-setor/{id}/cancel', [TabunganController::class, 'cancelPengajuanSetor'])->name('cancel-pengajuan-setor');
+        Route::post('/pengajuan-tarik/{id}/cancel', [TabunganController::class, 'cancelPengajuanTarik'])->name('cancel-pengajuan-tarik');
     });
     
     // Pinjaman Routes
@@ -429,10 +430,11 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/setoran-kantor', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranKantorIndex'])->name('setoran-kantor.index');
         Route::post('/setoran-kantor', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranKantorStore'])->name('setoran-kantor.store');
 
-        // ── Main Wallet Owner (CRUD) ──
-        Route::get('/owner-wallet', [\App\Http\Controllers\Admin\PettyCashController::class, 'ownerWalletIndex'])->name('owner-wallet.index');
-        Route::post('/owner-wallet', [\App\Http\Controllers\Admin\PettyCashController::class, 'ownerWalletStore'])->name('owner-wallet.store');
-        Route::delete('/owner-wallet/{id}', [\App\Http\Controllers\Admin\PettyCashController::class, 'ownerWalletDestroy'])->name('owner-wallet.destroy');
+        // ── Main Wallet Owner (Unified Ledger) ──
+        Route::get('/owner-wallet', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'index'])->name('owner-wallet.index');
+        Route::post('/owner-wallet', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'store'])->name('owner-wallet.store');
+        Route::post('/owner-wallet/withdraw', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'withdraw'])->name('owner-wallet.withdraw');
+        Route::delete('/owner-wallet/{id}', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'destroy'])->name('owner-wallet.destroy');
 
         // ── Verifikasi Setoran (Owner) ──
         Route::get('/setoran-approval', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalIndex'])->name('setoran-approval.index');

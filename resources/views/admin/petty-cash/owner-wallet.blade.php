@@ -23,7 +23,14 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                 </svg>
-                Dana Keluar (Biaya)
+                Dana Keluar
+            </button>
+            <button onclick="openModal('modalWithdraw')"
+                    class="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all flex items-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z"/>
+                </svg>
+                Tarik Saldo
             </button>
         </div>
     </div>
@@ -97,12 +104,61 @@
         </div>
     </div>
 
+    {{-- Saldo per Sumber --}}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-6 mb-8">
+        @php
+            $sources = [
+                'tabungan' => ['Tabungan', 'purple', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                'pinjaman' => ['Pinjaman', 'blue', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
+                'petty_cash' => ['Petty (Clearing)', 'emerald', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
+                'other' => ['Modal Awal', 'amber', 'M12 6v6m0 0v6m0-6h6m-6 0H6'],
+            ];
+        @endphp
+
+        @foreach($sources as $key => $info)
+        @php
+            $det = (object)($sourceDetails[$key] ?? ['total_cash' => 0, 'total_tf' => 0]);
+            $total = $det->total_cash + $det->total_tf;
+            $color = $info[1];
+        @endphp
+        <div class="bg-white rounded-2xl shadow-sm p-5 border border-{{ $color }}-100 flex items-center gap-4 hover:shadow-md transition-shadow group">
+            <div class="w-12 h-12 bg-{{ $color }}-100 rounded-xl flex items-center justify-center flex-shrink-0 text-{{ $color }}-600 group-hover:scale-110 transition-transform">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $info[2] }}"/>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <p class="text-gray-500 text-[10px] font-bold uppercase tracking-wider mb-1">Saldo {{ $info[0] }}</p>
+                <p class="text-xl font-black text-{{ $color }}-900 font-display">Rp {{ number_format($total, 0, ',', '.') }}</p>
+                <div class="flex items-center gap-3 mt-1.5 pt-1.5 border-t border-gray-50">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold">Cash</span>
+                        <span class="text-[11px] font-bold text-gray-700">Rp {{ number_format($det->total_cash, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="w-px h-4 bg-gray-100"></div>
+                    <div class="flex flex-col">
+                        <span class="text-[9px] text-gray-400 uppercase font-bold">Bank</span>
+                        <span class="text-[11px] font-bold text-gray-700">Rp {{ number_format($det->total_tf, 0, ',', '.') }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endforeach
+    </div>
+
     {{-- Filter & Recent Transactions --}}
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
         <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <h2 class="text-xl font-bold text-[#674c1d] font-display">Riwayat Transaksi Wallet Utama</h2>
             
             <form action="{{ route('admin.petty-cash.owner-wallet.index') }}" method="GET" class="flex flex-wrap items-center gap-3 text-sm">
+                <select name="sumber" class="rounded-lg border-gray-300 focus:ring-[#674c1d] focus:border-[#674c1d]">
+                    <option value="">Semua Sumber</option>
+                    <option value="tabungan" {{ request('sumber') == 'tabungan' ? 'selected' : '' }}>Tabungan</option>
+                    <option value="pinjaman" {{ request('sumber') == 'pinjaman' ? 'selected' : '' }}>Pinjaman</option>
+                    <option value="petty_cash" {{ request('sumber') == 'petty_cash' ? 'selected' : '' }}>Petty Cash</option>
+                    <option value="other" {{ request('sumber') == 'other' ? 'selected' : '' }}>Modal Awal</option>
+                </select>
                 <select name="tipe" class="rounded-lg border-gray-300 focus:ring-[#674c1d] focus:border-[#674c1d]">
                     <option value="">Semua Tipe</option>
                     <option value="masuk" {{ request('tipe') == 'masuk' ? 'selected' : '' }}>Dana Masuk</option>
@@ -111,8 +167,8 @@
                     <option value="terima_setoran" {{ request('tipe') == 'terima_setoran' ? 'selected' : '' }}>Terima Setoran</option>
                 </select>
                 <input type="date" name="tgl_dari" value="{{ request('tgl_dari') }}" class="rounded-lg border-gray-300 focus:ring-[#674c1d] focus:border-[#674c1d]">
-                <button type="submit" class="p-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
-                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button type="submit" class="p-2 bg-[#674c1d] text-white hover:bg-[#4a3514] rounded-lg transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                     </svg>
                 </button>
@@ -124,8 +180,9 @@
                 <thead class="bg-gray-50 border-b border-gray-100">
                     <tr>
                         <th class="px-6 py-4 text-left font-bold text-gray-700 uppercase tracking-wider">ID / Waktu</th>
-                        <th class="px-6 py-4 text-left font-bold text-gray-700 uppercase tracking-wider">Tipe / Keterangan</th>
+                        <th class="px-6 py-4 text-left font-bold text-gray-700 uppercase tracking-wider">Sumber / Tipe / Keterangan</th>
                         <th class="px-6 py-4 text-right font-bold text-gray-700 uppercase tracking-wider">Nominal</th>
+                        <th class="px-6 py-4 text-right font-bold text-gray-700 uppercase tracking-wider bg-gray-100/50">Running Balance</th>
                         <th class="px-6 py-4 text-center font-bold text-gray-700 uppercase tracking-wider">Bukti</th>
                         <th class="px-6 py-4 text-center font-bold text-gray-700 uppercase tracking-wider">Aksi</th>
                     </tr>
@@ -135,45 +192,59 @@
                     <tr class="hover:bg-gray-50/50 transition-colors">
                         <td class="px-6 py-4">
                             <p class="font-bold text-gray-900 text-xs">{{ $t->id }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $t->created_at->format('d M Y - H:i') }}</p>
+                            <p class="text-xs text-gray-500 mt-1">{{ \Carbon\Carbon::parse($t->created_at)->format('d M Y - H:i') }}</p>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="flex items-center gap-2 mb-1">
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
                                 @php
-                                    $tipeBadge = [
-                                        'masuk' => ['bg-green-100 text-green-700', 'DANA MASUK'],
-                                        'keluar' => ['bg-red-100 text-red-700', 'DANA KELUAR'],
-                                        'kirim_admin_hold' => ['bg-amber-100 text-amber-700', 'KIRIM KE ADMIN'],
-                                        'terima_setoran' => ['bg-blue-100 text-blue-700', 'TERIMA SETORAN'],
+                                    $sumberBadge = [
+                                        'tabungan' => ['bg-purple-100 text-purple-700', 'TABUNGAN'],
+                                        'pinjaman' => ['bg-blue-100 text-blue-700', 'PINJAMAN'],
+                                        'petty_cash' => ['bg-emerald-100 text-emerald-700', 'PETTY CASH'],
+                                        'other' => ['bg-amber-100 text-amber-700', 'MODAL AWAL'],
                                     ];
-                                    $badge = $tipeBadge[$t->tipe] ?? ['bg-gray-100 text-gray-700', strtoupper($t->tipe)];
+                                    $tipeBadge = [
+                                        'masuk' => ['bg-green-100 text-green-700', 'MASUK'],
+                                        'keluar' => ['bg-red-100 text-red-700', 'KELUAR'],
+                                        'kirim_admin_hold' => ['bg-amber-100 text-amber-700', 'HOLD'],
+                                        'terima_setoran' => ['bg-blue-100 text-blue-700', 'SETORAN'],
+                                        'penerimaan_angsuran' => ['bg-indigo-100 text-indigo-700', 'ANGSURAN'],
+                                    ];
+                                    $sBadge = $sumberBadge[$t->sumber ?? 'other'] ?? ['bg-gray-50 text-gray-500', strtoupper($t->sumber ?? 'N/A')];
+                                    $tBadge = $tipeBadge[$t->tipe] ?? ['bg-gray-50 text-gray-500', strtoupper($t->tipe)];
                                 @endphp
-                                <span class="px-2 py-0.5 {{ $badge[0] }} rounded-full text-[10px] font-bold">{{ $badge[1] }}</span>
+                                <span class="px-2 py-0.5 {{ $sBadge[0] }} rounded text-[10px] font-extrabold border border-current/10">{{ $sBadge[1] }}</span>
+                                <span class="px-2 py-0.5 {{ $tBadge[0] }} rounded text-[10px] font-extrabold">{{ $tBadge[1] }}</span>
                             </div>
-                            <p class="text-gray-700 text-xs leading-relaxed">{{ $t->keterangan }}</p>
+                            <p class="text-gray-700 text-xs leading-relaxed font-medium">{{ $t->keterangan }}</p>
                         </td>
                         <td class="px-6 py-4 text-right">
                             <div class="space-y-1">
-                                @if($t->nominal_cash > 0)
-                                <div class="text-xs">
-                                    <span class="text-gray-400 mr-2">CASH:</span>
-                                    <span class="font-bold {{ $t->tipe == 'masuk' || $t->tipe == 'terima_setoran' ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $t->tipe == 'masuk' || $t->tipe == 'terima_setoran' ? '+' : '-' }} Rp {{ number_format($t->nominal_cash, 0, ',', '.') }}
+                                @if($t->nominal_cash != 0)
+                                <div class="text-[10px]">
+                                    <span class="text-gray-400 mr-1 uppercase">Cash:</span>
+                                    <span class="font-bold {{ $t->nominal_cash > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                        {{ $t->nominal_cash > 0 ? '+' : '' }} Rp {{ number_format($t->nominal_cash, 0, ',', '.') }}
                                     </span>
                                 </div>
                                 @endif
-                                @if($t->nominal_tf > 0)
-                                <div class="text-xs">
-                                    <span class="text-gray-400 mr-2">BANK:</span>
-                                    <span class="font-bold {{ $t->tipe == 'masuk' || $t->tipe == 'terima_setoran' ? 'text-blue-600' : 'text-indigo-600' }}">
-                                        {{ $t->tipe == 'masuk' || $t->tipe == 'terima_setoran' ? '+' : '-' }} Rp {{ number_format($t->nominal_tf, 0, ',', '.') }}
+                                @if($t->nominal_tf != 0)
+                                <div class="text-[10px]">
+                                    <span class="text-gray-400 mr-1 uppercase">Bank:</span>
+                                    <span class="font-bold {{ $t->nominal_tf > 0 ? 'text-blue-600' : 'text-purple-600' }}">
+                                        {{ $t->nominal_tf > 0 ? '+' : '' }} Rp {{ number_format($t->nominal_tf, 0, ',', '.') }}
                                     </span>
                                 </div>
                                 @endif
-                                <div class="pt-1 border-t border-gray-100 font-extrabold text-[#674c1d]">
-                                    Rp {{ number_format($t->nominal_cash + $t->nominal_tf, 0, ',', '.') }}
+                                <div class="pt-1 border-t border-gray-100 font-extrabold text-gray-900">
+                                    {{ $t->mutasi > 0 ? '+' : '' }} Rp {{ number_format($t->mutasi, 0, ',', '.') }}
                                 </div>
                             </div>
+                        </td>
+                        <td class="px-6 py-4 text-right bg-gray-50/50">
+                            <p class="text-sm font-black text-[#674c1d] font-display">
+                                Rp {{ number_format($t->running_balance, 0, ',', '.') }}
+                            </p>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="flex justify-center gap-2">
@@ -277,7 +348,7 @@
 
     // Close on click outside
     window.onclick = function(event) {
-        ['modalMasuk', 'modalKeluar', 'imageViewer'].forEach(id => {
+        ['modalMasuk', 'modalKeluar', 'modalWithdraw', 'imageViewer'].forEach(id => {
             const modal = document.getElementById(id);
             if (event.target == modal) {
                 closeModal(id);

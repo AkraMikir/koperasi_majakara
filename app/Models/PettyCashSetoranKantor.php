@@ -20,6 +20,8 @@ class PettyCashSetoranKantor extends Model
         'admin_id',
         'owner_id',
         'total_setor',
+        'nominal_cash',
+        'nominal_tf',
         'data_potongan',
         'jumlah_nasabah',
         'foto_setoran',
@@ -33,6 +35,8 @@ class PettyCashSetoranKantor extends Model
 
     protected $casts = [
         'total_setor'       => 'decimal:2',
+        'nominal_cash'      => 'decimal:2',
+        'nominal_tf'        => 'decimal:2',
         'data_potongan'     => 'array',      // JSON auto-cast
         'sudah_setor_fisik' => 'boolean',
         'tgl_setoran'       => 'datetime',
