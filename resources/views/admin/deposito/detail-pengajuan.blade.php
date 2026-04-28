@@ -90,7 +90,16 @@
             <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 mb-3">
                 <h2 class="font-bold text-green-700 text-sm mb-3">Setujui Pengajuan</h2>
                 <label class="text-xs text-gray-600 block mb-1">Catatan Admin (opsional)</label>
-                <textarea name="catatan_admin" rows="2" placeholder="Catatan untuk nasabah..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 resize-none"></textarea>
+                <textarea name="catatan_admin" rows="2" placeholder="Catatan untuk nasabah..." class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 resize-none mb-3"></textarea>
+
+                @if($pengajuan->metode_setor === 'transfer')
+                <label class="text-xs text-gray-600 block mb-1">Simpan Dana Ke <span class="text-red-500">*</span></label>
+                <select name="metode_bayar" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 mb-3" required>
+                    <option value="transfer_koperasi">Rekening Koperasi (Utama)</option>
+                    <option value="transfer_admin">Rekening Admin (Petty Cash TF)</option>
+                    <option value="cash">Cash ke Admin (Petty Cash Cash)</option>
+                </select>
+                @endif
             </div>
             <button type="submit" onclick="return confirm('Yakin ingin menyetujui pengajuan ini?')" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 rounded-xl text-sm transition">
                 ✓ Setujui Deposito

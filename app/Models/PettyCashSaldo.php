@@ -42,7 +42,7 @@ class PettyCashSaldo extends Model
             $query->where('tipe', $tipe);
         }
 
-        $last = $query->latest()->first();
+        $last = $query->latest('id')->first();
 
         return $last ? (float) $last->saldo_akhir : 0.0;
     }
@@ -88,7 +88,7 @@ class PettyCashSaldo extends Model
         $last = self::where('user_id', $userId)
             ->where('role', 'admin')
             ->where('tipe', $tipe)
-            ->latest()->first();
+            ->latest('id')->first();
             
         $saldoAkhir = ($last ? (float)$last->saldo_akhir : 0) + $mutasi;
         

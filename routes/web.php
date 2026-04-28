@@ -296,6 +296,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             });
         });
         
+        // Kategori Deposito
+        Route::prefix('kategori-deposito')->name('kategori-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'index'])->name('index');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'update'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\KategoriDepositoController::class, 'destroy'])->name('destroy');
+            });
+        });
+        
         // Suku Bunga Deposito
         Route::prefix('suku-bunga-deposito')->name('suku-bunga-deposito.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaDepositoIndex'])->name('index');
@@ -422,6 +435,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/penerimaan', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanIndex'])->name('penerimaan.index');
         Route::post('/penerimaan/{id}/approve', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanApprove'])->name('penerimaan.approve');
         Route::post('/penerimaan/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'penerimaanReject'])->name('penerimaan.reject');
+        // Konfirmasi penerimaan dana deposito khusus (Admin)
+        Route::post('/penerimaan/{id}/approve-deposito', [\App\Http\Controllers\Admin\PettyCashController::class, 'approvePenerimaanDeposito'])->name('penerimaan.approve-deposito');
 
 
         Route::post('/transaksi/{id}/approve-tf', [\App\Http\Controllers\Admin\PettyCashController::class, 'approveSetoranTf'])->name('transaksi.approve-tf');
@@ -454,17 +469,42 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/export-pdf', [\App\Http\Controllers\Admin\DepositoController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/list/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'depositoDetail'])->name('deposito-detail');
 
+        // ── Paket Deposito (Owner Only) ──
+        Route::prefix('paket')->name('paket.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'paketIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\DepositoController::class, 'paketCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\DepositoController::class, 'paketStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\DepositoController::class, 'paketEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'paketUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\DepositoController::class, 'paketDestroy'])->name('destroy');
+        });
+
         // ── Pencairan via Transfer (TF) ──
         Route::prefix('pencairan-tf')->name('pencairan-tf.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfIndex'])->name('index');
             Route::get('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfFormShow'])->name('proses-form');
             Route::post('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTfProses'])->name('proses');
+            Route::post('/{id}/finish', [\App\Http\Controllers\Admin\DepositoController::class, 'selesaikanPencairanTf'])->name('finish');
         });
 
         // ── Pencairan ke Tabungan ──
         Route::prefix('pencairan-tabungan')->name('pencairan-tabungan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTabunganIndex'])->name('index');
             Route::post('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanTabunganProses'])->name('proses');
+            Route::post('/{id}/finish', [\App\Http\Controllers\Admin\DepositoController::class, 'selesaikanPencairanTabungan'])->name('finish');
+        });
+
+        // ── Pencairan via Petty Cash Operator (Tunai ke nasabah via Admin) ──
+        Route::prefix('pencairan-petty-cash')->name('pencairan-petty-cash.')->group(function () {
+            Route::post('/{id}/proses', [\App\Http\Controllers\Admin\DepositoController::class, 'pencairanPettyCashProses'])->name('proses');
+            Route::post('/{id}/serahkan', [\App\Http\Controllers\Admin\PettyCashController::class, 'pencairanDepositoCash'])->name('serahkan');
+        });
+
+        // ── Peringatan Jatuh Tempo (Dashboard Owner) ──
+        Route::prefix('peringatan')->name('peringatan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'peringatanIndex'])->name('index');
+            Route::post('/{id}/update', [\App\Http\Controllers\Admin\DepositoController::class, 'updatePersiapanCair'])->name('update');
+            Route::post('/{id}/send-dana', [\App\Http\Controllers\Admin\DepositoController::class, 'sendDanaPersiapan'])->name('send-dana');
         });
     });
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');

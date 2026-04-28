@@ -186,6 +186,7 @@
                                 $sourceLabels = [
                                     'tabungan' => 'Saldo Tabungan',
                                     'pinjaman' => 'Saldo Pinjaman',
+                                    'deposito' => 'Saldo Deposito',
                                     'petty_cash' => 'Saldo Petty Cash',
                                     'other' => 'Modal Awal',
                                 ];

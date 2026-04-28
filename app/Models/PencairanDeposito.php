@@ -15,7 +15,7 @@ class PencairanDeposito extends Model
     protected $fillable = [
         'deposito_id',
         'id_nasabah',
-        'jenis_pencairan',   // rek_nasabah | saldo_tabungan
+        'jenis_pencairan',   // rek_nasabah | saldo_tabungan | petty_cash_operator
         'nominal_akhir',
         'metode_pencairan',  // (legacy, keep for compat)
         'foto_bukti_tf',
@@ -46,8 +46,16 @@ class PencairanDeposito extends Model
     }
 
     /* ── helpers ── */
-    public function isPending(): bool   { return $this->status === 'pending'; }
-    public function isSelesai(): bool   { return $this->status === 'selesai'; }
-    public function isTf(): bool        { return $this->jenis_pencairan === 'rek_nasabah'; }
-    public function isTabungan(): bool  { return $this->jenis_pencairan === 'saldo_tabungan'; }
+    public function isPending(): bool      { return $this->status === 'pending'; }
+    public function isDiproses(): bool     { return $this->status === 'diproses'; }
+    public function isSelesai(): bool      { return $this->status === 'selesai'; }
+    public function isTf(): bool           { return $this->jenis_pencairan === 'rek_nasabah'; }
+    public function isTabungan(): bool     { return $this->jenis_pencairan === 'saldo_tabungan'; }
+    public function isPettyCash(): bool    { return $this->jenis_pencairan === 'petty_cash_operator'; }
+
+    /** Apakah pencairan ini butuh dana fisik/transfer Owner? */
+    public function needsFisikOwner(): bool
+    {
+        return in_array($this->jenis_pencairan, ['rek_nasabah', 'petty_cash_operator']);
+    }
 }

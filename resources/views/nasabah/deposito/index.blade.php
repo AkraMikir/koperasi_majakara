@@ -213,25 +213,17 @@
                     <label class="text-xs font-semibold text-gray-700 block mb-1">Pilih Tenor</label>
                     <div class="grid grid-cols-4 gap-2">
                         @php
-                            $tenorOptions = [['bulan' => 1, 'rate' => 6.0], ['bulan' => 3, 'rate' => 7.5], ['bulan' => 6, 'rate' => 9.0], ['bulan' => 12, 'rate' => 12.0]];
-                            $firstTenorRate = 6.0;
+                            $uniqueTenors = $pakets->unique('tenor_bulan')->values();
                         @endphp
-                        @foreach($tenors as $t)
-                        @php
-                            // Rate default berdasarkan tenor jika DB kosong
-                            $rateDefault = [1 => 3.75, 3 => 4.50, 6 => 5.25, 12 => 6.00];
-                            $rate = $t->sukuBunga->first()
-                                ? (float)($t->sukuBunga->first()->bunga * 100)
-                                : ($rateDefault[$t->tenor_bulan] ?? 6.00);
-                        @endphp
-                        <button type="button" onclick="selectTenor({{ $t->tenor_bulan }}, {{ $rate }}, this)"
-                            data-bulan="{{ $t->tenor_bulan }}" data-rate="{{ $rate }}"
+                        @foreach($uniqueTenors as $t)
+                        <button type="button" onclick="selectTenor({{ $t->tenor_bulan }}, {{ $t->suku_bunga }}, this)"
+                            data-bulan="{{ $t->tenor_bulan }}" data-rate="{{ $t->suku_bunga }}"
                             class="tenor-sim-btn py-2 rounded-xl border-2 text-center transition-all text-xs font-bold border-gray-200 text-gray-600 hover:border-[#674c1d] hover:text-[#674c1d]">
                             {{ $t->tenor_bulan }}bln
                         </button>
                         @endforeach
-                        {{-- Fallback jika tenor kosong --}}
-                        @if($tenors->isEmpty())
+                        {{-- Fallback jika paket kosong --}}
+                        @if($pakets->isEmpty())
                         <button type="button" onclick="selectTenor(1, 6.0, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">1bln</button>
                         <button type="button" onclick="selectTenor(3, 7.5, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">3bln</button>
                         <button type="button" onclick="selectTenor(6, 9.0, this)" class="tenor-sim-btn py-2 rounded-xl border-2 border-gray-200 text-xs font-bold text-gray-600">6bln</button>
@@ -274,52 +266,19 @@
             <span class="text-xs text-gray-400">Mulai dari Rp 1 juta</span>
         </div>
 
-        {{-- Featured / Recommended Product --}}
-        <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-5 mb-4 shadow-lg relative overflow-hidden">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-            <div class="relative z-10">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="rate-badge text-xs px-2.5 py-1 rounded-full">⭐ Rekomendasi</span>
-                    <span class="text-white/70 text-xs">Paling Diminati</span>
-                </div>
-                <div class="flex items-end justify-between mb-4">
-                    <div>
-                        <p class="text-white/80 text-sm">Deposito 12 Bulan</p>
-                        <div class="flex items-baseline gap-1">
-                            <span class="text-[#f0d060] text-5xl font-black">12%</span>
-                            <span class="text-white/80 text-lg font-medium">p.a.</span>
-                        </div>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-white/60 text-xs">Mulai dari</p>
-                        <p class="text-white font-bold text-sm">Rp 1.000.000</p>
-                    </div>
-                </div>
-                <div class="flex gap-2 mb-4">
-                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Bunga Tertinggi</span>
-                    <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">Pilihan Terbaik</span>
-                </div>
-                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor=12"
-                    class="shimmer-gold w-full block text-center font-bold text-[#3a2800] py-3 rounded-xl text-sm transition-all active:scale-95">
-                    Buka Deposito →
-                </a>
-            </div>
-        </div>
-
-        {{-- Other tenor products --}}
-        <div class="space-y-3">
-            @php
-                $tenorData = [
-                    ['bulan' => 1, 'rate' => 6.0, 'label' => '1 Bulan'],
-                    ['bulan' => 3, 'rate' => 7.5, 'label' => '3 Bulan'],
-                    ['bulan' => 6, 'rate' => 9.0, 'label' => '6 Bulan'],
-                    ['bulan' => 12, 'rate' => 12.0, 'label' => '12 Bulan'],
-                ];
-            @endphp
-
-            @if($tenors->isEmpty())
+        {{-- List Produk Deposito --}}
+        <div class="space-y-4">
+            @if($pakets->isEmpty())
+                @php
+                    $tenorData = [
+                        ['bulan' => 1, 'rate' => 6.0, 'label' => '1 Bulan'],
+                        ['bulan' => 3, 'rate' => 7.5, 'label' => '3 Bulan'],
+                        ['bulan' => 6, 'rate' => 9.0, 'label' => '6 Bulan'],
+                        ['bulan' => 12, 'rate' => 12.0, 'label' => '12 Bulan'],
+                    ];
+                @endphp
                 @foreach($tenorData as $td)
-                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor={{ $td['bulan'] }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md">
+                <a href="{{ route('nasabah.deposito.pengajuan') }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-[#674c1d]">
                             @if($td['bulan'] <= 3)
@@ -343,37 +302,95 @@
                 </a>
                 @endforeach
             @else
-                @foreach($tenors as $tenor)
                 @php
-                    // Rate default berdasarkan tenor jika DB kosong
-                    $rateDefault = [1 => 3.75, 3 => 4.50, 6 => 5.25, 12 => 6.00];
-                    $rate = $tenor->sukuBunga->first()
-                        ? (float)($tenor->sukuBunga->first()->bunga * 100)
-                        : ($rateDefault[$tenor->tenor_bulan] ?? 6.00);
+                    $hasCategory = $pakets->filter(function($p) { return $p->kategori != null; })->isNotEmpty();
+                    $highestRateId = $pakets->sortByDesc('suku_bunga')->first()->id ?? null;
+                    
+                    // Separate featured from regular
+                    $featuredPakets = $pakets->filter(function($p) use ($hasCategory, $highestRateId) {
+                        return $p->kategori != null || (!$hasCategory && $p->id == $highestRateId);
+                    });
+                    
+                    $regularPakets = $pakets->filter(function($p) use ($hasCategory, $highestRateId) {
+                        return !($p->kategori != null || (!$hasCategory && $p->id == $highestRateId));
+                    });
                 @endphp
-                <a href="{{ route('nasabah.deposito.pengajuan') }}?tenor={{ $tenor->id }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-[#674c1d]">
-                            @if($tenor->tenor_bulan <= 3)
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                            @elseif($tenor->tenor_bulan <= 6)
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            @else
-                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                            @endif
-                        </div>
-                        <div>
-                            <p class="font-bold text-gray-800 text-sm">Deposito {{ $tenor->tenor_bulan }} Bulan</p>
-                            <p class="text-xs text-gray-500 mt-0.5">Mulai dari Rp 1.000.000</p>
-                        </div>
+
+                {{-- Carousel Featured Packages --}}
+                @if($featuredPakets->isNotEmpty())
+                    <div class="flex overflow-x-auto gap-4 pb-4 snap-x snap-mandatory hide-scrollbar -mx-4 px-4">
+                        @foreach($featuredPakets as $p)
+                            <div class="snap-center shrink-0 w-[85vw] max-w-[340px]">
+                                <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-5 shadow-lg relative overflow-hidden h-full flex flex-col justify-between block">
+                                    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
+                                    <div class="relative z-10 flex-1 flex flex-col">
+                                        <div class="flex items-center gap-2 mb-3">
+                                            @if($p->kategori)
+                                                <span class="rate-badge text-xs px-2.5 py-1 rounded-full text-[#674c1d] bg-[#d4af37]">⭐ {{ $p->kategori->nama_kategori }}</span>
+                                                <span class="text-white/70 text-xs">Promo Spesial</span>
+                                            @else
+                                                <span class="rate-badge text-xs px-2.5 py-1 rounded-full text-[#674c1d] bg-[#d4af37]">🔥 Bunga Tertinggi</span>
+                                            @endif
+                                        </div>
+                                        <div class="flex items-end justify-between mb-4">
+                                            <div>
+                                                <p class="text-white/80 text-sm">{{ $p->nama_paket }}</p>
+                                                <div class="flex items-baseline gap-1">
+                                                    <span class="text-[#f0d060] text-5xl font-black">{{ rtrim(rtrim($p->suku_bunga, '0'), '.') }}%</span>
+                                                    <span class="text-white/80 text-lg font-medium">p.a.</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-right">
+                                                <p class="text-white/60 text-xs">Mulai dari</p>
+                                                <p class="text-white font-bold text-sm">Rp {{ number_format($p->minimal_nominal, 0, ',', '.') }}</p>
+                                            </div>
+                                        </div>
+                                        <div class="flex gap-2 mb-4 mt-auto">
+                                            <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full">{{ $p->tenor_bulan }} Bulan</span>
+                                            @if($p->keterangan)
+                                            <span class="bg-white/20 text-white text-xs px-3 py-1 rounded-full truncate max-w-[150px]">{{ $p->keterangan }}</span>
+                                            @endif
+                                        </div>
+                                        <a href="{{ route('nasabah.deposito.pengajuan') }}?paket={{ $p->id }}"
+                                            class="shimmer-gold w-full block text-center font-bold text-[#3a2800] py-3 rounded-xl text-sm transition-all active:scale-95">
+                                            Buka Deposito →
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
-                    <div class="text-right">
-                        <span class="text-[#674c1d] font-black text-xl">{{ number_format($rate, 2) }}%</span>
-                        <p class="text-xs text-gray-400 font-medium">p.a.</p>
-                        <span class="text-[#674c1d] text-xs font-medium">Buka →</span>
+                @endif
+
+                {{-- Regular Packages --}}
+                @if($regularPakets->isNotEmpty())
+                    <div class="space-y-3 mt-2">
+                        @foreach($regularPakets as $p)
+                            <a href="{{ route('nasabah.deposito.pengajuan') }}?paket={{ $p->id }}" class="tenor-card bg-white rounded-xl shadow-sm border border-gray-100 p-4 flex items-center justify-between block hover:border-[#d4af37] hover:shadow-md relative overflow-hidden">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-amber-50 border border-amber-100 rounded-xl flex items-center justify-center text-[#674c1d]">
+                                        @if($p->tenor_bulan <= 3)
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                        @elseif($p->tenor_bulan <= 6)
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        @else
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-gray-800 text-sm">{{ $p->nama_paket }}</p>
+                                        <p class="text-xs text-gray-500 mt-0.5">Mulai dari Rp {{ number_format($p->minimal_nominal, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-[#674c1d] font-black text-xl">{{ rtrim(rtrim($p->suku_bunga, '0'), '.') }}%</span>
+                                    <p class="text-xs text-gray-400 font-medium">p.a.</p>
+                                    <span class="text-[#674c1d] text-xs font-medium">Buka →</span>
+                                </div>
+                            </a>
+                        @endforeach
                     </div>
-                </a>
-                @endforeach
+                @endif
             @endif
         </div>
     </div>

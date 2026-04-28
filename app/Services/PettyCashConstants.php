@@ -26,10 +26,12 @@ class PettyCashConstants
     const REF_JANJI_TEMU   = 'tbl_janji_temu_tabungan';
     const REF_PINJAMAN_H   = 'tbl_pinjaman_h';
     const REF_PINJAMAN_D   = 'tbl_pengajuan_pembayaran_pinjaman';
+    const REF_DEPOSITO_P   = 'tbl_pengajuan_deposito';
 
     // Sumber Transaksi Owner
     const SUMBER_TABUNGAN = 'tabungan';
     const SUMBER_PINJAMAN = 'pinjaman';
+    const SUMBER_DEPOSITO = 'deposito';
     const SUMBER_PETTY    = 'petty_cash';
     const SUMBER_LAIN     = 'other';
 }

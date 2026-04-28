@@ -162,7 +162,7 @@ class OwnerWalletController extends Controller
     public function withdraw(Request $request)
     {
         $request->validate([
-            'sumber'       => 'required|in:tabungan,petty_cash,other',
+            'sumber'       => 'required|in:tabungan,pinjaman,deposito,petty_cash,other',
             'nominal_cash' => 'nullable|numeric|min:0',
             'nominal_tf'   => 'nullable|numeric|min:0',
             'keterangan'   => 'required|string|max:500',

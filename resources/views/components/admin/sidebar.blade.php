@@ -190,6 +190,12 @@ $pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
                         class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.deposito') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         Daftar Deposito
                     </a>
+                    @isAdminUtama
+                    <a href="{{ route('admin.deposito.paket.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.paket') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Paket Deposito
+                    </a>
+                    @endisAdminUtama
                     <a href="{{ route('admin.deposito.pencairan-tf.index') }}"
                         class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.pencairan-tf') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         <span>Pencairan TF</span>
@@ -202,6 +208,19 @@ $pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
                         <span>Pencairan Tabungan</span>
                         @if($pendingTab > 0)
                         <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded-full">{{ $pendingTab }}</span>
+                        @endif
+                    </a>
+                    <a href="{{ route('admin.deposito.peringatan.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.deposito.peringatan') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <div class="flex items-center">
+                            <span class="mr-1">⚠️</span>
+                            <span>Peringatan JT</span>
+                        </div>
+                        @php 
+                            $peringatanCount = \App\Models\DepositoPersiapanCair::whereIn('status', ['tentatif', 'diproses'])->count();
+                        @endphp
+                        @if($peringatanCount > 0)
+                        <span class="px-2 py-0.5 bg-red-100 text-red-800 text-xs font-bold rounded-full">{{ $peringatanCount }}</span>
                         @endif
                     </a>
                 </div>
