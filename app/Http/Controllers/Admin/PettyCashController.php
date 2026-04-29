@@ -65,7 +65,6 @@ class PettyCashController extends Controller
         $saldoCash = PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'cash');
         $saldoTf   = PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'transfer');
 
-        // 🔥 Hitung saldo per sumber untuk modal kirim
         $sourceDetails = DB::table('vw_saldo_owner_detail')
             ->where('user_id', Auth::id())
             ->select('sumber', 
@@ -112,7 +111,6 @@ class PettyCashController extends Controller
             return back()->withErrors(['nominal_tf' => 'Minimal satu nominal harus diisi.'])->withInput();
         }
 
-        // 🔥 VALIDASI SALDO PER SUMBER
         $ownerId = Auth::id();
         $sourceDetails = DB::table('vw_saldo_owner_detail')
             ->where('user_id', $ownerId)
@@ -276,7 +274,7 @@ class PettyCashController extends Controller
                 'sumber'          => $penerimaan->sumber,
             ], $id, 'petty_cash_penerimaan');
 
-            // 🔥 DEPOSITO INTEGRATION
+            //  DEPOSITO INTEGRATION
             if ($penerimaan->sumber === 'deposito' && $penerimaan->ref_id) {
                 // Link ke PencairanDeposito (Langsung)
                 \App\Models\PencairanDeposito::where('id', $penerimaan->ref_id)
@@ -579,7 +577,7 @@ class PettyCashController extends Controller
             if ($nominalTf > 0) {
                 PettyCashSaldo::buatMutasi(
                     $adminId, 'admin', -$nominalTf,
-                    "Setor TF (Hollow) ke Kantor (#{$idSetoran})",
+                    "Setor TF ke Kantor (#{$idSetoran})",
                     $idSetoran, 'petty_cash_setoran_kantor', 'transfer'
                 );
             }
