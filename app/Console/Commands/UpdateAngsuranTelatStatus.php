@@ -34,48 +34,29 @@ class UpdateAngsuranTelatStatus extends Command
         $now = Carbon::now();
         $updated = 0;
 
-        // Update angsuran bulanan
-        $angsuranBulanan = TempoPinjamanB::where('status_bayar', '!=', 'lunas')
-            ->where('tgl_jatuh_tempo', '<', $now)
-            ->get();
+        $models = [TempoPinjamanB::class, TempoPinjamanM::class];
 
-        foreach ($angsuranBulanan as $angsuran) {
-            if ($angsuran->status_bayar !== 'telat') {
-                $angsuran->update(['status_bayar' => 'telat']);
-                $updated++;
-                
-                // Hitung dan update denda
-                $denda = $this->hitungDenda($angsuran);
-                $angsuran->update(['denda' => $denda]);
-            } else {
-                // Update denda untuk angsuran yang sudah telat
-                $denda = $this->hitungDenda($angsuran);
-                if ($angsuran->denda != $denda) {
-                    $angsuran->update(['denda' => $denda]);
+        foreach ($models as $modelClass) {
+            $type = $modelClass === TempoPinjamanB::class ? 'Bulanan' : 'Mingguan';
+            $angsurans = $modelClass::where('status_bayar', '!=', 'lunas')
+                ->where('tgl_jatuh_tempo', '<', $now)
+                ->get();
+
+            foreach ($angsurans as $angsuran) {
+                if ($angsuran->status_bayar !== 'telat') {
+                    $angsuran->update(['status_bayar' => 'telat']);
                     $updated++;
-                }
-            }
-        }
-
-        // Update angsuran mingguan
-        $angsuranMingguan = TempoPinjamanM::where('status_bayar', '!=', 'lunas')
-            ->where('tgl_jatuh_tempo', '<', $now)
-            ->get();
-
-        foreach ($angsuranMingguan as $angsuran) {
-            if ($angsuran->status_bayar !== 'telat') {
-                $angsuran->update(['status_bayar' => 'telat']);
-                $updated++;
-                
-                // Hitung dan update denda
-                $denda = $this->hitungDenda($angsuran);
-                $angsuran->update(['denda' => $denda]);
-            } else {
-                // Update denda untuk angsuran yang sudah telat
-                $denda = $this->hitungDenda($angsuran);
-                if ($angsuran->denda != $denda) {
+                    
+                    // Hitung dan update denda
+                    $denda = $angsuran->hitungDenda();
                     $angsuran->update(['denda' => $denda]);
-                    $updated++;
+                } else {
+                    // Update denda untuk angsuran yang sudah telat
+                    $denda = $angsuran->hitungDenda();
+                    if ($angsuran->denda != $denda) {
+                        $angsuran->update(['denda' => $denda]);
+                        $updated++;
+                    }
                 }
             }
         }
@@ -87,16 +68,7 @@ class UpdateAngsuranTelatStatus extends Command
             ->get();
 
         foreach ($pinjamanBelumLunas as $pinjaman) {
-            $allAngsuran = $pinjaman->jenis === 'bulanan' 
-                ? $pinjaman->tempoBulanan 
-                : $pinjaman->tempoMingguan;
-            
-            $allLunas = $allAngsuran->every(function($item) {
-                return $item->status_bayar === 'lunas';
-            });
-
-            if ($allLunas) {
-                $pinjaman->update(['lunas' => 'lunas']);
+            if ($pinjaman->checkAndUpdateLunasStatus()) {
                 $this->info("Pinjaman #{$pinjaman->id} telah lunas");
             }
         }
@@ -106,31 +78,4 @@ class UpdateAngsuranTelatStatus extends Command
         return 0;
     }
 
-    /**
-     * Hitung denda untuk angsuran yang telat.
-     */
-    private function hitungDenda($angsuran)
-    {
-        if ($angsuran->status_bayar === 'lunas') {
-            return 0;
-        }
-
-        $hariTelat = Carbon::now()->diffInDays($angsuran->tgl_jatuh_tempo, false);
-        
-        if ($hariTelat <= 0) {
-            return 0;
-        }
-
-        $pinjaman = $angsuran->pinjaman;
-        if (!$pinjaman) {
-            return 0;
-        }
-
-        $dendaPersen = $pinjaman->denda_persen ?? 0.02;
-        $sisaTagihan = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
-        $denda = $sisaTagihan * ($dendaPersen / 100) * $hariTelat;
-        $dendaMax = $angsuran->jumlah_tagihan * 0.5;
-        
-        return round(min($denda, $dendaMax), 2);
-    }
 }

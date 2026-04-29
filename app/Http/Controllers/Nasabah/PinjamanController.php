@@ -679,7 +679,8 @@ class PinjamanController extends Controller
         // Hitung denda per angsuran (berjalan jika telat & belum bayar) dan total denda
         $totalDenda = 0;
         foreach ($angsuran as $item) {
-            $dendaItem = $this->hitungDenda($item);
+            $item->setRelation('pinjaman', $pinjaman);
+            $dendaItem = $item->hitungDenda();
             $item->denda_berjalan = $dendaItem;
             $totalDenda += $dendaItem;
         }
@@ -766,7 +767,7 @@ class PinjamanController extends Controller
             $tempos = $jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
             foreach ($tempos as $t) {
                 $t->setRelation('pinjaman', $pinjaman);
-                $t->denda_berjalan = $this->hitungDenda($t);
+                $t->denda_berjalan = $t->hitungDenda();
             }
         }
 
@@ -802,7 +803,7 @@ class PinjamanController extends Controller
         $isTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas';
         
         // Hitung denda
-        $denda = $this->hitungDenda($angsuran);
+        $denda = $angsuran->hitungDenda();
         $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
 
         // Bukti transfer untuk angsuran ini (dari pengajuan pembayaran yang sudah terlaksana)
@@ -842,50 +843,6 @@ class PinjamanController extends Controller
      * Jika telat 1 hari = Rp 3.000
      * Jika telat 2 hari = Rp 6.000
      */
-    private function hitungDenda($angsuran)
-    {
-        // Jika sudah lunas, return denda yang tersimpan
-        if ($angsuran->status_bayar === 'lunas') {
-            return $angsuran->denda ?? 0;
-        }
-
-        // Jika sudah ada pembayaran (walaupun sebagian), denda BERHENTI
-        // Return denda yang sudah tersimpan
-        if ($angsuran->jumlah_terbayar > 0) {
-            return $angsuran->denda ?? 0;
-        }
-
-        $pinjaman = $angsuran->pinjaman;
-        if (!$pinjaman) {
-            return 0;
-        }
-
-        // Hitung hari telat mulai dari H+1 setelah jatuh tempo
-        $tanggalMulaiDenda = $angsuran->tgl_jatuh_tempo->copy()->addDay();
-        
-        // Jika belum mencapai H+1, tidak ada denda
-        if (now() < $tanggalMulaiDenda) {
-            return 0;
-        }
-        
-        // Hitung jumlah hari telat (dari H+1 sampai sekarang) — dari tanggalMulaiDenda ke now
-        $hariTelat = (int) $tanggalMulaiDenda->diffInDays(now(), true);
-        if ($hariTelat <= 0) {
-            return 0;
-        }
-
-        // Get denda persen dari pinjaman
-        $dendaPersen = $pinjaman->denda_persen ?? 0.30; // Default 0.3% per hari
-        
-        // **PENTING:** Hitung POKOK per bulan (bukan total tagihan!)
-        // Pokok per bulan = jumlah_pinjam / lama_pinjam
-        $pokokPerBulan = $pinjaman->jumlah_pinjam / $pinjaman->lama_pinjam;
-        
-        // Denda = POKOK per bulan × (denda_persen / 100) × hari_telat
-        $denda = $pokokPerBulan * ($dendaPersen / 100) * $hariTelat;
-
-        return round($denda, 2);
-    }
 
     /**
      * Show form pembayaran pinjaman.
@@ -927,6 +884,14 @@ class PinjamanController extends Controller
                         ->get();
                 }
 
+                // Tambahkan denda ke setiap angsuran dalam list untuk konsistensi tampilan dropdown
+                foreach ($angsuranList as $angs) {
+                    $angs->setRelation('pinjaman', $selectedPinjaman);
+                    $angs->denda_kalkulasi = $angs->hitungDenda();
+                    $angs->sisa_kalkulasi = $angs->sisa_tagihan;
+                    $angs->total_kalkulasi = $angs->sisa_kalkulasi + $angs->denda_kalkulasi;
+                }
+
                 if ($tempoId) {
                     if ($selectedPinjaman->jenis === 'bulanan') {
                         $selectedAngsuran = TempoPinjamanB::where('id', $tempoId)
@@ -945,21 +910,52 @@ class PinjamanController extends Controller
             }
         }
 
+        // Hitung denda menggunakan hitungDenda() yang konsisten
+        // agar view tidak perlu re-kalkulasi sendiri dengan rumus berbeda
+        $dendaAngsuran = 0;
+        $sisaTagihan = 0;
+        $totalBayar = 0;
+        $isTelat = false;
+        $hariTelat = 0;
+
+        if ($selectedAngsuran && $selectedPinjaman) {
+            // Set relasi pinjaman agar hitungDenda() bisa mengakses data pinjaman
+            $selectedAngsuran->setRelation('pinjaman', $selectedPinjaman);
+
+            $sisaTagihan = $selectedAngsuran->sisa_tagihan;
+            $isTelat = $selectedAngsuran->tgl_jatuh_tempo < now() && $selectedAngsuran->status_bayar !== 'lunas';
+
+            // Gunakan hitungDenda() dari trait (Model)
+            $dendaAngsuran = $selectedAngsuran->hitungDenda();
+
+            // Use hitungHariTelat() from trait (Model) to avoid duplication
+            $hariTelat = $selectedAngsuran->hitungHariTelat();
+
+            $totalBayar = $sisaTagihan + $dendaAngsuran;
+        }
+
         // Get lokasi untuk janji temu
         $lokasi = JnsLokasiPerusahaan::all();
         // Rekening perusahaan untuk dropdown transfer
         $rekeningPerusahaan = JnsBank::orderBy('bank')->orderBy('pemilik')->get();
 
         return view('nasabah.pinjaman.pembayaran', [
-            'pinjamanAktif' => $pinjamanAktif,
+            'pinjamanAktif'   => $pinjamanAktif,
             'selectedPinjaman' => $selectedPinjaman,
             'selectedAngsuran' => $selectedAngsuran,
-            'angsuranList' => $angsuranList,
-            'lokasi' => $lokasi,
+            'angsuranList'    => $angsuranList,
+            'lokasi'          => $lokasi,
             'rekeningPerusahaan' => $rekeningPerusahaan,
-            'jenis' => $jenis,
+            'jenis'           => $jenis,
+            // Data denda yang dihitung oleh controller (konsisten dengan hitungDenda())
+            'dendaAngsuran'   => $dendaAngsuran,
+            'sisaTagihan'     => $sisaTagihan,
+            'totalBayar'      => $totalBayar,
+            'isTelat'         => $isTelat,
+            'hariTelat'       => $hariTelat,
         ]);
     }
+
 
     /**
      * Submit pembayaran via transfer.
