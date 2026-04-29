@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/admin/tabungan/pengajuan-setor/{{id}}/reject"
+method: POST
+order: 2000

@@ -1,0 +1,5 @@
+$kind: collection
+description: Koleksi lengkap untuk seluruh endpoint di web.php Koperasi Majakara.
+variables:
+  base_url: http://127.0.0.1:8000
+  id: "1"

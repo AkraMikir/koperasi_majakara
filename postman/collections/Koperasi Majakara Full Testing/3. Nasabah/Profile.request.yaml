@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/nasabah/profile"
+method: GET
+order: 5000

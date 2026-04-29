@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{base_url}}/admin/tabungan/pengajuan-setor/{{id}}/approve"
+method: POST
+order: 1000
