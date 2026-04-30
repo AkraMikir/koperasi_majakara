@@ -97,47 +97,21 @@
                         onchange="this.form.submit()" required>
                         <option value="">-- Pilih Angsuran --</option>
                         @foreach($angsuranList ?? [] as $angs)
-                        @php
-                        $sisa = max(0, $angs->jumlah_tagihan - ($angs->jumlah_terbayar ?? 0));
-                        $denda = 0;
-                        if ($angs->status_bayar !== 'lunas' && $angs->tgl_jatuh_tempo < now()) { $hariTelat=now()->
-                            diffInDays($angs->tgl_jatuh_tempo, false);
-                            if ($hariTelat > 0) {
-                            $dendaPersen = $selectedPinjaman->denda_persen ?? 0.02;
-                            $denda = $sisa * ($dendaPersen / 100) * $hariTelat;
-                            $dendaMax = $angs->jumlah_tagihan * 0.5;
-                            $denda = min($denda, $dendaMax);
-                            }
-                            }
-                            $total = $sisa + $denda;
-                            @endphp
                             <option value="{{ $angs->id }}" {{ request('tempo_id') == $angs->id ? 'selected' : '' }}>
                                 Angsuran ke-{{ $angs->no_urut }} -
                                 Jatuh Tempo: {{ $angs->tgl_jatuh_tempo->format('d M Y') }} -
-                                Sisa: Rp {{ number_format($total, 0, ',', '.') }}
-                                @if($denda > 0) (Denda: Rp {{ number_format($denda, 0, ',', '.') }}) @endif
+                                Sisa: Rp {{ number_format($angs->total_kalkulasi ?? 0, 0, ',', '.') }}
+                                @if(($angs->denda_kalkulasi ?? 0) > 0) 
+                                    (Denda: Rp {{ number_format($angs->denda_kalkulasi, 0, ',', '.') }}) 
+                                @endif
                             </option>
-                            @endforeach
+                        @endforeach
                     </select>
                 </div>
             </form>
 
-            @if($selectedAngsuran)
-            @php
-            $sisaTagihan = max(0, $selectedAngsuran->jumlah_tagihan - ($selectedAngsuran->jumlah_terbayar ?? 0));
-            $hariTelat = $selectedAngsuran->tgl_jatuh_tempo < now() && $selectedAngsuran->status_bayar !== 'lunas'
-                ? now()->diffInDays($selectedAngsuran->tgl_jatuh_tempo, false)
-                : 0;
-                $denda = 0;
-                if ($hariTelat > 0) {
-                $dendaPersen = $selectedPinjaman->denda_persen ?? 0.02;
-                $denda = $sisaTagihan * ($dendaPersen / 100) * $hariTelat;
-                $dendaMax = $selectedAngsuran->jumlah_tagihan * 0.5;
-                $denda = min($denda, $dendaMax);
-                }
-                $totalBayar = $sisaTagihan + $denda;
-                @endphp
 
+            @if($selectedAngsuran)
                 <!-- Informasi Angsuran -->
                 <div
                     class="mb-6 p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
@@ -163,10 +137,10 @@
                             <span class="font-semibold text-gray-900">Rp
                                 {{ number_format($sisaTagihan, 0, ',', '.') }}</span>
                         </div>
-                        @if($denda > 0)
+                        @if($dendaAngsuran > 0)
                         <div class="flex justify-between">
                             <span class="text-sm text-red-600">Denda ({{ $hariTelat }} hari):</span>
-                            <span class="font-semibold text-red-600">Rp {{ number_format($denda, 0, ',', '.') }}</span>
+                            <span class="font-semibold text-red-600">Rp {{ number_format($dendaAngsuran, 0, ',', '.') }}</span>
                         </div>
                         @endif
                         <div class="flex justify-between pt-2 border-t border-gray-300">
@@ -176,6 +150,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <!-- Tabs: Transfer / Janji Temu (Cash) -->
                 <div class="mb-6">

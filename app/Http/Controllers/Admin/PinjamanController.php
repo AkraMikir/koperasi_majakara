@@ -857,69 +857,12 @@ class PinjamanController extends Controller
         }
 
         // Denda yang dihitung (untuk tampilan angsuran telat, konsisten dengan nasabah)
-        $dendaDisplay = $this->hitungDenda($angsuran, $angsuran->pinjaman);
+        $dendaDisplay = $angsuran->hitungDenda();
 
         return view('admin.pinjaman.detail-angsuran', compact('angsuran', 'jenis', 'buktiTransferAngsuran', 'dendaDisplay'));
     }
 
-    /**
-     * Hitung denda untuk angsuran yang telat.
-     * 
-     * Aturan REVISI TERBARU:
-     * - Denda 0.3% per hari dari POKOK ANGSURAN per bulan (bukan total tagihan)
-     * - Denda mulai dihitung 1 hari SETELAH tanggal jatuh tempo (H+1)
-     * - Denda BERHENTI jika sudah ada pembayaran (walaupun Rp 1)
-     * 
-     * Perhitungan:
-     * - Pokok per bulan = jumlah_pinjam / lama_pinjam
-     * - Denda = pokok per bulan × (denda_persen / 100) × hari_telat
-     * 
-     * Contoh:
-     * Pinjaman 3 juta, 3 bulan
-     * Pokok per bulan = 1 juta
-     * Denda = 1.000.000 × 0.3% × hari_telat
-     * Jika telat 1 hari = Rp 3.000
-     * Jika telat 2 hari = Rp 6.000
-     */
-    private function hitungDenda($angsuran, $pinjaman)
-    {
-        // Jika sudah lunas, return denda yang tersimpan
-        if ($angsuran->status_bayar === 'lunas') {
-            return $angsuran->denda ?? 0;
-        }
 
-        // Jika sudah ada pembayaran (walaupun sebagian), denda BERHENTI
-        // Return denda yang sudah tersimpan
-        if ($angsuran->jumlah_terbayar > 0) {
-            return $angsuran->denda ?? 0;
-        }
-
-        // Hitung hari telat mulai dari H+1 setelah jatuh tempo
-        $tanggalMulaiDenda = $angsuran->tgl_jatuh_tempo->copy()->addDay();
-        
-        // Jika belum mencapai H+1, tidak ada denda
-        if (now() < $tanggalMulaiDenda) {
-            return 0;
-        }
-        
-        // Hitung jumlah hari telat (dari H+1 sampai sekarang) — dari tanggalMulaiDenda ke now
-        $hariTelat = (int) $tanggalMulaiDenda->diffInDays(now(), true);
-        if ($hariTelat <= 0) {
-            return 0;
-        }
-
-        // Get denda persen dari pinjaman
-        $dendaPersen = $pinjaman->denda_persen ?? 0.30; // Default 0.3% per hari
-        
-        // **PENTING:** Hitung POKOK per bulan (bukan total tagihan!)
-        // Pokok per bulan = jumlah_pinjam / lama_pinjam
-        $pokokPerBulan = $pinjaman->jumlah_pinjam / $pinjaman->lama_pinjam;
-        
-        // Denda = POKOK per bulan × (denda_persen / 100) × hari_telat
-        $denda = $pokokPerBulan * ($dendaPersen / 100) * $hariTelat;
-
-        return round($denda, 2);
-    }
 
     /**
      * Pelunasan dipercepat (early payment).
@@ -966,7 +909,7 @@ class PinjamanController extends Controller
             : $pinjaman->tempoMingguan()->where('status_bayar', '!=', 'lunas')->get();
 
         foreach ($angsuranBelumLunas as $a) {
-            $denda = $this->hitungDenda($a, $pinjaman);
+            $denda = $a->hitungDenda();
             $totalDenda += $denda;
         }
 
@@ -976,19 +919,13 @@ class PinjamanController extends Controller
 
         // Update semua angsuran yang belum lunas
         foreach ($angsuranBelumLunas as $a) {
-            $denda = $this->hitungDenda($a, $pinjaman);
+            $denda = $a->hitungDenda();
             $totalPerAngsuran = $a->jumlah_tagihan + $denda;
+            $sisaHarusDibayar = $totalPerAngsuran - ($a->jumlah_terbayar ?? 0);
             
-            $a->update([
-                'jumlah_terbayar' => $totalPerAngsuran,
-                'denda' => 0, // Denda sudah dibayar
-                'status_bayar' => 'lunas',
-                'tgl_bayar' => now(),
-            ]);
+            // Gunakan method terpusat (Anti-Duplikasi)
+            $a->applyPayment($sisaHarusDibayar);
         }
-        
-        // Update pinjaman menjadi lunas
-        $pinjaman->update(['lunas' => 'lunas']);
 
         // Upload Bukti Foto
         if ($request->hasFile('bukti_foto')) {
@@ -1145,46 +1082,8 @@ class PinjamanController extends Controller
                  return redirect()->back()->with('error', 'Transaksi ini sudah tercatat sebelumnya.');
             }
 
-            // Hitung denda
-            $denda = $this->hitungDenda($angsuran, $pinjaman);
-            $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
-
-            // Update angsuran dengan pembayaran
-            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
-            
-            $statusBayar = 'belum';
-            $tglBayar = null;
-            
-            if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
-                $statusBayar = 'lunas';
-                $jumlahTerbayarBaru = $totalTagihanPlusDenda;
-                $denda = 0;
-                $tglBayar = now();
-            } else {
-                // Jika belum lunas, cek apakah telat (lewat jatuh tempo)
-                $statusBayar = $angsuran->tgl_jatuh_tempo < now() ? 'telat' : 'belum';
-                $tglBayar = $jumlahTerbayarBaru > 0 ? now() : null;
-            }
-
-            $angsuran->update([
-                'jumlah_terbayar' => $jumlahTerbayarBaru,
-                'denda' => $denda,
-                'status_bayar' => $statusBayar,
-                'tgl_bayar' => $tglBayar,
-            ]);
-
-            // Check if all angsuran sudah lunas
-            $allAngsuran = $pinjaman->jenis === 'bulanan' 
-                ? $pinjaman->tempoBulanan 
-                : $pinjaman->tempoMingguan;
-            
-            $allLunas = $allAngsuran->every(function($item) {
-                return $item->status_bayar === 'lunas';
-            });
-
-            if ($allLunas) {
-                $pinjaman->update(['lunas' => 'lunas']);
-            }
+            // Update angsuran dengan pembayaran menggunakan method terpusat (Anti-Duplikasi)
+            $angsuran->applyPayment($pengajuan->nominal);
 
             // Proses Penerimaan Petty Cash (Jika bukan Rek Koperasi Utama)
             $metode = $request->metode_penerimaan;
@@ -1331,28 +1230,8 @@ class PinjamanController extends Controller
 
             $pinjaman = $pengajuan->pinjaman;
 
-            // Hitung denda
-            $denda = $this->hitungDenda($angsuran, $pinjaman);
-            $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
-
-            // Update angsuran
-            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
-            
-            $statusBayar = 'belum';
-            if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
-                $statusBayar = 'lunas';
-                $jumlahTerbayarBaru = $totalTagihanPlusDenda;
-                $denda = 0;
-            } else {
-                $statusBayar = $angsuran->tgl_jatuh_tempo < now() ? 'telat' : 'belum';
-            }
-
-            $angsuran->update([
-                'jumlah_terbayar' => $jumlahTerbayarBaru,
-                'denda' => $denda,
-                'status_bayar' => $statusBayar,
-                'tgl_bayar' => now(),
-            ]);
+            // Update angsuran dengan pembayaran menggunakan method terpusat (Anti-Duplikasi)
+            $angsuran->applyPayment($pengajuan->nominal);
 
             // Jika transfer, upload bukti bisa dilakukan disini
             if ($request->hasFile('bukti_transfer')) {
@@ -1378,18 +1257,8 @@ class PinjamanController extends Controller
                 'tgl_pembayaran' => now(),
             ]);
 
-            // Check if all angsuran sudah lunas
-            $allAngsuran = $pinjaman->jenis === 'bulanan' 
-                ? $pinjaman->tempoBulanan 
-                : $pinjaman->tempoMingguan;
-            
-            $allLunas = $allAngsuran->every(function($item) {
-                return $item->status_bayar === 'lunas';
-            });
-
-            if ($allLunas) {
-                $pinjaman->update(['lunas' => 'lunas']);
-            }
+            // Pelunasan pinjaman induk sudah dihandle oleh applyPayment() di dalam model
+            // Jadi block check lunas manual disini bisa dihapus (Anti-Duplikasi)
 
             DB::commit();
 
@@ -1455,40 +1324,8 @@ class PinjamanController extends Controller
             }
 
             if ($angsuran) {
-                $pinjaman = $pengajuan->pinjaman;
-                $denda = $this->hitungDenda($angsuran, $pinjaman);
-                $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
-
-                $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
-                
-                $statusBayar = 'belum';
-                if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
-                    $statusBayar = 'lunas';
-                    $jumlahTerbayarBaru = $totalTagihanPlusDenda;
-                    $denda = 0;
-                } else {
-                    $statusBayar = $angsuran->tgl_jatuh_tempo < now() ? 'telat' : 'belum';
-                }
-
-                $angsuran->update([
-                    'jumlah_terbayar' => $jumlahTerbayarBaru,
-                    'denda' => $denda,
-                    'status_bayar' => $statusBayar,
-                    'tgl_bayar' => now(),
-                ]);
-
-                // Check if all angsuran sudah lunas
-                $allAngsuran = $pinjaman->jenis === 'bulanan' 
-                    ? $pinjaman->tempoBulanan 
-                    : $pinjaman->tempoMingguan;
-                
-                $allLunas = $allAngsuran->every(function($item) {
-                    return $item->status_bayar === 'lunas';
-                });
-
-                if ($allLunas) {
-                    $pinjaman->update(['lunas' => 'lunas']);
-                }
+                // Update angsuran dengan pembayaran menggunakan method terpusat (Anti-Duplikasi)
+                $angsuran->applyPayment($pengajuan->nominal);
             }
 
             // Update status pengajuan menjadi terlaksana

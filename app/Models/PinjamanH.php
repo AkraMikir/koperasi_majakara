@@ -133,4 +133,25 @@ class PinjamanH extends Model
 
         return "{$lunas} / {$total}";
     }
+    /**
+     * Cek apakah semua angsuran sudah lunas, jika ya update status pinjaman menjadi lunas.
+     * Centralized logic to prevent duplication in controllers.
+     */
+    public function checkAndUpdateLunasStatus()
+    {
+        $allAngsuran = $this->jenis === 'bulanan' 
+            ? $this->tempoBulanan 
+            : $this->tempoMingguan;
+        
+        $allLunas = $allAngsuran->every(function($item) {
+            return $item->status_bayar === 'lunas';
+        });
+
+        if ($allLunas) {
+            $this->update(['lunas' => 'lunas']);
+            return true;
+        }
+
+        return false;
+    }
 }

@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+use App\Traits\CalculatesDenda;
+
 class TempoPinjamanM extends Model
 {
-    use HasFactory;
+    use HasFactory, CalculatesDenda;
 
     protected $table = 'tempo_pinjaman_m';
     public $incrementing = false;
