@@ -37,6 +37,27 @@ class StrukController extends Controller
     }
 
     /**
+     * Cetak struk transaksi tabungan langsung dari HTML (Thermal).
+     */
+    public function printTransaksiTabunganHtml(string $id)
+    {
+        $transaksi = TransTabungan::with([
+            'nasabah.user',
+            'nasabah.dataKtp',
+            'jnsTransaksi',
+            'jnsVia',
+            'pengajuanSetor.approvedBy',
+            'pengajuanTarik',
+            'adminPengelola'
+        ])->findOrFail($id);
+
+        $logoPath = public_path('images/logo-koperasi-majakara.png');
+        $hasLogo = is_file($logoPath);
+
+        return view('struk.tabungan-html', compact('transaksi', 'hasLogo', 'logoPath'));
+    }
+
+    /**
      * Cetak struk pembayaran angsuran pinjaman.
      */
     public function pembayaranPinjaman(string $id)

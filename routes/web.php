@@ -179,6 +179,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         });
         Route::get('/transaksi/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
         Route::get('/transaksi/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'transaksiTabungan'])->name('struk-transaksi');
+        Route::get('/transaksi/{id}/print-struk', [\App\Http\Controllers\Admin\StrukController::class, 'printTransaksiTabunganHtml'])->name('print-struk-transaksi');
         Route::get('/saldo-nasabah', [\App\Http\Controllers\Admin\TabunganController::class, 'saldoNasabah'])->name('saldo-nasabah');
         Route::get('/janji-temu/{id}', [\App\Http\Controllers\Admin\TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
 
