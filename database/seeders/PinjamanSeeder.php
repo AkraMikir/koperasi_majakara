@@ -325,7 +325,9 @@ class PinjamanSeeder extends Seeder
             $currentId = $datePrefix . $seqStr . $suffix;
             $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsuranTerakhir;
 
-            TempoPinjamanB::updateOrCreate(
+            $statusBayar = $tanggalJatuhTempo->isPast() ? 'telat' : 'belum';
+            
+            $tempo = TempoPinjamanB::updateOrCreate(
                 ['id' => $currentId],
                 [
                     'pinjaman_id' => $pinjamanId,
@@ -334,9 +336,15 @@ class PinjamanSeeder extends Seeder
                     'jumlah_tagihan' => $jumlahTagihan,
                     'jumlah_terbayar' => 0,
                     'denda' => 0,
-                    'status_bayar' => 'belum',
+                    'status_bayar' => $statusBayar,
                 ]
             );
+
+            // Jika statusnya telat, hitung denda
+            if ($statusBayar === 'telat') {
+                $denda = $tempo->hitungDenda();
+                $tempo->update(['denda' => $denda]);
+            }
         }
     }
 }

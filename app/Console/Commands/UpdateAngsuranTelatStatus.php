@@ -46,7 +46,7 @@ class UpdateAngsuranTelatStatus extends Command
                 if ($angsuran->status_bayar !== 'telat') {
                     $angsuran->update(['status_bayar' => 'telat']);
                     $updated++;
-                    
+
                     // Hitung dan update denda
                     $denda = $angsuran->hitungDenda();
                     $angsuran->update(['denda' => $denda]);
@@ -74,7 +74,7 @@ class UpdateAngsuranTelatStatus extends Command
         }
 
         $this->info("Selesai! Total {$updated} angsuran di-update.");
-        
+
         return 0;
     }
 

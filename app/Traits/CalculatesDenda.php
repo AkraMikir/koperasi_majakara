@@ -28,7 +28,7 @@ trait CalculatesDenda
         }
 
         // Jika jatuh tempo tgl 1 dan sekarang tgl 2, maka diffInDays = 1 (telat 1 hari)
-        return (int) $now->diffInDays($tanggalJatuhTempo);
+        return (int) $tanggalJatuhTempo->diffInDays($now);
     }
 
     /**
