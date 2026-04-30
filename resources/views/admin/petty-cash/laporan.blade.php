@@ -16,16 +16,117 @@
     </div>
 
     {{-- Summary Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div class="bg-gradient-to-br from-green-50 to-green-100 border border-green-200 rounded-2xl p-5">
-            <p class="text-xs font-bold text-green-700 uppercase mb-1">Total Penerimaan (Owner → Admin)</p>
-            <p class="text-3xl font-bold text-green-800">Rp {{ number_format($totalPenerimaan, 0, ',', '.') }}</p>
-            <p class="text-xs text-green-600 mt-1">Semua penerimaan yang sudah ACC</p>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {{-- Card Emas: Dompet Utama Internal --}}
+        <div class="bg-white border border-[#674c1d]/20 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
+            <div class="absolute -right-4 -bottom-4 opacity-5 text-[#674c1d]">
+                <svg class="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.1 0-2 .9-2 2v8c0 1.1.9 2 2 2h9zm-9-2h10V8H12v8z"/></svg>
+            </div>
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-[#674c1d]/10 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-[#674c1d] uppercase">Modal & Biaya Internal</p>
+                    <p class="text-[10px] text-gray-500 font-medium">Dana Masuk vs Biaya Kantor</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs text-gray-500 font-medium tracking-tight">Dana Masuk (Modal):</span>
+                    <span class="text-sm font-bold text-green-600">+ Rp {{ number_format($manualIn, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center justify-between pb-3 border-b border-gray-100">
+                    <span class="text-xs text-gray-500 font-medium tracking-tight">Dana Keluar (Biaya):</span>
+                    <span class="text-sm font-bold text-red-600">- Rp {{ number_format($manualOut, 0, ',', '.') }}</span>
+                </div>
+                <div class="flex items-center justify-between pt-1">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase">Net Internal</span>
+                    <span class="text-md font-extrabold text-[#674c1d]">Rp {{ number_format($manualIn - $manualOut, 0, ',', '.') }}</span>
+                </div>
+            </div>
         </div>
-        <div class="bg-gradient-to-br from-blue-50 to-blue-100 border border-blue-200 rounded-2xl p-5">
-            <p class="text-xs font-bold text-blue-700 uppercase mb-1">Total Setoran (Admin → Owner)</p>
-            <p class="text-3xl font-bold text-blue-800">Rp {{ number_format($totalSetoran, 0, ',', '.') }}</p>
-            <p class="text-xs text-blue-600 mt-1">Sudah diverifikasi Owner</p>
+
+        {{-- Card Hijau: Operasional (Owner -> Admin) --}}
+        <div class="bg-white border border-green-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path>
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-green-700 uppercase">Total Pengiriman</p>
+                    <p class="text-[10px] text-green-500 font-medium">Owner → Admin Operasional</p>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900 mb-4">Rp {{ number_format($totalPenerimaan, 0, ',', '.') }}</p>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-green-100">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cash (Fisik)</p>
+                    <p class="text-sm font-bold text-green-600">Rp {{ number_format($totalPenerimaanCash, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Transfer (Bank)</p>
+                    <p class="text-sm font-bold text-green-600">Rp {{ number_format($totalPenerimaanTf, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card Biru: Operasional (Admin -> Owner) --}}
+        <div class="bg-white border border-blue-200 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
+            <div class="flex items-center justify-between mb-4">
+                <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path>
+                    </svg>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-blue-700 uppercase">Total Setoran</p>
+                    <p class="text-[10px] text-blue-500 font-medium">Admin Operasional → Owner</p>
+                </div>
+            </div>
+            <p class="text-3xl font-bold text-gray-900 mb-4">Rp {{ number_format($totalSetoran, 0, ',', '.') }}</p>
+            <div class="grid grid-cols-2 gap-4 pt-4 border-t border-blue-100">
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cash (Fisik)</p>
+                    <p class="text-sm font-bold text-blue-600">Rp {{ number_format($totalSetoranCash, 0, ',', '.') }}</p>
+                </div>
+                <div>
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Transfer (Bank)</p>
+                    <p class="text-sm font-bold text-blue-600">Rp {{ number_format($totalSetoranTf, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Info Rekonsiliasi --}}
+    <div class="bg-indigo-900 text-white rounded-2xl p-6 shadow-lg shadow-indigo-900/20 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative">
+        <div class="absolute -right-10 -top-10 opacity-10">
+            <svg class="w-40 h-40" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/></svg>
+        </div>
+        <div class="relative z-10">
+            <h3 class="text-lg font-bold font-display tracking-wide mb-1 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04m12.892 4.48c.058.666.088 1.34.088 2.02a11.952 11.952 0 01-13.633 11.853m15.356-18.063l-1.045 1.045m1.045-1.045l-1.045 1.045M9.045 15.045l1.045-1.045m-1.045 1.045l1.045-1.045M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Audit System: Rumus Keseimbangan Dana
+            </h3>
+            <p class="text-indigo-200 text-xs">
+                (Manual In + Total Setoran) - (Manual Out + Total Kiriman) = 
+                <span class="text-white font-black underline uppercase ml-1">Saldo Saat Ini</span>
+            </p>
+        </div>
+        <div class="flex items-center gap-6 relative z-10 border-t md:border-t-0 md:border-l border-white/20 pt-4 md:pt-0 md:pl-8">
+            <div class="text-right">
+                <p class="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">Total Saldo Dompet Utama</p>
+                <p class="text-3xl font-black font-display">Rp {{ number_format($currentSaldoCash + $currentSaldoTf, 0, ',', '.') }}</p>
+            </div>
+            <div class="hidden lg:block w-px h-10 bg-white/20"></div>
+            <div class="hidden lg:flex flex-col gap-1 text-[10px] font-bold text-white/60">
+                <span class="flex justify-between gap-4">CASH: <span class="text-white">Rp {{ number_format($currentSaldoCash, 0, ',', '.') }}</span></span>
+                <span class="flex justify-between gap-4">BANK: <span class="text-white">Rp {{ number_format($currentSaldoTf, 0, ',', '.') }}</span></span>
+            </div>
         </div>
     </div>
 

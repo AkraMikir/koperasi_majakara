@@ -210,7 +210,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto (Opsional)</label>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Foto (Wajib)</label>
                             <input type="file" name="foto_penerimaan[]" multiple 
                                 class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-[#674c1d]/10 file:text-[#674c1d] hover:file:bg-[#674c1d]/20 transition-all">
                             <p class="text-xs text-gray-500 mt-1">Bisa upload foto uang / kwitansi / bukti {{ ($janjiTemu->jenis ?? 'setoran') == 'setoran' ? 'penerimaan' : 'penyerahan' }}</p>
@@ -224,14 +224,23 @@
                         </div>
 
                         @php
-                            $confirmMsg = ($janjiTemu->jenis ?? 'setoran') == 'setoran'
+                            $isPenarikan = ($janjiTemu->jenis ?? 'setoran') == 'penarikan';
+                            $saldoKurang = $isPenarikan && $adminSaldo < $janjiTemu->nominal;
+                            $confirmMsg = !$isPenarikan
                                 ? 'Apakah Anda yakin uang sudah diterima? Transaksi akan dibuat otomatis.'
                                 : 'Apakah Anda yakin uang sudah diserahkan? Transaksi akan dibuat otomatis.';
                         @endphp
+                        
+                        @if($saldoKurang)
+                        <div class="w-full py-3 bg-red-100 text-red-700 font-bold rounded-xl text-center border border-red-300">
+                            ❌ Saldo Petty Cash Tidak Mencukupi
+                        </div>
+                        @else
                         <button type="submit" data-confirm-message="{{ $confirmMsg }}" onclick="return confirm(this.dataset.confirmMessage)" 
                             class="w-full py-3 bg-[#674c1d] hover:bg-[#543d16] text-white font-bold rounded-xl shadow-lg shadow-[#674c1d]/20 transition-all transform hover:-translate-y-1">
                             ✅ Selesaikan & Buat Transaksi
                         </button>
+                        @endif
                     </div>
                 </form>
             </div>

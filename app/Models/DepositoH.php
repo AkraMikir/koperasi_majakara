@@ -17,6 +17,7 @@ class DepositoH extends Model
     protected $fillable = [
         'id_pengajuan',
         'id_nasabah',
+        'paket_id',
         'nomor_deposito',
         'nominal_awal',
         'tenor_id',
@@ -25,6 +26,8 @@ class DepositoH extends Model
         'tgl_jatuh_tempo',
         'metode_pencairan',
         'status',
+        'status_peringatan',
+        'tgl_peringatan',
     ];
 
     protected $casts = [
@@ -69,6 +72,28 @@ class DepositoH extends Model
     public function janjiTemu(): HasOne
     {
         return $this->hasOne(JanjiTemuDeposito::class, 'deposito_id');
+    }
+
+    public function persiapanCair(): HasMany
+    {
+        return $this->hasMany(DepositoPersiapanCair::class, 'deposito_id');
+    }
+
+    /**
+     * Apakah deposito ini perlu mendapat warning berdasarkan threshold hari.
+     */
+    public function needsWarning(int $days = 7): bool
+    {
+        if ($this->status !== 'aktif') {
+            return false;
+        }
+        return $this->tgl_jatuh_tempo !== null
+            && $this->tgl_jatuh_tempo->lte(now()->addDays($days));
+    }
+
+    public function paket(): BelongsTo
+    {
+        return $this->belongsTo(PaketDeposito::class, 'paket_id');
     }
 }
 

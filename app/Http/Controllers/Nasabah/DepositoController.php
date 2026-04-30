@@ -10,6 +10,9 @@ use App\Models\PencairanDeposito;
 use App\Models\NasabahNotification;
 use App\Models\SukuBungaDeposito;
 use App\Models\PengajuanTabungan;
+use App\Models\PaketDeposito;
+use App\Models\JnsBank;
+use App\Models\KategoriDeposito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,16 +25,15 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        // Ambil semua tenor aktif beserta suku bunga-nya
-        $tenors = JnsTenorDeposito::where('aktif', 'y')
-            ->with(['sukuBunga' => function ($q) {
-                $q->where('status', 'aktif')->orderBy('min_nominal');
-            }])
+        // Ambil semua paket deposito aktif
+        $pakets = PaketDeposito::with('kategori')
+            ->where('status', 'aktif')
             ->orderBy('tenor_bulan')
+            ->orderBy('minimal_nominal')
             ->get();
 
-        // Jenis deposito di-hardcode (tabel jns_deposito belum ada di DB)
-        $jenisDeposito = collect([]);
+        // Jenis deposito dinamis dari database
+        $jenisDeposito = KategoriDeposito::where('status', 'aktif')->get();
 
         // Ambil deposito aktif nasabah
         $depositoAktif = [];
@@ -52,7 +54,7 @@ class DepositoController extends Controller
         }
 
         return view('nasabah.deposito.index', compact(
-            'tenors',
+            'pakets',
             'jenisDeposito',
             'depositoAktif',
             'riwayatPengajuan'
@@ -110,23 +112,26 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        $tenors = JnsTenorDeposito::where('aktif', 'y')
-            ->with(['sukuBunga' => function ($q) {
-                $q->where('status', 'aktif')->orderBy('min_nominal');
-            }])
+        $pakets = PaketDeposito::with('kategori')
+            ->where('status', 'aktif')
             ->orderBy('tenor_bulan')
+            ->orderBy('minimal_nominal')
             ->get();
 
-        // Jenis deposito di-hardcode
-        $jenisDeposito = collect([]);
+        // Jenis deposito dinamis
+        $jenisDeposito = KategoriDeposito::where('status', 'aktif')->get();
 
         // Saldo tabungan nasabah dari history transaksi
         $saldoTabungan = $nasabah ? $this->getSaldoNasabah($nasabah->id) : 0;
 
+        // Daftar Bank untuk Info Rekening
+        $banks = JnsBank::where('status', 'aktif')->get();
+
         return view('nasabah.deposito.pengajuan', compact(
-            'tenors',
+            'pakets',
             'jenisDeposito',
-            'saldoTabungan'
+            'saldoTabungan',
+            'banks'
         ));
     }
 
@@ -137,12 +142,20 @@ class DepositoController extends Controller
     {
         $request->validate([
             'nominal'        => 'required|numeric|min:1000000',
-            'tenor_id'       => 'required|exists:jns_tenor_deposito,id',
+            'paket_id'       => 'required|exists:paket_depositos,id',
             'metode_setor'   => 'required|in:transfer,saldo_tabungan',
             'foto_bukti_tf'  => 'nullable|required_if:metode_setor,transfer|image|max:5120',
         ]);
 
         $nasabah = Auth::user()->nasabah;
+        
+        $paket = PaketDeposito::findOrFail($request->paket_id);
+        if ($request->nominal < $paket->minimal_nominal) {
+            return back()->with('error', 'Nominal pengajuan kurang dari batas minimal paket ini.')->withInput();
+        }
+        if ($paket->maksimal_nominal && $request->nominal > $paket->maksimal_nominal) {
+            return back()->with('error', 'Nominal pengajuan melebihi batas maksimal paket ini.')->withInput();
+        }
 
         if ($request->metode_setor === 'saldo_tabungan') {
             $saldo = $this->getSaldoNasabah($nasabah->id);
@@ -150,11 +163,16 @@ class DepositoController extends Controller
                 return back()->with('error', 'Saldo Tabungan tidak mencukupi untuk membuka Deposito.')->withInput();
             }
         }
+        
+        // Cari mapping tenor_id untuk backward compatibility
+        $tenorDb = JnsTenorDeposito::where('tenor_bulan', $paket->tenor_bulan)->first();
+        $tenorId = $tenorDb ? $tenorDb->id : 1; // Default fallback if not found
 
         $data = [
             'id_nasabah'     => $nasabah->id,
+            'paket_id'       => $paket->id,
             'nominal'        => $request->nominal,
-            'tenor_id'       => $request->tenor_id,
+            'tenor_id'       => $tenorId, // Dipertahankan untuk compatibility Warning System
             'metode_setor'   => $request->metode_setor,
             'status'         => '1',
             'catatan'        => $request->catatan,
@@ -213,7 +231,11 @@ class DepositoController extends Controller
             ->with('tenor')->findOrFail($id);
 
         // Hitung nominal akhir: pokok + bunga bersih (setelah pajak 20%)
-        $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor->tenor_hari ?? 365) / 365);
+        $tglJatuhTempo = $deposito->tgl_jatuh_tempo;
+        $isLeap = $tglJatuhTempo ? (($tglJatuhTempo->year % 4 === 0 && $tglJatuhTempo->year % 100 !== 0) || ($tglJatuhTempo->year % 400 === 0)) : false;
+        $pembagi = $isLeap ? 366 : 365;
+        
+        $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor->tenor_hari ?? 30) / $pembagi);
         $pajak       = $bungaKotor * 0.20;
         $nominalAkhir = $deposito->nominal_awal + $bungaKotor - $pajak;
 

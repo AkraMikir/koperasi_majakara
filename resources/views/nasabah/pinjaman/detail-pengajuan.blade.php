@@ -24,8 +24,20 @@
                         <h1 class="text-3xl font-bold text-white mb-2 font-display">Detail Pengajuan</h1>
                         <p class="text-white/90 text-sm">ID: #{{ str_pad($pengajuan->id, 6, '0', STR_PAD_LEFT) }}</p>
                     </div>
-                    <span class="px-4 py-2 {{ $pengajuan->pinjaman ? 'bg-green-500' : 'bg-yellow-500' }} text-white rounded-full text-sm font-semibold">
-                        {{ $pengajuan->pinjaman ? 'Disetujui' : 'Pending' }}
+                    @php
+                        if ($pengajuan->status == '3' || $pengajuan->status == '4' || $pengajuan->pinjaman) {
+                            $badgeClass = 'bg-green-500';
+                            $badgeText = 'Disetujui';
+                        } elseif ($pengajuan->status == '2') {
+                            $badgeClass = 'bg-red-500';
+                            $badgeText = 'Ditolak';
+                        } else {
+                            $badgeClass = 'bg-yellow-500';
+                            $badgeText = 'Pending';
+                        }
+                    @endphp
+                    <span class="px-4 py-2 {{ $badgeClass }} text-white rounded-full text-sm font-semibold">
+                        {{ $badgeText }}
                     </span>
                 </div>
             </div>
@@ -67,7 +79,8 @@
     </div>
 
     <!-- Status Info -->
-    @if($pengajuan->pinjaman)
+    <!-- Status Info -->
+    @if($pengajuan->status == '3' || $pengajuan->status == '4' || $pengajuan->pinjaman)
     <div class="mx-4 mb-6">
         <div class="bg-green-50 border-2 border-green-200 rounded-2xl p-6">
             <div class="flex items-center gap-3 mb-4">
@@ -77,10 +90,36 @@
                 <h3 class="text-lg font-bold text-green-800">Pengajuan Disetujui</h3>
             </div>
             <p class="text-sm text-green-700 mb-4">Pengajuan Anda telah disetujui. Pinjaman Anda sudah aktif.</p>
+            @if($pengajuan->keterangan_admin)
+            <div class="mt-4 p-4 bg-white/60 rounded-xl border border-green-100">
+                <p class="text-xs font-bold text-green-800 uppercase tracking-wider mb-1">Catatan Admin</p>
+                <p class="text-sm text-green-900">{{ $pengajuan->keterangan_admin }}</p>
+            </div>
+            @endif
+            @if($pengajuan->pinjaman)
             <a href="{{ route('nasabah.pinjaman.detail-pinjaman', ['id' => $pengajuan->pinjaman->id]) }}" 
-                class="inline-block bg-green-600 text-white font-semibold px-6 py-2 rounded-xl hover:bg-green-700 transition-all">
+                class="inline-block mt-4 bg-green-600 text-white font-semibold px-6 py-2 rounded-xl hover:bg-green-700 transition-all">
                 Lihat Detail Pinjaman
             </a>
+            @endif
+        </div>
+    </div>
+    @elseif($pengajuan->status == '2')
+    <div class="mx-4 mb-6">
+        <div class="bg-red-50 border-2 border-red-200 rounded-2xl p-6">
+            <div class="flex items-center gap-3 mb-4">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h3 class="text-lg font-bold text-red-800">Pengajuan Ditolak</h3>
+            </div>
+            <p class="text-sm text-red-700">Mohon maaf, pengajuan pinjaman Anda tidak dapat disetujui saat ini.</p>
+            @if($pengajuan->keterangan_admin)
+            <div class="mt-4 p-4 bg-white/60 rounded-xl border border-red-100">
+                <p class="text-xs font-bold text-red-800 uppercase tracking-wider mb-1">Alasan Penolakan</p>
+                <p class="text-sm text-red-900">{{ $pengajuan->keterangan_admin }}</p>
+            </div>
+            @endif
         </div>
     </div>
     @else

@@ -15,6 +15,7 @@ class PengajuanDeposito extends Model
 
     protected $fillable = [
         'id_nasabah',
+        'paket_id',
         'nominal',
         'tenor_id',
         'metode_setor',
@@ -44,6 +45,11 @@ class PengajuanDeposito extends Model
     public function deposito(): HasOne
     {
         return $this->hasOne(DepositoH::class, 'id_pengajuan');
+    }
+
+    public function paket(): BelongsTo
+    {
+        return $this->belongsTo(PaketDeposito::class, 'paket_id');
     }
 }
 

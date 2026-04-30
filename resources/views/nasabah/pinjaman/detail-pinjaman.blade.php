@@ -155,6 +155,38 @@
     </div>
     @endif
 
+    <!-- Bukti Pelunasan -->
+    @if($pinjaman->buktiPelunasan)
+    <div class="mx-4 mb-6">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+            <h2 class="text-lg font-bold text-[#8b6f2f] mb-4 font-display">Bukti Pelunasan</h2>
+            <p class="text-sm text-gray-500 mb-4">Bukti pelunasan pinjaman yang dikonfirmasi oleh admin. Klik untuk memperbesar atau unduh.</p>
+            
+            <div class="max-w-md">
+                @php
+                    $filePath = $pinjaman->buktiPelunasan->file_path;
+                    $imageUrl = asset('storage/' . $filePath);
+                    $fileName = basename($filePath);
+                @endphp
+                <div class="border border-gray-200 rounded-xl overflow-hidden bg-gray-50 hover:shadow-md transition-all group">
+                    <div class="aspect-[4/3] bg-gray-100 overflow-hidden cursor-pointer" onclick="window.open('{{ $imageUrl }}', '_blank')">
+                        <img src="{{ $imageUrl }}" alt="Bukti Pelunasan" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200">
+                    </div>
+                    <div class="p-3 flex items-center justify-between gap-2">
+                        <span class="text-xs text-gray-500 truncate flex-1">{{ $fileName }}</span>
+                        <a href="{{ $imageUrl }}" download="{{ $fileName }}" class="shrink-0 inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
+                            Unduh
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Jadwal Angsuran -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">

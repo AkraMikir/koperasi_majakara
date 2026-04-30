@@ -156,20 +156,56 @@
                 {{-- Decorative light --}}
                 <div class="absolute -top-24 -right-24 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
                 
-                <div class="relative z-10">
-                    <div class="flex items-center justify-between">
+                <div class="relative z-10 flex items-center justify-between">
+                    <div>
                         <h3 class="text-3xl font-bold text-white font-display tracking-tight">Kirim Dana Operasional</h3>
-                        <button onclick="closeKirimModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-black/10 text-white hover:bg-black/20 transition-all">
-                            <i class="fas fa-times"></i>
-                        </button>
+                        <p class="text-white/80 text-sm mt-1.5 font-medium tracking-wide">Pindahkan modal kerja ke Admin Teller</p>
                     </div>
-                    <p class="text-white/80 text-sm mt-1.5 font-medium tracking-wide">Pindahkan modal kerja dari Owner ke Admin Teller</p>
+                    <div class="text-right">
+                        <div class="bg-white/10 rounded-xl p-2 backdrop-blur-sm border border-white/20">
+                            <p class="text-[10px] font-bold text-white/60 uppercase">Dompet Utama Anda</p>
+                            <p class="text-lg font-black text-white">Rp {{ number_format($saldoCash + $saldoTf, 0, ',', '.') }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <form action="{{ route('admin.petty-cash.penerimaan.store') }}" method="POST" enctype="multipart/form-data" class="px-10 py-10 space-y-8">
                 @csrf
                 
+                <div>
+                    <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Pilih Sumber Dana <span class="text-red-500">*</span></label>
+                    <div class="relative group">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#674c1d] transition-colors">
+                            <i class="fas fa-layer-group text-lg"></i>
+                        </div>
+                        <select name="sumber" id="select_sumber" required onchange="updateMaxValues()"
+                                class="block w-full pl-12 pr-4 py-4 text-base font-semibold border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50">
+                            <option value="">-- Pilih Sumber Saldo --</option>
+                            @php
+                                $sourceLabels = [
+                                    'tabungan' => 'Saldo Tabungan',
+                                    'pinjaman' => 'Saldo Pinjaman',
+                                    'deposito' => 'Saldo Deposito',
+                                    'petty_cash' => 'Saldo Petty Cash',
+                                    'other' => 'Modal Awal',
+                                ];
+                            @endphp
+                            @foreach($sourceLabels as $key => $label)
+                                @php
+                                    $det = (object)($sourceDetails[$key] ?? ['total_cash' => 0, 'total_tf' => 0]);
+                                    $totalSource = $det->total_cash + $det->total_tf;
+                                @endphp
+                                <option value="{{ $key }}" 
+                                        data-cash="{{ (float)$det->total_cash }}" 
+                                        data-tf="{{ (float)$det->total_tf }}">
+                                    {{ $label }} (Rp {{ number_format($totalSource, 0, ',', '.') }})
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Admin Penerima <span class="text-red-500">*</span></label>
                     <div class="relative group">
@@ -189,19 +225,27 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-2">
                     <div>
-                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Saldo Transfer (Bank)</label>
+                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
+                            <span>Saldo Transfer (Bank)</span>
+                            <span class="text-[10px] text-blue-600 font-bold" id="label_max_tf">Max: 0</span>
+                        </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_tf" id="input_tf" oninput="calculateTotal()"
+                                   max="0"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Saldo Tunai (Cash)</label>
+                        <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3 flex items-center justify-between">
+                            <span>Saldo Tunai (Cash)</span>
+                            <span class="text-[10px] text-green-600 font-bold" id="label_max_cash">Max: 0</span>
+                        </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
                             <input type="number" name="nominal_cash" id="input_cash" oninput="calculateTotal()"
+                                   max="0"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
@@ -235,6 +279,13 @@
                             <input type="file" name="foto_cash" accept="image/*" class="hidden">
                         </label>
                     </div>
+                </div>
+
+                {{-- Catatan --}}
+                <div>
+                    <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Catatan (Opsional)</label>
+                    <textarea name="keterangan" rows="2" placeholder="Tambahkan catatan jika diperlukan..."
+                              class="block w-full px-5 py-4 text-sm font-medium border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50 resize-none"></textarea>
                 </div>
 
                 <div class="flex gap-4 pt-4">
@@ -349,6 +400,31 @@
         const cash = parseInt(document.getElementById('input_cash').value) || 0;
         const total = tf + cash;
         document.getElementById('display_total').innerText = 'Rp ' + total.toLocaleString('id-ID');
+    }
+
+    function updateMaxValues() {
+        const select = document.getElementById('select_sumber');
+        const selectedOption = select.options[select.selectedIndex];
+        
+        const maxCash = parseFloat(selectedOption.getAttribute('data-cash')) || 0;
+        const maxTf = parseFloat(selectedOption.getAttribute('data-tf')) || 0;
+        
+        const inputCash = document.getElementById('input_cash');
+        const inputTf = document.getElementById('input_tf');
+        const labelMaxCash = document.getElementById('label_max_cash');
+        const labelMaxTf = document.getElementById('label_max_tf');
+        
+        inputCash.max = maxCash;
+        inputTf.max = maxTf;
+        
+        labelMaxCash.innerText = 'Max: ' + maxCash.toLocaleString('id-ID');
+        labelMaxTf.innerText = 'Max: ' + maxTf.toLocaleString('id-ID');
+        
+        // Reset values if they exceed new max
+        if (parseFloat(inputCash.value) > maxCash) inputCash.value = maxCash;
+        if (parseFloat(inputTf.value) > maxTf) inputTf.value = maxTf;
+        
+        calculateTotal();
     }
 
     document.addEventListener('keydown', function(event) {

@@ -32,6 +32,27 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="mx-4 mb-4">
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-md border border-red-100 p-4 flex items-start gap-3">
+            <div class="absolute inset-0 bg-gradient-to-br from-red-50/60 to-rose-50/40 pointer-events-none"></div>
+            <div class="relative flex-shrink-0 w-12 h-12 bg-gradient-to-br from-red-400 to-rose-500 rounded-xl flex items-center justify-center shadow-lg shadow-red-200/40">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </div>
+            <div class="relative flex-1 min-w-0">
+                <p class="font-bold text-red-800 text-sm mb-1">Terjadi Kesalahan:</p>
+                <ul class="list-disc list-inside text-sm text-gray-700 space-y-0.5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- 🔥 STEP 1: GUIDE ONBOARDING --}}
     <div id="step-guide" class="guide-step mx-4">
         <div class="text-center mb-10">
@@ -365,44 +386,88 @@
     async function submitFormTransfer() {
         const pinInput = document.getElementById('pin-input-transfer');
         const errorMsg = document.getElementById('pin-error-transfer');
+        const submitBtn = document.querySelector('#pin-modal-transfer button[onclick="submitFormTransfer()"]');
         const pin = pinInput.value;
         if (pin.length !== 6) return;
 
-        const data = await verifyPinAjax(pin);
-        if (data.success) {
-            const nominalInput = document.getElementById('nominal-transfer');
-            nominalInput.value = nominalInput.value.replace(/[^0-9]/g, '');
-            const hiddenPin = document.createElement('input');
-            hiddenPin.type = 'hidden'; hiddenPin.name = 'pin'; hiddenPin.value = pin;
-            document.getElementById('form-transfer').appendChild(hiddenPin);
-            document.getElementById('form-transfer').submit();
-        } else {
-            errorMsg.textContent = data.message || 'PIN salah';
-            errorMsg.classList.remove('hidden');
+        // Prevent double submit
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+        try {
+            const data = await verifyPinAjax(pin);
+            if (data.success) {
+                const nominalInput = document.getElementById('nominal-transfer');
+                nominalInput.value = nominalInput.value.replace(/[^0-9]/g, '');
+                const hiddenPin = document.createElement('input');
+                hiddenPin.type = 'hidden'; hiddenPin.name = 'pin'; hiddenPin.value = pin;
+                document.getElementById('form-transfer').appendChild(hiddenPin);
+                document.getElementById('form-transfer').submit();
+            } else {
+                errorMsg.textContent = data.message || 'PIN salah';
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        } catch (e) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     }
 
     async function submitFormTunai() {
         const pinInput = document.getElementById('pin-input-tunai');
         const errorMsg = document.getElementById('pin-error-tunai');
+        const submitBtn = document.querySelector('#pin-modal-tunai button[onclick="submitFormTunai()"]');
         const pin = pinInput.value;
         if (pin.length !== 6) return;
 
-        const data = await verifyPinAjax(pin);
-        if (data.success) {
-            const nominalInput = document.getElementById('nominal-tunai');
-            nominalInput.value = nominalInput.value.replace(/[^0-9]/g, '');
-            const hiddenPin = document.createElement('input');
-            hiddenPin.type = 'hidden'; hiddenPin.name = 'pin'; hiddenPin.value = pin;
-            document.getElementById('form-tunai').appendChild(hiddenPin);
-            document.getElementById('form-tunai').submit();
-        } else {
-            errorMsg.textContent = data.message || 'PIN salah';
-            errorMsg.classList.remove('hidden');
+        // Prevent double submit
+        submitBtn.disabled = true;
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`;
+
+        try {
+            const data = await verifyPinAjax(pin);
+            if (data.success) {
+                const nominalInput = document.getElementById('nominal-tunai');
+                nominalInput.value = nominalInput.value.replace(/[^0-9]/g, '');
+                const hiddenPin = document.createElement('input');
+                hiddenPin.type = 'hidden'; hiddenPin.name = 'pin'; hiddenPin.value = pin;
+                document.getElementById('form-tunai').appendChild(hiddenPin);
+                document.getElementById('form-tunai').submit();
+            } else {
+                errorMsg.textContent = data.message || 'PIN salah';
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
+            }
+        } catch (e) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
     }
 
-    function showPinModalTransfer() { if (document.getElementById('form-transfer').checkValidity()) { document.getElementById('pin-modal-transfer').classList.remove('hidden'); document.getElementById('pin-modal-transfer').classList.add('flex'); document.getElementById('pin-input-transfer').focus(); } else document.getElementById('form-transfer').reportValidity(); }
+    function showPinModalTransfer() { 
+        const form = document.getElementById('form-transfer');
+        if (form.checkValidity()) { 
+            const fileInputs = form.querySelectorAll('input[type="file"]');
+            for (let input of fileInputs) {
+                if (input.files && input.files[0]) {
+                    if (input.files[0].size > 5 * 1024 * 1024) {
+                        alert('Ukuran file ' + input.files[0].name + ' terlalu besar. Maksimal 5MB.');
+                        return;
+                    }
+                }
+            }
+            document.getElementById('pin-modal-transfer').classList.remove('hidden'); 
+            document.getElementById('pin-modal-transfer').classList.add('flex'); 
+            document.getElementById('pin-input-transfer').focus(); 
+        } else {
+            form.reportValidity();
+        }
+    }
     function closePinModalTransfer() { document.getElementById('pin-modal-transfer').classList.add('hidden'); document.getElementById('pin-modal-transfer').classList.remove('flex'); }
     function showPinModalTunai() { if (document.getElementById('form-tunai').checkValidity()) { document.getElementById('pin-modal-tunai').classList.remove('hidden'); document.getElementById('pin-modal-tunai').classList.add('flex'); document.getElementById('pin-input-tunai').focus(); } else document.getElementById('form-tunai').reportValidity(); }
     function closePinModalTunai() { document.getElementById('pin-modal-tunai').classList.add('hidden'); document.getElementById('pin-modal-tunai').classList.remove('flex'); }

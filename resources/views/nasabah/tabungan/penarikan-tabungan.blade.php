@@ -102,7 +102,7 @@
 
                 <!-- Nominal Penarikan -->
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Penarikan *</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Penarikan <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
                         <input type="text" name="nominal" id="nominal" value="{{ old('nominal', request('nominal')) }}" placeholder="0" required
@@ -137,7 +137,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor <span class="text-red-500">*</span></label>
                         <select name="lokasi_temu" id="lokasi_temu" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <option value="">-- Pilih Lokasi --</option>
                             @foreach($lokasi ?? [] as $loc)
@@ -148,12 +148,12 @@
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal <span class="text-red-500">*</span></label>
                             <input type="date" name="tanggal_janji_temu" id="tanggal_janji_temu" min="{{ date('Y-m-d') }}" value="{{ old('tanggal_janji_temu') }}"
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu <span class="text-red-500">*</span></label>
                             <input type="time" name="waktu_janji_temu" id="waktu_janji_temu" value="{{ old('waktu_janji_temu') }}"
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <p class="text-xs text-gray-500 mt-1">Jam operasional: 08:00 - 16:00</p>
@@ -168,7 +168,7 @@
                 @endphp
                 <div id="bank-section" class="hidden space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bank *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bank <span class="text-red-500">*</span></label>
                         <select name="nama_bank" id="nama_bank" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <option value="">Pilih Bank</option>
                             @foreach(['BCA', 'BNI', 'Mandiri', 'BRI', 'CIMB Niaga', 'Permata', 'Bank Lainnya'] as $bank)
@@ -181,7 +181,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Rekening *</label>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Nomor Rekening <span class="text-red-500">*</span></label>
                         <input type="text" name="no_rekening" id="no_rekening" placeholder="Masukkan nomor rekening tujuan" value="{{ $defaultNoRek }}"
                             class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
                             oninput="this.value = this.value.replace(/[^0-9]/g, '')">
@@ -291,17 +291,17 @@
 
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
-            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
-                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-center text-2xl font-mono tracking-widest"
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                class="w-full px-4 py-5 border-2 border-gray-100 rounded-2xl focus:border-[#674c1d] focus:ring-4 focus:ring-[#674c1d]/10 outline-none text-center text-3xl font-bold tracking-[0.5em] transition-all bg-gray-50 focus:bg-white"
                 placeholder="••••••"
-                oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                oninput="this.value = this.value.replace(/[^0-9]/g, ''); if(this.value.length === 6) verifyAndSubmit();">
         </div>
 
         <div class="flex gap-3">
             <button onclick="closePinModal()" class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
                 Batal
             </button>
-            <button onclick="verifyAndSubmit()" class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
+            <button onclick="verifyAndSubmit()" id="btn-verify-submit" class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#4a3514] hover:to-[#674c1d] transition-all">
                 Verifikasi
             </button>
         </div>
@@ -447,46 +447,46 @@
         document.getElementById('pin-error').classList.add('hidden');
     }
 
+    let isSubmitting = false;
     function verifyAndSubmit() {
+        if (isSubmitting) return;
+        
         console.log('=== VERIFY AND SUBMIT CALLED ===');
         const pin = document.getElementById('pin-input').value;
-        console.log('PIN length:', pin.length);
         
         if (pin.length !== 6) {
-            showPinError('PIN harus 6 digit');
-            return;
+            return; // Don't show error yet if called from oninput
         }
 
+        isSubmitting = true;
         const form = document.getElementById('form-penarikan');
         const nominalInput = document.getElementById('nominal');
         
-        console.log('Form found:', !!form);
-        console.log('Nominal before unformat:', nominalInput.value);
-        
         // Unformat nominal before submit
         nominalInput.value = nominalInput.value.replace(/[^\d]/g, '');
-        console.log('Nominal after unformat:', nominalInput.value);
 
         // Create hidden input for PIN
-        // (Make sure to remove old one if exists or just append)
-        let pinInput = form.querySelector('input[name="pin"]');
-        if (!pinInput) {
-            pinInput = document.createElement('input');
-            pinInput.type = 'hidden';
-            pinInput.name = 'pin';
-            form.appendChild(pinInput);
-            console.log('Created new PIN input');
+        let pinInputHidden = form.querySelector('input[name="pin"]');
+        if (!pinInputHidden) {
+            pinInputHidden = document.createElement('input');
+            pinInputHidden.type = 'hidden';
+            pinInputHidden.name = 'pin';
+            form.appendChild(pinInputHidden);
         }
-        pinInput.value = pin;
-        console.log('PIN input value set:', pinInput.value);
-
-        console.log('Form data before submit:');
-        const formData = new FormData(form);
-        for (let [key, value] of formData.entries()) {
-            console.log(key + ':', value);
-        }
+        pinInputHidden.value = pin;
 
         console.log('Submitting form...');
+        
+        // Prevent double click
+        const verifyBtn = document.getElementById('btn-verify-submit');
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = `
+            <svg class="animate-spin h-5 w-5 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        `;
+        
         form.submit();
     }
     

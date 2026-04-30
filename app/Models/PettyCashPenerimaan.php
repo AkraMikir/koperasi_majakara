@@ -19,6 +19,7 @@ class PettyCashPenerimaan extends Model
         'id',
         'owner_id',
         'admin_id',
+        'sumber',
         'nominal_tf',
         'nominal_cash',
         'bukti_tf',

@@ -45,6 +45,7 @@ class MasterDataController extends Controller
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
             'total_biaya_transfer' => 0,
+            'total_kategori_deposito' => \App\Models\KategoriDeposito::where('status', 'aktif')->count(),
             'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
             'total_rekening_perusahaan' => JnsBank::count(),
         ];

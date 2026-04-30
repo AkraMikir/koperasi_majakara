@@ -89,6 +89,8 @@
                     <td class="px-4 py-3">
                         @if($p->status === 'pending')
                             <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">Pending</span>
+                        @elseif($p->status === 'diproses')
+                            <span class="px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-bold">Diproses (Menunggu Admin)</span>
                         @elseif($p->status === 'selesai')
                             <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Selesai</span>
                         @else
@@ -97,37 +99,44 @@
                     </td>
                     <td class="px-4 py-3">
                         @if($p->status === 'pending')
-                        {{-- Modal konfirmasi --}}
+                        {{-- STAGE 1: OWNER INITIATION --}}
                         <button type="button"
-                            onclick="document.getElementById('modal-{{ $p->id }}').classList.remove('hidden')"
+                            onclick="document.getElementById('modal-init-{{ $p->id }}').classList.remove('hidden')"
                             class="inline-flex items-center gap-1 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold">
-                            Cairkan ke Tabungan
+                            Kirim Dana ke Admin
                         </button>
 
-                        {{-- Modal --}}
-                        <div id="modal-{{ $p->id }}" class="hidden fixed inset-0 bg-gray-800/60 z-50 flex items-center justify-center px-4">
+                        {{-- Modal Init --}}
+                        <div id="modal-init-{{ $p->id }}" class="hidden fixed inset-0 bg-gray-800/60 z-50 flex items-center justify-center px-4">
                             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                                <h3 class="font-bold text-gray-800 text-lg mb-2">Konfirmasi Pencairan ke Tabungan</h3>
+                                <h3 class="font-bold text-gray-800 text-lg mb-2">Inisiasi Pencairan Tabungan</h3>
                                 <p class="text-sm text-gray-600 mb-4">
-                                    Dana deposito <strong>{{ $dep?->nomor_deposito }}</strong> milik
-                                    <strong>{{ $p->nasabah?->user?->nama }}</strong> senilai
-                                    <strong class="text-[#674c1d]">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</strong>
-                                    akan langsung ditambahkan ke saldo tabungan. Proses ini tidak dapat dibatalkan.
+                                    Pilih Admin Operasional yang akan mengelola pencairan deposito <strong>{{ $dep?->nomor_deposito }}</strong> senilai
+                                    <strong class="text-[#674c1d]">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</strong>.
                                 </p>
                                 <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.proses', $p->id) }}">
                                     @csrf
                                     <div class="mb-4">
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Admin Penerima Dana</label>
+                                        <select name="admin_id" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none">
+                                            <option value="">-- Pilih Admin --</option>
+                                            @foreach($admins as $adm)
+                                                <option value="{{ $adm->id }}">{{ $adm->nama }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="mb-4">
                                         <label class="block text-xs font-semibold text-gray-600 mb-1">Catatan (opsional)</label>
-                                        <input type="text" name="catatan" placeholder="Catatan tambahan…"
+                                        <input type="text" name="catatan" placeholder="Catatan untuk admin…"
                                             class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d]">
                                     </div>
                                     <div class="flex gap-3">
                                         <button type="submit"
                                             class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
-                                            ✓ Cairkan Sekarang
+                                            ✓ Kirim Dana
                                         </button>
                                         <button type="button"
-                                            onclick="document.getElementById('modal-{{ $p->id }}').classList.add('hidden')"
+                                            onclick="document.getElementById('modal-init-{{ $p->id }}').classList.add('hidden')"
                                             class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
                                             Batal
                                         </button>
@@ -135,6 +144,40 @@
                                 </form>
                             </div>
                         </div>
+
+                        @elseif($p->status === 'diproses')
+                        {{-- STAGE 2: ADMIN FINALIZATION --}}
+                        <button type="button"
+                            onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.remove('hidden')"
+                            class="inline-flex items-center gap-1 bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold">
+                            Selesaikan (Update Tabungan)
+                        </button>
+
+                        {{-- Modal Finish --}}
+                        <div id="modal-finish-{{ $p->id }}" class="hidden fixed inset-0 bg-gray-800/60 z-50 flex items-center justify-center px-4">
+                            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
+                                <h3 class="font-bold text-gray-800 text-lg mb-2">Finalisasi Pencairan Tabungan</h3>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    Konfirmasi penambahan saldo tabungan nasabah sebesar <strong class="text-green-600">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</strong>.
+                                    Pastikan Anda sudah menerima dana dari Owner di menu Petty Cash.
+                                </p>
+                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.finish', $p->id) }}">
+                                    @csrf
+                                    <div class="flex gap-3 mt-6">
+                                        <button type="submit"
+                                            class="flex-1 bg-green-600 text-white py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition">
+                                            ✓ Konfirmasi Selesai
+                                        </button>
+                                        <button type="button"
+                                            onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.add('hidden')"
+                                            class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                                            Batal
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
                         @else
                         <a href="{{ route('admin.deposito.deposito-detail', $p->deposito_id) }}"
                             class="text-xs text-[#674c1d] hover:underline">Lihat Detail</a>

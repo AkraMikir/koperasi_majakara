@@ -10,7 +10,13 @@
             <h1 class="text-3xl font-bold text-gray-900 font-display">Dashboard Petty Cash (Owner)</h1>
             <p class="text-gray-600 mt-1">Helicopter View: Monitoring aliran dana operasional koperasi</p>
         </div>
-        <div class="flex items-center space-x-3">
+            <a href="{{ route('admin.petty-cash.owner-wallet.index') }}"
+               class="px-4 py-2 bg-white border border-[#674c1d] text-[#674c1d] rounded-lg text-sm font-bold hover:bg-[#674c1d]/5 transition-colors flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
+                </svg>
+                Kelola Saldo Utama
+            </a>
             <a href="{{ route('admin.petty-cash.penerimaan.create') }}"
                class="px-4 py-2 bg-[#674c1d] text-white rounded-lg text-sm font-medium hover:bg-[#4a3514] transition-colors flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,10 +50,14 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
-                <span class="text-white/60 text-xs font-medium uppercase tracking-wider">Owner</span>
+                <span class="text-white/60 text-xs font-medium uppercase tracking-wider text-right line-clamp-1">Saldo Utama Owner</span>
             </div>
-            <p class="text-white/80 text-sm mb-1">Saldo Petty Cash Owner</p>
-            <p class="text-3xl font-bold">Rp {{ number_format($saldoOwner, 0, ',', '.') }}</p>
+            <p class="text-white/80 text-xs mb-1">Total Saldo (Cash + TF)</p>
+            <p class="text-3xl font-bold font-display">Rp {{ number_format($saldoOwnerTotal, 0, ',', '.') }}</p>
+            <div class="mt-4 flex items-center justify-between text-[10px] text-white/60 pt-3 border-t border-white/10">
+                <span>C: {{ number_format($saldoOwnerCash, 0, ',', '.') }}</span>
+                <span>TF: {{ number_format($saldoOwnerTf, 0, ',', '.') }}</span>
+            </div>
         </div>
 
         {{-- Alert Setoran Pending --}}

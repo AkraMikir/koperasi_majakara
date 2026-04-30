@@ -11,6 +11,7 @@ use App\Models\PettyCashLog;
 use App\Models\TransTabungan;
 use App\Models\Nasabah;
 use App\Models\User;
+use App\Models\PettyCashOwnerTransaksi;
 use App\Models\BuktiFoto;
 use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
@@ -61,6 +62,20 @@ class PettyCashController extends Controller
         ];
 
         $admins = User::where('role', 'admin_operasional')->get();
+        $saldoCash = PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'cash');
+        $saldoTf   = PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'transfer');
+
+        // 🔥 Hitung saldo per sumber untuk modal kirim
+        $sourceDetails = DB::table('vw_saldo_owner_detail')
+            ->where('user_id', Auth::id())
+            ->select('sumber', 
+                DB::raw('SUM(nominal_cash) as total_cash'),
+                DB::raw('SUM(nominal_tf) as total_tf')
+            )
+            ->groupBy('sumber')
+            ->get()
+            ->keyBy('sumber')
+            ->toArray();
         
         if ($request->ajax()) {
             return response()->json([
@@ -70,7 +85,7 @@ class PettyCashController extends Controller
             ]);
         }
 
-        return view('admin.petty-cash.penerimaan-owner', compact('pengiriman', 'stats', 'admins'));
+        return view('admin.petty-cash.penerimaan-owner', compact('pengiriman', 'stats', 'admins', 'saldoCash', 'saldoTf', 'sourceDetails'));
     }
 
     /**
@@ -81,6 +96,7 @@ class PettyCashController extends Controller
     {
         $request->validate([
             'admin_id'     => 'required|exists:users,id',
+            'sumber'       => 'required|in:tabungan,pinjaman,deposito,petty_cash,other',
             'nominal_tf'   => 'nullable|numeric|min:0',
             'nominal_cash' => 'nullable|numeric|min:0',
             'bukti_tf'     => 'nullable|image|max:5120',
@@ -90,9 +106,28 @@ class PettyCashController extends Controller
 
         $nominalTf   = (float) ($request->nominal_tf   ?? 0);
         $nominalCash = (float) ($request->nominal_cash ?? 0);
+        $sumber      = $request->sumber;
 
         if (($nominalTf + $nominalCash) <= 0) {
             return back()->withErrors(['nominal_tf' => 'Minimal satu nominal harus diisi.'])->withInput();
+        }
+
+        // 🔥 VALIDASI SALDO PER SUMBER
+        $ownerId = Auth::id();
+        $sourceDetails = DB::table('vw_saldo_owner_detail')
+            ->where('user_id', $ownerId)
+            ->where('sumber', $sumber) 
+            ->select(
+                DB::raw('SUM(nominal_cash) as total_cash'),
+                DB::raw('SUM(nominal_tf) as total_tf')
+            )
+            ->first();
+
+        if ($nominalCash > (float)$sourceDetails->total_cash) {
+            return back()->withErrors(['nominal_cash' => "Saldo Tunai untuk sumber ini tidak mencukupi (Max: " . number_format($sourceDetails->total_cash, 0, ',', '.') . ")"])->withInput();
+        }
+        if ($nominalTf > (float)$sourceDetails->total_tf) {
+            return back()->withErrors(['nominal_tf' => "Saldo Transfer untuk sumber ini tidak mencukupi (Max: " . number_format($sourceDetails->total_tf, 0, ',', '.') . ")"])->withInput();
         }
 
         $buktiFoto = null;
@@ -107,25 +142,68 @@ class PettyCashController extends Controller
 
         $id = IdGenerator::generate('petty_cash_penerimaan', 'PCP', 'OW', 'KRM');
 
-        PettyCashPenerimaan::create([
-            'id'          => $id,
-            'owner_id'    => Auth::id(),
-            'admin_id'    => $request->admin_id,
-            'nominal_tf'  => $nominalTf,
-            'nominal_cash'=> $nominalCash,
-            'bukti_tf'    => $buktiFoto,
-            'foto_cash'   => $fotoCash,
-            'keterangan'  => $request->keterangan,
-            'status'      => 'pending',
-        ]);
+        try {
+            DB::beginTransaction();
 
-        PettyCashLog::catat(Auth::id(), 'kirim_dana_ke_admin', $nominalTf + $nominalCash, [
-            'admin_id' => $request->admin_id,
-            'penerimaan_id' => $id,
-        ], $id, 'petty_cash_penerimaan');
+            $penerimaan = PettyCashPenerimaan::create([
+                'id'          => $id,
+                'owner_id'    => $ownerId,
+                'admin_id'    => $request->admin_id,
+                'sumber'      => $sumber,
+                'nominal_tf'  => $nominalTf,
+                'nominal_cash'=> $nominalCash,
+                'bukti_tf'    => $buktiFoto,
+                'foto_cash'   => $fotoCash,
+                'keterangan'  => $request->keterangan,
+                'status'      => 'pending',
+            ]);
 
-        return redirect()->route('admin.petty-cash.penerimaan.create')
-            ->with('success', 'Dana berhasil dikirim. Menunggu konfirmasi Admin.');
+            // 🔥 POTONG SALDO OWNER (HOLD) - Tetap gunakan buatMutasi global karena view saldo detail akan menghitungnya berdasarkan PettyCashOwnerTransaksi
+            if ($nominalCash > 0) {
+                PettyCashSaldo::buatMutasi(
+                    $ownerId, 'owner', -$nominalCash,
+                    "Kirim Dana ke Admin ({$penerimaan->admin->nama}) - HOLD",
+                    $id, 'petty_cash_penerimaan', 'cash'
+                );
+            }
+            if ($nominalTf > 0) {
+                PettyCashSaldo::buatMutasi(
+                    $ownerId, 'owner', -$nominalTf,
+                    "Kirim Transfer ke Admin ({$penerimaan->admin->nama}) - HOLD",
+                    $id, 'petty_cash_penerimaan', 'transfer'
+                );
+            }
+
+            // Catat di Transaksi Owner Utama (Ini yang muncul di Dashboard History)
+            PettyCashOwnerTransaksi::create([
+                'id'              => IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR'),
+                'user_id'         => $ownerId,
+                'tipe'            => 'kirim_admin_hold',
+                'sumber'          => $sumber,
+                'nominal_cash'    => $nominalCash,
+                'nominal_tf'      => $nominalTf,
+                'keterangan'      => "Kirim ke Admin: " . ($penerimaan->admin->nama ?? '-') . ". " . $request->keterangan,
+                'bukti_foto_cash' => $fotoCash,
+                'bukti_foto_tf'   => $buktiFoto,
+                'ref_id'          => $id,
+                'ref_table'       => 'petty_cash_penerimaan',
+            ]);
+
+            PettyCashLog::catat($ownerId, 'kirim_dana_ke_admin', $nominalTf + $nominalCash, [
+                'admin_id' => $request->admin_id,
+                'penerimaan_id' => $id,
+                'sumber' => $sumber
+            ], $id, 'petty_cash_penerimaan');
+
+            DB::commit();
+
+            return redirect()->route('admin.petty-cash.penerimaan.create')
+                ->with('success', 'Dana berhasil dikirim dan saldo Owner telah dipotong. Menunggu konfirmasi Admin.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('PettyCash penerimaanStore error', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage())->withInput();
+        }
     }
 
     // =========================================================================
@@ -195,7 +273,21 @@ class PettyCashController extends Controller
                 'penerimaan_id'   => $id,
                 'detil_tf'        => $penerimaan->nominal_tf,
                 'detil_cash'      => $penerimaan->nominal_cash,
+                'sumber'          => $penerimaan->sumber,
             ], $id, 'petty_cash_penerimaan');
+
+            // 🔥 DEPOSITO INTEGRATION
+            if ($penerimaan->sumber === 'deposito' && $penerimaan->ref_id) {
+                // Link ke PencairanDeposito (Langsung)
+                \App\Models\PencairanDeposito::where('id', $penerimaan->ref_id)
+                    ->whereIn('status', ['pending', 'diproses'])
+                    ->update(['status' => 'diproses']);
+
+                // Link ke DepositoPersiapanCair (Proaktif)
+                \App\Models\DepositoPersiapanCair::where('id', $penerimaan->ref_id)
+                    ->whereIn('status', ['tentatif', 'diproses'])
+                    ->update(['status' => 'diproses']);
+            }
 
             DB::commit();
 
@@ -224,7 +316,36 @@ class PettyCashController extends Controller
             'keterangan_admin' => $request->keterangan_admin,
         ]);
 
-        return back()->with('success', 'Penerimaan ditolak.');
+        // 🔥 REFUND SALDO OWNER
+        if ($penerimaan->nominal_cash > 0) {
+            PettyCashSaldo::buatMutasi(
+                $penerimaan->owner_id, 'owner', (float)$penerimaan->nominal_cash,
+                "REFUND: Penolakan dana oleh Admin ({$penerimaan->admin->nama})",
+                $id, 'petty_cash_penerimaan', 'cash'
+            );
+        }
+        if ($penerimaan->nominal_tf > 0) {
+            PettyCashSaldo::buatMutasi(
+                $penerimaan->owner_id, 'owner', (float)$penerimaan->nominal_tf,
+                "REFUND: Penolakan transfer oleh Admin ({$penerimaan->admin->nama})",
+                $id, 'petty_cash_penerimaan', 'transfer'
+            );
+        }
+
+        // Catat di Transaksi Owner Utama (Refund)
+        PettyCashOwnerTransaksi::create([
+            'id'              => IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR'),
+            'user_id'         => $penerimaan->owner_id,
+            'tipe'            => 'masuk', // Kembali masuk
+            'sumber'          => $penerimaan->sumber, // Kembalikan ke sumber asal
+            'nominal_cash'    => $penerimaan->nominal_cash,
+            'nominal_tf'      => $penerimaan->nominal_tf,
+            'keterangan'      => "REFUND: Dana ditolak oleh Admin " . ($penerimaan->admin->nama ?? '-') . ". " . $request->keterangan_admin,
+            'ref_id'          => $id,
+            'ref_table'       => 'petty_cash_penerimaan',
+        ]);
+
+        return back()->with('success', 'Penerimaan ditolak dan saldo Owner telah dikembalikan.');
     }
 
     // =========================================================================
@@ -276,10 +397,12 @@ class PettyCashController extends Controller
         $adminId = Auth::id();
 
         // Semua transaksi yang belum disetor (mengabaikan tanggal agar uang nyangkut tetap ke-cover)
+        // 🛡️ Tugas 14: Exclude pencairan pinjaman (ref_table='tbl_pinjaman_h') — itu uang KELUAR, bukan MASUK ke kantor
         $transaksiPending = PettyCashTransaksiNasabah::with(['nasabah.user', 'jnsVia', 'jnsTransaksi', 'jnsFitur'])
             ->where('admin_id', $adminId)
             ->where('status', 'approved')
             ->whereNull('setoran_kantor_id')
+            ->where('ref_table', '!=', 'tbl_pinjaman_h')
             ->get();
 
         $totalCash = $transaksiPending
@@ -314,39 +437,98 @@ class PettyCashController extends Controller
             'foto_setoran'       => 'nullable|image|max:5120',
             'sudah_setor_fisik'  => 'required|in:1,0,true,false',
             'keterangan_admin'   => 'nullable|string|max:500',
+            'tipe_setoran'       => 'required|in:transaksi,manual',
+            'transaksi_ids'      => 'nullable|array',
+            'manual_cash'        => 'nullable|numeric|min:0',
+            'manual_tf'          => 'nullable|numeric|min:0',
         ]);
 
         try {
             DB::beginTransaction();
 
             $adminId = Auth::id();
+            $tipeSetoran = $request->tipe_setoran;
 
-            // Ambil semua transaksi yang belum disetor (mengabaikan tanggal agar dana nyangkut tidak hilang)
-            $transaksi = PettyCashTransaksiNasabah::with(['nasabah.user', 'jnsVia', 'jnsTransaksi', 'jnsFitur'])
-                ->where('admin_id', $adminId)
-                ->where('status', 'approved')
-                ->whereNull('setoran_kantor_id')
-                ->get();
+            $transaksi = collect([]);
+            $dataPotongan = [];
+            $jumlahNasabah = 0;
+            $totalSetor = 0;
+            $nominalCash = 0;
+            $nominalTf = 0;
 
-            if ($transaksi->isEmpty()) {
-                return back()->with('error', 'Tidak ada transaksi yang bisa disetor hari ini.');
+            if ($tipeSetoran === 'transaksi') {
+                $transaksiIds = $request->transaksi_ids ?? [];
+                if (empty($transaksiIds)) {
+                    return back()->with('error', 'Pilih minimal 1 transaksi untuk disetor.');
+                }
+
+                $transaksi = PettyCashTransaksiNasabah::with(['nasabah.user', 'jnsVia', 'jnsTransaksi', 'jnsFitur'])
+                    ->where('admin_id', $adminId)
+                    ->where('status', 'approved')
+                    ->whereNull('setoran_kantor_id')
+                    ->whereIn('id', $transaksiIds)
+                    ->get();
+
+                if ($transaksi->isEmpty()) {
+                    return back()->with('error', 'Transaksi yang dipilih tidak valid atau sudah disetor.');
+                }
+
+                $totalSetor = $transaksi->sum('nominal');
+                $jumlahNasabah = $transaksi->count();
+                $nominalCash = $transaksi->filter(fn($t) => in_array($t->jnsVia?->kode, ['CS', 'TN']))->sum('nominal');
+                $nominalTf = $transaksi->filter(fn($t) => $t->jnsVia?->kode === 'TF')->sum('nominal');
+
+                $dataPotongan = $transaksi->map(fn($t) => [
+                    'nasabah_id'  => $t->nasabah_id,
+                    'nama'        => $t->nasabah->user->nama ?? '-',
+                    'nominal'     => (float) $t->nominal,
+                    'transaksi'   => $t->jnsTransaksi?->nama ?? '-',
+                    'via'         => $t->jnsVia?->nama ?? '-',
+                    'via_kode'    => $t->jnsVia?->kode ?? '-',
+                    'fitur'       => $t->jnsFitur?->nama ?? '-',
+                    'jenis_transaksi' => $t->jenis_transaksi,
+                    'pctn_id'     => $t->id,
+                    'ref_id'      => $t->ref_id,
+                ])->values()->toArray();
+
+            } else {
+                $nominalCash = (float) $request->manual_cash;
+                $nominalTf = (float) $request->manual_tf;
+                $totalSetor = $nominalCash + $nominalTf;
+
+                if ($totalSetor <= 0) {
+                    return back()->with('error', 'Nominal setor manual tidak boleh 0.');
+                }
+
+                $saldoCash = PettyCashSaldo::getSaldoCash($adminId);
+                $saldoTransfer = PettyCashSaldo::getSaldoTransfer($adminId);
+
+                if ($nominalCash > $saldoCash || $nominalTf > $saldoTransfer) {
+                    return back()->with('error', 'Saldo Anda tidak mencukupi untuk setor manual sebesar itu.');
+                }
+
+                // Populate data_potongan for manual setoran to show in detail rows
+                if ($nominalCash > 0) {
+                    $dataPotongan[] = [
+                        'nama'      => 'Setoran Manual (Tunai)',
+                        'nominal'   => $nominalCash,
+                        'via'       => 'Cash',
+                        'via_kode'  => 'CS',
+                        'fitur'     => 'Manual',
+                        'transaksi' => 'Manual',
+                    ];
+                }
+                if ($nominalTf > 0) {
+                    $dataPotongan[] = [
+                        'nama'      => 'Setoran Manual (Transfer)',
+                        'nominal'   => $nominalTf,
+                        'via'       => 'Transfer',
+                        'via_kode'  => 'TF',
+                        'fitur'     => 'Manual',
+                        'transaksi' => 'Manual',
+                    ];
+                }
             }
-
-            $totalSetor = $transaksi->sum('nominal');
-
-            // Build data potongan untuk JSON
-            $dataPotongan = $transaksi->map(fn($t) => [
-                'nasabah_id'  => $t->nasabah_id,
-                'nama'        => $t->nasabah->user->nama ?? '-',
-                'nominal'     => (float) $t->nominal,
-                'transaksi'   => $t->jnsTransaksi?->nama ?? '-',
-                'via'         => $t->jnsVia?->nama ?? '-',
-                'via_kode'    => $t->jnsVia?->kode ?? '-',
-                'fitur'       => $t->jnsFitur?->nama ?? '-',
-                'jenis_transaksi' => $t->jenis_transaksi,
-                'pctn_id'     => $t->id,
-                'ref_id'      => $t->ref_id,
-            ])->values()->toArray();
 
             $fotoSetoran = null;
             if ($request->hasFile('foto_setoran')) {
@@ -363,28 +545,29 @@ class PettyCashController extends Controller
                 'admin_id'          => $adminId,
                 'owner_id'          => $owner?->id,
                 'total_setor'       => $totalSetor,
+                'nominal_cash'      => $nominalCash,
+                'nominal_tf'        => $nominalTf,
                 'data_potongan'     => $dataPotongan,
-                'jumlah_nasabah'    => $transaksi->count(),
+                'jumlah_nasabah'    => $jumlahNasabah,
                 'foto_setoran'      => $fotoSetoran,
                 'sudah_setor_fisik' => (bool) $request->sudah_setor_fisik,
                 'status'            => 'pending',
                 'keterangan_admin'  => $request->keterangan_admin,
             ]);
 
-            // Update transaksi: tandai sudah masuk setoran ini
-            PettyCashTransaksiNasabah::whereIn('id', $transaksi->pluck('id'))
-                ->update(['setoran_kantor_id' => $idSetoran]);
-                
-            foreach ($transaksi as $t) {
-                if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
-                    DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => $idSetoran]);
+            if ($transaksi->isNotEmpty()) {
+                // Update transaksi: tandai sudah masuk setoran ini
+                PettyCashTransaksiNasabah::whereIn('id', $transaksi->pluck('id'))
+                    ->update(['setoran_kantor_id' => $idSetoran]);
+                    
+                foreach ($transaksi as $t) {
+                    if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
+                        DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => $idSetoran]);
+                    }
                 }
             }
 
             // 🔥 PEMISAHAN PENGURANGAN SALDO ADMIN
-            $nominalCash = $transaksi->filter(fn($t) => in_array($t->jnsVia?->kode, ['CS', 'TN']))->sum('nominal');
-            $nominalTf = $transaksi->filter(fn($t) => $t->jnsVia?->kode === 'TF')->sum('nominal');
-
             if ($nominalCash > 0) {
                 PettyCashSaldo::buatMutasi(
                     $adminId, 'admin', -$nominalCash,
@@ -403,7 +586,8 @@ class PettyCashController extends Controller
 
             PettyCashLog::catat($adminId, 'setor_ke_kantor', $totalSetor, [
                 'setoran_id'     => $idSetoran,
-                'jml_nasabah'    => $transaksi->count(),
+                'tipe_setoran'   => $tipeSetoran,
+                'jml_nasabah'    => $jumlahNasabah,
                 'cash'           => $nominalCash,
                 'tf'             => $nominalTf,
             ], $idSetoran, 'petty_cash_setoran_kantor');
@@ -434,7 +618,10 @@ class PettyCashController extends Controller
         
         if ($userRole === 'admin_utama') {
             // 🔥 OWNER: Helicopter View
-            $saldoOwner = PettyCashSaldo::getSaldo($userId, 'owner');
+            $saldoOwnerCash = PettyCashSaldo::getSaldo($userId, 'owner', 'cash');
+            $saldoOwnerTf   = PettyCashSaldo::getSaldo($userId, 'owner', 'transfer');
+            $saldoOwnerTotal = $saldoOwnerCash + $saldoOwnerTf;
+            
             $pendingSetoran = PettyCashSetoranKantor::where('status', 'pending')->count();
             
             // Ambil admin yang role-nya admin_operasional
@@ -468,7 +655,7 @@ class PettyCashController extends Controller
             }
 
             return view('admin.petty-cash.owner-dashboard', compact(
-                'saldoOwner', 'pendingSetoran', 'admins', 'setoranPending', 'grafik'
+                'saldoOwnerCash', 'saldoOwnerTf', 'saldoOwnerTotal', 'pendingSetoran', 'admins', 'setoranPending', 'grafik'
             ));
         }
 
@@ -545,12 +732,39 @@ class PettyCashController extends Controller
                 'tgl_approval'     => now(),
             ]);
 
-            // Tambah saldo owner (Owner hanya punya 1 saldo total)
-            PettyCashSaldo::buatMutasi(
-                Auth::id(), 'owner', (float) $setoran->total_setor,
-                "Setoran dari Admin {$setoran->admin->nama} (#{$id})",
-                $id, 'petty_cash_setoran_kantor', 'cash'
-            );
+            // 🔥 PEMISAHAN SALDO OWNER (Governance 2.0)
+            $nominalCash = (float)$setoran->nominal_cash;
+            $nominalTf   = (float)$setoran->nominal_tf;
+
+            if ($nominalCash > 0) {
+                PettyCashSaldo::buatMutasi(
+                    Auth::id(), 'owner', (float)$nominalCash,
+                    "Terima Setoran Cash dari Admin {$setoran->admin->nama} (#{$id})",
+                    $id, 'petty_cash_setoran_kantor', 'cash'
+                );
+            }
+
+            if ($nominalTf > 0) {
+                PettyCashSaldo::buatMutasi(
+                    Auth::id(), 'owner', (float)$nominalTf,
+                    "Terima Setoran TF dari Admin {$setoran->admin->nama} (#{$id})",
+                    $id, 'petty_cash_setoran_kantor', 'transfer'
+                );
+            }
+
+            // Catat di Transaksi Owner Utama
+            PettyCashOwnerTransaksi::create([
+                'id'              => IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR'),
+                'user_id'         => Auth::id(),
+                'tipe'            => 'terima_setoran',
+                'sumber'          => \App\Services\PettyCashConstants::SUMBER_PETTY,
+                'nominal_cash'    => $nominalCash,
+                'nominal_tf'      => $nominalTf,
+                'keterangan'      => "Terima Setoran dari Admin " . ($setoran->admin->nama ?? '-') . ". " . $request->keterangan_owner,
+                'bukti_foto_cash' => $setoran->foto_setoran, // Gunakan foto setoran admin sebagai bukti
+                'ref_id'          => $id,
+                'ref_table'       => 'petty_cash_setoran_kantor',
+            ]);
 
             PettyCashLog::catat(Auth::id(), 'approve_setoran_kantor', $setoran->total_setor, [
                 'admin_id'   => $setoran->admin_id,
@@ -615,6 +829,7 @@ class PettyCashController extends Controller
         return back()->with('success', 'Setoran ditolak dan saldo admin dikembalikan.');
     }
 
+
     // =========================================================================
     // LAPORAN
     // =========================================================================
@@ -648,11 +863,217 @@ class PettyCashController extends Controller
         $laporan   = $query->paginate(20);
         $admins    = User::where('role', 'admin_operasional')->get();
 
-        $totalPenerimaan = PettyCashPenerimaan::where('status', 'approved')
-            ->sum(DB::raw('nominal_tf + nominal_cash'));
-        $totalSetoran    = PettyCashSetoranKantor::where('status', 'approved_owner')
-            ->sum('total_setor');
+        // ── Card Hijau: Penerimaan (Owner -> Admin) ──
+        $penerimaanQuery = PettyCashPenerimaan::where('status', 'approved');
+        // (Optional: Filter stats by dates/admin if wanted, but current code is global)
+        $totalPenerimaan     = $penerimaanQuery->sum(DB::raw('nominal_tf + nominal_cash'));
+        $totalPenerimaanCash = $penerimaanQuery->sum('nominal_cash');
+        $totalPenerimaanTf   = $penerimaanQuery->sum('nominal_tf');
 
-        return view('admin.petty-cash.laporan', compact('laporan', 'admins', 'totalPenerimaan', 'totalSetoran'));
+        // ── Card Biru: Setoran (Admin -> Owner) ──
+        $setoranQuery = PettyCashSetoranKantor::where('status', 'approved_owner');
+        $totalSetoran = $setoranQuery->sum('total_setor');
+        
+        // Untuk detail cash/tf setoran
+        $totalSetoranCash = (clone $setoranQuery)->sum('nominal_cash');
+        $totalSetoranTf   = (clone $setoranQuery)->sum('nominal_tf');
+
+        // ── Card Dompet Utama: Owner Internal (Manual In/Out) ──
+        $manualQuery = \App\Models\PettyCashOwnerTransaksi::where('user_id', Auth::id());
+        if ($request->tanggal_dari) {
+            $manualQuery->whereDate('created_at', '>=', $request->tanggal_dari);
+        }
+        if ($request->tanggal_sampai) {
+            $manualQuery->whereDate('created_at', '<=', $request->tanggal_sampai);
+        }
+
+        $manualIn   = (clone $manualQuery)->where('tipe', 'masuk')->sum(DB::raw('nominal_cash + nominal_tf'));
+        $manualOut  = (clone $manualQuery)->where('tipe', 'keluar')->sum(DB::raw('nominal_cash + nominal_tf'));
+
+        // Saldo Saat Ini (Untuk Rekonsiliasi)
+        $currentSaldoCash = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'cash');
+        $currentSaldoTf   = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'owner', 'transfer');
+
+        return view('admin.petty-cash.laporan', compact(
+            'laporan', 'admins',
+            'totalPenerimaan', 'totalPenerimaanCash', 'totalPenerimaanTf',
+            'totalSetoran', 'totalSetoranCash', 'totalSetoranTf',
+            'manualIn', 'manualOut', 'currentSaldoCash', 'currentSaldoTf'
+        ));
+    }
+
+    // =========================================================================
+    // DEPOSITO: Pencairan via Petty Cash Operator
+    // =========================================================================
+
+    /**
+     * [Admin] Konfirmasi menerima dana deposito dari Owner untuk diserahkan ke nasabah.
+     * Dipanggil setelah Owner membuat PettyCashPenerimaan dengan sumber='deposito'.
+     * POST /admin/petty-cash/penerimaan/{id}/approve-deposito
+     */
+    public function approvePenerimaanDeposito(Request $request, $id)
+    {
+        try {
+            DB::beginTransaction();
+
+            $penerimaan = PettyCashPenerimaan::where('admin_id', Auth::id())
+                ->where('status', 'pending')
+                ->where('sumber', 'deposito')
+                ->findOrFail($id);
+
+            $penerimaan->update([
+                'status'           => 'approved',
+                'keterangan_admin' => $request->keterangan_admin,
+            ]);
+
+            // Tambah saldo Admin (tunai yang diterima dari Owner)
+            if ($penerimaan->nominal_cash > 0) {
+                PettyCashSaldo::buatMutasi(
+                    Auth::id(), 'admin', (float) $penerimaan->nominal_cash,
+                    "Terima Dana Deposito dari Owner untuk Pencairan Tunai",
+                    $penerimaan->id, 'petty_cash_penerimaan', 'cash'
+                );
+            }
+
+            // Jika ada ref_id, update status penyiapan/pencairan
+            if ($penerimaan->ref_id) {
+                // Link ke PencairanDeposito
+                \App\Models\PencairanDeposito::where('id', $penerimaan->ref_id)
+                    ->where('status', 'pending')
+                    ->update(['status' => 'diproses']);
+
+                // Link ke DepositoPersiapanCair
+                \App\Models\DepositoPersiapanCair::where('id', $penerimaan->ref_id)
+                    ->where('status', 'tentatif')
+                    ->update(['status' => 'diproses']);
+            }
+
+            PettyCashLog::catat(Auth::id(), 'approve_penerimaan_deposito', (float) $penerimaan->nominal_cash, [
+                'penerimaan_id' => $id,
+                'ref_id'        => $penerimaan->ref_id,
+            ], $id, 'petty_cash_penerimaan');
+
+            DB::commit();
+
+            return back()->with('success', 'Dana deposito diterima. Silakan serahkan tunai ke nasabah.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('approvePenerimaanDeposito error', ['id' => $id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * [Admin] Proses penyerahan uang tunai deposito ke nasabah (Cash Out).
+     * Dipanggil setelah Admin approve penerimaan dan nasabah datang.
+     * POST /admin/deposito/pencairan/petty-cash/{id}/serahkan
+     */
+    public function pencairanDepositoCash(Request $request, $id)
+    {
+        $request->validate([
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pencairan = \App\Models\PencairanDeposito::with(['deposito', 'nasabah.user'])
+                ->where('jenis_pencairan', 'petty_cash_operator')
+                ->where('status', 'diproses')
+                ->findOrFail($id);
+
+            $nominal = (float) $pencairan->nominal_akhir;
+
+            // Validasi saldo Admin mencukupi
+            if (!PettyCashSaldo::validatePenarikanCash(Auth::id(), $nominal)) {
+                $saldoAdmin = PettyCashSaldo::getSaldoCash(Auth::id());
+                return back()->with('error',
+                    'Saldo Cash Anda tidak mencukupi. Saldo: Rp ' . number_format($saldoAdmin, 0, ',', '.') .
+                    ', Dibutuhkan: Rp ' . number_format($nominal, 0, ',', '.')
+                );
+            }
+
+            // Ambil id fitur deposito
+            $idJnsFitur = DB::table('jns_fitur')->where('kode', 'DP')->value('id')
+                ?? DB::table('jns_fitur')->first()?->id;
+            $idJnsVia   = DB::table('jns_via')->where('kode', 'CS')->value('id');
+            $idJnsTrans = DB::table('jns_transaksi')->where('kode', 'PCR')->value('id')
+                ?? DB::table('jns_transaksi')->where('kode', 'PNR')->value('id');
+
+            $pctnId = \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'T', 'CS', 'PCR');
+
+            // Catat di PettyCashTransaksiNasabah (KELUAR dari Admin ke nasabah)
+            PettyCashTransaksiNasabah::create([
+                'id'               => $pctnId,
+                'admin_id'         => Auth::id(),
+                'nasabah_id'       => $pencairan->id_nasabah,
+                'id_jns_transaksi' => $idJnsTrans,
+                'id_jns_via'       => $idJnsVia,
+                'id_jns_fitur'     => $idJnsFitur,
+                'nominal'          => $nominal,
+                'status'           => 'approved',
+                'keterangan'       => 'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' - Tunai',
+                'ref_table'        => 'tbl_pencairan_deposito',
+                'ref_id'           => $pencairan->id,
+                'tgl_transaksi'    => now(),
+            ]);
+
+            // Kurangi saldo Admin (tunai keluar ke nasabah)
+            PettyCashSaldo::buatMutasi(
+                Auth::id(), 'admin', -$nominal,
+                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' - Tunai ke Nasabah',
+                $pctnId, 'petty_cash_transaksi_nasabah', 'cash'
+            );
+
+            // Catat di TransDeposito
+            \App\Models\TransDeposito::create([
+                'deposito_id'   => $pencairan->deposito_id,
+                'jenis'         => 'pencairan',
+                'nominal'       => $nominal,
+                'keterangan'    => 'Pencairan via Petty Cash (Tunai) - ' . ($request->catatan ?? ''),
+                'tgl_transaksi' => now(),
+            ]);
+
+            // Update PencairanDeposito → selesai
+            $pencairan->update([
+                'catatan'     => $request->catatan,
+                'status'      => 'selesai',
+                'approved_by' => Auth::id(),
+            ]);
+
+            // Update DepositoH → dicairkan
+            $pencairan->deposito->update(['status' => 'dicairkan']);
+
+            // Sinkronisasi deposito_persiapan_cair
+            \App\Models\DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
+                ->whereIn('status', ['tentatif', 'diproses'])
+                ->update(['status' => 'selesai', 'pencairan_id' => $pencairan->id]);
+
+            PettyCashLog::catat(Auth::id(), 'pencairan_deposito_cash', $nominal, [
+                'pencairan_id' => $pencairan->id,
+                'nasabah_id'   => $pencairan->id_nasabah,
+            ], (string) $pencairan->id, 'tbl_pencairan_deposito');
+
+            DB::commit();
+
+            // Notifikasi nasabah
+            \App\Models\NasabahNotification::notify(
+                $pencairan->id_nasabah, 'deposito',
+                'Deposito Anda Telah Dicairkan',
+                'Deposito No. ' . $pencairan->deposito->nomor_deposito . ' senilai Rp ' .
+                    number_format($nominal, 0, ',', '.') . ' telah diserahkan secara tunai.',
+                route('nasabah.deposito.detail', $pencairan->deposito_id),
+                (string) $pencairan->deposito_id, 'pencairan_deposito'
+            );
+
+            return redirect()->route('admin.deposito.pencairan-tf.index')
+                ->with('success', 'Pencairan tunai deposito berhasil. Saldo Petty Cash Admin berkurang Rp ' . number_format($nominal, 0, ',', '.'));
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('pencairanDepositoCash error', ['id' => $id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 }
+

@@ -66,9 +66,16 @@ class PinjamanH extends Model
         return $this->hasMany(TempoPinjamanM::class, 'pinjaman_id');
     }
 
-    public function buktiFoto()
+    public function buktiFoto(): HasMany
     {
         return $this->hasMany(BuktiFoto::class, 'owner_id', 'id');
+    }
+
+    public function buktiPelunasan(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(BuktiFoto::class, 'owner_id', 'id')
+            ->where('owner_fitur', 'P')
+            ->where('owner_trans', 'LUNAS');
     }
 
     public function pettyCashTransaksi(): \Illuminate\Database\Eloquent\Relations\HasOne

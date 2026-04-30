@@ -12,6 +12,10 @@ use App\Models\TempoPinjamanM;
 use App\Models\Nasabah;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\JanjiTemuPembayaranPinjaman;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use App\Models\PettyCashSaldo;
+use App\Models\PettyCashTransaksiNasabah;
 use App\Models\JanjiTemuPinjaman;
 use App\Models\BuktiFoto;
 use App\Models\JnsLokasiPerusahaan;
@@ -22,6 +26,8 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Helpers\IdGenerator;
 use App\Models\NasabahNotification;
+use App\Models\User;
+use App\Models\PettyCashOwnerTransaksi;
 
 class PinjamanController extends Controller
 {
@@ -124,7 +130,15 @@ class PinjamanController extends Controller
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
         $masterDenda = MasterDendaPinjaman::getDendaAktif();
 
-        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan', 'masterBunga', 'masterDenda'));
+        // Get admin petty cash balances
+        $adminSaldoCash = PettyCashSaldo::getSaldoCash(Auth::id());
+        $adminSaldoTransfer = PettyCashSaldo::getSaldoTransfer(Auth::id());
+        $adminSaldo = (object) [
+            'cash' => $adminSaldoCash,
+            'transfer' => $adminSaldoTransfer
+        ];
+
+        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan', 'masterBunga', 'masterDenda', 'adminSaldo'));
     }
 
     /**
@@ -168,10 +182,22 @@ class PinjamanController extends Controller
         try {
             DB::beginTransaction();
 
-            // Hitung bunga
-            $nominal = $pengajuan->nominal;
+            // Hitung bunga asli (persentase dari nominal)
+            $nominal = (float) $pengajuan->nominal;
+            $durasi = (int) $pengajuan->durasi;
             $bungaPersen = $masterBunga->bunga_persen;
+            
             $bungaRp = ($nominal * $bungaPersen) / 100;
+            $totalKewajiban = $nominal + $bungaRp;
+            
+            $angsuranRaw = $totalKewajiban / $durasi;
+            
+            // Bulatkan angsuran per bulan ke bawah ke kelipatan 1.000
+            $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+            if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
+            }
+            
             $jumlahPinjam = $nominal;
 
             // Generate ID Pinjaman: P (Pinjaman) TF/TN (Transfer/Tunai) DPNJM (Detail Pinjaman Header)
@@ -184,8 +210,8 @@ class PinjamanController extends Controller
                 'id_anggota' => $pengajuan->id_anggota,
                 'id_pengajuan' => $pengajuan->id,
                 'jumlah_pinjam' => $jumlahPinjam,
-                'lama_pinjam' => (int)$pengajuan->durasi,
-                'ags_bulan' => ($jumlahPinjam + $bungaRp) / (int)$pengajuan->durasi,
+                'lama_pinjam' => $durasi,
+                'ags_bulan' => $angsuranBulanan,
                 'jenis' => 'bulanan',
                 'bunga' => $bungaPersen,
                 'bunga_rp' => $bungaRp,
@@ -203,13 +229,13 @@ class PinjamanController extends Controller
 
             DB::commit();
 
-            app(ActivityLogService::class)->logApprovePengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+            app(ActivityLogService::class)->logApprovePengajuanPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             NasabahNotification::notify(
                 $pengajuan->id_anggota,
                 'pinjaman',
                 'Pengajuan pinjaman disetujui',
-                'Pengajuan pinjaman Anda sebesar Rp ' . number_format($pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Silakan menunggu proses pencairan.',
+                'Pengajuan pinjaman Anda sebesar Rp ' . number_format((float) $pengajuan->nominal ?? 0, 0, ',', '.') . ' telah disetujui. Silakan menunggu proses pencairan.',
                 route('nasabah.pinjaman.detail-pengajuan', $pengajuan->id),
                 (string) $pengajuan->id,
                 'pengajuan_pinjaman'
@@ -270,15 +296,30 @@ class PinjamanController extends Controller
             
             if ($isPettyCash) {
                 $tipe = $metode == 'petty_cash' ? 'cash' : 'transfer';
-                if ($tipe == 'cash' && !\App\Models\PettyCashSaldo::validatePenarikanCash(auth()->id(), (float) $pinjaman->jumlah_pinjam)) {
-                    throw new \Exception('Saldo Cash Petty Cash tidak mencukupi untuk pencairan.');
+                $saldoTersedia = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'admin', $tipe);
+                if ($saldoTersedia < (float) $pinjaman->jumlah_pinjam) {
+                    throw new \Exception(sprintf(
+                        'Saldo %s Petty Cash tidak mencukupi untuk pencairan. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                        strtoupper($tipe),
+                        number_format($pinjaman->jumlah_pinjam, 0, ',', '.'),
+                        number_format($saldoTersedia, 0, ',', '.')
+                    ));
+                }
+
+                // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+                $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', PettyCashConstants::REF_PINJAMAN_H)
+                    ->where('ref_id', $pinjaman->id)
+                    ->first();
+                
+                if ($existingPc) {
+                    throw new \Exception('Transaksi pencairan ini sudah tercatat di Petty Cash.');
                 }
                 
                 // Create Transaction Record for Disbursement
                 $pettyId = \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'PC', 'AN', 'P', now());
                 \App\Models\PettyCashTransaksiNasabah::create([
                     'id' => $pettyId,
-                    'admin_id' => auth()->id(),
+                    'admin_id' => Auth::id(),
                     'nasabah_id' => $pengajuan->id_anggota,
                     'nominal' => $pinjaman->jumlah_pinjam,
                     'id_jns_transaksi' => PettyCashConstants::JNS_PNCR,
@@ -291,7 +332,7 @@ class PinjamanController extends Controller
                     'tgl_transaksi' => now(),
                 ]);
 
-                \App\Models\PettyCashSaldo::updateSaldo(auth()->id(), $tipe, -(float)$pinjaman->jumlah_pinjam, $pettyId, 'Pencairan Pinjaman', 'petty_cash_transaksi_nasabah');
+                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipe, -(float)$pinjaman->jumlah_pinjam, $pettyId, 'Pencairan Pinjaman', 'petty_cash_transaksi_nasabah');
             }
 
             $pinjaman->update([
@@ -307,6 +348,33 @@ class PinjamanController extends Controller
             // Upload bukti transaksi dan simpan ke tbl_bukti_foto dengan kode PNCR
             $file = $request->file('bukti_transfer');
             $path = $file->store('bukti-pencairan-pinjaman', 'public');
+            
+            // 🔥 INTEGRASI OWNER LEDGER: Jika pencairan dari Kas Utama
+            if ($metode === 'kas_utama') {
+                $owner = User::where('role', 'admin_utama')->first();
+                if ($owner) {
+                    $ownerTransId = IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+                    PettyCashOwnerTransaksi::create([
+                        'id'              => $ownerTransId,
+                        'user_id'         => $owner->id,
+                        'tipe'            => 'keluar',
+                        'sumber'          => PettyCashConstants::SUMBER_PINJAMAN,
+                        'nominal_cash'    => 0,
+                        'nominal_tf'      => (float) $pinjaman->jumlah_pinjam,
+                        'keterangan'      => "Pencairan Pinjaman #{$pinjaman->id}: " . ($pengajuan->nasabah->user->nama ?? '-') . " (#{$pengajuan->id})",
+                        'bukti_foto_tf'   => $path,
+                        'ref_id'          => $pinjaman->id,
+                        'ref_table'       => PettyCashConstants::REF_PINJAMAN_H,
+                    ]);
+
+                    PettyCashSaldo::buatMutasi(
+                        $owner->id, 'owner', -(float)$pinjaman->jumlah_pinjam,
+                        "Pencairan Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
+                        $pinjaman->id, PettyCashConstants::REF_PINJAMAN_H, 'transfer'
+                    );
+                }
+            }
+
             $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'TF', 'PNCR', $request->tgl_cair);
             BuktiFoto::create([
                 'id' => $idBuktiFoto,
@@ -405,9 +473,22 @@ class PinjamanController extends Controller
                     DB::rollBack();
                     return redirect()->back()->with('error', 'Master bunga/denda belum diatur.');
                 }
-                $nominal = $pengajuan->nominal;
+                // Hitung bunga asli (persentase dari nominal)
+                $nominal = (float) $pengajuan->nominal;
+                $durasi = (int) $pengajuan->durasi;
                 $bungaPersen = $masterBunga->bunga_persen;
+                
                 $bungaRp = ($nominal * $bungaPersen) / 100;
+                $totalKewajiban = $nominal + $bungaRp;
+                
+                $angsuranRaw = $totalKewajiban / $durasi;
+                
+                // Bulatkan angsuran per bulan ke bawah ke kelipatan 1.000
+                $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+                if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                    $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
+                }
+
                 $kodeVia = 'TN';
                 $idPinjaman = IdGenerator::generate('tbl_pinjaman_h', 'P', $kodeVia, 'DPNJM', now());
                 PinjamanH::create([
@@ -415,8 +496,8 @@ class PinjamanController extends Controller
                     'id_anggota' => $pengajuan->id_anggota,
                     'id_pengajuan' => $pengajuan->id,
                     'jumlah_pinjam' => $nominal,
-                    'lama_pinjam' => (int) $pengajuan->durasi,
-                    'ags_bulan' => ($nominal + $bungaRp) / (int) $pengajuan->durasi,
+                    'lama_pinjam' => $durasi,
+                    'ags_bulan' => $angsuranBulanan,
                     'jenis' => 'bulanan',
                     'bunga' => $bungaPersen,
                     'bunga_rp' => $bungaRp,
@@ -484,7 +565,7 @@ class PinjamanController extends Controller
             'keterangan_admin' => $request->keterangan_admin
         ]);
 
-        app(ActivityLogService::class)->logRejectPengajuanPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+        app(ActivityLogService::class)->logRejectPengajuanPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         NasabahNotification::notify(
             $pengajuan->id_anggota,
@@ -571,7 +652,8 @@ class PinjamanController extends Controller
             'nasabah.pekerjaan',
             'pengajuan',
             'tempoBulanan',
-            'tempoMingguan'
+            'tempoMingguan',
+            'buktiPelunasan'
         ])->findOrFail($id);
 
         // Get angsuran berdasarkan jenis
@@ -653,8 +735,16 @@ class PinjamanController extends Controller
         // Total kewajiban yang harus dibayar
         $totalKewajiban = $jumlahPinjam + $bungaRp;
         
-        // Angsuran bulanan: n-1 pertama dibulatkan ke bawah ke ratusan, bulan terakhir = sisa
-        $angsuranBulanan = (int) floor($totalKewajiban / $jumlahAngsuran / 100) * 100;
+        // Angsuran bulanan mengikuti ags_bulan yang sudah dibulatkan saat PinjamanH dibuat
+        $angsuranBulanan = (int) $pinjaman->ags_bulan;
+        
+        // Fallback jika ags_bulan 0 (data lama)
+        if ($angsuranBulanan <= 0) {
+            $angsuranRaw = $totalKewajiban / $jumlahAngsuran;
+            $angsuranBulanan = (int) round($angsuranRaw / 500) * 500;
+            if ($angsuranBulanan == 0) $angsuranBulanan = 500;
+        }
+
         $akumulasi = $angsuranBulanan * ($jumlahAngsuran - 1);
         $angsuranTerakhir = (int) round($totalKewajiban - $akumulasi, 0);
 
@@ -837,7 +927,7 @@ class PinjamanController extends Controller
     public function pelunasanDipercepat(Request $request, $id)
     {
         // Authorization: Only Admin Utama can do pelunasan dipercepat
-        if (!app(\App\Services\AdminPermissionService::class)->canPelunasanDipercepat(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canPelunasanDipercepat(Auth::user())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat melakukan pelunasan dipercepat.'
@@ -847,6 +937,7 @@ class PinjamanController extends Controller
         $request->validate([
             'potongan' => 'nullable|numeric|min:0',
             'keterangan' => 'nullable|string|max:500',
+            'bukti_foto' => 'required|image|max:10240',
         ]);
 
         $pinjaman = PinjamanH::with(['tempoBulanan', 'tempoMingguan'])
@@ -898,6 +989,21 @@ class PinjamanController extends Controller
         
         // Update pinjaman menjadi lunas
         $pinjaman->update(['lunas' => 'lunas']);
+
+        // Upload Bukti Foto
+        if ($request->hasFile('bukti_foto')) {
+            $file = $request->file('bukti_foto');
+            $path = $file->store('bukti_pelunasan_dipercepat', 'public');
+            
+            $idBuktiFoto = IdGenerator::generate('tbl_bukti_foto', 'P', 'CS', 'LUNAS');
+            BuktiFoto::create([
+                'id' => $idBuktiFoto,
+                'owner_id' => $pinjaman->id,
+                'owner_fitur' => 'P', // Pinjaman
+                'owner_trans' => 'LUNAS', // Pelunasan Dipercepat
+                'file_path' => $path,
+            ]);
+        }
 
         app(ActivityLogService::class)->logPelunasanDipercepat($pinjaman->id, $jumlahBayar, $pinjaman->nasabah->user->nama ?? 'N/A');
 
@@ -989,13 +1095,28 @@ class PinjamanController extends Controller
         try {
             DB::beginTransaction();
 
-            // Get angsuran yang terkait
+            // 🛡️ Re-check status DALAM transaction + lock untuk cegah race condition dobel-approve
+            $pengajuan = PengajuanPembayaranPinjaman::with(['pinjaman'])
+                ->lockForUpdate()
+                ->findOrFail($id);
+
+            if ($pengajuan->status !== '1') {
+                DB::rollBack();
+                return redirect()->back()
+                    ->with('error', 'Pengajuan ini sudah diproses oleh admin lain. Silakan refresh halaman.');
+            }
+
+            // Get angsuran yang terkait (dengan lock agar tidak ada update paralel)
             $angsuran = null;
             if ($pengajuan->tempo_id && $pengajuan->jenis_tempo) {
                 if ($pengajuan->jenis_tempo === 'bulanan') {
-                    $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)->first();
+                    $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)
+                        ->lockForUpdate()
+                        ->first();
                 } else {
-                    $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)->first();
+                    $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)
+                        ->lockForUpdate()
+                        ->first();
                 }
             }
 
@@ -1010,12 +1131,26 @@ class PinjamanController extends Controller
                     ->with('error', 'Data pinjaman tidak ditemukan');
             }
 
+            // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+            $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', PettyCashConstants::REF_PINJAMAN_D)
+                ->where('ref_id', $pengajuan->id)
+                ->first();
+            
+            $existingOwner = \App\Models\PettyCashOwnerTransaksi::where('ref_table', PettyCashConstants::REF_PINJAMAN_D)
+                ->where('ref_id', $pengajuan->id)
+                ->first();
+
+            if ($existingPc || $existingOwner) {
+                 DB::rollBack();
+                 return redirect()->back()->with('error', 'Transaksi ini sudah tercatat sebelumnya.');
+            }
+
             // Hitung denda
             $denda = $this->hitungDenda($angsuran, $pinjaman);
             $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
 
             // Update angsuran dengan pembayaran
-            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + $pengajuan->nominal;
+            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
             
             $statusBayar = 'belum';
             $tglBayar = null;
@@ -1059,9 +1194,9 @@ class PinjamanController extends Controller
                 
                 \App\Models\PettyCashTransaksiNasabah::create([
                     'id' => $pettyId,
-                    'admin_id' => auth()->id(),
+                    'admin_id' => Auth::id(),
                     'nasabah_id' => $pengajuan->id_anggota,
-                    'nominal' => $pengajuan->nominal,
+                    'nominal' => (float) $pengajuan->nominal,
                     'id_jns_transaksi' => PettyCashConstants::JNS_PMB,
                     'id_jns_via' => $tipeVia,
                     'id_jns_fitur' => PettyCashConstants::FITUR_PINJAMAN,
@@ -1073,7 +1208,30 @@ class PinjamanController extends Controller
                 ]);
                 
                 $tipeSaldo = $metode == 'cash_admin' ? 'cash' : 'transfer';
-                \App\Models\PettyCashSaldo::updateSaldo(auth()->id(), $tipeSaldo, (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk', 'petty_cash_transaksi_nasabah');
+                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipeSaldo, (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk', 'petty_cash_transaksi_nasabah');
+            } elseif ($metode === 'rek_koperasi') {
+                // 🔥 INTEGRASI OWNER LEDGER: Pencatatan ke Rekening Koperasi Utama (Admin Utama)
+                $owner = User::where('role', 'admin_utama')->first();
+                if ($owner) {
+                    $ownerTransId = IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+                    PettyCashOwnerTransaksi::create([
+                        'id'           => $ownerTransId,
+                        'user_id'      => $owner->id,
+                        'tipe'         => 'terima_setoran',
+                        'sumber'       => PettyCashConstants::SUMBER_PINJAMAN,
+                        'nominal_cash' => 0,
+                        'nominal_tf'   => (float) $pengajuan->nominal,
+                        'keterangan'   => "Angsuran Pinjaman #{$pinjaman->id}: " . ($pengajuan->nasabah->user->nama ?? '-') . " (#{$pengajuan->id})",
+                        'ref_table'    => PettyCashConstants::REF_PINJAMAN_D,
+                        'ref_id'       => $pengajuan->id,
+                    ]);
+
+                    PettyCashSaldo::buatMutasi(
+                        $owner->id, 'owner', (float)$pengajuan->nominal,
+                        "Angsuran Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
+                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer'
+                    );
+                }
             }
 
             // Update status pengajuan pembayaran menjadi disetujui
@@ -1085,7 +1243,7 @@ class PinjamanController extends Controller
 
             DB::commit();
 
-            app(ActivityLogService::class)->logApprovePembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+            app(ActivityLogService::class)->logApprovePembayaranPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             NasabahNotification::notify(
                 $pengajuan->id_anggota,
@@ -1127,7 +1285,7 @@ class PinjamanController extends Controller
             'keterangan_admin' => $request->keterangan_admin,
         ]);
 
-        app(ActivityLogService::class)->logRejectPembayaranPinjaman($pengajuan->id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
+        app(ActivityLogService::class)->logRejectPembayaranPinjaman($pengajuan->id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan_admin);
 
         NasabahNotification::notify(
             $pengajuan->id_anggota,
@@ -1178,7 +1336,7 @@ class PinjamanController extends Controller
             $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
 
             // Update angsuran
-            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + $pengajuan->nominal;
+            $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
             
             $statusBayar = 'belum';
             if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
@@ -1235,7 +1393,7 @@ class PinjamanController extends Controller
 
             DB::commit();
 
-            app(ActivityLogService::class)->logKonfirmasiPembayaranPinjaman($id, $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+            app(ActivityLogService::class)->logKonfirmasiPembayaranPinjaman($id, (float) $pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.pinjaman.pembayaran')
                 ->with('success', 'Pembayaran berhasil dikonfirmasi dan angsuran diperbarui');
@@ -1301,7 +1459,7 @@ class PinjamanController extends Controller
                 $denda = $this->hitungDenda($angsuran, $pinjaman);
                 $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + $denda;
 
-                $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + $pengajuan->nominal;
+                $jumlahTerbayarBaru = ($angsuran->jumlah_terbayar ?? 0) + (float) $pengajuan->nominal;
                 
                 $statusBayar = 'belum';
                 if ($jumlahTerbayarBaru >= $totalTagihanPlusDenda) {
@@ -1351,9 +1509,9 @@ class PinjamanController extends Controller
                 
                 \App\Models\PettyCashTransaksiNasabah::create([
                     'id' => $pettyId,
-                    'admin_id' => auth()->id(),
+                    'admin_id' => Auth::id(),
                     'nasabah_id' => $pengajuan->id_anggota,
-                    'nominal' => $pengajuan->nominal,
+                    'nominal' => (float) $pengajuan->nominal,
                     'id_jns_transaksi' => PettyCashConstants::JNS_PMB,
                     'id_jns_via' => PettyCashConstants::VIA_CS,
                     'id_jns_fitur' => PettyCashConstants::FITUR_PINJAMAN, // Pinjaman
@@ -1364,7 +1522,7 @@ class PinjamanController extends Controller
                     'tgl_transaksi' => now(),
                 ]);
                 
-                \App\Models\PettyCashSaldo::updateSaldo(auth()->id(), 'cash', (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk (JT)', 'petty_cash_transaksi_nasabah');
+                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), 'cash', (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk (JT)', 'petty_cash_transaksi_nasabah');
             }
 
             // Update janji temu pembayaran jika ada (status selesai, keterangan_admin)
@@ -1396,7 +1554,7 @@ class PinjamanController extends Controller
     public function createPinjaman()
     {
         // Authorization: Only Admin Utama can create manual pinjaman
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
         }
 
@@ -1412,7 +1570,7 @@ class PinjamanController extends Controller
     public function storePinjaman(Request $request)
     {
         // Authorization: Only Admin Utama can create manual pinjaman
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat membuat pinjaman manual.');
         }
 
@@ -1485,7 +1643,7 @@ class PinjamanController extends Controller
     public function editPinjaman($id)
     {
         // Authorization: Only Admin Utama can edit manual pinjaman
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengedit pinjaman manual.');
         }
 
@@ -1502,7 +1660,7 @@ class PinjamanController extends Controller
     public function updatePinjaman(Request $request, $id)
     {
         // Authorization: Only Admin Utama can update manual pinjaman
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengupdate pinjaman manual.');
         }
 
@@ -1573,7 +1731,7 @@ class PinjamanController extends Controller
     public function deletePinjaman($id)
     {
         // Authorization: Only Admin Utama can delete manual pinjaman
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudPinjamanAktif(Auth::user())) {
             abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menghapus pinjaman manual.');
         }
 

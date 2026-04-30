@@ -20,40 +20,35 @@ class DashboardController extends Controller
     {
         $userId = auth()->id();
 
-        // Cache dashboard 1 jam (bisa direfresh via artisan command)
-        $dashboardData = \Illuminate\Support\Facades\Cache::remember('dashboard_stats_' . $userId, 3600, function () {
-            // Statistik utama
-            $totalSetoran = TransTabungan::whereHas('jnsTransaksi', function($q) {
-                    $q->where('kode', 'STR');
-                })->sum('nominal') ?? 0;
-                
-            $totalPenarikan = TransTabungan::whereHas('jnsTransaksi', function($q) {
-                    $q->where('kode', 'PNR');
-                })->sum('nominal') ?? 0;
+        // Statistik utama
+        $totalSetoran = TransTabungan::whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'STR');
+            })->sum('nominal') ?? 0;
             
-            $stats = [
-                'total_nasabah' => Nasabah::count(),
-                'total_tabungan' => max(0, $totalSetoran - $totalPenarikan),
-                'total_pinjaman' => PinjamanH::where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
-                'pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->count(),
-                'total_deposito' => DepositoH::where('status', 'aktif')->sum('nominal_awal') ?? 0,
-                'deposito_aktif' => DepositoH::where('status', 'aktif')->count(),
-                'total_gadai' => GadaiH::where('status', 'aktif')->sum('jumlah_pinjaman') ?? 0,
-                'gadai_aktif' => GadaiH::where('status', 'aktif')->count(),
-                'pengajuan_pending' => $this->getTotalPengajuanPending(),
-                'pendapatan_bulan' => $this->getPendapatanBulanIni(),
-            ];
+        $totalPenarikan = TransTabungan::whereHas('jnsTransaksi', function($q) {
+                $q->where('kode', 'PNR');
+            })->sum('nominal') ?? 0;
+        
+        $stats = [
+            'total_nasabah' => Nasabah::count(),
+            'total_tabungan' => max(0, $totalSetoran - $totalPenarikan),
+            'total_pinjaman' => PinjamanH::where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
+            'pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->count(),
+            'total_deposito' => DepositoH::where('status', 'aktif')->sum('nominal_awal') ?? 0,
+            'deposito_aktif' => DepositoH::where('status', 'aktif')->count(),
+            'total_gadai' => GadaiH::where('status', 'aktif')->sum('jumlah_pinjaman') ?? 0,
+            'gadai_aktif' => GadaiH::where('status', 'aktif')->count(),
+            'pengajuan_pending' => $this->getTotalPengajuanPending(),
+            'pendapatan_bulan' => $this->getPendapatanBulanIni(),
+        ];
 
-            // Pengajuan pending dengan Eager Loading
-            $pengajuan_pending = $this->getPengajuanPending();
+        // Pengajuan pending dengan Eager Loading
+        $pengajuan_pending = $this->getPengajuanPending();
 
-            // Aktivitas terkini dengan Eager Loading
-            $aktivitas_terkini = $this->getAktivitasTerkini();
+        // Aktivitas terkini dengan Eager Loading
+        $aktivitas_terkini = $this->getAktivitasTerkini();
 
-            return compact('stats', 'pengajuan_pending', 'aktivitas_terkini');
-        });
-
-        return view('admin.dashboard', $dashboardData);
+        return view('admin.dashboard', compact('stats', 'pengajuan_pending', 'aktivitas_terkini'));
     }
 
     private function getTotalPengajuanPending()

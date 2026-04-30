@@ -118,6 +118,88 @@
         </div>
     </div>
 
+    {{-- 🔥 Persiapan Pencairan (Maturity Warning System) --}}
+    @php
+        $persiapan = $deposito->persiapanCair->whereIn('status', ['tentatif', 'diproses'])->first();
+    @endphp
+    @if($persiapan)
+    <div class="bg-amber-50 rounded-xl border border-amber-200 p-5 mb-4 shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-bold text-[#674c1d] text-sm flex items-center gap-2">
+                <span class="text-lg">🛡️</span> Persiapan Dana Jatuh Tempo
+            </h2>
+            <span class="text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider
+                {{ $persiapan->status === 'tentatif' ? 'bg-yellow-100 text-yellow-700' : 'bg-blue-100 text-blue-700' }}">
+                {{ $persiapan->status }}
+            </span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-5">
+            <div class="bg-white/50 p-3 rounded-xl border border-amber-100">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">Total Disiapkan</p>
+                <p class="text-lg font-black text-gray-800">Rp {{ number_format($persiapan->total_dibayar, 0, ',', '.') }}</p>
+            </div>
+            <div class="bg-white/50 p-3 rounded-xl border border-amber-100">
+                <p class="text-[10px] text-gray-500 uppercase font-bold">Target Cair</p>
+                <p class="text-lg font-black text-gray-800">{{ $persiapan->tgl_target_cair->format('d M Y') }}</p>
+            </div>
+        </div>
+
+        @if(auth()->user()->role === 'admin_utama')
+            @if($persiapan->status === 'tentatif')
+            <div class="space-y-4">
+                {{-- Form Update Metode --}}
+                <form action="{{ route('admin.deposito.peringatan.update', $persiapan->id) }}" method="POST" class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                    @csrf
+                    <div class="md:col-span-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Metode Cair</label>
+                        <select name="metode_cair" class="w-full border-gray-200 rounded-lg text-xs py-2">
+                            <option value="saldo_tabungan" {{ $persiapan->metode_cair === 'saldo_tabungan' ? 'selected' : '' }}>Saldo Tabungan</option>
+                            <option value="rek_nasabah" {{ $persiapan->metode_cair === 'rek_nasabah' ? 'selected' : '' }}>Transfer Bank</option>
+                            <option value="petty_cash_operator" {{ $persiapan->metode_cair === 'petty_cash_operator' ? 'selected' : '' }}>Petty Cash Operator</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-1">
+                        <label class="text-[10px] font-bold text-gray-500 uppercase block mb-1">Catatan</label>
+                        <input type="text" name="catatan" value="{{ $persiapan->catatan }}" placeholder="Internal note..." class="w-full border-gray-200 rounded-lg text-xs py-2">
+                    </div>
+                    <button type="submit" class="bg-[#674c1d] text-white py-2 rounded-lg text-xs font-bold hover:bg-[#4a3514] transition">
+                        Update Rencana
+                    </button>
+                </form>
+
+                {{-- Tombol Kirim Dana (jika Petty Cash) --}}
+                @if($persiapan->metode_cair === 'petty_cash_operator')
+                <div class="pt-4 border-t border-amber-200">
+                    <p class="text-[10px] text-gray-500 mb-2 italic">Metode Petty Cash terpilih. Kirim dana ke Admin sekarang agar mereka bisa menyerahkan tunai ke nasabah nanti.</p>
+                    <form action="{{ route('admin.deposito.peringatan.send-dana', $persiapan->id) }}" method="POST" class="flex gap-2">
+                        @csrf
+                        <select name="admin_id" required class="flex-1 border-gray-200 rounded-lg text-xs py-2">
+                            <option value="">-- Pilih Admin Penerima --</option>
+                            @foreach($admins as $admin)
+                                <option value="{{ $admin->id }}">{{ $admin->nama }}</option>
+                            @endforeach
+                        </select>
+                        <button type="submit" onclick="return confirm('Kirim Rp {{ number_format($persiapan->total_dibayar, 0, ',', '.') }} ke Admin sekarang?')"
+                                class="px-4 py-2 bg-purple-600 text-white rounded-lg text-xs font-bold hover:bg-purple-700 transition">
+                            Kirim Dana ke Admin
+                        </button>
+                    </form>
+                </div>
+                @endif
+            </div>
+            @else
+            <div class="p-3 bg-blue-100/50 rounded-xl border border-blue-200 text-blue-700 text-xs font-medium flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span>Dana persiapan sudah dikirim ke Admin. Menunggu Admin memproses pencairan fisik ke nasabah.</span>
+            </div>
+            @endif
+        @else
+            <p class="text-xs text-amber-700 italic">Persiapan dana sedang ditinjau oleh Owner.</p>
+        @endif
+    </div>
+@endif
+
     {{-- Histori Transaksi --}}
     @if($deposito->transDeposito->isNotEmpty())
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-5 mb-4">

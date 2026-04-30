@@ -117,6 +117,7 @@ class PettyCashTransaksiNasabah extends Model
             'tbl_pengajuan_tabungan' => 'Tabungan',
             'tbl_pengajuan_pembayaran_pinjaman' => 'Angsuran',
             'tbl_pinjaman_h' => 'Pencairan',
+            'tbl_pengajuan_deposito' => 'Deposito',
             default => 'Lainnya'
         };
     }

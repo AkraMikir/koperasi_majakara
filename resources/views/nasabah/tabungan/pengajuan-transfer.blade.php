@@ -30,6 +30,24 @@
             </div>
             @endif
 
+            @if($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div class="flex items-start">
+                    <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-red-700 text-sm font-semibold mb-1">Terjadi kesalahan:</p>
+                        <ul class="list-disc list-inside text-red-600 text-xs space-y-1">
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <form id="form-transfer" method="POST" action="{{ route('nasabah.tabungan.submit-setoran') }}" enctype="multipart/form-data" class="space-y-6">
                 @csrf
                 <input type="hidden" name="metode" value="transfer">
@@ -111,7 +129,7 @@
 
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
-            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-center text-2xl font-mono tracking-widest"
                 placeholder="••••••"
                 oninput="this.value = this.value.replace(/[^0-9]/g, '')">

@@ -102,56 +102,117 @@
         <div class="mb-4 bg-red-50 border border-red-200 text-red-800 rounded-xl px-4 py-3 text-sm">{{ session('error') }}</div>
         @endif
 
-        <p class="text-sm font-bold text-gray-700 mb-4">Form Pencairan Transfer</p>
+        @if($pencairan->isPending())
+            {{-- STAGE 1: OWNER INITIATION --}}
+            <p class="text-sm font-bold text-gray-700 mb-4">Tahap 1: Kirim Dana ke Admin Operasional</p>
+            <p class="text-xs text-gray-500 mb-4 italic">Dana akan dipotong dari saldo Owner dan dikirim ke Petty Cash Admin terpilih untuk nantinya ditransfer ke nasabah.</p>
 
-        <form method="POST" action="{{ route('admin.deposito.pencairan-tf.proses', $pencairan->id) }}" enctype="multipart/form-data">
-            @csrf
+            <form method="POST" action="{{ route('admin.deposito.pencairan-tf.proses', $pencairan->id) }}">
+                @csrf
 
-            {{-- Nominal Akhir --}}
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                    Nominal Akhir yang Ditransfer <span class="text-red-500">*</span>
-                </label>
-                <div class="relative">
-                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
-                    <input type="number" name="nominal_akhir" id="nominal_akhir"
-                        value="{{ old('nominal_akhir', round($estimasiCair)) }}"
-                        min="1"
-                        class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none @error('nominal_akhir') border-red-400 @enderror"
-                        placeholder="{{ number_format($estimasiCair, 0, ',', '.') }}">
+                {{-- Pilih Admin --}}
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Pilih Admin Operasional (Penerima Dana) <span class="text-red-500">*</span>
+                    </label>
+                    <select name="admin_id" class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none @error('admin_id') border-red-400 @enderror">
+                        <option value="">-- Pilih Admin --</option>
+                        @foreach($admins as $adm)
+                            <option value="{{ $adm->id }}" {{ old('admin_id') == $adm->id ? 'selected' : '' }}>
+                                {{ $adm->nama }} (Saldo TF: Rp {{ number_format(\App\Models\PettyCashSaldo::getSaldo($adm->id, 'admin', 'transfer'), 0, ',', '.') }})
+                            </option>
+                        @endforeach
+                    </select>
+                    @error('admin_id')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
                 </div>
-                <p class="text-xs text-gray-400 mt-1">Estimasi otomatis: Rp {{ number_format($estimasiCair, 0, ',', '.') }} (sudah dipotong pajak 20%)</p>
-                @error('nominal_akhir')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+
+                {{-- Nominal Akhir --}}
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Nominal yang Dikirim ke Admin <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-semibold">Rp</span>
+                        <input type="number" name="nominal_akhir" id="nominal_akhir"
+                            value="{{ old('nominal_akhir', round($estimasiCair)) }}"
+                            min="1"
+                            class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none @error('nominal_akhir') border-red-400 @enderror"
+                            placeholder="{{ number_format($estimasiCair, 0, ',', '.') }}">
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Estimasi otomatis: Rp {{ number_format($estimasiCair, 0, ',', '.') }}</p>
+                    @error('nominal_akhir')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Keterangan --}}
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label>
+                    <textarea name="catatan" rows="2" placeholder="Catatan untuk admin…"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none resize-none">{{ old('catatan') }}</textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit"
+                        class="flex-1 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white py-3 rounded-xl text-sm font-bold hover:opacity-90 transition shadow">
+                        ✓ Kirim Dana ke Admin
+                    </button>
+                    <a href="{{ route('admin.deposito.pencairan-tf.index') }}"
+                        class="flex-1 text-center bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                        Batal
+                    </a>
+                </div>
+            </form>
+
+        @elseif($pencairan->isDiproses())
+            {{-- STAGE 2: ADMIN FINALIZATION --}}
+            <p class="text-sm font-bold text-gray-700 mb-2">Tahap 2: Finalisasi Transfer ke Nasabah</p>
+            <div class="bg-blue-50 text-blue-700 text-xs p-3 rounded-xl mb-4 border border-blue-100">
+                <p class="font-bold">Informasi PCP:</p>
+                <p>Status: <span class="font-bold">Dana sudah dikirim Owner</span></p>
+                <p>Nominal: <span class="font-bold text-sm">Rp {{ number_format($pencairan->nominal_akhir, 0, ',', '.') }}</span></p>
+                <p class="mt-1 text-[10px] uppercase font-black opacity-70">ADMIN WAJIB MELAKUKAN TRANSFER KE REKENING NASABAH LALU UPLOAD BUKTI DI BAWAH INI.</p>
             </div>
 
-            {{-- Foto Bukti TF --}}
-            <div class="mb-4">
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">
-                    Foto Bukti Transfer <span class="text-red-500">*</span>
-                </label>
-                <input type="file" name="foto_bukti_tf" accept="image/*"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-[#674c1d] file:text-white file:text-xs file:font-semibold file:cursor-pointer @error('foto_bukti_tf') border-red-400 @enderror">
-                @error('foto_bukti_tf')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
-            </div>
+            <form method="POST" action="{{ route('admin.deposito.pencairan-tf.finish', $pencairan->id) }}" enctype="multipart/form-data">
+                @csrf
 
-            {{-- Keterangan --}}
-            <div class="mb-6">
-                <label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan (opsional)</label>
-                <textarea name="catatan" rows="2" placeholder="Misal: Transfer melalui BCA, tanggal …"
-                    class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none resize-none">{{ old('catatan') }}</textarea>
-            </div>
+                <input type="hidden" name="nominal_akhir" value="{{ $pencairan->nominal_akhir }}">
 
-            <div class="flex gap-3">
-                <button type="submit"
-                    class="flex-1 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white py-3 rounded-xl text-sm font-bold hover:opacity-90 transition shadow">
-                    ✓ Konfirmasi Pencairan TF
-                </button>
-                <a href="{{ route('admin.deposito.pencairan-tf.index') }}"
-                    class="flex-1 text-center bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
-                    Batal
-                </a>
-            </div>
-        </form>
+                {{-- Data Rekening Nasabah (Reminder) --}}
+                <div class="bg-gray-50 p-3 rounded-xl mb-4 border border-gray-200">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase mb-1">Tujuan Transfer</p>
+                    <p class="text-sm font-black text-gray-800">{{ $nasabah?->dataRek?->nama_bank ?? '-' }} - {{ $nasabah?->dataRek?->no_rek ?? '-' }}</p>
+                    <p class="text-xs text-gray-600">a.n {{ $nasabah?->dataRek?->nama_rekening ?? ($nasabah?->user?->nama ?? '-') }}</p>
+                </div>
+
+                {{-- Foto Bukti TF --}}
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">
+                        Upload Bukti Transfer Nasabah <span class="text-red-500">*</span>
+                    </label>
+                    <input type="file" name="foto_bukti_tf" accept="image/*" required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:bg-[#674c1d] file:text-white file:text-xs file:font-semibold file:cursor-pointer @error('foto_bukti_tf') border-red-400 @enderror">
+                    @error('foto_bukti_tf')<p class="text-xs text-red-500 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                {{-- Keterangan --}}
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-gray-600 mb-1.5">Keterangan Finalisasi (opsional)</label>
+                    <textarea name="catatan" rows="2" placeholder="Misal: Sudah ditransfer via m-Banking BCA..."
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-[#674c1d]/20 focus:border-[#674c1d] outline-none resize-none">{{ old('catatan') }}</textarea>
+                </div>
+
+                <div class="flex gap-3">
+                    <button type="submit"
+                        class="flex-1 bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow">
+                        ✓ Konfirmasi Transfer Selesai
+                    </button>
+                    <a href="{{ route('admin.deposito.pencairan-tf.index') }}"
+                        class="flex-1 text-center bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                        Kembali
+                    </a>
+                </div>
+            </form>
+        @endif
     </div>
 
 </div>

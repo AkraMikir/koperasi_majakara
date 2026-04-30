@@ -42,6 +42,26 @@
     </div>
     @endif
 
+    @if($errors->any())
+    <div class="mx-4 mb-6">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+            <div class="flex items-start">
+                <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <div>
+                    <p class="text-red-700 text-sm font-semibold mb-1">Terjadi kesalahan:</p>
+                    <ul class="list-disc list-inside text-red-600 text-xs space-y-1">
+                        @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Form Pembayaran -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
@@ -183,7 +203,7 @@
 
                         <!-- Input Nominal Pembayaran -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                                 <input type="text" name="nominal_display" id="nominal-transfer" required
@@ -198,7 +218,7 @@
 
                         <!-- Rekening Tujuan (dari Master Rekening Perusahaan) -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Rekening Tujuan *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Rekening Tujuan <span class="text-red-500">*</span></label>
                             <select name="rekening_tujuan" required
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all">
                                 <option value="">-- Pilih Rekening Tujuan Transfer --</option>
@@ -212,7 +232,7 @@
 
                         <!-- Upload Bukti Transfer -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Upload Bukti Transfer <span class="text-red-500">*</span></label>
                             <div id="bukti-container" class="space-y-3">
                                 <div class="flex items-center gap-3 p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-[#8b6f2f]/50 transition-colors">
                                     <div class="shrink-0 w-10 h-10 bg-[#8b6f2f] rounded-lg flex items-center justify-center">
@@ -262,7 +282,7 @@
 
                         <!-- Input Nominal Pembayaran -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pembayaran <span class="text-red-500">*</span></label>
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                                 <input type="text" name="nominal_display" id="nominal-cash" required
@@ -277,7 +297,7 @@
 
                         <!-- Pilih Lokasi -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Lokasi Kantor <span class="text-red-500">*</span></label>
                             <select name="lokasi_temu" required
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all">
                                 <option value="">-- Pilih Lokasi --</option>
@@ -290,7 +310,7 @@
 
                         <!-- Tanggal Janji Temu -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Janji Temu *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Tanggal Janji Temu <span class="text-red-500">*</span></label>
                             <input type="date" name="tanggal_janji_temu" required
                                 min="{{ date('Y-m-d', strtotime('+1 day')) }}"
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all">
@@ -298,7 +318,7 @@
 
                         <!-- Waktu Janji Temu -->
                         <div class="mb-6">
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu Janji Temu *</label>
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Waktu Janji Temu <span class="text-red-500">*</span></label>
                             <input type="time" name="waktu_janji_temu" required
                                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all">
                         </div>
@@ -342,7 +362,7 @@
 
         <div class="mb-6">
             <label class="block text-sm font-semibold text-gray-700 mb-2">PIN (6 digit)</label>
-            <input type="text" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
                 class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 outline-none text-center text-2xl font-mono tracking-widest"
                 placeholder="••••••" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
         </div>
@@ -480,6 +500,19 @@ function showPinModal(formType) {
     if (!form.checkValidity()) {
         form.reportValidity();
         return;
+    }
+
+    // Validate files for transfer
+    if (formType === 'transfer') {
+        const fileInputs = form.querySelectorAll('input[type="file"]');
+        for (let input of fileInputs) {
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > 5 * 1024 * 1024) {
+                    alert('Ukuran file ' + input.files[0].name + ' terlalu besar. Maksimal 5MB.');
+                    return;
+                }
+            }
+        }
     }
 
     // Validate nominal

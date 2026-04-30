@@ -19,6 +19,7 @@
         background: #674c1d; color: white; border: none; padding: 6px 14px;
         border-radius: 8px; cursor: pointer; font-size: 12px; margin-right: 10px;
     }
+    .paket-option.selected { border-color: #674c1d; box-shadow: 0 0 0 2px rgba(103, 76, 29, 0.2); }
 </style>
 @endpush
 
@@ -79,59 +80,46 @@
 
 
         {{-- Pilih Tenor --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4">
-            <h2 class="font-bold text-[#674c1d] text-sm mb-3">Pilih Tenor & Suku Bunga</h2>
-            <input type="hidden" name="tenor_id" id="selected_tenor_id" required>
-            <div class="space-y-3">
-                @php
-                    $tenorFallback = [
-                        ['id' => 1, 'bulan' => 1, 'rate' => 6.0, 'desc' => 'Cocok untuk dana darurat jangka pendek'],
-                        ['id' => 3, 'bulan' => 3, 'rate' => 7.5, 'desc' => 'Fleksibel, cocok untuk perencanaan kuartalan'],
-                        ['id' => 6, 'bulan' => 6, 'rate' => 9.0, 'desc' => 'Bunga menarik untuk simpanan semester'],
-                        ['id' => 12, 'bulan' => 12, 'rate' => 12.0, 'desc' => 'Return tertinggi untuk investasi tahunan'],
-                    ];
-                    $tenorList = $tenors->isEmpty() ? collect($tenorFallback) : $tenors;
-                @endphp
-                @foreach($tenorList as $t)
-                @php
-                    if ($tenors->isEmpty()) {
-                        $id = $t['id']; $bulan = $t['bulan']; $rate = $t['rate']; $desc = $t['desc'];
-                        $isRecommended = $bulan == 12;
-                    } else {
-                        $id = $t->id; $bulan = $t->tenor_bulan;
-                        $rateDefault = [1 => 3.75, 3 => 4.50, 6 => 5.25, 12 => 6.00];
-                        $rate = $t->sukuBunga->first()
-                            ? (float)($t->sukuBunga->first()->bunga * 100)
-                            : ($rateDefault[$bulan] ?? 6.00);
-                        $desc = 'Pilih tenor ' . $bulan . ' bulan';
-                        $isRecommended = $bulan == 12;
-                    }
-                @endphp
-                <div class="tenor-option border-2 border-gray-200 rounded-xl p-4 hover:border-[#d4af37]"
-                     data-tenor-id="{{ $id }}"
-                     onclick="selectTenorOption({{ $id }}, {{ $bulan }}, {{ $rate }}, this)">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center font-bold text-[#674c1d] text-sm">
-                                {{ $bulan }}bln
-                            </div>
-                            <div>
-                                <div class="flex items-center gap-2">
-                                    <p class="font-bold text-gray-800 text-sm">Deposito {{ $bulan }} Bulan</p>
-                                    @if($isRecommended)
-                                    <span class="text-xs bg-[#d4af37] text-[#3a2800] px-2 py-0.5 rounded-full font-bold">Terbaik</span>
+        <div class="mb-6">
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
+                <h2 class="font-bold text-[#674c1d] text-sm mb-4">Pilih Paket Deposito</h2>
+                <input type="hidden" name="paket_id" id="selected_paket_id" required>
+                <div class="space-y-3">
+                    @forelse($pakets as $p)
+                    <div class="paket-option border-2 border-gray-200 rounded-xl p-4 hover:border-[#d4af37] cursor-pointer transition-all duration-200"
+                         data-paket-id="{{ $p->id }}"
+                         data-min-nominal="{{ $p->minimal_nominal }}"
+                         onclick="selectPaketOption({{ $p->id }}, {{ $p->tenor_bulan }}, {{ $p->suku_bunga }}, {{ $p->minimal_nominal }}, this)">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center font-bold text-[#674c1d] text-sm relative">
+                                    {{ $p->tenor_bulan }}bln
+                                    @if($p->kategori_id)
+                                        <div class="absolute -top-1 -right-1 w-2.5 h-2.5 bg-[#d4af37] rounded-full border border-white"></div>
                                     @endif
                                 </div>
-                                <p class="text-xs text-gray-500">{{ $desc }}</p>
+                                <div>
+                                    <div class="flex items-center gap-2">
+                                        <p class="font-bold text-gray-800 text-sm">{{ $p->nama_paket }}</p>
+                                        @if($p->kategori)
+                                            <span class="text-[8px] bg-[#d4af37]/10 text-[#674c1d] px-1.5 py-0.5 rounded-md font-bold border border-[#d4af37]/20">{{ $p->kategori->nama }}</span>
+                                        @endif
+                                    </div>
+                                    <p class="text-[10px] text-gray-500">Minimal Rp {{ number_format($p->minimal_nominal, 0, ',', '.') }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="rate-text text-xl font-black text-gray-700 transition-colors">{{ number_format($p->suku_bunga, 2) }}%</span>
+                                <p class="text-[10px] text-gray-400 uppercase">p.a.</p>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <span class="rate-text text-2xl font-black text-gray-700 transition-colors">{{ number_format($rate, 2) }}%</span>
-                            <p class="text-xs text-gray-400">p.a.</p>
-                        </div>
                     </div>
+                    @empty
+                        <div class="p-4 text-center text-gray-500 text-sm bg-gray-50 rounded-xl">
+                            Belum ada paket deposito yang aktif saat ini.
+                        </div>
+                    @endforelse
                 </div>
-                @endforeach
             </div>
         </div>
 
@@ -169,7 +157,7 @@
                     class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-800 focus:outline-none focus:border-[#674c1d] transition-colors"
                     oninput="updatePreview()">
             </div>
-            <p class="text-xs text-gray-400 mb-4">Minimum Rp 1.000.000</p>
+            <p class="text-xs text-gray-400 mb-4" id="min-nominal-helper">Pilih paket terlebih dahulu untuk melihat batas minimum</p>
             {{-- Shortcut buttons --}}
             <div class="grid grid-cols-4 gap-2 mb-4">
                 @foreach([1000000, 5000000, 10000000, 50000000] as $amt)
@@ -182,7 +170,10 @@
 
             {{-- Estimasi bunga realtime --}}
             <div id="estimasi-container" class="hidden fade-in bg-gradient-to-br from-[#fffbf0] to-[#fef9e7] border border-[#d4af37]/30 rounded-xl p-4">
-                <p class="text-xs text-gray-500 font-semibold mb-2">Estimasi Imbal Hasil</p>
+                <div class="flex justify-between items-center mb-3">
+                    <p class="text-xs text-gray-500 font-semibold">Estimasi Imbal Hasil</p>
+                    <button type="button" onclick="document.getElementById('modal-rumus').classList.remove('hidden')" class="text-[10px] text-[#674c1d] font-bold underline">Lihat Rumus</button>
+                </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="text-center">
                         <p class="text-xs text-gray-400 mb-1">Bunga Kotor</p>
@@ -196,6 +187,32 @@
                 <div class="flex justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-[#d4af37]/20">
                     <span>Setelah pajak 20%</span>
                     <span id="est-bersih" class="font-semibold">Rp 0</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Modal Rumus --}}
+        <div id="modal-rumus" class="hidden fixed inset-0 bg-black/60 z-[999] flex items-center justify-center p-4">
+            <div class="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-in zoom-in duration-200">
+                <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] p-4 text-white">
+                    <h3 class="font-bold">Rumus Perhitungan</h3>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Bunga Kotor</p>
+                        <p class="text-sm font-mono font-bold text-gray-800">(Nominal × Bunga × Tenor_Hari) / 365</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Pajak (20%)</p>
+                        <p class="text-sm font-mono font-bold text-gray-800">Bunga Kotor × 0.20</p>
+                    </div>
+                    <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
+                        <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Cair</p>
+                        <p class="text-sm font-mono font-bold text-gray-800">Nominal + (Bunga Kotor - Pajak)</p>
+                    </div>
+                    <p class="text-[10px] text-gray-400 italic">* Tenor hari dihitung 30 hari per bulan.</p>
+                    <button type="button" onclick="document.getElementById('modal-rumus').classList.add('hidden')" 
+                        class="w-full bg-[#674c1d] text-white font-bold py-3 rounded-xl text-sm">Tutup</button>
                 </div>
             </div>
         </div>
@@ -231,9 +248,30 @@
             {{-- Upload bukti (conditional) --}}
             <div id="bukti-tf-container" class="hidden mt-4 fade-in">
                 <div class="p-4 bg-amber-50 rounded-xl border border-[#d4af37]/30 mb-3">
-                    <p class="text-xs font-bold text-[#674c1d] mb-1">📋 Info Rekening Koperasi Majakara</p>
-                    <p class="text-xs text-gray-600">Bank BRI – 1234-01-012345-56-7</p>
-                    <p class="text-xs text-gray-600">a.n. Koperasi Simpan Pinjam Majakara</p>
+                    <p class="text-xs font-bold text-[#674c1d] mb-3 flex items-center gap-2">
+                        <span>📋</span> Info Rekening Koperasi Majakara
+                    </p>
+                    @forelse($banks as $bank)
+                        <div class="mb-4 last:mb-0 pb-3 border-b border-[#d4af37]/20 last:border-0">
+                            <div class="flex items-center gap-2 mb-2">
+                                @if($bank->logo_url)
+                                    <img src="{{ $bank->logo_url }}" alt="{{ $bank->bank }}" class="h-4 object-contain">
+                                @endif
+                                <p class="text-xs text-gray-800 font-bold uppercase tracking-wider">{{ $bank->bank }}</p>
+                            </div>
+                            <p class="text-xl text-[#674c1d] font-mono font-black mb-1">{{ $bank->no_rek }}</p>
+                            <div class="space-y-0.5">
+                                <p class="text-xs text-gray-600">a.n. <span class="font-bold text-gray-800">{{ $bank->pemilik }}</span></p>
+                                @if($bank->cabang || $bank->kode_bank)
+                                    <p class="text-[10px] text-gray-500 italic">
+                                        {{ $bank->cabang ?? '' }} {{ $bank->kode_bank ? '(Kode: '.$bank->kode_bank.')' : '' }}
+                                    </p>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-xs text-gray-500 italic text-center">Belum ada data rekening aktif.</p>
+                    @endforelse
                 </div>
                 <label class="text-xs font-semibold text-gray-700 block mb-2">Upload Bukti Transfer *</label>
                 <input type="file" name="foto_bukti_tf" accept="image/*" class="w-full text-sm text-gray-600 border border-gray-200 rounded-xl p-2">
@@ -314,15 +352,32 @@
 let currentStep = 1;
 let selectedTenorBulan = 0;
 let selectedTenorRate = 0;
-let selectedTenorId = 0;
+let selectedPaketId = 0;
+let currentMinNominal = 1000000;
 
-function selectTenorOption(id, bulan, rate, el) {
-    selectedTenorId = id;
+function selectPaketOption(id, bulan, rate, minNominal, el) {
+    selectedPaketId = id;
     selectedTenorBulan = bulan;
     selectedTenorRate = rate;
-    document.getElementById('selected_tenor_id').value = id;
-    document.querySelectorAll('.tenor-option').forEach(e => e.classList.remove('selected', 'border-[#674c1d]', 'bg-gradient-to-r', 'from-[#fffbf0]', 'to-[#fef9e7]'));
+    currentMinNominal = minNominal;
+    
+    document.getElementById('selected_paket_id').value = id;
+    
+    document.querySelectorAll('.paket-option').forEach(e => e.classList.remove('selected', 'border-[#674c1d]', 'bg-gradient-to-r', 'from-[#fffbf0]', 'to-[#fef9e7]'));
     el.classList.add('selected', 'border-[#674c1d]', 'bg-gradient-to-r', 'from-[#fffbf0]', 'to-[#fef9e7]');
+    
+    // Update minimum nominal input rules
+    const nominalInput = document.getElementById('nominal_input');
+    nominalInput.min = minNominal;
+    
+    // Update helper text
+    document.getElementById('min-nominal-helper').textContent = 'Minimum penempatan Rp ' + Math.round(minNominal).toLocaleString('id-ID');
+    
+    // Auto-set nominal to min if current is lower or empty
+    if (!nominalInput.value || parseFloat(nominalInput.value) < minNominal) {
+        nominalInput.value = minNominal;
+    }
+    
     updatePreview();
 }
 
@@ -341,13 +396,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function goToStep(step) {
     // Validasi
-    if (step === 2 && !selectedTenorId) {
-        alert('Harap pilih tenor terlebih dahulu.');
+    if (step === 2 && !selectedPaketId) {
+        alert('Harap pilih paket terlebih dahulu.');
         return;
     }
     if (step === 3) {
         const nominal = parseFloat(document.getElementById('nominal_input').value);
-        if (!nominal || nominal < 1000000) { alert('Minimal penempatan Rp 1.000.000'); return; }
+        if (!nominal || nominal < currentMinNominal) { 
+            alert('Minimal penempatan untuk paket ini adalah Rp ' + Math.round(currentMinNominal).toLocaleString('id-ID')); 
+            return; 
+        }
         const metode = document.querySelector('input[name="metode_setor"]:checked');
         if (!metode) { alert('Pilih metode setoran terlebih dahulu.'); return; }
         
@@ -403,25 +461,38 @@ function setNominal(val) {
 function updatePreview() {
     const nominal = parseFloat(document.getElementById('nominal_input').value) || 0;
     const cont = document.getElementById('estimasi-container');
-    if (nominal < 1000000 || !selectedTenorBulan) { cont.classList.add('hidden'); return; }
+    if (nominal < currentMinNominal || !selectedTenorBulan) { cont.classList.add('hidden'); return; }
     cont.classList.remove('hidden');
-    const hari = selectedTenorBulan * 30;
-    const kotor = nominal * (selectedTenorRate / 100) * (hari / 365);
-    const pajak = kotor * 0.2;
+    
+    // RUMUS SESUAI STANDAR PERBANKAN (SEABANK/MAJAKARA)
+    const year = new Date().getFullYear();
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const pembagi = isLeap ? 366 : 365;
+    
+    const hari = selectedTenorBulan * 30; // Simulasi: 30 hari per bulan
+    const kotor = Math.round(nominal * (selectedTenorRate / 100) * (hari / pembagi));
+    const pajak = Math.round(kotor * 0.2);
     const bersih = kotor - pajak;
     const total = nominal + bersih;
-    const fmt = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+    
+    const fmt = v => 'Rp ' + v.toLocaleString('id-ID');
     document.getElementById('est-bunga').textContent = fmt(kotor);
     document.getElementById('est-total').textContent = fmt(total);
     document.getElementById('est-bersih').textContent = fmt(bersih);
 }
 
 function fillConfirmation(nominal, metode) {
+    const year = new Date().getFullYear();
+    const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
+    const pembagi = isLeap ? 366 : 365;
+
     const hari = selectedTenorBulan * 30;
-    const kotor = nominal * (selectedTenorRate / 100) * (hari / 365);
-    const bersih = kotor * 0.8;
+    const kotor = Math.round(nominal * (selectedTenorRate / 100) * (hari / pembagi));
+    const pajak = Math.round(kotor * 0.2);
+    const bersih = kotor - pajak;
     const total = nominal + bersih;
-    const fmt = v => 'Rp ' + Math.round(v).toLocaleString('id-ID');
+    
+    const fmt = v => 'Rp ' + v.toLocaleString('id-ID');
     document.getElementById('conf-tenor').textContent = selectedTenorBulan + ' Bulan';
     document.getElementById('conf-rate').textContent = selectedTenorRate.toFixed(2) + '% p.a.';
     document.getElementById('conf-nominal').textContent = fmt(nominal);
@@ -429,6 +500,18 @@ function fillConfirmation(nominal, metode) {
     document.getElementById('conf-bunga').textContent = fmt(bersih);
     document.getElementById('conf-total').textContent = fmt(total);
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const paketId = urlParams.get('paket');
+    
+    if (paketId) {
+        const optionEl = document.querySelector(`.paket-option[data-paket-id="${paketId}"]`);
+        if (optionEl) {
+            optionEl.click();
+        }
+    }
+});
 </script>
 @endpush
 @endsection
