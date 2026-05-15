@@ -8,6 +8,18 @@
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+
+    /* ─── Majakara Brand Colors ─────────────────────────────────────────────── */
+    --color-majakara-brown: #674c1d;
+    --color-majakara-gold: #d4af37;
+    --color-majakara-dark-gold: #8b6f2f;
+    --color-majakara-light-brown: #a67c52;
+
+    /* ─── Majakara Gradients ────────────────────────────────────────────────── */
+    --background-image-gradient-gold: linear-gradient(135deg, #d4af37 0%, #8b6f2f 100%);
+    --background-image-gradient-brown: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
+    --background-image-gradient-premium: linear-gradient(135deg, #8b6f2f 0%, #a67c52 100%);
+    --background-image-gradient-light-brown: linear-gradient(135deg, #a67c52 0%, #c4a484 100%);
 }
 
 /* ─── TURBO DRIVE: Progress Bar Styling ─────────────────────────────────────── */
@@ -45,4 +57,29 @@ main > .container {
 
 .animate-fade-in {
     animation: fadeIn 0.3s ease-out;
+}
+
+/* ─── Premium Glassmorphism & Depth ─────────────────────────────────────────── */
+.glass-icon {
+    @apply bg-white/20 backdrop-blur-md border border-white/20 shadow-sm;
+}
+
+.card-gradient-gold {
+    background-image: var(--background-image-gradient-gold);
+    @apply shadow-lg shadow-majakara-gold/20 text-white;
+}
+
+.card-gradient-brown {
+    background-image: var(--background-image-gradient-brown);
+    @apply shadow-lg shadow-majakara-brown/20 text-white;
+}
+
+.card-gradient-premium {
+    background-image: var(--background-image-gradient-premium);
+    @apply shadow-lg shadow-majakara-dark-gold/20 text-white;
+}
+
+.card-gradient-light-brown {
+    background-image: var(--background-image-gradient-light-brown);
+    @apply shadow-lg shadow-majakara-light-brown/20 text-white;
 }

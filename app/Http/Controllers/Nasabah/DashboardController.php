@@ -86,6 +86,19 @@ class DashboardController extends Controller
         // Get Notifikasi Penting
         $notifikasiPenting = $this->getNotifikasiPenting($idAnggota, $pinjamanAktif);
 
+        // Calculate Chart Data (Percentages)
+        $totalAll = $saldoTabungan + $totalDeposito + $totalPinjaman + $totalGadai;
+        $chartData = [
+            'labels' => ['Tabungan', 'Deposito', 'Pinjaman', 'Gadai'],
+            'data' => [
+                $totalAll > 0 ? ($saldoTabungan / $totalAll) * 100 : 0,
+                $totalAll > 0 ? ($totalDeposito / $totalAll) * 100 : 0,
+                $totalAll > 0 ? ($totalPinjaman / $totalAll) * 100 : 0,
+                $totalAll > 0 ? ($totalGadai / $totalAll) * 100 : 0,
+            ],
+            'raw' => [$saldoTabungan, $totalDeposito, $totalPinjaman, $totalGadai]
+        ];
+
         // Stats for cards
         $stats = [
             'saldo_tabungan' => $saldoTabungan,
@@ -102,6 +115,7 @@ class DashboardController extends Controller
             'pengajuan_pending' => $pengajuanPending,
             'transaksi_bulan_ini' => $transaksiBulanIni,
             'notifikasi_penting' => $notifikasiPenting,
+            'chart_data' => $chartData,
         ];
         
         return view('nasabah.dashboard', [
@@ -297,25 +311,24 @@ class DashboardController extends Controller
     }
 
     /**
-     * Get angsuran terdekat (7 hari ke depan)
+     * Get angsuran terdekat (Next absolute installment)
      */
     private function getAngsuranTerdekat($idAnggota)
     {
         $now = Carbon::now();
-        $nextWeek = Carbon::now()->addDays(7);
         
-        // Get angsuran bulanan
-        $angsuranB = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
-                $q->where('id_anggota', $idAnggota);
+        // Get the very next unpaid installment
+        $angsuran = TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                $q->where('id_anggota', $idAnggota)
+                  ->where('lunas', 'belum');
             })
             ->where('status_bayar', 'belum')
-            ->whereBetween('tgl_jatuh_tempo', [$now, $nextWeek])
+            ->where('tgl_jatuh_tempo', '>=', $now->startOfDay())
             ->orderBy('tgl_jatuh_tempo')
             ->with('pinjaman')
             ->first();
         
-        // Return yang paling dekat
-        return $angsuranB;
+        return $angsuran;
     }
 
     /**

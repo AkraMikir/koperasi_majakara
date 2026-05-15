@@ -135,6 +135,15 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         // Ajukan pencairan deposito
         Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
     });
+
+    // Gadai Routes
+    Route::prefix('gadai')->name('gadai.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Nasabah\GadaiController::class, 'index'])->name('index');
+        Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\GadaiController::class, 'pengajuan'])->name('pengajuan');
+        Route::post('/pengajuan', [\App\Http\Controllers\Nasabah\GadaiController::class, 'submitPengajuan'])->name('submit-pengajuan');
+        Route::get('/aktif/{id}', [\App\Http\Controllers\Nasabah\GadaiController::class, 'detail'])->name('detail');
+        Route::get('/riwayat', [\App\Http\Controllers\Nasabah\GadaiController::class, 'riwayat'])->name('riwayat');
+    });
 });
 
 // Admin Routes - Protected with authentication and admin role check
