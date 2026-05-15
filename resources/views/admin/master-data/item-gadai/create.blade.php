@@ -1,0 +1,142 @@
+@extends('layouts.admin')
+
+@section('title', 'Tambah Master Item Gadai')
+
+@section('content')
+<div class="max-w-4xl mx-auto">
+    {{-- Header Section --}}
+    <div class="flex items-center justify-between gap-4 mb-8">
+        <div>
+            <h2 class="text-3xl font-black text-gray-900 tracking-tight font-display">Tambah Item Gadai</h2>
+            <p class="text-sm text-gray-500 mt-1">Tambahkan jenis barang yang dapat digadaikan oleh nasabah.</p>
+        </div>
+        <a href="{{ route('admin.master-data.item-gadai.index') }}" class="px-5 py-2.5 bg-white border border-gray-200 text-gray-600 font-bold rounded-xl hover:bg-gray-50 transition-all flex items-center gap-2 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+            Kembali
+        </a>
+    </div>
+
+    @if($errors->any())
+        <div class="mb-6 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-800 animate-fade-in">
+            <ul class="list-disc list-inside text-sm font-bold">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
+        <form action="{{ route('admin.master-data.item-gadai.store') }}" method="POST" enctype="multipart/form-data" class="p-8">
+            @csrf
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="md:col-span-2">
+                    <label for="kategori_id" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Kategori Barang <span class="text-red-500">*</span></label>
+                    <select name="kategori_id" id="kategori_id" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" required>
+                        <option value="">-- Pilih Kategori --</option>
+                        @foreach($kategoris as $kat)
+                            <option value="{{ $kat->id }}" {{ old('kategori_id') == $kat->id ? 'selected' : '' }}>{{ $kat->nama_kategori }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div>
+                    <label for="head_1" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi Utama (Head 1) <span class="text-red-500">*</span></label>
+                    <input type="text" name="head_1" id="head_1" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('head_1') }}" required placeholder="Contoh: Honda Beat, Emas Antam 10gr">
+                </div>
+
+                <div>
+                    <label for="head_2" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Deskripsi Sekunder (Head 2)</label>
+                    <input type="text" name="head_2" id="head_2" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('head_2') }}" placeholder="Contoh: Tahun 2022, 24 Karat">
+                </div>
+
+                <div>
+                    <label for="nominal_real" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Harga Real (OLX/Pasar) <span class="text-red-500">*</span></label>
+                    <input type="number" name="nominal_real" id="nominal_real" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('nominal_real') }}" min="0" required placeholder="Contoh: 15000000">
+                </div>
+
+                <div>
+                    <label for="is_active" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Status <span class="text-red-500">*</span></label>
+                    <select name="is_active" id="is_active" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" required>
+                        <option value="1" {{ old('is_active', '1') === '1' ? 'selected' : '' }}>Aktif</option>
+                        <option value="0" {{ old('is_active') === '0' ? 'selected' : '' }}>Non-Aktif</option>
+                    </select>
+                </div>
+
+                <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-100 md:col-span-2 grid grid-cols-2 gap-4">
+                    <div class="col-span-2 text-[10px] font-black text-emerald-800 uppercase tracking-widest mb-2">Konfigurasi Taksiran & Jasa</div>
+                    
+                    <div>
+                        <label for="nominal_low" class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal Taksir Min (Auto % Min)</label>
+                        <input type="number" name="nominal_low" id="nominal_low" class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm" value="{{ old('nominal_low') }}" readonly>
+                    </div>
+                    <div>
+                        <label for="bunga_low" class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Bunga/Jasa Min (%) <span class="text-red-500">*</span></label>
+                        <input type="number" name="bunga_low" id="bunga_low" step="0.01" class="w-full px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm" value="{{ old('bunga_low') }}" min="0" required placeholder="Contoh: 40">
+                    </div>
+
+                    <div>
+                        <label for="nominal_high" class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal Taksir Max (Auto % Max)</label>
+                        <input type="number" name="nominal_high" id="nominal_high" class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm" value="{{ old('nominal_high') }}" readonly>
+                    </div>
+                    <div>
+                        <label for="bunga_high" class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Bunga/Jasa Max (%) <span class="text-red-500">*</span></label>
+                        <input type="number" name="bunga_high" id="bunga_high" step="0.01" class="w-full px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm" value="{{ old('bunga_high') }}" min="0" required placeholder="Contoh: 60">
+                    </div>
+
+                    <div class="col-span-2 pt-2 border-t border-emerald-100 mt-2">
+                        <label for="nominal_inap" class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Biaya Inap (Nominal Rupiah - Khusus Kendaraan)</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <span class="text-emerald-500 font-bold text-xs">Rp</span>
+                            </div>
+                            <input type="number" name="nominal_inap" id="nominal_inap" class="w-full pl-8 px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm" value="{{ old('nominal_inap', 0) }}" min="0">
+                        </div>
+                        <p class="text-[9px] text-emerald-400 mt-1 italic">Isi jika kategori adalah Kendaraan (Motor/Mobil). Untuk Emas/Elektronik biasanya menggunakan % dari Kategori.</p>
+                    </div>
+                </div>
+
+                <div class="md:col-span-2">
+                    <label for="file_pic" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Foto Item Master</label>
+                    <input type="file" name="file_pic" id="file_pic" class="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] transition-all text-sm file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-black file:bg-amber-100 file:text-amber-700 hover:file:bg-amber-200">
+                    <p class="text-[10px] text-gray-400 mt-2">Gunakan foto transparan atau bersih untuk katalog nasabah (Max 2MB).</p>
+                </div>
+            </div>
+
+            <div class="flex justify-end items-center gap-3 pt-6 border-t border-gray-100">
+                <button type="reset" class="px-6 py-3 text-gray-500 font-bold hover:text-gray-700 transition-all">Reset</button>
+                <button type="submit" class="px-8 py-3 bg-[#674c1d] text-white font-black rounded-2xl hover:bg-[#8b6f2f] transition-all shadow-lg shadow-amber-900/20">
+                    Simpan Master Item
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const nominalRealInput = document.getElementById('nominal_real');
+        const bungaLowInput = document.getElementById('bunga_low');
+        const bungaHighInput = document.getElementById('bunga_high');
+        const nominalLowInput = document.getElementById('nominal_low');
+        const nominalHighInput = document.getElementById('nominal_high');
+
+        function calculateNominal() {
+            const real = parseFloat(nominalRealInput.value) || 0;
+            const bLow = parseFloat(bungaLowInput.value) || 0;
+            const bHigh = parseFloat(bungaHighInput.value) || 0;
+
+            nominalLowInput.value = Math.round(real * (bLow / 100));
+            nominalHighInput.value = Math.round(real * (bHigh / 100));
+        }
+
+        nominalRealInput.addEventListener('input', calculateNominal);
+        bungaLowInput.addEventListener('input', calculateNominal);
+        bungaHighInput.addEventListener('input', calculateNominal);
+        
+        // Initial calculation
+        calculateNominal();
+    });
+</script>
+@endsection

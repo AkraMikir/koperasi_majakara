@@ -140,11 +140,11 @@ class OwnerWalletController extends Controller
             // 2. Update Saldo Terpusat
             if ($nominalCash > 0) {
                 $mutasi = ($request->tipe === 'masuk') ? $nominalCash : -$nominalCash;
-                PettyCashSaldo::buatMutasi($userId, 'owner', $mutasi, $request->keterangan, $idTrans, 'petty_cash_owner_transaksi', 'cash');
+                PettyCashSaldo::buatMutasi($userId, 'owner', $mutasi, $request->keterangan, $idTrans, 'petty_cash_owner_transaksi', 'cash', PettyCashConstants::SUMBER_LAIN);
             }
             if ($nominalTf > 0) {
                 $mutasi = ($request->tipe === 'masuk') ? $nominalTf : -$nominalTf;
-                PettyCashSaldo::buatMutasi($userId, 'owner', $mutasi, $request->keterangan, $idTrans, 'petty_cash_owner_transaksi', 'transfer');
+                PettyCashSaldo::buatMutasi($userId, 'owner', $mutasi, $request->keterangan, $idTrans, 'petty_cash_owner_transaksi', 'transfer', PettyCashConstants::SUMBER_LAIN);
             }
 
             DB::commit();
@@ -204,10 +204,10 @@ class OwnerWalletController extends Controller
 
             // Update Saldo Terpusat
             if ($nominalCash > 0) {
-                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalCash, "Penarikan Owner ({$request->sumber})", $idWithdraw, 'owner_withdrawals', 'cash');
+                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalCash, "Penarikan Owner ({$request->sumber})", $idWithdraw, 'owner_withdrawals', 'cash', $request->sumber);
             }
             if ($nominalTf > 0) {
-                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalTf, "Penarikan Owner ({$request->sumber})", $idWithdraw, 'owner_withdrawals', 'transfer');
+                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalTf, "Penarikan Owner ({$request->sumber})", $idWithdraw, 'owner_withdrawals', 'transfer', $request->sumber);
             }
 
             DB::commit();
@@ -231,11 +231,11 @@ class OwnerWalletController extends Controller
             // Refund Saldo
             if ($trans->nominal_cash > 0) {
                 $mutasi = ($trans->tipe === 'masuk') ? -$trans->nominal_cash : $trans->nominal_cash;
-                PettyCashSaldo::buatMutasi(Auth::id(), 'owner', $mutasi, "Hapus Transaksi #{$id}", $id, 'petty_cash_owner_transaksi', 'cash');
+                PettyCashSaldo::buatMutasi(Auth::id(), 'owner', $mutasi, "Hapus Transaksi #{$id}", $id, 'petty_cash_owner_transaksi', 'cash', $trans->sumber);
             }
             if ($trans->nominal_tf > 0) {
                 $mutasi = ($trans->tipe === 'masuk') ? -$trans->nominal_tf : $trans->nominal_tf;
-                PettyCashSaldo::buatMutasi(Auth::id(), 'owner', $mutasi, "Hapus Transaksi #{$id}", $id, 'petty_cash_owner_transaksi', 'transfer');
+                PettyCashSaldo::buatMutasi(Auth::id(), 'owner', $mutasi, "Hapus Transaksi #{$id}", $id, 'petty_cash_owner_transaksi', 'transfer', $trans->sumber);
             }
 
             $trans->delete();
@@ -244,6 +244,96 @@ class OwnerWalletController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             return back()->with('error', 'Gagal menghapus: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Internal transfer between sources (Owner level).
+     */
+    public function internalTransfer(Request $request)
+    {
+        $request->validate([
+            'sumber_asal'  => 'required|in:tabungan,pinjaman,deposito,gadai,petty_cash',
+            'nominal_cash' => 'nullable|numeric|min:0',
+            'nominal_tf'   => 'nullable|numeric|min:0',
+            'keterangan'   => 'nullable|string|max:500',
+        ]);
+
+        $nominalCash = (float)($request->nominal_cash ?? 0);
+        $nominalTf   = (float)($request->nominal_tf   ?? 0);
+        $userId      = Auth::id();
+        $sumberAsal  = $request->sumber_asal;
+        $sumberTujuan= PettyCashConstants::SUMBER_LAIN; // Modal Awal
+
+        if (($nominalCash + $nominalTf) <= 0) {
+            return back()->with('error', 'Nominal harus lebih dari 0.')->withInput();
+        }
+
+        // Validasi Saldo Asal
+        $sourceBalance = DB::table('vw_saldo_owner_detail')
+            ->where('user_id', $userId)
+            ->where('sumber', $sumberAsal)
+            ->select(
+                DB::raw('SUM(nominal_cash) as total_cash'),
+                DB::raw('SUM(nominal_tf) as total_tf')
+            )
+            ->first();
+
+        if ($nominalCash > (float)($sourceBalance->total_cash ?? 0) || $nominalTf > (float)($sourceBalance->total_tf ?? 0)) {
+            return back()->with('error', "Saldo sumber {$sumberAsal} tidak mencukupi.")->withInput();
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $idAsal = IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+            $ket = "Pindah Dana ke Modal Awal: " . ($request->keterangan ?? '-');
+
+            // 1. Potong Saldo Asal
+            PettyCashOwnerTransaksi::create([
+                'id'           => $idAsal,
+                'user_id'      => $userId,
+                'tipe'         => 'keluar',
+                'sumber'       => $sumberAsal,
+                'nominal_cash' => $nominalCash,
+                'nominal_tf'   => $nominalTf,
+                'keterangan'   => $ket,
+            ]);
+
+            if ($nominalCash > 0) {
+                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalCash, $ket, $idAsal, 'petty_cash_owner_transaksi', 'cash', $sumberAsal);
+            }
+            if ($nominalTf > 0) {
+                PettyCashSaldo::buatMutasi($userId, 'owner', -$nominalTf, $ket, $idAsal, 'petty_cash_owner_transaksi', 'transfer', $sumberAsal);
+            }
+
+            // 2. Tambah Saldo Tujuan (Modal Awal)
+            $idTujuan = IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+            $ket2 = "Terima Pindahan dari {$sumberAsal}: " . ($request->keterangan ?? '-');
+
+            PettyCashOwnerTransaksi::create([
+                'id'           => $idTujuan,
+                'user_id'         => $userId,
+                'tipe'            => 'masuk',
+                'sumber'          => $sumberTujuan,
+                'nominal_cash'    => $nominalCash,
+                'nominal_tf'      => $nominalTf,
+                'keterangan'      => $ket2,
+            ]);
+
+            if ($nominalCash > 0) {
+                PettyCashSaldo::buatMutasi($userId, 'owner', $nominalCash, $ket2, $idTujuan, 'petty_cash_owner_transaksi', 'cash', $sumberTujuan);
+            }
+            if ($nominalTf > 0) {
+                PettyCashSaldo::buatMutasi($userId, 'owner', $nominalTf, $ket2, $idTujuan, 'petty_cash_owner_transaksi', 'transfer', $sumberTujuan);
+            }
+
+            DB::commit();
+            return back()->with('success', "Dana dari {$sumberAsal} berhasil dipindahkan ke Modal Awal.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('internalTransfer error', ['error' => $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

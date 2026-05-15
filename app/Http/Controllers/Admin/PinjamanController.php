@@ -297,9 +297,11 @@ class PinjamanController extends Controller
             if ($isPettyCash) {
                 $tipe = $metode == 'petty_cash' ? 'cash' : 'transfer';
                 $saldoTersedia = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'admin', $tipe);
+                // Get Saldo dari MODAL AWAL
+                $saldoTersedia = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'admin', $tipe, 'other');
                 if ($saldoTersedia < (float) $pinjaman->jumlah_pinjam) {
                     throw new \Exception(sprintf(
-                        'Saldo %s Petty Cash tidak mencukupi untuk pencairan. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                        'Saldo %s MODAL AWAL tidak mencukupi untuk pencairan. Dibutuhkan: Rp %s | Tersedia: Rp %s',
                         strtoupper($tipe),
                         number_format($pinjaman->jumlah_pinjam, 0, ',', '.'),
                         number_format($saldoTersedia, 0, ',', '.')
@@ -332,7 +334,7 @@ class PinjamanController extends Controller
                     'tgl_transaksi' => now(),
                 ]);
 
-                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipe, -(float)$pinjaman->jumlah_pinjam, $pettyId, 'Pencairan Pinjaman', 'petty_cash_transaksi_nasabah');
+                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipe, -(float)$pinjaman->jumlah_pinjam, $pettyId, 'Pencairan Pinjaman', 'petty_cash_transaksi_nasabah', 'other');
             }
 
             $pinjaman->update([
@@ -1107,7 +1109,7 @@ class PinjamanController extends Controller
                 ]);
                 
                 $tipeSaldo = $metode == 'cash_admin' ? 'cash' : 'transfer';
-                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipeSaldo, (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk', 'petty_cash_transaksi_nasabah');
+                \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), $tipeSaldo, (float) $pengajuan->nominal, $pettyId, 'Angsuran Masuk', 'petty_cash_transaksi_nasabah', 'pinjaman');
             } elseif ($metode === 'rek_koperasi') {
                 // 🔥 INTEGRASI OWNER LEDGER: Pencatatan ke Rekening Koperasi Utama (Admin Utama)
                 $owner = User::where('role', 'admin_utama')->first();
@@ -1128,7 +1130,7 @@ class PinjamanController extends Controller
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', (float)$pengajuan->nominal,
                         "Angsuran Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
-                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer'
+                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer', 'pinjaman'
                     );
                 }
             }

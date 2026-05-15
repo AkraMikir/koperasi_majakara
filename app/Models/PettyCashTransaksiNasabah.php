@@ -114,10 +114,12 @@ class PettyCashTransaksiNasabah extends Model
     public function getJenisTransaksiAttribute()
     {
         return match($this->ref_table) {
-            'tbl_pengajuan_tabungan' => 'Tabungan',
-            'tbl_pengajuan_pembayaran_pinjaman' => 'Angsuran',
-            'tbl_pinjaman_h' => 'Pencairan',
-            'tbl_pengajuan_deposito' => 'Deposito',
+            \App\Services\PettyCashConstants::REF_TABUNGAN_STR => 'Tabungan',
+            \App\Services\PettyCashConstants::REF_PINJAMAN_D => 'Angsuran',
+            \App\Services\PettyCashConstants::REF_PINJAMAN_H => 'Pencairan',
+            \App\Services\PettyCashConstants::REF_DEPOSITO_P => 'Deposito',
+            \App\Services\PettyCashConstants::REF_GADAI_P => 'Gadai',
+            \App\Services\PettyCashConstants::REF_GADAI_A => 'Gadai (Admin)',
             default => 'Lainnya'
         };
     }

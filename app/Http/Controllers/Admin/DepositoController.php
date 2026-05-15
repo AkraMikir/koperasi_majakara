@@ -209,7 +209,8 @@ class DepositoController extends Controller
                         $pettyId,
                         'Setoran Deposito dari Pengajuan #' . $pengajuan->id,
                         'petty_cash_transaksi_nasabah',
-                        $pettyType
+                        $pettyType,
+                        'deposito'
                     );
                 } else {
                     // Simpan ke Koperasi Utama (Owner Wallet)
@@ -231,7 +232,7 @@ class DepositoController extends Controller
                         PettyCashSaldo::buatMutasi(
                             $owner->id, 'owner', $nominal,
                             "Setoran Deposito Nasabah (#{$pengajuan->id})",
-                            (string)$pengajuan->id, PettyCashConstants::REF_DEPOSITO_P, 'transfer'
+                            (string)$pengajuan->id, PettyCashConstants::REF_DEPOSITO_P, 'transfer', 'deposito'
                         );
                     }
                 }
@@ -533,16 +534,13 @@ class DepositoController extends Controller
         }
     }
 
-    /**
-     * [Admin] Finalisasi pencairan TF (POST)
-     * Admin mengunggah bukti transfer setelah menerima dana dari Owner.
-     */
     public function selesaikanPencairanTf(Request $request, $id)
     {
         $this->checkDepositoPermission();
 
         $request->validate([
             'foto_bukti_tf' => 'required|image|max:5120',
+            'nominal_akhir' => 'required|numeric|min:1',
             'catatan'       => 'nullable|string|max:500',
         ]);
 
@@ -551,75 +549,72 @@ class DepositoController extends Controller
 
             $pencairan = PencairanDeposito::with(['deposito', 'nasabah'])->findOrFail($id);
 
-            // Pastikan status diproses (artinya Admin sudah ACC PCP dari Owner)
-            if ($pencairan->status !== 'diproses') {
-                return back()->with('error', 'Pencairan belum siap diselesaikan (Pastikan Anda sudah menerima dana dari Owner di menu Petty Cash).');
+            if (!in_array($pencairan->status, ['pending', 'diproses'])) {
+                return back()->with('error', 'Pencairan tidak dalam status valid untuk diselesaikan.');
             }
 
-            $nominal = (float) $pencairan->nominal_akhir;
+            // Direct Approval check
+            $isDirect = ($pencairan->status === 'pending');
+            if ($isDirect && auth()->user()->role !== 'admin_operasional') {
+                return back()->with('error', 'Hanya Admin Operasional yang dapat melakukan persetujuan langsung.');
+            }
+
+            $nominal = (float) $request->nominal_akhir;
             $adminId = auth()->id();
 
-            // Cek saldo Admin (transfer) mencukupi
-            $saldoTfAdmin = PettyCashSaldo::getSaldo($adminId, 'admin', 'transfer');
+            // Cek saldo Admin (transfer) mencukupi dari MODAL AWAL (Rule #1)
+            $saldoTfAdmin = PettyCashSaldo::getSaldo($adminId, 'admin', 'transfer', 'other');
             if ($saldoTfAdmin < $nominal) {
-                return back()->with('error', 'Saldo Transfer Anda tidak mencukupi untuk melakukan transfer ini.');
+                return back()->with('error', 'Saldo Transfer MODAL AWAL Anda tidak mencukupi untuk melakukan transfer ini.');
             }
 
             // 1. Upload foto bukti TF
             $fotoPath = $request->file('foto_bukti_tf')->store('deposito/bukti-tf-pencairan', 'public');
 
-            // 2. Potong saldo Petty Cash Admin
+            // 2. Potong saldo Petty Cash Admin (MODAL AWAL) - Rule #1
+            // Ini MENGURANGI saldo Admin. Reimbursement dilakukan terpisah oleh Owner (Rule #3).
             PettyCashSaldo::buatMutasi(
                 $adminId, 'admin', -$nominal,
-                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' ke Nasabah (Transfer)',
-                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer'
+                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF)',
+                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'other'
             );
 
-            // 3. Update pencairan record
-            $pencairan->update([
-                'foto_bukti_tf' => $fotoPath,
-                'catatan'       => $pencairan->catatan . ' | Selesai oleh Admin: ' . ($request->catatan ?? ''),
-                'status'        => 'selesai',
-                'approved_by'   => $adminId,
-            ]);
-
-            // 4. Record di trans_deposito
+            // 3. Record di trans_deposito
             TransDeposito::create([
                 'deposito_id'   => $pencairan->deposito_id,
                 'jenis'         => 'pencairan',
                 'nominal'       => $nominal,
-                'keterangan'    => 'Pencairan via Transfer ke Rekening Nasabah (oleh Admin)',
+                'keterangan'    => 'Pencairan TF ke Nasabah',
                 'tgl_transaksi' => now(),
+            ]);
+
+            // 4. Update status pencairan
+            $pencairan->update([
+                'nominal_akhir' => $nominal,
+                'foto_bukti_tf' => $fotoPath,
+                'status'        => 'selesai',
+                'approved_by'   => $adminId,
             ]);
 
             // 5. Update status deposito → dicairkan
             $pencairan->deposito->update(['status' => 'dicairkan']);
 
-            // 6. Sinkronisasi deposito_persiapan_cair
+            // 6. Sinkronisasi persiapan cair
             DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
                 ->update(['status' => 'selesai']);
 
             DB::commit();
 
-            // Notifikasi nasabah
-            NasabahNotification::notify(
-                $pencairan->id_nasabah, 'deposito',
-                'Deposito Anda Telah Dicairkan',
-                'Deposito No. ' . $pencairan->deposito->nomor_deposito . ' senilai Rp ' .
-                    number_format($nominal, 0, ',', '.') . ' telah ditransfer ke rekening Anda.',
-                route('nasabah.deposito.detail', $pencairan->deposito_id),
-                (string) $pencairan->deposito_id, 'pencairan_deposito'
-            );
-
             return redirect()->route('admin.deposito.pencairan-tf.index')
-                ->with('success', 'Pencairan TF telah selesai diproses.');
+                ->with('success', 'Pencairan deposito berhasil diselesaikan.');
 
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Finalisasi pencairan TF error', ['id' => $id, 'error' => $e->getMessage()]);
+            Log::error('Selesaikan pencairan TF error', ['id' => $id, 'error' => $e->getMessage()]);
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
 
     /* ══════════════════════════════════════════════════════════
      *  PENCAIRAN – Tabungan (transfer langsung ke saldo tab)
@@ -751,22 +746,38 @@ class DepositoController extends Controller
     {
         $this->checkDepositoPermission();
 
+        $request->validate([
+            'nominal_akhir' => 'required|numeric|min:1',
+            'foto_bukti_tf' => 'nullable|image|max:5120',
+        ]);
+
         try {
             DB::beginTransaction();
 
             $pencairan = PencairanDeposito::with(['deposito.tenor', 'nasabah'])->findOrFail($id);
 
-            if ($pencairan->status !== 'diproses') {
-                return back()->with('error', 'Pencairan belum siap diselesaikan.');
+            if (!in_array($pencairan->status, ['pending', 'diproses'])) {
+                return back()->with('error', 'Pencairan tidak dalam status valid untuk diselesaikan.');
             }
 
-            $nominal = (float) $pencairan->nominal_akhir;
+            $isDirect = ($pencairan->status === 'pending');
+            if ($isDirect && auth()->user()->role !== 'admin_operasional') {
+                return back()->with('error', 'Hanya Admin Operasional yang dapat melakukan persetujuan langsung.');
+            }
+
+            $nominal = (float) $request->nominal_akhir;
             $adminId = auth()->id();
 
-            // Cek saldo Admin (transfer/virtual)
-            $saldoTfAdmin = PettyCashSaldo::getSaldo($adminId, 'admin', 'transfer');
+            // Cek saldo Admin (transfer) mencukupi dari MODAL AWAL (Rule #1)
+            $saldoTfAdmin = PettyCashSaldo::getSaldo($adminId, 'admin', 'transfer', 'other');
             if ($saldoTfAdmin < $nominal) {
-                return back()->with('error', 'Saldo Transfer/Virtual Anda tidak mencukupi.');
+                return back()->with('error', 'Saldo Transfer MODAL AWAL Anda tidak mencukupi.');
+            }
+
+            // 0. Handle Foto Bukti
+            $fotoPath = $pencairan->foto_bukti_tf;
+            if ($request->hasFile('foto_bukti_tf')) {
+                $fotoPath = $request->file('foto_bukti_tf')->store('deposito/bukti-tabungan', 'public');
             }
 
             // 1. Buat TransTabungan (STR)
@@ -785,11 +796,12 @@ class DepositoController extends Controller
                 'admin_pengelola_id' => $adminId,
             ]);
 
-            // 2. Potong saldo Admin (virtual/TF)
+            // 2. Potong saldo Admin (MODAL AWAL) - Rule #1
+            // Ini MENGURANGI saldo. TopUp dilakukan terpisah oleh Owner (Rule #3).
             PettyCashSaldo::buatMutasi(
                 $adminId, 'admin', -$nominal,
-                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' ke Tabungan Nasabah',
-                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer'
+                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' ke Tabungan',
+                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'other'
             );
 
             // 3. Record di trans_deposito
@@ -797,20 +809,22 @@ class DepositoController extends Controller
                 'deposito_id'   => $pencairan->deposito_id,
                 'jenis'         => 'pencairan',
                 'nominal'       => $nominal,
-                'keterangan'    => 'Pencairan ke Saldo Tabungan (oleh Admin)',
+                'keterangan'    => 'Pencairan ke Saldo Tabungan',
                 'tgl_transaksi' => now(),
             ]);
 
             // 4. Update status pencairan
             $pencairan->update([
-                'status'      => 'selesai',
-                'approved_by' => $adminId,
+                'nominal_akhir' => $nominal,
+                'foto_bukti_tf' => $fotoPath,
+                'status'        => 'selesai',
+                'approved_by'   => $adminId,
             ]);
 
             // 5. Update status deposito → dicairkan
             $pencairan->deposito->update(['status' => 'dicairkan']);
 
-            // 6. Sinkronisasi deposito_persiapan_cair
+            // 6. Sinkronisasi persiapan cair
             DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
                 ->update(['status' => 'selesai']);
 
@@ -827,7 +841,7 @@ class DepositoController extends Controller
             );
 
             return redirect()->route('admin.deposito.pencairan-tabungan.index')
-                ->with('success', 'Pencairan ke tabungan telah diselesaikan oleh Admin.');
+                ->with('success', 'Pencairan ke tabungan berhasil.');
 
         } catch (\Exception $e) {
             DB::rollBack();

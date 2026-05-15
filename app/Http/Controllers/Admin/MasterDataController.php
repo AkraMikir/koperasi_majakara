@@ -41,7 +41,8 @@ class MasterDataController extends Controller
             'total_denda_pinjaman' => MasterDendaPinjaman::where('status_aktif', true)->count(),
             'total_suku_bunga_tabungan' => 0, // Tabel suku_bunga / fitur suku bunga tabungan sudah tidak dipakai
             'total_tenor_deposito' => JnsTenorDeposito::where('aktif', 'y')->count(),
-            'total_barang_gadai' => MBarangGadai::count(),
+            'total_barang_gadai' => \App\Models\GadaiMasterItem::count(),
+            'total_kategori_gadai' => \App\Models\GadaiMasterKategori::count(),
             'total_lokasi_perusahaan' => JnsLokasiPerusahaan::where('status_aktif', true)->count(),
             'total_jenis_deposito' => 0, 
             'total_biaya_transfer' => 0,
@@ -826,5 +827,38 @@ class MasterDataController extends Controller
         app(\App\Services\ActivityLogService::class)->logAdminOperasionalAction($action, $adminOp->user->nama ?? 'N/A', $adminOp->id);
 
         return redirect()->back()->with('success', "Akun Admin Operasional berhasil {$statusText}.");
+    }
+    // ==================== GADAI DEBUGGER (TIME TRAVEL) ====================
+
+    public function gadaiDebuggerIndex()
+    {
+        $this->checkCrudPermission();
+        $gadaiList = \App\Models\GadaiActive::with('item')->get();
+        return view('admin.master-data.gadai-debugger.index', compact('gadaiList'));
+    }
+
+    public function gadaiDebuggerMajuHari(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'days' => 'required|integer|min:1|max:365'
+        ]);
+
+        $days = (int) $request->days;
+
+        // Kurangi tanggal jatuh tempo, tenggang, dan mulai di semua gadai_active (mensimulasikan waktu maju)
+        DB::table('tbl_gadai_active')->update([
+            'tgl_mulai' => DB::raw("DATE_SUB(tgl_mulai, INTERVAL $days DAY)"),
+            'tgl_jatuh_tempo' => DB::raw("DATE_SUB(tgl_jatuh_tempo, INTERVAL $days DAY)"),
+            'tgl_tenggang' => DB::raw("DATE_SUB(tgl_tenggang, INTERVAL $days DAY)"),
+        ]);
+
+        // Jalankan artisan command untuk cek status secara paksa
+        \Illuminate\Support\Facades\Artisan::call('gadai:check-status');
+        $output = \Illuminate\Support\Facades\Artisan::output();
+
+        return redirect()->route('admin.master-data.gadai-debugger.index')
+            ->with('success', "Berhasil mensimulasikan waktu maju $days hari dan mengecek status Gadai!")
+            ->with('output', $output);
     }
 }

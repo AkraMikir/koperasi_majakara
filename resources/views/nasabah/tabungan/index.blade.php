@@ -20,6 +20,12 @@
                         <h1 class="text-4xl md:text-5xl font-bold text-white mb-2 font-display">
                             Rp {{ number_format($tabunganInfo->saldo ?? 0, 0, ',', '.') }}
                         </h1>
+                        @if(($tabunganInfo->saldo_hold ?? 0) > 0)
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 bg-amber-400 text-amber-900 rounded text-[10px] font-bold uppercase tracking-wider shadow-sm">Tertahan</span>
+                                <span class="text-white/90 text-sm font-semibold">Rp {{ number_format($tabunganInfo->saldo_hold, 0, ',', '.') }}</span>
+                            </div>
+                        @endif
                         <p class="text-white/80 text-sm">Status: <span class="font-semibold">{{ $tabunganInfo->status ?? 'Aktif' }}</span></p>
                     </div>
                     <div class="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">

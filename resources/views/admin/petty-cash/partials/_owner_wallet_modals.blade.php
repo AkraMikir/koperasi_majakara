@@ -60,7 +60,7 @@
 @php
     $otherBal = (object)($sourceDetails['other'] ?? ['total_cash' => 0, 'total_tf' => 0]);
     $allSources = [];
-    foreach(['tabungan', 'pinjaman', 'petty_cash', 'other'] as $k) {
+    foreach(['tabungan', 'pinjaman', 'deposito', 'gadai', 'petty_cash', 'other'] as $k) {
         $allSources[$k] = (object)($sourceDetails[$k] ?? ['total_cash' => 0, 'total_tf' => 0]);
     }
 @endphp
@@ -145,6 +145,8 @@
                         $keys = [
                             'tabungan' => 'Saldo Tabungan',
                             'pinjaman' => 'Saldo Pinjaman',
+                            'deposito' => 'Saldo Deposito',
+                            'gadai'    => 'Saldo Gadai',
                             'petty_cash' => 'Saldo Petty Cash',
                             'other' => 'Modal Awal',
                         ];
@@ -193,6 +195,72 @@
             <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
                 <button type="button" onclick="closeModal('modalWithdraw')" class="px-4 py-2 text-gray-600 font-semibold text-sm hover:text-gray-800">Batal</button>
                 <button type="submit" class="px-6 py-2 bg-purple-600 text-white rounded-xl font-bold text-sm hover:bg-purple-700 shadow-md">Proses Tarik Saldo</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal Pindah Dana (Internal Transfer) -->
+<div id="modalTransferInternal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 backdrop-blur-sm p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-amber-50">
+            <h3 class="text-xl font-bold text-amber-900 font-display">Pindah Dana ke Modal Awal</h3>
+            <button onclick="closeModal('modalTransferInternal')" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+        <form action="{{ route('admin.petty-cash.owner-wallet.internal-transfer') }}" method="POST" class="p-6 space-y-4" id="formInternalTransfer">
+            @csrf
+            
+            <div class="bg-amber-50 border border-amber-200 p-3 rounded-xl mb-4">
+                <p class="text-xs text-amber-800 font-medium leading-relaxed">
+                    <svg class="w-4 h-4 inline mr-1 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Pindahkan dana dari saku produk (Tabungan/Pinjaman) ke **Modal Awal** agar dapat dikirim ke Admin Operasional.
+                </p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Pilih Sumber Asal</label>
+                <select name="sumber_asal" id="it_sumber_asal" required class="w-full px-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold">
+                    @foreach(['tabungan', 'pinjaman', 'deposito', 'gadai', 'petty_cash'] as $key)
+                        @php
+                            $det = (object)($sourceDetails[$key] ?? ['total_cash' => 0, 'total_tf' => 0]);
+                            $total = $det->total_cash + $det->total_tf;
+                            $label = $sources[$key][0] ?? ucfirst($key);
+                        @endphp
+                        <option value="{{ $key }}">{{ $label }} (Rp {{ number_format($total, 0, ',', '.') }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Cash</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                        <input type="number" name="nominal_cash" id="it_nominal_cash" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Transfer</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
+                        <input type="number" name="nominal_tf" id="it_nominal_tf" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold">
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Keterangan (Opsional)</label>
+                <textarea name="keterangan" rows="2" placeholder="Contoh: TopUp Modal Operasional"
+                          class="w-full px-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all text-sm"></textarea>
+            </div>
+
+            <div class="pt-4 border-t border-gray-100 flex justify-end gap-3">
+                <button type="button" onclick="closeModal('modalTransferInternal')" class="px-4 py-2 text-gray-600 font-semibold text-sm hover:text-gray-800">Batal</button>
+                <button type="submit" class="px-6 py-2 bg-amber-600 text-white rounded-xl font-bold text-sm hover:bg-amber-700 shadow-md">Pindahkan Dana</button>
             </div>
         </form>
     </div>
@@ -266,6 +334,40 @@ document.addEventListener('DOMContentLoaded', function() {
         inputWDTf.addEventListener('input', validateWD);
         
         validateWD();
+    }
+
+    // 🔥 Validasi Pindah Dana (Internal Transfer)
+    const formIT = document.getElementById('formInternalTransfer');
+    if (formIT) {
+        const selectAsal = document.getElementById('it_sumber_asal');
+        const inputITCash = document.getElementById('it_nominal_cash');
+        const inputITTf   = document.getElementById('it_nominal_tf');
+        const submitBtnIT = formIT.querySelector('button[type="submit"]');
+        
+        const sourceBalances = @json($allSources);
+
+        function validateIT() {
+            const asal = selectAsal.value;
+            const bal = sourceBalances[asal] || { total_cash: 0, total_tf: 0 };
+            
+            const valCash = parseFloat(inputITCash.value) || 0;
+            const valTf   = parseFloat(inputITTf.value) || 0;
+            
+            const isInvalid = (valCash > parseFloat(bal.total_cash)) || (valTf > parseFloat(bal.total_tf));
+            
+            submitBtnIT.disabled = isInvalid;
+            if (isInvalid) {
+                submitBtnIT.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                submitBtnIT.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        selectAsal.addEventListener('change', validateIT);
+        inputITCash.addEventListener('input', validateIT);
+        inputITTf.addEventListener('input', validateIT);
+        
+        validateIT();
     }
 });
 </script>

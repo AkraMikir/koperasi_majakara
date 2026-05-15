@@ -15,3 +15,10 @@ Schedule::command('deposito:generate-peringatan --days=7')
     ->dailyAt('07:00')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/deposito-peringatan.log'));
+
+// Cek status gadai harian
+Schedule::command('gadai:check-status')
+    ->dailyAt('00:01')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/gadai-check-status.log'));
+
