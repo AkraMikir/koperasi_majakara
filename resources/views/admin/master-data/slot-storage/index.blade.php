@@ -17,9 +17,29 @@
         </div>
     </div>
 
+    {{-- Alert Messages --}}
     @if(session('success'))
-        <div class="p-4 bg-green-50 border border-green-200 text-green-700 rounded-xl">
-            {{ session('success') }}
+        <div class="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl shadow-xs font-medium text-sm flex items-center space-x-2">
+            <span>✅</span>
+            <span>{{ session('success') }}</span>
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-xs font-medium text-sm flex items-center space-x-2">
+            <span>❌</span>
+            <span>{{ session('error') }}</span>
+        </div>
+    @endif
+
+    @if ($errors->any())
+        <div class="p-4 bg-red-50 border border-red-200 text-red-800 rounded-xl shadow-xs text-sm">
+            <p class="font-bold mb-1">Terjadi kesalahan validasi:</p>
+            <ul class="list-disc list-inside space-y-0.5 text-xs text-red-700">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
@@ -52,7 +72,8 @@
             </div>
         </div>
 
-        <div class="col-span-2">
+        <div class="col-span-2 space-y-6">
+            {{-- Card Tambah --}}
             <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
                 <h2 class="text-lg font-bold text-gray-900 mb-4">Tambah Dimensi Grid</h2>
                 <p class="text-sm text-gray-600 mb-6">Penambahan baris atau kolom akan otomatis menggenerate slot-slot kosong baru yang dapat digunakan.</p>
@@ -78,6 +99,37 @@
                     <div class="flex justify-end pt-4">
                         <button type="submit" class="px-5 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white font-medium rounded-xl hover:shadow-lg transition-all">
                             Tambahkan Slot
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- Card Kurang --}}
+            <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6">
+                <h2 class="text-lg font-bold text-gray-900 mb-2">Kurangi Dimensi Grid</h2>
+                <p class="text-xs text-amber-600 font-medium mb-6">⚠️ Pengurangan baris atau kolom hanya dapat dilakukan jika slot-slot pada baris teratas/kolom terluar yang akan dihapus sedang dalam keadaan kosong (tidak terisi barang gadai).</p>
+                
+                <form action="{{ route('admin.master-data.slot-storage.reduce') }}" method="POST" class="space-y-5">
+                    @csrf
+                    <input type="hidden" name="kategori" value="{{ $selectedKategori }}">
+                    
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Kurangi (Baris / Kolom)</label>
+                            <select name="jenis" class="w-full border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500" required>
+                                <option value="baris">Baris (Hapus dari Atas)</option>
+                                <option value="kolom">Kolom (Hapus dari Kanan)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Jumlah</label>
+                            <input type="number" name="jumlah" min="1" max="10" value="1" class="w-full border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500" required>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4">
+                        <button type="submit" class="px-5 py-2.5 bg-red-600 text-white font-medium rounded-xl hover:bg-red-700 hover:shadow-lg transition-all">
+                            Kurangi Slot
                         </button>
                     </div>
                 </form>

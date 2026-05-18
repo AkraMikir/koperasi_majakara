@@ -413,6 +413,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::prefix('slot-storage')->name('slot-storage.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'index'])->name('index');
             Route::post('/', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'store'])->name('store');
+            Route::post('/reduce', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'reduce'])->name('reduce');
         });
         
         // Jenis Deposito
