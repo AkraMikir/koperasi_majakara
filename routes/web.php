@@ -584,6 +584,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
         Route::get('/', [\App\Http\Controllers\AdminGadaiBaruController::class, 'index'])->name('index');
         Route::get('/storage', [\App\Http\Controllers\AdminGadaiBaruController::class, 'storage'])->name('storage');
+        Route::post('/storage/empty-auction', [\App\Http\Controllers\AdminGadaiBaruController::class, 'emptyAuction'])->name('storage.empty-auction');
         Route::get('/create', [\App\Http\Controllers\AdminGadaiBaruController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\AdminGadaiBaruController::class, 'store'])->name('store');
         Route::get('/{id}', [\App\Http\Controllers\AdminGadaiBaruController::class, 'detail'])->name('detail');
