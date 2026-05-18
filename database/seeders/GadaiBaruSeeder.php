@@ -53,8 +53,8 @@ class GadaiBaruSeeder extends Seeder
         DB::table('tbl_gadai_master_item')->insert([
             [
                 'kategori_id' => $kategoriElektronik,
-                'nama_item' => 'Smartphone / HP',
-                'foto_item' => null,
+                'head_1' => 'Smartphone / HP',
+                'file_pic' => null,
                 'max_taksiran' => 5000000,
                 'rate_inap_nominal' => 0,
                 'created_at' => now(),
@@ -62,8 +62,8 @@ class GadaiBaruSeeder extends Seeder
             ],
             [
                 'kategori_id' => $kategoriElektronik,
-                'nama_item' => 'Laptop',
-                'foto_item' => null,
+                'head_1' => 'Laptop',
+                'file_pic' => null,
                 'max_taksiran' => 10000000,
                 'rate_inap_nominal' => 0,
                 'created_at' => now(),
@@ -71,8 +71,8 @@ class GadaiBaruSeeder extends Seeder
             ],
             [
                 'kategori_id' => $kategoriKendaraan,
-                'nama_item' => 'Motor Kelas A',
-                'foto_item' => null,
+                'head_1' => 'Motor Kelas A',
+                'file_pic' => null,
                 'max_taksiran' => 15000000,
                 'rate_inap_nominal' => 50000,
                 'created_at' => now(),
@@ -80,8 +80,8 @@ class GadaiBaruSeeder extends Seeder
             ],
             [
                 'kategori_id' => $kategoriKendaraan,
-                'nama_item' => 'Mobil Kelas B',
-                'foto_item' => null,
+                'head_1' => 'Mobil Kelas B',
+                'file_pic' => null,
                 'max_taksiran' => 50000000,
                 'rate_inap_nominal' => 100000,
                 'created_at' => now(),
@@ -89,8 +89,8 @@ class GadaiBaruSeeder extends Seeder
             ],
             [
                 'kategori_id' => $kategoriEmas,
-                'nama_item' => 'Emas Batangan (per gram)',
-                'foto_item' => null,
+                'head_1' => 'Emas Batangan (per gram)',
+                'file_pic' => null,
                 'max_taksiran' => 1000000,
                 'rate_inap_nominal' => 0,
                 'created_at' => now(),
