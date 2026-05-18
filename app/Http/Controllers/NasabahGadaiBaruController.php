@@ -73,6 +73,16 @@ class NasabahGadaiBaruController extends Controller
         return view('nasabah.gadai_baru.show', compact('kategori', 'item', 'lokasi', 'nasabah'));
     }
 
+    public function showActiveDetail($id)
+    {
+        $nasabah = Auth::user()->nasabah;
+        $gadai = GadaiActive::with(['kategori', 'item', 'lokasi', 'files', 'paymentLogs', 'history'])
+            ->where('nasabah_id', $nasabah->id)
+            ->findOrFail($id);
+
+        return view('nasabah.gadai_baru.aktif_detail', compact('gadai'));
+    }
+
     public function riwayat()
     {
         $nasabah = Auth::user()->nasabah;
@@ -103,8 +113,8 @@ class NasabahGadaiBaruController extends Controller
 
         // 🛡️ Guard Perpanjangan rules
         if (in_array($jenis, ['perpanjang', 'perpanjangan'])) {
-            if ($gadai->status !== 'grace_period') {
-                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan pada masa tenggang.');
+            if (!in_array($gadai->status, ['active', 'grace_period'])) {
+                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan untuk gadai yang aktif atau dalam masa tenggang.');
             }
             if ($gadai->jumlah_perpanjangan >= 3) {
                 return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah 3 kali.');
@@ -125,6 +135,7 @@ class NasabahGadaiBaruController extends Controller
     public function storePengajuan(Request $request, $id, $jenis)
     {
         $request->validate([
+            'pin' => 'required|numeric|digits:6',
             'metode' => 'required|in:cash,transfer',
             'tgl_janji_temu' => 'required_if:metode,cash|nullable|date|after:now',
             'bukti_transfer.*' => 'required_if:metode,transfer|nullable|image|max:2048',
@@ -138,6 +149,14 @@ class NasabahGadaiBaruController extends Controller
             abort(403);
         }
 
+        // Verify PIN
+        $user = Auth::user();
+        if (!$user->pin || (int)$user->pin !== (int)$request->pin) {
+            return redirect()->back()
+                ->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
+        }
+
         // 🛡️ Guard Duplikasi: check if there's already a pending request for this gadai
         $pending = \App\Models\GadaiPengajuan::where('gadai_active_id', $id)
             ->where('status', 'pending')
@@ -149,8 +168,8 @@ class NasabahGadaiBaruController extends Controller
 
         // 🛡️ Guard Perpanjangan rules
         if (in_array($jenis, ['perpanjang', 'perpanjangan'])) {
-            if ($gadai->status !== 'grace_period') {
-                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan pada masa tenggang.');
+            if (!in_array($gadai->status, ['active', 'grace_period'])) {
+                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan untuk gadai yang aktif atau dalam masa tenggang.');
             }
             if ($gadai->jumlah_perpanjangan >= 3) {
                 return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah 3 kali.');

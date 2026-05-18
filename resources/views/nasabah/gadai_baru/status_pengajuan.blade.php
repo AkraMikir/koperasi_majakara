@@ -60,12 +60,29 @@
                         </div>
                         @else
                         <div class="col-span-2">
-                            <p class="text-[10px] text-gray-400 font-medium mb-1">Bukti Transfer</p>
-                            @if($item->bukti_transfer)
-                                <img src="{{ asset('storage/' . $item->bukti_transfer) }}" class="h-20 w-auto rounded-lg shadow-sm border border-gray-200 cursor-pointer hover:scale-105 transition-transform" onclick="window.open(this.src)">
-                            @else
-                                <p class="text-xs text-gray-500 italic">Tidak ada bukti</p>
-                            @endif
+                            <p class="text-[10px] text-gray-400 font-medium mb-1.5">Bukti Transfer</p>
+                            <div class="flex flex-wrap gap-2">
+                                @if($item->files->count() > 0)
+                                    @foreach($item->files as $file)
+                                        <button onclick="showPhotoPreview('{{ asset('storage/'.$file->path_file) }}', 'Bukti Transfer')" class="w-14 h-14 rounded-xl overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                                            <img src="{{ asset('storage/'.$file->path_file) }}" class="w-full h-full object-cover">
+                                        </button>
+                                    @endforeach
+                                @elseif($item->bukti_transfer)
+                                    <button onclick="showPhotoPreview('{{ asset('storage/'.$item->bukti_transfer) }}', 'Bukti Transfer')" class="w-14 h-14 rounded-xl overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                                        <img src="{{ asset('storage/'.$item->bukti_transfer) }}" class="w-full h-full object-cover">
+                                    </button>
+                                @else
+                                    <p class="text-xs text-gray-500 italic">Tidak ada bukti</p>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
+                        @if($item->keterangan)
+                        <div class="col-span-2 bg-gray-50 rounded-2xl p-4 border border-gray-100 mt-2">
+                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-widest mb-1.5">Keterangan Pengajuan Anda</p>
+                            <p class="text-xs text-gray-700 font-medium leading-relaxed italic">"{{ $item->keterangan }}"</p>
                         </div>
                         @endif
                         

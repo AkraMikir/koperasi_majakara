@@ -84,6 +84,10 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center gap-3">
+                                <button type="button" onclick="openDetailsModal({{ $item->id }})" 
+                                    class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-blue-100 active:scale-90" title="Lihat Detail">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                </button>
                                 <button type="button" onclick="openApproveModal({{ $item->id }}, '{{ $item->nasabah->user->nama }}', '{{ strtoupper($item->jenis_pengajuan) }}')" 
                                     class="w-9 h-9 flex items-center justify-center bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm hover:shadow-green-100 active:scale-90" title="Setujui">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -112,6 +116,92 @@
                     @endforelse
                 </tbody>
             </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Detail Pengajuan (Tailwind) -->
+<div id="details-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
+    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 bg-amber-50 text-[#674c1d] rounded-2xl flex items-center justify-center shadow-inner">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 tracking-tight">Detail Rincian Pengajuan</h3>
+                        <p class="text-xs text-gray-500 font-medium">Informasi lengkap permohonan pelunasan/perpanjangan gadai</p>
+                    </div>
+                </div>
+                <button onclick="closeDetailsModal()" class="w-10 h-10 bg-gray-50 hover:bg-gray-100 rounded-full flex items-center justify-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm mb-6 max-h-[60vh] overflow-y-auto pr-1">
+                {{-- Data Nasabah --}}
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Nasabah & Barang</h4>
+                        <p class="font-bold text-gray-800" id="detail-nasabah-name">-</p>
+                        <p class="text-xs text-gray-500 font-medium mt-1" id="detail-barang-name">-</p>
+                        <span class="inline-block mt-2 text-[10px] font-mono bg-amber-100 text-amber-800 px-2 py-0.5 rounded font-black" id="detail-slot-code">-</span>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2 font-display">Rincian Transaksi</h4>
+                        <div class="flex justify-between py-1 border-b border-gray-200/50">
+                            <span class="text-xs text-gray-500">Jenis</span>
+                            <span class="font-bold text-gray-800 uppercase text-xs" id="detail-jenis">-</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-gray-200/50">
+                            <span class="text-xs text-gray-500">Metode</span>
+                            <span class="font-bold text-gray-800 uppercase text-xs" id="detail-metode">-</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-gray-200/50" id="detail-janji-temu-row">
+                            <span class="text-xs text-gray-500">Janji Temu</span>
+                            <span class="font-bold text-gray-800 text-xs" id="detail-janji-temu">-</span>
+                        </div>
+                        <div class="flex justify-between pt-2">
+                            <span class="text-xs text-gray-600 font-black">Nominal</span>
+                            <span class="font-black text-emerald-600 text-base" id="detail-nominal">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Keterangan & Lampiran --}}
+                <div class="space-y-4">
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan Nasabah</h4>
+                        <p class="text-xs text-gray-700 italic leading-relaxed" id="detail-keterangan">-</p>
+                    </div>
+
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100" id="detail-foto-section">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Foto Lampiran / Bukti Transfer</h4>
+                        <div class="grid grid-cols-3 gap-2" id="detail-foto-grid">
+                            <!-- Photos will be inserted dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-4 border-t border-gray-100 pt-5">
+                <button type="button" onclick="closeDetailsModal()" 
+                    class="flex-1 px-6 py-3.5 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all active:scale-95 text-center text-sm">
+                    Tutup
+                </button>
+                <div class="flex gap-2 flex-2">
+                    <button type="button" id="detail-reject-btn"
+                        class="flex-1 px-6 py-3.5 bg-red-50 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 text-center text-sm">
+                        Tolak
+                    </button>
+                    <button type="button" id="detail-approve-btn"
+                        class="flex-1 px-6 py-3.5 bg-green-600 text-white font-bold rounded-2xl hover:bg-green-700 transition-all shadow-xl shadow-green-200 active:scale-95 text-center text-sm">
+                        Setujui
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -209,6 +299,98 @@
 
 @push('scripts')
 <script>
+    const pengajuanData = {
+        @foreach($pengajuan as $item)
+            "{{ $item->id }}": {
+                id: {{ $item->id }},
+                nasabahName: "{{ addslashes($item->nasabah->user->nama) }}",
+                barangName: "{{ addslashes($item->gadaiActive->item->nama_item) }}",
+                slotCode: "{{ $item->gadaiActive->slot_code }} / {{ $item->gadaiActive->slot_table }}",
+                jenis: "{{ strtoupper($item->jenis_pengajuan) }}",
+                metode: "{{ strtoupper($item->metode) }}",
+                nominal: "Rp {{ number_format($item->nominal, 0, ',', '.') }}",
+                janjiTemu: "{{ $item->tgl_janji_temu ? $item->tgl_janji_temu->format('d M Y, H:i') : '-' }}",
+                keterangan: "{{ $item->keterangan ? addslashes(str_replace(array("\r", "\n"), ' ', $item->keterangan)) : 'Tidak ada keterangan dari nasabah.' }}",
+                photos: [
+                    @if($item->files->count() > 0)
+                        @foreach($item->files as $file)
+                            "{{ asset('storage/'.$file->path_file) }}",
+                        @endforeach
+                    @elseif($item->bukti_transfer)
+                        "{{ asset('storage/'.$item->bukti_transfer) }}"
+                    @endif
+                ]
+            },
+        @endforeach
+    };
+
+    function openDetailsModal(id) {
+        const data = pengajuanData[id];
+        if (!data) return;
+
+        document.getElementById('detail-nasabah-name').textContent = data.nasabahName;
+        document.getElementById('detail-barang-name').textContent = data.barangName;
+        document.getElementById('detail-slot-code').textContent = data.slotCode;
+        document.getElementById('detail-jenis').textContent = data.jenis;
+        document.getElementById('detail-metode').textContent = data.metode;
+        
+        const janjiTemuRow = document.getElementById('detail-janji-temu-row');
+        if (data.metode === 'CASH') {
+            janjiTemuRow.classList.remove('hidden');
+            document.getElementById('detail-janji-temu').textContent = data.janjiTemu;
+        } else {
+            janjiTemuRow.classList.add('hidden');
+        }
+
+        document.getElementById('detail-nominal').textContent = data.nominal;
+        document.getElementById('detail-keterangan').textContent = data.keterangan;
+
+        // Render photos
+        const grid = document.getElementById('detail-foto-grid');
+        const photoSection = document.getElementById('detail-foto-section');
+        grid.innerHTML = '';
+        
+        if (data.photos.length > 0) {
+            photoSection.classList.remove('hidden');
+            data.photos.forEach((photoUrl) => {
+                grid.innerHTML += `
+                    <button type="button" onclick="showPhotoPreview('${photoUrl}', 'Lampiran Foto ${data.nasabahName}')" class="aspect-square rounded-xl overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                        <img src="${photoUrl}" class="w-full h-full object-cover">
+                    </button>
+                `;
+            });
+        } else {
+            photoSection.classList.add('hidden');
+        }
+
+        // Bind actions to buttons inside detail modal
+        document.getElementById('detail-approve-btn').onclick = function() {
+            closeDetailsModal();
+            openApproveModal(data.id, data.nasabahName, data.jenis);
+        };
+        document.getElementById('detail-reject-btn').onclick = function() {
+            closeDetailsModal();
+            openRejectModal(data.id, data.nasabahName);
+        };
+
+        const modal = document.getElementById('details-modal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeDetailsModal() {
+        const modal = document.getElementById('details-modal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close details modal on click outside
+    document.getElementById('details-modal').addEventListener('click', function(e) {
+        if (e.target === this) closeDetailsModal();
+    });
+
     let adminBuktiCount = 0;
     function addAdminBuktiField() {
         adminBuktiCount++;

@@ -49,6 +49,7 @@ class MasterDataController extends Controller
             'total_kategori_deposito' => \App\Models\KategoriDeposito::where('status', 'aktif')->count(),
             'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
             'total_rekening_perusahaan' => JnsBank::count(),
+            'total_inap_kendaraan' => \App\Models\GadaiMasterInapKendaraan::count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));

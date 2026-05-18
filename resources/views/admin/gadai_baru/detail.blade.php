@@ -136,20 +136,33 @@
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Rincian Keuangan</h3>
                     
                     <div class="space-y-3 mb-6">
-                        <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-100">
+                        <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
                             <span class="text-gray-600 font-medium">Pinjaman Pokok</span>
                             <span class="font-bold text-gray-900">Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                            <span class="text-gray-600 font-medium">Biaya Jasa Admin</span>
+                        <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
+                            <div class="flex flex-col">
+                                <span class="text-gray-600 font-medium">Biaya Jasa Admin</span>
+                                <span class="text-[10px] text-blue-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_jasa, 2) }}%</span>
+                            </div>
                             <span class="font-bold text-gray-900">Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                            <span class="text-gray-600 font-medium">Denda Keterlambatan</span>
+                        <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
+                            <div class="flex flex-col">
+                                <span class="text-gray-600 font-medium">Denda Keterlambatan</span>
+                                <span class="text-[10px] text-red-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_denda, 2) }}%</span>
+                            </div>
                             <span class="font-bold {{ $gadai->denda_aktif > 0 ? 'text-red-600' : 'text-gray-400' }}">Rp {{ number_format($gadai->denda_aktif, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between items-center py-2 border-b border-dashed border-gray-100">
-                            <span class="text-gray-600 font-medium">Biaya Inap</span>
+                        <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
+                            <div class="flex flex-col">
+                                <span class="text-gray-600 font-medium">Biaya Inap</span>
+                                @if($gadai->item->nominal_inap > 0)
+                                    <span class="text-[10px] text-amber-600 font-bold">Tarif Flat (Kendaraan): Rp {{ number_format($gadai->item->nominal_inap, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-[10px] text-amber-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_inap_persen, 2) }}% dari Taksiran</span>
+                                @endif
+                            </div>
                             <span class="font-bold {{ $gadai->biaya_inap > 0 ? 'text-amber-600' : 'text-gray-400' }}">Rp {{ number_format($gadai->biaya_inap, 0, ',', '.') }}</span>
                         </div>
                     </div>
@@ -250,19 +263,32 @@
                         <tr class="hover:bg-gray-50/50 transition-colors bg-emerald-50/20">
                             <td class="px-6 py-3 whitespace-nowrap text-gray-600 font-medium">{{ $log->created_at->format('d M Y H:i') }}</td>
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded">{{ strtoupper($log->jenis_pembayaran) }}</span>
+                                @if(in_array($log->jenis_pembayaran, ['tebus', 'lunas']))
+                                    <span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded">Pelunasan Gadai</span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-xs font-bold rounded">Pembayaran Perpanjangan</span>
+                                @endif
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap font-bold text-emerald-600">Rp {{ number_format($log->nominal, 0, ',', '.') }}</td>
-                            <td class="px-6 py-3 text-gray-600">{{ $log->metode }}</td>
+                            <td class="px-6 py-3 text-gray-600 font-semibold">{{ strtoupper($log->metode) }}</td>
                         </tr>
                         @endforeach
                         
                         {{-- Log Status History --}}
                         @foreach($gadai->history as $hist)
+                        @if(in_array($hist->aksi, ['extend', 'lunas'])) @continue @endif
                         <tr class="hover:bg-gray-50/50 transition-colors">
                             <td class="px-6 py-3 whitespace-nowrap text-gray-500">{{ $hist->created_at->format('d M Y H:i') }}</td>
                             <td class="px-6 py-3 whitespace-nowrap">
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded border border-gray-200">{{ strtoupper($hist->aksi) }}</span>
+                                @if($hist->aksi === 'create')
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-800 text-xs font-bold rounded border border-blue-200">Gadai Didaftarkan</span>
+                                @elseif($hist->aksi === 'extend')
+                                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded border border-amber-200">Masa Gadai Diperpanjang</span>
+                                @elseif($hist->aksi === 'lunas')
+                                    <span class="px-2 py-0.5 bg-green-100 text-green-800 text-xs font-bold rounded border border-green-200">Gadai Dilunasi</span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs font-bold rounded border border-gray-200">{{ strtoupper($hist->aksi) }}</span>
+                                @endif
                             </td>
                             <td class="px-6 py-3 whitespace-nowrap text-gray-400 font-medium">-</td>
                             <td class="px-6 py-3 text-gray-600">{{ $hist->catatan }}</td>

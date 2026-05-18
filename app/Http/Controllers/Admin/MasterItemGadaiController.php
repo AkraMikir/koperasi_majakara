@@ -30,7 +30,8 @@ class MasterItemGadaiController extends Controller
     {
         $this->checkCrudPermission();
         $kategoris = GadaiMasterKategori::all();
-        return view('admin.master-data.item-gadai.create', compact('kategoris'));
+        $inapKendaraans = \App\Models\GadaiMasterInapKendaraan::all();
+        return view('admin.master-data.item-gadai.create', compact('kategoris', 'inapKendaraans'));
     }
 
     public function store(Request $request)
@@ -68,7 +69,8 @@ class MasterItemGadaiController extends Controller
         $this->checkCrudPermission();
         $data = GadaiMasterItem::findOrFail($id);
         $kategoris = GadaiMasterKategori::all();
-        return view('admin.master-data.item-gadai.edit', compact('data', 'kategoris'));
+        $inapKendaraans = \App\Models\GadaiMasterInapKendaraan::all();
+        return view('admin.master-data.item-gadai.edit', compact('data', 'kategoris', 'inapKendaraans'));
     }
 
     public function update(Request $request, $id)
