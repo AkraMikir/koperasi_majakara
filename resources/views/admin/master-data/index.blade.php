@@ -96,6 +96,24 @@
                 <p class="text-xs text-gray-400 mt-0.5">Aturan jasa/denda</p>
             </a>
 
+            {{-- Inap Kendaraan --}}
+            <a href="{{ route('admin.master-data.inap-kendaraan.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-[#674c1d]/30 transition-all duration-200">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 16c0 1.105-1.343 2-3 2s-3-.895-3-2M9 16c0 1.105-1.343 2-3 2s-3-.895-3-2m16 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v7m16 0h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 12H4"></path>
+                        </svg>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-0.5">{{ $stats['total_inap_kendaraan'] ?? 0 }}</p>
+                <p class="text-sm font-medium text-gray-700">Inap Kendaraan</p>
+                <p class="text-xs text-gray-400 mt-0.5">Golongan tarif</p>
+            </a>
+
             {{-- Lokasi Perusahaan --}}
             <a href="{{ route('admin.master-data.lokasi-perusahaan.index') }}"
                 class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-[#674c1d]/30 transition-all duration-200">
@@ -390,6 +408,23 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
+                <a href="{{ route('admin.master-data.inap-kendaraan.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-4.5 h-4.5 text-indigo-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 16c0 1.105-1.343 2-3 2s-3-.895-3-2M9 16c0 1.105-1.343 2-3 2s-3-.895-3-2m16 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v7m16 0h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 12H4"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Inap Kendaraan</p>
+                            <p class="text-xs text-gray-400">{{ $stats['total_inap_kendaraan'] ?? 0 }} golongan</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
                 <a href="{{ route('admin.master-data.lokasi-perusahaan.index') }}"
                     class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
                     <div class="flex items-center gap-3">
@@ -402,6 +437,23 @@
                         <div>
                             <p class="text-sm font-semibold text-gray-800">Lokasi Perusahaan</p>
                             <p class="text-xs text-gray-400">{{ $stats['total_lokasi_perusahaan'] }} kantor</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                <a href="{{ route('admin.master-data.slot-storage.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-4.5 h-4.5 text-gray-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Slot Storage Grid</p>
+                            <p class="text-xs text-gray-400">Dimensi baris & kolom</p>
                         </div>
                     </div>
                     <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">

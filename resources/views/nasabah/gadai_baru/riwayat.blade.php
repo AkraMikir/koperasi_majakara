@@ -44,13 +44,25 @@
                                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                                 <span class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest">Slot {{ $gadai->slot_kode }}</span>
                             </div>
-                            <h3 class="font-black text-gray-900 text-xl tracking-tight leading-none">{{ $gadai->item->nama_item }}</h3>
+                            <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="group/title flex items-center gap-1.5">
+                                <h3 class="font-black text-gray-900 text-xl tracking-tight leading-none group-hover/title:text-[#674c1d] transition-colors">{{ $gadai->item->head_1 ?? $gadai->item->nama_item }}</h3>
+                                <svg class="w-4 h-4 text-gray-400 group-hover/title:text-[#674c1d] group-hover/title:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                            @if($gadai->item->head_2)
+                                <p class="text-[10px] text-gray-400 mt-1 italic">{{ $gadai->item->head_2 }}</p>
+                            @endif
                         </div>
-                        @if($isTenggang)
-                            <span class="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-200">TENGGANG</span>
-                        @else
-                            <span class="bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-200">AKTIF</span>
-                        @endif
+                        <div class="flex flex-col items-end gap-2 shrink-0">
+                            @if($isTenggang)
+                                <span class="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-200">TENGGANG</span>
+                            @else
+                                <span class="bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-200">AKTIF</span>
+                            @endif
+                            <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest hover:underline flex items-center gap-1">
+                                Rincian
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 mb-6 relative z-10">
@@ -84,7 +96,7 @@
                     </div>
                     
                     <div class="mt-6 flex gap-2 relative z-10">
-                        <a href="{{ route('nasabah.gadai_baru.index') }}" class="flex-1 text-center bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white font-black py-3 px-4 rounded-2xl transition-all shadow-xl shadow-amber-100 active:scale-95 text-xs">Kelola Gadai</a>
+                        <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="flex-1 text-center bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white font-black py-3 px-4 rounded-2xl transition-all shadow-xl shadow-amber-100 active:scale-95 text-xs">Lihat Rincian &amp; Kelola</a>
                         <a href="https://wa.me/628139552626?text=Halo%20Admin,%20saya%20ingin%20info%20gadai%20{{$gadai->slot_kode}}" target="_blank" class="w-12 h-12 flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-2xl transition-all active:scale-95">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
                         </a>
@@ -119,7 +131,7 @@
                             @foreach($gadaiSelesai as $selesai)
                             <tr class="hover:bg-gray-50/30 transition-colors">
                                 <td class="px-6 py-4">
-                                    <div class="font-black text-gray-900 tracking-tight leading-none mb-1">{{ $selesai->item->nama_item }}</div>
+                                    <div class="font-black text-gray-900 tracking-tight leading-none mb-1">{{ $selesai->item->head_1 ?? $selesai->item->nama_item }}</div>
                                     <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $selesai->kategori->nama_kategori }}</div>
                                 </td>
                                 <td class="px-6 py-4 text-center">

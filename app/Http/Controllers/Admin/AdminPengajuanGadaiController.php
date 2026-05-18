@@ -39,22 +39,51 @@ class AdminPengajuanGadaiController extends Controller
         try {
             $adminId = Auth::id();
 
-            // 1. Process Petty Cash Mutation
-            PettyCashSaldo::buatMutasi(
-                $adminId,
-                'admin',
-                $pengajuan->nominal,
-                ucfirst($pengajuan->jenis_pengajuan) . ' Gadai ' . $gadai->slot_kode . ' (via ' . $pengajuan->metode . ')',
-                $gadai->id,
-                'tbl_gadai_active',
-                $pengajuan->metode,
-                'gadai'
-            );
+            // 1. Process Petty Cash / Owner Mutation
+            if ($pengajuan->metode === 'transfer') {
+                $owner = \App\Models\User::where('role', 'admin_utama')->first();
+                if ($owner) {
+                    $ownerTransId = \App\Helpers\IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+                    \App\Models\PettyCashOwnerTransaksi::create([
+                        'id'           => $ownerTransId,
+                        'user_id'      => $owner->id,
+                        'tipe'         => 'terima_setoran',
+                        'sumber'       => \App\Services\PettyCashConstants::SUMBER_GADAI,
+                        'nominal_cash' => 0,
+                        'nominal_tf'   => (float) $pengajuan->nominal,
+                        'keterangan'   => ucfirst($pengajuan->jenis_pengajuan) . " Gadai: " . ($pengajuan->nasabah->user->nama ?? '-') . " (#{$pengajuan->id})",
+                        'ref_table'    => \App\Services\PettyCashConstants::REF_GADAI_P,
+                        'ref_id'       => $pengajuan->id,
+                    ]);
+
+                    \App\Models\PettyCashSaldo::buatMutasi(
+                        $owner->id, 
+                        'owner', 
+                        (float)$pengajuan->nominal,
+                        ucfirst($pengajuan->jenis_pengajuan) . " Gadai (#{$pengajuan->id})",
+                        $pengajuan->id, 
+                        \App\Services\PettyCashConstants::REF_GADAI_P, 
+                        'transfer', 
+                        'gadai'
+                    );
+                }
+            } else {
+                PettyCashSaldo::buatMutasi(
+                    $adminId,
+                    'admin',
+                    $pengajuan->nominal,
+                    ucfirst($pengajuan->jenis_pengajuan) . ' Gadai ' . $gadai->slot_kode . ' (via ' . $pengajuan->metode . ')',
+                    $gadai->id,
+                    'tbl_gadai_active',
+                    $pengajuan->metode,
+                    'gadai'
+                );
+            }
 
             // 2. Process Gadai Logic based on type
             if ($pengajuan->jenis_pengajuan == 'perpanjang' || $pengajuan->jenis_pengajuan == 'perpanjangan') {
-                if ($gadai->status !== 'grace_period') {
-                    throw new \Exception('Perpanjangan hanya dapat dilakukan pada masa tenggang.');
+                if (!in_array($gadai->status, ['active', 'grace_period'])) {
+                    throw new \Exception('Perpanjangan hanya dapat dilakukan untuk gadai aktif atau dalam masa tenggang.');
                 }
                 if ($gadai->jumlah_perpanjangan >= 3) {
                     throw new \Exception('Maksimal perpanjangan adalah 3 kali.');
@@ -62,9 +91,16 @@ class AdminPengajuanGadaiController extends Controller
                 $newJatuhTempo = $gadai->tgl_jatuh_tempo->copy()->addDays($gadai->kategori->masa_gadai_hari)->endOfDay();
                 $newTenggang = $newJatuhTempo->copy()->addDays($gadai->kategori->masa_tenggang_hari)->endOfDay();
 
-                // Recalculate interest for the next period
-                $rateJasa = ($gadai->item->bunga_high > 0) ? $gadai->item->bunga_high : $gadai->kategori->rate_jasa;
+                // Recalculate interest and inap for the next period
+                $rateJasa = $gadai->kategori->rate_jasa;
                 $newBiayaJasa = ($gadai->nominal_deal * $rateJasa) / 100;
+
+                $newBiayaInap = 0;
+                if ($gadai->item->nominal_inap > 0) {
+                    $newBiayaInap = $gadai->item->nominal_inap;
+                } else {
+                    $newBiayaInap = ($gadai->nominal_deal * $gadai->kategori->rate_inap_persen) / 100;
+                }
 
                 $gadai->update([
                     'tgl_jatuh_tempo' => $newJatuhTempo,
@@ -73,7 +109,7 @@ class AdminPengajuanGadaiController extends Controller
                     'status' => 'active',
                     'biaya_jasa' => $newBiayaJasa, // Interest for the new period
                     'denda_aktif' => 0,
-                    'biaya_inap' => 0
+                    'biaya_inap' => $newBiayaInap
                 ]);
 
                 GadaiHistory::create([
@@ -120,21 +156,23 @@ class AdminPengajuanGadaiController extends Controller
                 'processed_at' => now()
             ]);
 
-            // 5. Create record for Setoran Kantor queue
-            \App\Models\PettyCashTransaksiNasabah::create([
-                'id' => \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'PCTN', 'AD', 'TR'),
-                'admin_id' => $adminId,
-                'nasabah_id' => $pengajuan->nasabah_id,
-                'id_jns_transaksi' => \App\Services\PettyCashConstants::JNS_PMB, // Pembayaran
-                'id_jns_via' => ($pengajuan->metode == 'transfer' ? \App\Services\PettyCashConstants::VIA_TF : \App\Services\PettyCashConstants::VIA_CS),
-                'id_jns_fitur' => \App\Services\PettyCashConstants::FITUR_GADAI,
-                'nominal' => $pengajuan->nominal,
-                'status' => 'approved',
-                'keterangan' => ucfirst($pengajuan->jenis_pengajuan) . ' Gadai ' . $gadai->slot_kode,
-                'ref_table' => \App\Services\PettyCashConstants::REF_GADAI_P,
-                'ref_id' => $pengajuan->id,
-                'tgl_transaksi' => now()
-            ]);
+            // 5. Create record for Setoran Kantor queue (ONLY for cash payment, because transfer goes directly to owner)
+            if ($pengajuan->metode === 'cash') {
+                \App\Models\PettyCashTransaksiNasabah::create([
+                    'id' => \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'PCTN', 'AD', 'TR'),
+                    'admin_id' => $adminId,
+                    'nasabah_id' => $pengajuan->nasabah_id,
+                    'id_jns_transaksi' => \App\Services\PettyCashConstants::JNS_PMB, // Pembayaran
+                    'id_jns_via' => \App\Services\PettyCashConstants::VIA_CS,
+                    'id_jns_fitur' => \App\Services\PettyCashConstants::FITUR_GADAI,
+                    'nominal' => $pengajuan->nominal,
+                    'status' => 'approved',
+                    'keterangan' => ucfirst($pengajuan->jenis_pengajuan) . ' Gadai ' . $gadai->slot_kode,
+                    'ref_table' => \App\Services\PettyCashConstants::REF_GADAI_P,
+                    'ref_id' => $pengajuan->id,
+                    'tgl_transaksi' => now()
+                ]);
+            }
 
             // 6. Handle Admin Proof Photos
             if ($request->hasFile('admin_bukti_foto')) {

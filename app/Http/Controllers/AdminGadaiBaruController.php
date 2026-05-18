@@ -47,7 +47,13 @@ class AdminGadaiBaruController extends Controller
         $itemList = GadaiMasterItem::all();
         $lokasiList = JnsLokasiPerusahaan::all();
 
-        return view('admin.gadai_baru.create', compact('nasabahs', 'kategoriList', 'itemList', 'lokasiList'));
+        $availableSlots = [
+            'electronic' => DB::table('tbl_gadai_grid_electronic')->where('is_occupied', false)->orderBy('baris')->orderBy('kolom')->get(),
+            'vehicle' => DB::table('tbl_gadai_grid_vehicle')->where('is_occupied', false)->orderBy('baris')->orderBy('kolom')->get(),
+            'gold' => DB::table('tbl_gadai_grid_gold')->where('is_occupied', false)->orderBy('baris')->orderBy('kolom')->get(),
+        ];
+
+        return view('admin.gadai_baru.create', compact('nasabahs', 'kategoriList', 'itemList', 'lokasiList', 'availableSlots'));
     }
 
     public function store(Request $request)
@@ -57,6 +63,7 @@ class AdminGadaiBaruController extends Controller
             'kategori_id' => 'required|exists:tbl_gadai_master_kategori,id',
             'item_id' => 'required|exists:tbl_gadai_master_item,id',
             'lokasi_id' => 'required|exists:jns_lokasi_perusahaan,id',
+            'slot_kode' => 'required|string',
             'nominal_deal' => 'required|numeric|min:1',
             'metode_pencairan' => 'required|in:cash,transfer',
             'foto_bukti.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
@@ -69,10 +76,17 @@ class AdminGadaiBaruController extends Controller
 
         $kategori = GadaiMasterKategori::findOrFail($request->kategori_id);
         
-        // Calculate Fees using item's bunga_high (or interpolate if needed)
-        // For now we use bunga_high as the default rate for this item
-        $rateJasa = $item->bunga_high > 0 ? $item->bunga_high : $kategori->rate_jasa;
+        // Calculate Fees
+        $rateJasa = $kategori->rate_jasa;
         $biayaJasa = ($request->nominal_deal * $rateJasa) / 100;
+
+        // Calculate Biaya Inap upfront (flat for vehicles, percentage for gold/electronics)
+        $biayaInap = 0;
+        if ($item->nominal_inap > 0) {
+            $biayaInap = $item->nominal_inap;
+        } else {
+            $biayaInap = ($request->nominal_deal * $kategori->rate_inap_persen) / 100;
+        }
         
         // Petty Cash Check & Mutasi (Uang keluar dari Admin ke Nasabah dari Modal Awal)
         $adminId = Auth::id();
@@ -84,7 +98,7 @@ class AdminGadaiBaruController extends Controller
         DB::beginTransaction();
         try {
             // Allocate Slot
-            $slotData = $this->allocateSlot($kategori->kode_kategori);
+            $slotData = $this->allocateSlot($kategori->kode_kategori, $request->slot_kode);
 
             $tglMulai = now();
             $tglJatuhTempo = now()->addDays($kategori->masa_gadai_hari)->endOfDay();
@@ -100,7 +114,7 @@ class AdminGadaiBaruController extends Controller
                 'nominal_deal' => $request->nominal_deal,
                 'biaya_jasa' => $biayaJasa,
                 'denda_aktif' => 0,
-                'biaya_inap' => 0,
+                'biaya_inap' => $biayaInap,
                 'tgl_mulai' => $tglMulai,
                 'tgl_jatuh_tempo' => $tglJatuhTempo,
                 'tgl_tenggang' => $tglTenggang,
@@ -166,17 +180,24 @@ class AdminGadaiBaruController extends Controller
         return view('admin.gadai_baru.detail', compact('gadai'));
     }
 
-    private function allocateSlot($kategoriKode)
+    private function allocateSlot($kategoriKode, $slotKode = null)
     {
         $table = $this->getGridTableName($kategoriKode);
         
-        $slot = DB::table($table)
-            ->where('is_occupied', false)
-            ->orderBy('baris', 'asc')
-            ->orderBy('kolom', 'asc')
-            ->first();
+        $query = DB::table($table)->where('is_occupied', false);
+        
+        if ($slotKode) {
+            $query->where('kode_slot', $slotKode);
+        } else {
+            $query->orderBy('baris', 'asc')->orderBy('kolom', 'asc');
+        }
+
+        $slot = $query->first();
             
         if (!$slot) {
+            if ($slotKode) {
+                throw new \Exception("Slot {$slotKode} tidak tersedia atau sudah terisi.");
+            }
             throw new \Exception("Kapasitas Penuh untuk kategori ini.");
         }
         
@@ -192,6 +213,118 @@ class AdminGadaiBaruController extends Controller
             case 'vehicle': return 'tbl_gadai_grid_vehicle';
             case 'gold': return 'tbl_gadai_grid_gold';
             default: throw new \Exception("Kategori tidak valid");
+        }
+    }
+
+    public function storage(Request $request)
+    {
+        $kategori = $request->get('kategori', 'electronic');
+        
+        $table = '';
+        switch ($kategori) {
+            case 'electronic': $table = 'tbl_gadai_grid_electronic'; break;
+            case 'vehicle': $table = 'tbl_gadai_grid_vehicle'; break;
+            case 'gold': $table = 'tbl_gadai_grid_gold'; break;
+            default: $table = 'tbl_gadai_grid_electronic'; break;
+        }
+
+        $grid = DB::table($table)
+            ->leftJoin('tbl_gadai_active', "$table.active_gadai_id", '=', 'tbl_gadai_active.id')
+            ->leftJoin('tbl_gadai_master_item', 'tbl_gadai_active.item_id', '=', 'tbl_gadai_master_item.id')
+            ->leftJoin('tbl_nasabah', 'tbl_gadai_active.nasabah_id', '=', 'tbl_nasabah.id')
+            ->leftJoin('users', 'tbl_nasabah.user_id', '=', 'users.id')
+            ->select(
+                "$table.*", 
+                'users.nama as nasabah_nama', 
+                'tbl_gadai_master_item.head_1 as item_nama', 
+                'tbl_gadai_active.status as gadai_status', 
+                'tbl_gadai_active.id as active_gadai_id'
+            )
+            ->orderBy('baris', 'desc')
+            ->orderBy('kolom', 'asc')
+            ->get();
+            
+        $groupedGrid = $grid->groupBy('baris');
+
+        return view('admin.gadai_baru.storage', compact('groupedGrid', 'kategori'));
+    }
+
+    public function emptyAuction(Request $request)
+    {
+        $request->validate([
+            'gadai_id' => 'required|exists:tbl_gadai_active,id',
+            'catatan' => 'required|string|min:5',
+            'foto_bukti' => 'required|array|min:1',
+            'foto_bukti.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+        ], [
+            'catatan.required' => 'Catatan alasan/detail pengambilan barang wajib diisi.',
+            'catatan.min' => 'Catatan minimal 5 karakter.',
+            'foto_bukti.required' => 'Wajib melampirkan minimal 1 foto bukti pengambilan.',
+            'foto_bukti.min' => 'Wajib melampirkan minimal 1 foto bukti pengambilan.',
+            'foto_bukti.*.image' => 'File bukti harus berupa foto/gambar.',
+            'foto_bukti.*.max' => 'Ukuran foto maksimal adalah 2MB.'
+        ]);
+
+        $gadai = GadaiActive::findOrFail($request->gadai_id);
+
+        if ($gadai->status !== 'expired_final') {
+            return back()->with('error', 'Barang gadai ini belum berstatus hangus, tidak bisa dikosongkan untuk lelang.');
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1. Update Grid Slot (Set occupied to false, active_gadai_id to null)
+            $table = '';
+            switch ($gadai->slot_table) {
+                case 'electronic': $table = 'tbl_gadai_grid_electronic'; break;
+                case 'vehicle': $table = 'tbl_gadai_grid_vehicle'; break;
+                case 'gold': $table = 'tbl_gadai_grid_gold'; break;
+                default: throw new \Exception("Kategori slot tidak valid.");
+            }
+
+            DB::table($table)->where('kode_slot', $gadai->slot_kode)->update([
+                'is_occupied' => false,
+                'active_gadai_id' => null
+            ]);
+
+            // 2. Create record for GadaiSlotLog (empty)
+            GadaiSlotLog::create([
+                'slot_kode' => $gadai->slot_kode,
+                'kategori' => $gadai->slot_table,
+                'aksi' => 'empty',
+                'gadai_active_id' => $gadai->id
+            ]);
+
+            // 3. Update Gadai Active status to 'auctioned'
+            $gadai->update([
+                'status' => 'auctioned'
+            ]);
+
+            // 4. Create History
+            GadaiHistory::create([
+                'gadai_active_id' => $gadai->id,
+                'aksi' => 'auction',
+                'catatan' => 'Barang diambil dari penyimpanan untuk proses lelang. Catatan: ' . $request->catatan
+            ]);
+
+            // 5. Save proof photos to tbl_gadai_files
+            if ($request->hasFile('foto_bukti')) {
+                foreach ($request->file('foto_bukti') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'lainnya'
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return back()->with('success', 'Barang pada slot ' . $gadai->slot_kode . ' berhasil diambil untuk dilelang dan kapasitas slot telah dikosongkan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 }

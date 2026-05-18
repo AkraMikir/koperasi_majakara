@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\GadaiMasterKategori;
+use App\Models\GadaiMasterInapKendaraan;
 use Illuminate\Http\Request;
 
 class MasterKategoriGadaiController extends Controller
@@ -18,14 +19,16 @@ class MasterKategoriGadaiController extends Controller
     public function index()
     {
         $data = GadaiMasterKategori::all();
-        return view('admin.master-data.kategori-gadai.index', compact('data'));
+        $inapKendaraans = GadaiMasterInapKendaraan::orderBy('golongan')->get();
+        return view('admin.master-data.kategori-gadai.index', compact('data', 'inapKendaraans'));
     }
 
     public function edit($id)
     {
         $this->checkCrudPermission();
         $data = GadaiMasterKategori::findOrFail($id);
-        return view('admin.master-data.kategori-gadai.edit', compact('data'));
+        $inapKendaraans = GadaiMasterInapKendaraan::orderBy('golongan')->get();
+        return view('admin.master-data.kategori-gadai.edit', compact('data', 'inapKendaraans'));
     }
 
     public function update(Request $request, $id)
@@ -43,6 +46,21 @@ class MasterKategoriGadaiController extends Controller
 
         $data = GadaiMasterKategori::findOrFail($id);
         $data->update($request->all());
+
+        // Update Master Inap Kendaraan if category is vehicle and present in request
+        if ($request->has('update_inap_kendaraan') && $data->kode_kategori === 'vehicle') {
+            $inapData = $request->input('inap', []);
+            foreach ($inapData as $inapId => $fields) {
+                $inapRecord = GadaiMasterInapKendaraan::find($inapId);
+                if ($inapRecord) {
+                    $inapRecord->update([
+                        'jenis_kendaraan' => $fields['jenis_kendaraan'],
+                        'nominal_inap' => $fields['nominal_inap'],
+                        'keterangan' => $fields['keterangan'] ?? null,
+                    ]);
+                }
+            }
+        }
 
         return redirect()->route('admin.master-data.kategori-gadai.index')
             ->with('success', 'Kategori Gadai berhasil diupdate');

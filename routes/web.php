@@ -140,6 +140,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
         Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
         Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
+        Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');
         Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
         
         // Pengajuan Pembayaran/Perpanjangan
@@ -262,6 +263,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
                 Route::put('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'update'])->name('update');
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'destroy'])->name('destroy');
+            });
+        });
+
+        // Inap Kendaraan
+        Route::prefix('inap-kendaraan')->name('inap-kendaraan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'index'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'update'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterInapKendaraanController::class, 'destroy'])->name('destroy');
             });
         });
         
@@ -394,6 +407,13 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanDestroy'])->name('destroy');
                 Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'lokasiPerusahaanToggleStatus'])->name('toggle-status');
             });
+        });
+
+        // Slot Storage Grid (Master Data)
+        Route::prefix('slot-storage')->name('slot-storage.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'index'])->name('index');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'store'])->name('store');
+            Route::post('/reduce', [\App\Http\Controllers\Admin\MasterSlotStorageController::class, 'reduce'])->name('reduce');
         });
         
         // Jenis Deposito
@@ -564,6 +584,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     // Gadai Baru Routes
     Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
         Route::get('/', [\App\Http\Controllers\AdminGadaiBaruController::class, 'index'])->name('index');
+        Route::get('/storage', [\App\Http\Controllers\AdminGadaiBaruController::class, 'storage'])->name('storage');
+        Route::post('/storage/empty-auction', [\App\Http\Controllers\AdminGadaiBaruController::class, 'emptyAuction'])->name('storage.empty-auction');
         Route::get('/create', [\App\Http\Controllers\AdminGadaiBaruController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\AdminGadaiBaruController::class, 'store'])->name('store');
         Route::get('/{id}', [\App\Http\Controllers\AdminGadaiBaruController::class, 'detail'])->name('detail');

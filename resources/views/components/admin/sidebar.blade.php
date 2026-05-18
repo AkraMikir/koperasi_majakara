@@ -258,6 +258,10 @@ $pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
                         class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.create' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         <span>Tambah Gadai</span>
                     </a>
+                    <a href="{{ route('admin.gadai_baru.storage') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.storage' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Penyimpanan Gadai</span>
+                    </a>
                     <a href="{{ route('admin.gadai_baru.pengajuan.index') }}"
                         class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.pengajuan.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         <span>Verifikasi Pengajuan</span>

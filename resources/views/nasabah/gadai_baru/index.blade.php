@@ -27,6 +27,30 @@
         </div>
     </div>
 
+    @if(session('success'))
+    <div class="mx-4 mb-6">
+        <div class="bg-green-50 border border-green-200 rounded-2xl p-4 text-green-700 text-sm font-bold shadow-sm">
+            {{ session('success') }}
+        </div>
+    </div>
+    @endif
+
+    @if(session('warning'))
+    <div class="mx-4 mb-6">
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 text-amber-700 text-sm font-bold shadow-sm">
+            {{ session('warning') }}
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mx-4 mb-6">
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-4 text-red-700 text-sm font-bold shadow-sm">
+            {{ session('error') }}
+        </div>
+    </div>
+    @endif
+
     <!-- Dashboard Section -->
     <div class="mx-4 mb-8">
         <div class="flex items-center justify-between mb-4">
@@ -64,13 +88,25 @@
                                 <span class="w-1 h-1 rounded-full bg-gray-300"></span>
                                 <span class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest">Slot {{ $gadai->slot_kode }}</span>
                             </div>
-                            <h3 class="font-black text-gray-900 text-xl tracking-tight leading-none">{{ $gadai->item->nama_item }}</h3>
+                            <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="group/title flex items-center gap-1.5">
+                                <h3 class="font-black text-gray-900 text-xl tracking-tight leading-none group-hover/title:text-[#674c1d] transition-colors">{{ $gadai->item->head_1 ?? $gadai->item->nama_item }}</h3>
+                                <svg class="w-4 h-4 text-gray-400 group-hover/title:text-[#674c1d] group-hover/title:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                            @if($gadai->item->head_2)
+                                <p class="text-[10px] text-gray-400 mt-1.5 italic">{{ $gadai->item->head_2 }}</p>
+                            @endif
                         </div>
-                        @if($isTenggang)
-                            <span class="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-200">TENGGANG</span>
-                        @else
-                            <span class="bg-[#674c1d] text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-200">AKTIF</span>
-                        @endif
+                        <div class="flex flex-col items-end gap-2 shrink-0">
+                            @if($isTenggang)
+                                <span class="bg-red-600 text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-red-200">TENGGANG</span>
+                            @else
+                                <span class="bg-[#674c1d] text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shadow-amber-200">AKTIF</span>
+                            @endif
+                            <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest hover:underline flex items-center gap-1">
+                                Rincian
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
                     </div>
                     
                     <div class="grid grid-cols-2 gap-4 mb-6">

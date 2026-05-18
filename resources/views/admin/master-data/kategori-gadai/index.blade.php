@@ -45,7 +45,28 @@
                             <span class="px-2 py-1 bg-red-50 text-red-700 rounded font-bold">{{ $kat->rate_denda }}%</span>
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <span class="px-2 py-1 bg-amber-50 text-amber-700 rounded font-bold">{{ $kat->rate_inap_persen }}%</span>
+                            @if($kat->kode_kategori === 'vehicle')
+                                <div class="inline-block border border-indigo-100 rounded-xl overflow-hidden shadow-sm max-w-xs mx-auto text-left">
+                                    <table class="w-full text-[11px]">
+                                        <thead class="bg-indigo-50/70 font-bold text-indigo-700">
+                                            <tr>
+                                                <th class="px-2.5 py-1 text-[8px] uppercase tracking-wider">Gol</th>
+                                                <th class="px-2.5 py-1 text-[8px] uppercase tracking-wider text-right">Tarif Inap</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="divide-y divide-indigo-50">
+                                            @foreach($inapKendaraans as $inap)
+                                                <tr class="bg-white hover:bg-indigo-50/20 transition-colors">
+                                                    <td class="px-2.5 py-1 font-bold text-gray-700 uppercase">Gol {{ $inap->golongan }}</td>
+                                                    <td class="px-2.5 py-1 text-right font-black text-indigo-600">Rp {{ number_format($inap->nominal_inap, 0, ',', '.') }}</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                </div>
+                            @else
+                                <span class="px-2 py-1 bg-amber-50 text-amber-700 rounded font-bold">{{ $kat->rate_inap_persen }}%</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-center">
                             <p class="text-sm font-medium text-gray-700">{{ $kat->masa_gadai_hari }} Hari</p>

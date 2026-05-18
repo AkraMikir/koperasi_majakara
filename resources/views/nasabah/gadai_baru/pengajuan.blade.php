@@ -23,32 +23,74 @@
                         <p class="text-2xl font-black text-amber-900">Rp {{ number_format($nominal, 0, ',', '.') }}</p>
                     </div>
                 </div>
-                <div class="text-sm text-amber-800 space-y-1 pt-3 border-t border-amber-200/50">
+                <div class="text-sm text-amber-800 space-y-1.5 pt-3 border-t border-amber-200/50">
                     <div class="flex justify-between">
-                        <span>Pokok Pinjaman:</span>
-                        <span>Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</span>
+                        <span class="font-medium">Pokok Pinjaman:</span>
+                        <span class="font-bold text-amber-950">Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</span>
                     </div>
                     <div class="flex justify-between">
-                        <span>Biaya Jasa:</span>
-                        <span>Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</span>
+                        <div class="flex flex-col">
+                            <span class="font-medium">Biaya Jasa Admin:</span>
+                            <span class="text-[9px] text-[#674c1d]/70 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_jasa, 2) }}%</span>
+                        </div>
+                        <span class="font-bold text-amber-950">Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</span>
                     </div>
                     @if($gadai->denda_aktif > 0)
-                    <div class="flex justify-between text-red-600">
-                        <span>Denda:</span>
-                        <span>Rp {{ number_format($gadai->denda_aktif, 0, ',', '.') }}</span>
+                    <div class="flex justify-between text-red-700">
+                        <div class="flex flex-col">
+                            <span class="font-medium">Denda Keterlambatan:</span>
+                            <span class="text-[9px] text-red-500 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_denda, 2) }}%</span>
+                        </div>
+                        <span class="font-bold">Rp {{ number_format($gadai->denda_aktif, 0, ',', '.') }}</span>
                     </div>
                     @endif
                     @if($gadai->biaya_inap > 0)
-                    <div class="flex justify-between text-orange-600">
-                        <span>Biaya Inap:</span>
-                        <span>Rp {{ number_format($gadai->biaya_inap, 0, ',', '.') }}</span>
+                    <div class="flex justify-between text-amber-900">
+                        <div class="flex flex-col">
+                            <span class="font-medium">Biaya Inap:</span>
+                            @if($gadai->item->nominal_inap > 0)
+                                <span class="text-[9px] text-amber-600 font-bold">Tarif Flat (Kendaraan): Rp {{ number_format($gadai->item->nominal_inap, 0, ',', '.') }}</span>
+                            @else
+                                <span class="text-[9px] text-amber-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_inap_persen, 2) }}% dari Taksiran</span>
+                            @endif
+                        </div>
+                        <span class="font-bold">Rp {{ number_format($gadai->biaya_inap, 0, ',', '.') }}</span>
                     </div>
                     @endif
                 </div>
             </div>
 
-            <form action="{{ route('nasabah.gadai_baru.store-pengajuan', ['id' => $gadai->id, 'jenis' => $jenis]) }}" method="POST" enctype="multipart/form-data" class="space-y-6" onsubmit="document.getElementById('btnSubmit').disabled=true; document.getElementById('btnSubmit').innerHTML='Mengolah...';">
+            @if(session('error'))
+            <div class="mb-6">
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <p class="text-red-700 text-sm">{{ session('error') }}</p>
+                </div>
+            </div>
+            @endif
+
+            @if($errors->any())
+            <div class="mb-6">
+                <div class="bg-red-50 border border-red-200 rounded-xl p-4">
+                    <div class="flex items-start">
+                        <svg class="w-5 h-5 text-red-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div>
+                            <p class="text-red-700 text-sm font-semibold mb-1">Terjadi kesalahan:</p>
+                            <ul class="list-disc list-inside text-red-600 text-xs space-y-1">
+                                @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <form action="{{ route('nasabah.gadai_baru.store-pengajuan', ['id' => $gadai->id, 'jenis' => $jenis]) }}" method="POST" enctype="multipart/form-data" class="space-y-6" id="form-pengajuan">
                 @csrf
+                <input type="hidden" name="pin" id="pin-hidden-input">
                 
                 <!-- Pilih Metode -->
                 <div>
@@ -121,7 +163,7 @@
                 </div>
 
                 <div class="pt-4">
-                    <button type="submit" class="w-full bg-[#674c1d] hover:bg-[#543e18] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-amber-200 flex items-center justify-center gap-2">
+                    <button type="button" onclick="showPinModal()" id="btnSubmit" class="w-full bg-[#674c1d] hover:bg-[#543e18] text-white font-bold py-4 rounded-2xl transition-all shadow-lg shadow-amber-200 flex items-center justify-center gap-2">
                         <span>Kirim Pengajuan {{ ucfirst($jenis) }}</span>
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                     </button>
@@ -179,11 +221,111 @@
         });
     }
     
+    function showPinModal() {
+        const form = document.getElementById('form-pengajuan');
+        if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+        }
+
+        // Validate files for transfer
+        const metode = document.querySelector('input[name="metode"]:checked').value;
+        if (metode === 'transfer') {
+            const fileInputs = form.querySelectorAll('input[type="file"]');
+            let hasFile = false;
+            for (let input of fileInputs) {
+                if (input.files && input.files[0]) {
+                    hasFile = true;
+                    if (input.files[0].size > 2 * 1024 * 1024) {
+                        alert('Ukuran file ' + input.files[0].name + ' terlalu besar. Maksimal 2MB.');
+                        return;
+                    }
+                }
+            }
+            if (!hasFile) {
+                alert('Silakan tambahkan minimal 1 bukti transfer.');
+                return;
+            }
+        }
+
+        document.getElementById('pin-modal').classList.remove('hidden');
+        document.getElementById('pin-modal').classList.add('flex');
+        document.getElementById('pin-input').value = '';
+        document.getElementById('pin-error').classList.add('hidden');
+        document.getElementById('pin-input').focus();
+    }
+
+    function closePinModal() {
+        document.getElementById('pin-modal').classList.add('hidden');
+        document.getElementById('pin-modal').classList.remove('flex');
+    }
+
+    function verifyAndSubmit() {
+        const pin = document.getElementById('pin-input').value;
+
+        if (pin.length !== 6) {
+            showPinError('PIN harus 6 digit');
+            return;
+        }
+
+        document.getElementById('pin-hidden-input').value = pin;
+        closePinModal();
+        
+        // Show loading state on btnSubmit
+        const btnSubmit = document.getElementById('btnSubmit');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = 'Mengolah...';
+        
+        document.getElementById('form-pengajuan').submit();
+    }
+
+    function showPinError(message) {
+        const errorDiv = document.getElementById('pin-error');
+        errorDiv.querySelector('p').textContent = message;
+        errorDiv.classList.remove('hidden');
+    }
+    
     // Set initial state
     document.addEventListener('DOMContentLoaded', function() {
         toggleMetode('cash');
     });
 </script>
+
+<!-- PIN Modal -->
+<div id="pin-modal" class="fixed inset-0 bg-black/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+        <div class="flex items-center justify-between mb-6">
+            <h3 class="text-lg font-bold text-gray-900">Verifikasi PIN Transaksi</h3>
+            <button type="button" onclick="closePinModal()" class="text-gray-400 hover:text-gray-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <div id="pin-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-red-700 text-sm"></p>
+        </div>
+
+        <div class="mb-6">
+            <label class="block text-sm font-semibold text-gray-700 mb-2">PIN Keamanan (6 digit)</label>
+            <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
+                class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-center text-2xl font-mono tracking-widest"
+                placeholder="••••••" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+        </div>
+
+        <div class="flex gap-3">
+            <button type="button" onclick="closePinModal()"
+                class="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50">
+                Batal
+            </button>
+            <button type="button" onclick="verifyAndSubmit()"
+                class="flex-1 px-4 py-3 bg-[#674c1d] hover:bg-[#543e18] text-white rounded-xl font-semibold">
+                Verifikasi
+            </button>
+        </div>
+    </div>
+</div>
 
 <style>
     .peer:checked + label {
