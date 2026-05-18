@@ -60,8 +60,8 @@
                 <p class="text-xs text-gray-400 mt-0.5">Data aktif</p>
             </a>
 
-            {{-- Barang Gadai --}}
-            <a href="{{ route('admin.master-data.barang-gadai.index') }}"
+            {{-- Item Gadai --}}
+            <a href="{{ route('admin.master-data.item-gadai.index') }}"
                 class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-[#674c1d]/30 transition-all duration-200">
                 <div class="flex items-start justify-between mb-3">
                     <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center shadow-sm">
@@ -74,8 +74,26 @@
                     </svg>
                 </div>
                 <p class="text-2xl font-bold text-gray-900 mb-0.5">{{ $stats['total_barang_gadai'] }}</p>
-                <p class="text-sm font-medium text-gray-700">Barang Gadai</p>
+                <p class="text-sm font-medium text-gray-700">Item Gadai</p>
                 <p class="text-xs text-gray-400 mt-0.5">Jenis barang</p>
+            </a>
+
+            {{-- Kategori Gadai --}}
+            <a href="{{ route('admin.master-data.kategori-gadai.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-[#674c1d]/30 transition-all duration-200">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center shadow-sm">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                        </svg>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors mt-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </div>
+                <p class="text-2xl font-bold text-gray-900 mb-0.5">{{ $stats['total_kategori_gadai'] ?? 0 }}</p>
+                <p class="text-sm font-medium text-gray-700">Kategori Gadai</p>
+                <p class="text-xs text-gray-400 mt-0.5">Aturan jasa/denda</p>
             </a>
 
             {{-- Lokasi Perusahaan --}}
@@ -338,7 +356,24 @@
                 <h2 class="text-white font-bold text-base">Gadai & Operasional</h2>
             </div>
             <div class="p-4 space-y-2">
-                <a href="{{ route('admin.master-data.barang-gadai.index') }}"
+                <a href="{{ route('admin.master-data.kategori-gadai.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
+                            <svg class="w-4.5 h-4.5 text-blue-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Kategori Gadai</p>
+                            <p class="text-xs text-gray-400">Atur bunga & denda</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                <a href="{{ route('admin.master-data.item-gadai.index') }}"
                     class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
@@ -347,8 +382,8 @@
                             </svg>
                         </div>
                         <div>
-                            <p class="text-sm font-semibold text-gray-800">Barang Gadai</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_barang_gadai'] }} jenis barang</p>
+                            <p class="text-sm font-semibold text-gray-800">Item Gadai</p>
+                            <p class="text-xs text-gray-400">{{ $stats['total_barang_gadai'] }} jenis item</p>
                         </div>
                     </div>
                     <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -411,6 +446,25 @@
                         </div>
                     </div>
                     <svg class="w-4 h-4 text-[#674c1d] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                
+                <!-- Gadai Debugger (Time Travel) -->
+                <a href="{{ route('admin.master-data.gadai-debugger.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Gadai Debugger</p>
+                            <p class="text-xs text-indigo-600 font-bold">Time Travel & Testing</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>

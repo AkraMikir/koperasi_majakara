@@ -32,6 +32,13 @@
                 </svg>
                 Tarik Saldo
             </button>
+            <button onclick="openModal('modalTransferInternal')"
+                    class="px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-semibold hover:bg-amber-700 transition-all flex items-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/>
+                </svg>
+                Pindah Dana ke Modal
+            </button>
         </div>
     </div>
 
@@ -111,8 +118,8 @@
                 'tabungan' => ['Tabungan', 'purple', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
                 'pinjaman' => ['Pinjaman', 'blue', 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4'],
                 'deposito' => ['Deposito', 'amber', 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                'petty_cash' => ['Petty (Clearing)', 'emerald', 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z'],
-                'other' => ['Modal Awal', 'amber', 'M12 6v6m0 0v6m0-6h6m-6 0H6'],
+                'gadai'    => ['Gadai', 'indigo', 'M13 10V3L4 14h7v7l9-11h-7z'],
+                'other'    => ['Modal Awal', 'amber', 'M12 6v6m0 0v6m0-6h6m-6 0H6'],
             ];
         @endphp
 
@@ -158,6 +165,7 @@
                     <option value="tabungan" {{ request('sumber') == 'tabungan' ? 'selected' : '' }}>Tabungan</option>
                     <option value="pinjaman" {{ request('sumber') == 'pinjaman' ? 'selected' : '' }}>Pinjaman</option>
                     <option value="deposito" {{ request('sumber') == 'deposito' ? 'selected' : '' }}>Deposito</option>
+                    <option value="gadai" {{ request('sumber') == 'gadai' ? 'selected' : '' }}>Gadai</option>
                     <option value="petty_cash" {{ request('sumber') == 'petty_cash' ? 'selected' : '' }}>Petty Cash</option>
                     <option value="other" {{ request('sumber') == 'other' ? 'selected' : '' }}>Modal Awal</option>
                 </select>
@@ -203,6 +211,7 @@
                                         'tabungan' => ['bg-purple-100 text-purple-700', 'TABUNGAN'],
                                         'pinjaman' => ['bg-blue-100 text-blue-700', 'PINJAMAN'],
                                         'deposito' => ['bg-amber-100 text-amber-700', 'DEPOSITO'],
+                                        'gadai' => ['bg-indigo-100 text-indigo-700', 'GADAI'],
                                         'petty_cash' => ['bg-emerald-100 text-emerald-700', 'PETTY CASH'],
                                         'other' => ['bg-amber-100 text-amber-700', 'MODAL AWAL'],
                                     ];

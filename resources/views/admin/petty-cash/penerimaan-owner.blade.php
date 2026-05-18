@@ -174,35 +174,20 @@
                 @csrf
                 
                 <div>
-                    <label class="block text-xs font-black text-gray-800 uppercase tracking-[0.15em] mb-3">Pilih Sumber Dana <span class="text-red-500">*</span></label>
                     <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-[#674c1d] transition-colors">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400">
                             <i class="fas fa-layer-group text-lg"></i>
                         </div>
-                        <select name="sumber" id="select_sumber" required onchange="updateMaxValues()"
-                                class="block w-full pl-12 pr-4 py-4 text-base font-semibold border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50">
-                            <option value="">-- Pilih Sumber Saldo --</option>
-                            @php
-                                $sourceLabels = [
-                                    'tabungan' => 'Saldo Tabungan',
-                                    'pinjaman' => 'Saldo Pinjaman',
-                                    'deposito' => 'Saldo Deposito',
-                                    'petty_cash' => 'Saldo Petty Cash',
-                                    'other' => 'Modal Awal',
-                                ];
-                            @endphp
-                            @foreach($sourceLabels as $key => $label)
-                                @php
-                                    $det = (object)($sourceDetails[$key] ?? ['total_cash' => 0, 'total_tf' => 0]);
-                                    $totalSource = $det->total_cash + $det->total_tf;
-                                @endphp
-                                <option value="{{ $key }}" 
-                                        data-cash="{{ (float)$det->total_cash }}" 
-                                        data-tf="{{ (float)$det->total_tf }}">
-                                    {{ $label }} (Rp {{ number_format($totalSource, 0, ',', '.') }})
-                                </option>
-                            @endforeach
-                        </select>
+                        @php
+                            $detModal = (object)($sourceDetails['other'] ?? ['total_cash' => 0, 'total_tf' => 0]);
+                            $totalModal = $detModal->total_cash + $detModal->total_tf;
+                        @endphp
+                        <input type="text" readonly 
+                               value="Modal Awal (Tersedia: Rp {{ number_format($totalModal, 0, ',', '.') }})"
+                               class="block w-full pl-12 pr-4 py-4 text-base font-bold text-[#674c1d] border-gray-200 rounded-[1.25rem] bg-gray-50 cursor-not-allowed">
+                        <input type="hidden" name="sumber" id="select_sumber" value="other" 
+                               data-cash="{{ (float)$detModal->total_cash }}" 
+                               data-tf="{{ (float)$detModal->total_tf }}">
                     </div>
                 </div>
 
@@ -387,6 +372,7 @@
         const modal = document.getElementById('modalKirim');
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
+        updateMaxValues(); // Auto initialize max values for Modal Awal
     }
 
     function closeKirimModal() {
@@ -403,11 +389,10 @@
     }
 
     function updateMaxValues() {
-        const select = document.getElementById('select_sumber');
-        const selectedOption = select.options[select.selectedIndex];
+        const sourceInput = document.getElementById('select_sumber');
         
-        const maxCash = parseFloat(selectedOption.getAttribute('data-cash')) || 0;
-        const maxTf = parseFloat(selectedOption.getAttribute('data-tf')) || 0;
+        const maxCash = parseFloat(sourceInput.getAttribute('data-cash')) || 0;
+        const maxTf = parseFloat(sourceInput.getAttribute('data-tf')) || 0;
         
         const inputCash = document.getElementById('input_cash');
         const inputTf = document.getElementById('input_tf');

@@ -226,18 +226,48 @@ $pettyCashPendingCount = $sidebarStats['pettyCashCount'] ?? 0;
                 </div>
             </div>
 
-            <!-- Gadai -->
-            <a href="{{ route('admin.gadai.index') }}"
-                class="flex items-center px-4 py-3 rounded-xl transition-all duration-200 {{ $isActive('admin.gadai') }}">
-                <div class="w-10 h-10 flex items-center justify-center mr-3">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
-                        </path>
+            <!-- Gadai (expandable) -->
+            @php $isGadaiActive = str_starts_with($currentRoute, 'admin.gadai_baru'); @endphp
+            <div x-data="{ open: {{ $isGadaiActive ? 'true' : 'false' }} }" class="space-y-1">
+                <button type="button" @click="open = !open"
+                    class="w-full flex items-center justify-between px-4 py-3 rounded-xl transition-all duration-200 {{ $isGadaiActive ? 'bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white shadow-lg' : 'text-gray-700 hover:bg-gray-100' }}">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 flex items-center justify-center mr-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z">
+                                </path>
+                            </svg>
+                        </div>
+                        <span class="font-medium">Gadai</span>
+                    </div>
+                    <svg class="w-5 h-5 transition-transform duration-200" :class="{ 'rotate-180': open }" fill="none"
+                        stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                     </svg>
+                </button>
+                <div x-show="open" x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-1"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="pl-4 pr-2 pb-2 space-y-1 border-l-2 border-[#8b6f2f]/30 ml-6">
+                    <a href="{{ route('admin.gadai_baru.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Dashboard Gadai
+                    </a>
+                    <a href="{{ route('admin.gadai_baru.create') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.create' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Tambah Gadai</span>
+                    </a>
+                    <a href="{{ route('admin.gadai_baru.pengajuan.index') }}"
+                        class="flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.gadai_baru.pengajuan.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <span>Verifikasi Pengajuan</span>
+                        @php $pendingGadai = \App\Models\GadaiPengajuan::where('status','pending')->count(); @endphp
+                        @if($pendingGadai > 0)
+                        <span class="px-2 py-0.5 bg-amber-100 text-amber-800 text-xs font-bold rounded-full">{{ $pendingGadai }}</span>
+                        @endif
+                    </a>
                 </div>
-                <span class="font-medium">Gadai</span>
-            </a>
+            </div>
 
             <!-- Janji Temu (badge = data baru sejak terakhir dibuka) -->
             <a href="{{ route('admin.janji-temu.index') }}"

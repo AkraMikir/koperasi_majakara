@@ -15,6 +15,7 @@ class PettyCashSaldo extends Model
         'user_id',
         'role',
         'tipe',
+        'sumber',
         'mutasi',
         'saldo_akhir',
         'ref_id',
@@ -33,13 +34,17 @@ class PettyCashSaldo extends Model
     /**
      * Get current saldo for a user (last record).
      */
-    public static function getSaldo(int $userId, string $role = 'admin', string $tipe = null): float
+    public static function getSaldo(int $userId, string $role = 'admin', string $tipe = null, string $sumber = null): float
     {
         $query = static::where('user_id', $userId)
             ->where('role', $role);
             
         if ($tipe) {
             $query->where('tipe', $tipe);
+        }
+
+        if ($sumber) {
+            $query->where('sumber', $sumber);
         }
 
         $last = $query->latest('id')->first();
@@ -63,15 +68,17 @@ class PettyCashSaldo extends Model
         string $keterangan,
         string $refId = null,
         string $refTable = null,
-        string $tipe = 'cash'
+        string $tipe = 'cash',
+        string $sumber = 'other'
     ): self {
-        $saldoSekarang = static::getSaldo($userId, $role, $tipe);
+        $saldoSekarang = static::getSaldo($userId, $role, $tipe, $sumber);
         $saldoBaru     = $saldoSekarang + $mutasi;
 
         return static::create([
             'user_id'    => $userId,
             'role'       => $role,
             'tipe'       => $tipe,
+            'sumber'     => $sumber,
             'mutasi'     => $mutasi,
             'saldo_akhir'=> $saldoBaru,
             'ref_id'     => $refId,
@@ -83,31 +90,15 @@ class PettyCashSaldo extends Model
     /**
      * Helper to update or create saldo (compatible with previous implementation)
      */
-    public static function updateSaldo($userId, $tipe, $mutasi, $refId, $keterangan = '', $refTable = null)
+    public static function updateSaldo($userId, $tipe, $mutasi, $refId, $keterangan = '', $refTable = null, $sumber = 'other')
     {
-        $last = self::where('user_id', $userId)
-            ->where('role', 'admin')
-            ->where('tipe', $tipe)
-            ->latest('id')->first();
-            
-        $saldoAkhir = ($last ? (float)$last->saldo_akhir : 0) + $mutasi;
-        
-        return self::create([
-            'user_id' => $userId,
-            'role' => 'admin',
-            'tipe' => $tipe,
-            'mutasi' => $mutasi,
-            'saldo_akhir' => $saldoAkhir,
-            'ref_table' => $refTable ?: (request()->route('id') ? 'tbl_janji_temu_tabungan' : 'petty_cash_transaksi_nasabah'),
-            'ref_id' => $refId,
-            'keterangan' => $keterangan ?: 'Auto ' . ($mutasi > 0 ? 'Setoran' : 'Penarikan')
-        ]);
+        return static::buatMutasi($userId, 'admin', $mutasi, $keterangan ?: 'Auto', $refId, $refTable, $tipe, $sumber);
     }
 
     // Keep original updateOrCreateSaldo for compatibility
-    public static function updateOrCreateSaldo($userId, $role, $mutasi, $refId, $keterangan = '', $refTable = null, $tipe = 'cash')
+    public static function updateOrCreateSaldo($userId, $role, $mutasi, $refId, $keterangan = '', $refTable = null, $tipe = 'cash', $sumber = 'other')
     {
-        return static::buatMutasi($userId, $role, $mutasi, $keterangan ?: 'Auto', $refId, $refTable, $tipe);
+        return static::buatMutasi($userId, $role, $mutasi, $keterangan ?: 'Auto', $refId, $refTable, $tipe, $sumber);
     }
 
     /**
@@ -127,11 +118,11 @@ class PettyCashSaldo extends Model
     }
 
     /**
-     * Generic validation based on type.
+     * Generic validation based on type and source.
      */
-    public static function validatePenarikan($adminId, $nominal, $tipe = 'cash'): bool
+    public static function validatePenarikan($adminId, $nominal, $tipe = 'cash', $sumber = 'other'): bool
     {
-        return static::getSaldo($adminId, 'admin', $tipe) >= $nominal;
+        return static::getSaldo($adminId, 'admin', $tipe, $sumber) >= $nominal;
     }
 
     /**
@@ -144,12 +135,12 @@ class PettyCashSaldo extends Model
     }
 
     /**
-     * Validate if owner has enough balance for both cash and tf.
+     * Validate if owner has enough balance for both cash and tf in a specific source.
      */
-    public static function validateKirimOwner(int $ownerId, float $cash, float $tf): bool
+    public static function validateKirimOwner(int $ownerId, float $cash, float $tf, string $sumber = 'other'): bool
     {
-        $saldoCash = static::getSaldo($ownerId, 'owner', 'cash');
-        $saldoTf   = static::getSaldo($ownerId, 'owner', 'transfer');
+        $saldoCash = static::getSaldo($ownerId, 'owner', 'cash', $sumber);
+        $saldoTf   = static::getSaldo($ownerId, 'owner', 'transfer', $sumber);
         
         return $saldoCash >= $cash && $saldoTf >= $tf;
     }

@@ -46,7 +46,8 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nasabah</th>
                         <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Setoran</th>
                         <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Total Penarikan</th>
-                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Saldo</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Saldo Tertahan</th>
+                        <th class="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Saldo Tersedia</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Aksi</th>
                     </tr>
                 </thead>
@@ -64,6 +65,13 @@
                         </td>
                         <td class="px-6 py-4 text-right">
                             <span class="inline-block font-semibold text-rose-700">Rp {{ number_format($item->total_penarikan ?? 0, 0, ',', '.') }}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            @if(($item->saldo_hold ?? 0) > 0)
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-bold bg-amber-100 text-amber-700">Rp {{ number_format($item->saldo_hold, 0, ',', '.') }}</span>
+                            @else
+                                <span class="text-gray-400 text-xs">-</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-right">
                             <span class="inline-flex items-center px-3 py-1 rounded-lg font-bold text-[#674c1d] bg-[#674c1d]/10">Rp {{ number_format($item->saldo ?? 0, 0, ',', '.') }}</span>

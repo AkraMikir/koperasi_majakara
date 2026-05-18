@@ -229,7 +229,8 @@ class TabunganController extends Controller
                     $pettyId, 
                     'Setoran dari Pengajuan #' . $pengajuan->id,
                     'petty_cash_transaksi_nasabah',
-                    $pettyType
+                    $pettyType,
+                    'tabungan' // 🔥 Fix: Masuk ke Saldo Tabungan (Clearing)
                 );
             }
 
@@ -490,11 +491,11 @@ class TabunganController extends Controller
             // Generate ID using correct method
             $idTransaksi = IdGenerator::generate('trans_tabungan', 'T', $kodeVia, $kodeTrans);
 
-            // 🔥 INTEGRASI PETTY CASH: Validasi dan Pemotongan Saldo Transfer Admin
-            // Untuk penarikan via transfer, kita kurangi saldo transfer admin
+            // 🔥 INTEGRASI PETTY CASH: Validasi dan Pemotongan Saldo Transfer Admin (MODAL AWAL)
+            // Untuk penarikan via transfer, kita kurangi saldo transfer admin sumber MODAL AWAL
             if ($pengajuan->metode_transfer == 'transfer') {
-                if (!PettyCashSaldo::validatePenarikanTransfer(Auth::id(), $pengajuan->nominal)) {
-                    throw new \Exception('Saldo Transfer Petty Cash Anda tidak mencukupi untuk melakukan penarikan ini.');
+                if (!PettyCashSaldo::validatePenarikan(Auth::id(), $pengajuan->nominal, 'transfer', 'other')) {
+                    throw new \Exception('Saldo Transfer MODAL AWAL Anda tidak mencukupi untuk melakukan penarikan ini.');
                 }
 
                 PettyCashSaldo::updateSaldo(
@@ -503,7 +504,8 @@ class TabunganController extends Controller
                     -(float)$pengajuan->nominal, 
                     $pengajuan->id, 
                     'Penarikan Tabungan (Transfer): ' . ($pengajuan->nasabah->user->nama ?? 'Nasabah'),
-                    'tbl_pengajuan_penarikan_tabungan'
+                    'tbl_pengajuan_penarikan_tabungan',
+                    'other' // 🔥 Tetap Other karena ini pengeluaran (Modal Awal)
                 );
             }
 
@@ -713,12 +715,12 @@ class TabunganController extends Controller
 
         // 🔥 Tugas 4: Validasi saldo SEBELUM ada perubahan data (fail-fast)
         if ($isWithdrawal) {
-            // 1. Cek Saldo Admin (Petty Cash)
-            $saldoCash = PettyCashSaldo::getSaldoCash(Auth::id());
+            // 1. Cek Saldo Admin (Petty Cash MODAL AWAL)
+            $saldoCash = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'other');
             if ($saldoCash < $nominal) {
                 return redirect()->back()
                     ->with('error', sprintf(
-                        'Saldo CASH Anda tidak mencukupi. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                        'Saldo CASH MODAL AWAL Anda tidak mencukupi. Dibutuhkan: Rp %s | Tersedia: Rp %s',
                         number_format($nominal, 0, ',', '.'),
                         number_format($saldoCash, 0, ',', '.')
                     ))
@@ -789,7 +791,7 @@ class TabunganController extends Controller
                 }
             }
 
-            // 🔥 Tugas 4: Pemotongan Saldo Petty Cash Admin (CASH) — sudah tervalidasi di atas
+            // 🔥 Tugas 4: Pemotongan Saldo Petty Cash Admin (CASH MODAL AWAL) — sudah tervalidasi di atas
             if ($isWithdrawal) {
                 PettyCashSaldo::updateSaldo(
                     Auth::id(),
@@ -797,7 +799,8 @@ class TabunganController extends Controller
                     -$nominal,
                     $janjiTemu->id,
                     'Penarikan Tunai: ' . ($janjiTemu->nasabah->user->nama ?? 'Nasabah'),
-                    'tbl_janji_temu_tabungan'
+                    'tbl_janji_temu_tabungan',
+                    'other'
                 );
             }
 
@@ -1044,7 +1047,9 @@ class TabunganController extends Controller
 
         // Calculate saldo for each nasabah
         $nasabah->getCollection()->transform(function($item) {
-            $item->saldo = $this->getSaldoNasabah($item->id);
+            $saldoData = $this->getSaldoNasabah($item->id, true); // true = return detail
+            $item->saldo = $saldoData['saldo'];
+            $item->saldo_hold = $saldoData['hold'];
             $item->total_setoran = TransTabungan::where('id_anggota', $item->id)
                 ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
                 ->sum('nominal') ?? 0;
@@ -1060,7 +1065,7 @@ class TabunganController extends Controller
     /**
      * Get saldo nasabah.
      */
-    private function getSaldoNasabah($idAnggota)
+    private function getSaldoNasabah($idAnggota, $returnDetail = false)
     {
         // Hitung dari trans_tabungan yang sudah ada
         $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
@@ -1078,7 +1083,7 @@ class TabunganController extends Controller
             ->whereDoesntHave('transTabungan')
             ->sum('nominal') ?? 0;
 
-        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
+        $rawSaldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
 
         // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
         $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
@@ -1086,7 +1091,16 @@ class TabunganController extends Controller
             ->where('metode_setor', 'saldo_tabungan')
             ->sum('nominal') ?? 0;
 
-        return max(0, $saldo - $pendingDepositoTabungan);
+        $finalSaldo = max(0, $rawSaldo - $pendingDepositoTabungan);
+
+        if ($returnDetail) {
+            return [
+                'saldo' => $finalSaldo,
+                'hold'  => $pendingDepositoTabungan
+            ];
+        }
+
+        return $finalSaldo;
     }
 
     /**

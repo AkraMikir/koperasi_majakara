@@ -99,88 +99,63 @@
                     </td>
                     <td class="px-4 py-3">
                         @if($p->status === 'pending')
-                        {{-- STAGE 1: OWNER INITIATION --}}
-                        <button type="button"
-                            onclick="document.getElementById('modal-init-{{ $p->id }}').classList.remove('hidden')"
-                            class="inline-flex items-center gap-1 bg-blue-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-blue-700 transition font-semibold">
-                            Kirim Dana ke Admin
-                        </button>
-
-                        {{-- Modal Init --}}
-                        <div id="modal-init-{{ $p->id }}" class="hidden fixed inset-0 bg-gray-800/60 z-50 flex items-center justify-center px-4">
-                            <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                                <h3 class="font-bold text-gray-800 text-lg mb-2">Inisiasi Pencairan Tabungan</h3>
-                                <p class="text-sm text-gray-600 mb-4">
-                                    Pilih Admin Operasional yang akan mengelola pencairan deposito <strong>{{ $dep?->nomor_deposito }}</strong> senilai
-                                    <strong class="text-[#674c1d]">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</strong>.
-                                </p>
-                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.proses', $p->id) }}">
-                                    @csrf
-                                    <div class="mb-4">
-                                        <label class="block text-xs font-semibold text-gray-600 mb-1.5">Pilih Admin Penerima Dana</label>
-                                        <select name="admin_id" required class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none">
-                                            <option value="">-- Pilih Admin --</option>
-                                            @foreach($admins as $adm)
-                                                <option value="{{ $adm->id }}">{{ $adm->nama }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="mb-4">
-                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Catatan (opsional)</label>
-                                        <input type="text" name="catatan" placeholder="Catatan untuk admin…"
-                                            class="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-[#674c1d]">
-                                    </div>
-                                    <div class="flex gap-3">
-                                        <button type="submit"
-                                            class="flex-1 bg-blue-600 text-white py-2 rounded-xl text-sm font-bold hover:bg-blue-700 transition">
-                                            ✓ Kirim Dana
-                                        </button>
-                                        <button type="button"
-                                            onclick="document.getElementById('modal-init-{{ $p->id }}').classList.add('hidden')"
-                                            class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
-                                            Batal
-                                        </button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-
+                            {{-- NEW: DIRECT APPROVAL (For Admin Operasional) --}}
+                            @if(auth()->user()->role === 'admin_operasional')
+                            <button type="button"
+                                onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.remove('hidden')"
+                                class="inline-flex items-center gap-1 bg-[#674c1d] text-white text-xs px-3 py-1.5 rounded-lg hover:bg-[#8b6f2f] transition font-semibold">
+                                Proses Langsung
+                            </button>
+                            @endif
                         @elseif($p->status === 'diproses')
-                        {{-- STAGE 2: ADMIN FINALIZATION --}}
-                        <button type="button"
-                            onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.remove('hidden')"
-                            class="inline-flex items-center gap-1 bg-green-600 text-white text-xs px-3 py-1.5 rounded-lg hover:bg-green-700 transition font-semibold">
-                            Selesaikan (Update Tabungan)
-                        </button>
+                        @else
+                            <a href="{{ route('admin.deposito.deposito-detail', $p->deposito_id) }}"
+                                class="text-xs text-[#674c1d] hover:underline">Lihat Detail</a>
+                        @endif
 
-                        {{-- Modal Finish --}}
+                      
+
+                        {{-- Modal Finish (Shared) --}}
+                        @if($p->status === 'pending' || $p->status === 'diproses')
                         <div id="modal-finish-{{ $p->id }}" class="hidden fixed inset-0 bg-gray-800/60 z-50 flex items-center justify-center px-4">
                             <div class="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-                                <h3 class="font-bold text-gray-800 text-lg mb-2">Finalisasi Pencairan Tabungan</h3>
-                                <p class="text-sm text-gray-600 mb-4">
-                                    Konfirmasi penambahan saldo tabungan nasabah sebesar <strong class="text-green-600">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</strong>.
-                                    Pastikan Anda sudah menerima dana dari Owner di menu Petty Cash.
-                                </p>
-                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.finish', $p->id) }}">
+                                <h3 class="font-bold text-gray-800 text-lg mb-4 text-center">Finalisasi Tabungan</h3>
+
+                                @if($p->status === 'pending')
+                                <div class="bg-amber-50 text-amber-800 text-[10px] p-3 rounded-xl mb-4 border border-amber-200 uppercase font-bold tracking-tighter">
+                                    Proses Langsung (Gunakan Modal Awal)
+                                </div>
+                                @endif
+
+                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.finish', $p->id) }}" enctype="multipart/form-data">
                                     @csrf
-                                    <div class="flex gap-3 mt-6">
-                                        <button type="submit"
-                                            class="flex-1 bg-green-600 text-white py-2 rounded-xl text-sm font-bold hover:bg-green-700 transition">
+                                    <div class="mb-4">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nominal Akhir</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">Rp</span>
+                                            <input type="number" name="nominal_akhir" value="{{ round($p->nominal_akhir) }}"
+                                                class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-[#674c1d] outline-none">
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-5">
+                                        <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Upload Bukti</label>
+                                        <input type="file" name="foto_bukti_tf" accept="image/*"
+                                            class="w-full text-xs text-gray-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer">
+                                    </div>
+
+                                    <div class="flex gap-3">
+                                        <button type="submit" class="flex-1 bg-green-600 text-white py-3 rounded-xl text-sm font-bold hover:bg-green-700 transition shadow-lg">
                                             ✓ Konfirmasi Selesai
                                         </button>
-                                        <button type="button"
-                                            onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.add('hidden')"
-                                            class="flex-1 bg-gray-100 text-gray-700 py-2 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
+                                        <button type="button" onclick="document.getElementById('modal-finish-{{ $p->id }}').classList.add('hidden')"
+                                            class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl text-sm font-bold hover:bg-gray-200 transition">
                                             Batal
                                         </button>
                                     </div>
                                 </form>
                             </div>
                         </div>
-
-                        @else
-                        <a href="{{ route('admin.deposito.deposito-detail', $p->deposito_id) }}"
-                            class="text-xs text-[#674c1d] hover:underline">Lihat Detail</a>
                         @endif
                     </td>
                 </tr>

@@ -136,13 +136,16 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
     });
 
-    // Gadai Routes
-    Route::prefix('gadai')->name('gadai.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Nasabah\GadaiController::class, 'index'])->name('index');
-        Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\GadaiController::class, 'pengajuan'])->name('pengajuan');
-        Route::post('/pengajuan', [\App\Http\Controllers\Nasabah\GadaiController::class, 'submitPengajuan'])->name('submit-pengajuan');
-        Route::get('/aktif/{id}', [\App\Http\Controllers\Nasabah\GadaiController::class, 'detail'])->name('detail');
-        Route::get('/riwayat', [\App\Http\Controllers\Nasabah\GadaiController::class, 'riwayat'])->name('riwayat');
+            // Gadai Baru Routes
+    Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
+        Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
+        Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
+        
+        // Pengajuan Pembayaran/Perpanjangan
+        Route::get('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'createPengajuan'])->name('create-pengajuan');
+        Route::post('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'storePengajuan'])->name('store-pengajuan');
+        Route::get('/status-pengajuan', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'statusPengajuan'])->name('status-pengajuan');
     });
 });
 
@@ -250,6 +253,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'index'])->name('index');
         
+        // Item Gadai Baru
+        Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'update'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'destroy'])->name('destroy');
+            });
+        });
+        
         // Bunga Pinjaman
         Route::prefix('bunga-pinjaman')->name('bunga-pinjaman.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanIndex'])->name('index');
@@ -345,6 +360,27 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'barangGadaiDestroy'])->name('destroy');
             });
         });
+
+        // Kategori Gadai
+        Route::prefix('kategori-gadai')->name('kategori-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterKategoriGadaiController::class, 'index'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterKategoriGadaiController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterKategoriGadaiController::class, 'update'])->name('update');
+            });
+        });
+
+        // Item Gadai
+        Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'update'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'destroy'])->name('destroy');
+            });
+        });
         
         // Lokasi Perusahaan
         Route::prefix('lokasi-perusahaan')->name('lokasi-perusahaan.')->group(function () {
@@ -410,6 +446,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalDestroy'])->name('destroy');
             Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'adminOperasionalToggleStatus'])->name('toggle-status');
         });
+
+        // Debugger Gadai (Testing Time Travel) - ONLY Admin Utama
+        Route::prefix('gadai-debugger')->name('gadai-debugger.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerIndex'])->name('index');
+            Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerMajuHari'])->name('maju-hari');
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
@@ -459,6 +501,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/owner-wallet', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'index'])->name('owner-wallet.index');
         Route::post('/owner-wallet', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'store'])->name('owner-wallet.store');
         Route::post('/owner-wallet/withdraw', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'withdraw'])->name('owner-wallet.withdraw');
+        Route::post('/owner-wallet/internal-transfer', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'internalTransfer'])->name('owner-wallet.internal-transfer');
         Route::delete('/owner-wallet/{id}', [\App\Http\Controllers\Admin\OwnerWalletController::class, 'destroy'])->name('owner-wallet.destroy');
 
         // ── Verifikasi Setoran (Owner) ──
@@ -517,6 +560,23 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::post('/{id}/send-dana', [\App\Http\Controllers\Admin\DepositoController::class, 'sendDanaPersiapan'])->name('send-dana');
         });
     });
+
+    // Gadai Baru Routes
+    Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\AdminGadaiBaruController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\AdminGadaiBaruController::class, 'create'])->name('create');
+        Route::post('/store', [\App\Http\Controllers\AdminGadaiBaruController::class, 'store'])->name('store');
+        Route::get('/{id}', [\App\Http\Controllers\AdminGadaiBaruController::class, 'detail'])->name('detail');
+        Route::post('/{id}/perpanjang', [\App\Http\Controllers\GadaiBaruActionController::class, 'perpanjang'])->name('perpanjang');
+        Route::post('/{id}/lunas', [\App\Http\Controllers\GadaiBaruActionController::class, 'lunas'])->name('lunas');
+        Route::post('/{id}/lelang', [\App\Http\Controllers\GadaiBaruActionController::class, 'lelang'])->name('lelang');
+
+        // Pengajuan Nasabah (Antrean Verifikasi)
+        Route::get('/pengajuan/list', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'index'])->name('pengajuan.index');
+        Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'approve'])->name('pengajuan.approve');
+        Route::post('/pengajuan/{id}/reject', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'reject'])->name('pengajuan.reject');
+    });
+
     Route::get('/gadai', function () { return view('admin.gadai.index'); })->name('gadai.index');
     Route::get('/janji-temu-universal', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'index'])->name('janji-temu.index');
     Route::post('/janji-temu/tabungan/{id}/cancel', [\App\Http\Controllers\Admin\JanjiTemuController::class, 'cancelTabungan'])->name('janji-temu.cancel-tabungan');

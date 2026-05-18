@@ -30,13 +30,14 @@ class TabunganController extends Controller
         $idAnggota = $this->getIdAnggota();
         
         // Calculate saldo from database
-        $saldo = $this->getSaldoNasabah($idAnggota);
+        $saldoData = $this->getSaldoNasabah($idAnggota, true);
         
         // Tabungan info from database
         $tabunganInfo = (object) [
-            'saldo' => $saldo,
-            'bunga' => 3.5,
-            'status' => 'Aktif',
+            'saldo'      => $saldoData['saldo'],
+            'saldo_hold' => $saldoData['hold'],
+            'bunga'      => 3.5,
+            'status'     => 'Aktif',
         ];
 
         // Optimized Transaksi selection - Unique paginator 'page_trans'
@@ -811,7 +812,7 @@ class TabunganController extends Controller
     /**
      * Get saldo nasabah.
      */
-    private function getSaldoNasabah($idAnggota)
+    private function getSaldoNasabah($idAnggota, $returnDetail = false)
     {
         // Hitung dari trans_tabungan yang sudah ada
         $totalSetoranTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
@@ -824,17 +825,12 @@ class TabunganController extends Controller
             ->sum(function($t) { return abs((float)$t->nominal); });
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
-        $pengajuanApprovedCount = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
-            ->where('status', '2')
-            ->whereDoesntHave('transTabungan')
-            ->count();
-            
         $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
             ->where('status', '2') // Approved
             ->whereDoesntHave('transTabungan')
             ->sum('nominal') ?? 0;
 
-        $saldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
+        $rawSaldo = max(0, $totalSetoranTrans + $approvedNoTransSum - $totalPenarikanTrans);
 
         // Kurangi juga dengan deposito yang diajukan menggunakan metode saldo tabungan namun belum diproses (status == '1' artinya pending/menunggu)
         $pendingDepositoTabungan = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
@@ -842,16 +838,16 @@ class TabunganController extends Controller
             ->where('metode_setor', 'saldo_tabungan')
             ->sum('nominal') ?? 0;
 
-        $saldo = max(0, $saldo - $pendingDepositoTabungan);
+        $finalSaldo = max(0, $rawSaldo - $pendingDepositoTabungan);
 
-        // #region agent log
-        $logPath = base_path('.cursor/debug.log');
-        if (!is_dir(dirname($logPath))) {
-            @mkdir(dirname($logPath), 0755, true);
+        if ($returnDetail) {
+            return [
+                'saldo' => $finalSaldo,
+                'hold'  => $pendingDepositoTabungan
+            ];
         }
-        file_put_contents($logPath, json_encode(['id' => 'log_' . uniqid(), 'timestamp' => round(microtime(true) * 1000), 'location' => 'TabunganController(Nasabah):getSaldoNasabah', 'message' => 'saldo calculation', 'data' => ['id_anggota' => $idAnggota, 'totalSetoran_trans' => $totalSetoranTrans, 'totalPenarikan_trans' => $totalPenarikanTrans, 'pendingDeposito_tabungan' => $pendingDepositoTabungan, 'approvedNoTrans_count' => $pengajuanApprovedCount, 'approvedNoTrans_sum' => $approvedNoTransSum, 'final_saldo' => $saldo], 'hypothesisId' => 'H2']) . "\n", FILE_APPEND | LOCK_EX);
-        // #endregion
-        return $saldo;
+
+        return $finalSaldo;
     }
 
     /**
