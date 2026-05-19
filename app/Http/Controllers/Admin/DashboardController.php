@@ -13,6 +13,7 @@ use App\Models\PengajuanPinjaman;
 use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -48,7 +49,46 @@ class DashboardController extends Controller
         // Aktivitas terkini dengan Eager Loading
         $aktivitas_terkini = $this->getAktivitasTerkini();
 
-        return view('admin.dashboard', compact('stats', 'pengajuan_pending', 'aktivitas_terkini'));
+        // Grafik Likuiditas (15 Hari Terakhir)
+        // Sumber: petty_cash_saldo (role=owner) — mutasi positif = kas masuk, negatif = kas keluar
+        // Ini mencakup: setoran tabungan, setoran deposito, angsuran pinjaman, pembayaran gadai (masuk)
+        // dan: pencairan pinjaman, penarikan tabungan, pencairan deposito, dll (keluar)
+        $labels     = [];
+        $dataMasuk  = [];
+        $dataKeluar = [];
+
+        for ($i = 14; $i >= 0; $i--) {
+            $date     = now()->subDays($i);
+            $dateStr  = $date->toDateString();
+            $labels[] = $date->format('d M');
+
+            // KAS MASUK ke koperasi: semua mutasi POSITIF di saldo owner
+            // Mencakup: deposito masuk, setoran tabungan, angsuran pinjaman, gadai, dll.
+            $masuk = DB::table('petty_cash_saldo')
+                ->where('role', 'owner')
+                ->where('mutasi', '>', 0)
+                ->whereDate('created_at', $dateStr)
+                ->sum('mutasi');
+
+            // KAS KELUAR dari koperasi: semua mutasi NEGATIF di saldo owner
+            // Mencakup: pencairan pinjaman, pencairan deposito, penarikan tabungan, dll.
+            $keluar = DB::table('petty_cash_saldo')
+                ->where('role', 'owner')
+                ->where('mutasi', '<', 0)
+                ->whereDate('created_at', $dateStr)
+                ->sum('mutasi'); // nilai negatif, dikonversi abs() di bawah
+
+            $dataMasuk[]  = (float) $masuk;
+            $dataKeluar[] = (float) abs($keluar); // jadikan positif untuk chart
+        }
+
+        $grafik_likuiditas = [
+            'labels' => $labels,
+            'masuk'  => $dataMasuk,
+            'keluar' => $dataKeluar,
+        ];
+
+        return view('admin.dashboard', compact('stats', 'pengajuan_pending', 'aktivitas_terkini', 'grafik_likuiditas'));
     }
 
     private function getTotalPengajuanPending()

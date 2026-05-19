@@ -48,8 +48,12 @@ class DepositoController extends Controller
     {
         $stats = [
             'pengajuan_pending'      => PengajuanDeposito::where('status', '1')->count(),
-            'pengajuan_approved'     => PengajuanDeposito::where('status', '2')->count(),
-            'pengajuan_rejected'     => PengajuanDeposito::where('status', '3')->count(),
+            'jatuh_tempo_bulan_ini'  => DepositoH::where('status', 'aktif')
+                                        ->whereMonth('tgl_jatuh_tempo', now()->month)
+                                        ->whereYear('tgl_jatuh_tempo', now()->year)->count(),
+            'bunga_dibayar_bulan_ini'=> TransDeposito::where('jenis', 'pencairan_bunga')
+                                        ->whereMonth('tgl_transaksi', now()->month)
+                                        ->whereYear('tgl_transaksi', now()->year)->sum('nominal'),
             'total_deposito_aktif'   => DepositoH::where('status', 'aktif')->count(),
             'total_nominal_aktif'    => DepositoH::where('status', 'aktif')->sum('nominal_awal'),
             'pending_transfer'       => PengajuanDeposito::where('status', '1')->where('metode_setor', 'transfer')->count(),
@@ -73,7 +77,19 @@ class DepositoController extends Controller
             ->take(5)
             ->get();
 
-        return view('admin.deposito.index', compact('stats', 'pengajuan_terbaru', 'deposito_terbaru', 'jatuh_tempo'));
+        // Trend data for chart (6 months)
+        $trend_data = [];
+        $trend_labels = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $date = now()->subMonths($i);
+            $trend_labels[] = $date->translatedFormat('M Y');
+            $trend_data[] = DepositoH::where('status', 'aktif')
+                                     ->whereMonth('tgl_mulai', $date->month)
+                                     ->whereYear('tgl_mulai', $date->year)
+                                     ->sum('nominal_awal');
+        }
+
+        return view('admin.deposito.index', compact('stats', 'pengajuan_terbaru', 'deposito_terbaru', 'jatuh_tempo', 'trend_labels', 'trend_data'));
     }
 
     /**

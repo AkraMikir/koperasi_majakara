@@ -51,7 +51,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @forelse($depositos as $d)
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-[#674c1d]/5">
                     <td class="px-4 py-3 font-mono text-xs text-gray-700">{{ $d->nomor_deposito }}</td>
                     <td class="px-4 py-3">
                         <p class="font-semibold text-gray-800">{{ $d->nasabah->user->nama ?? '-' }}</p>

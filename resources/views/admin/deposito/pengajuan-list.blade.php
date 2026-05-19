@@ -55,7 +55,7 @@
             </thead>
             <tbody class="divide-y divide-gray-50">
                 @forelse($pengajuan as $p)
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-[#674c1d]/5">
                     <td class="px-4 py-3">
                         <p class="font-semibold text-gray-800">{{ $p->nasabah->user->nama ?? '-' }}</p>
                         <p class="text-xs text-gray-400">{{ $p->nasabah->user->email ?? '-' }}</p>

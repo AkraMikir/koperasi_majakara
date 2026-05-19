@@ -3,29 +3,169 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="w-full pb-20 px-2 max-w-full mx-auto animate-fade-in">
-        <!-- Dashboard Top Section -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-0.5 mb-4">
-            
-            <!-- Asset Distribution Chart -->
-            <div class="lg:col-span-8 bg-white rounded-[1.5rem] p-4 lg:p-6 shadow-sm border border-gray-100 flex flex-col">
-                <div class="flex items-center justify-between mb-4">
-                    <div>
-                        <h2 class="text-lg font-black text-gray-900 leading-none">Distribusi Aset</h2>
-                        <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Portofolio Keuangan</p>
-                    </div>
-                    <div class="px-2.5 py-1 bg-majakara-gold/5 rounded-full text-[8px] font-black text-majakara-dark-gold uppercase tracking-widest border border-majakara-gold/10">Terverifikasi</div>
-                </div>
+    <div class="w-full pb-20 px-4 lg:px-8 max-w-[1600px] mx-auto animate-fade-in" x-data="{ showBalance: false }">
+        <!-- Personalized Greeting / Premium Member Card -->
+        <div class="relative w-full rounded-[2rem] overflow-hidden mb-6 shadow-2xl mt-4 group">
+            <!-- Background Gradients & Effects -->
+            <div class="absolute inset-0 bg-gradient-to-br from-majakara-dark-gold via-[#4A3728] to-majakara-brown"></div>
+            <!-- Glassy overlays and noise (simulated) -->
+            <div class="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-majakara-gold/20 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
+            <!-- Diagonal lines pattern -->
+            <div class="absolute inset-0 opacity-10" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255,255,255,0.5) 10px, rgba(255,255,255,0.5) 11px);"></div>
+
+            <div class="relative z-10 p-6 md:p-8 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
                 
-                <div class="flex-1 flex flex-col md:flex-row items-center justify-center gap-8 lg:gap-12">
-                    <div class="relative w-56 h-56 lg:w-72 lg:h-72 flex-shrink-0 animate-scale-in">
-                        <canvas id="assetChart"></canvas>
-                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                            <p class="text-[11px] font-black text-gray-400 uppercase tracking-[0.25em] mb-1">Total Aset</p>
-                            <h4 class="text-2xl lg:text-3xl font-black text-gray-900 tracking-tight">100%</h4>
+                <!-- User Info -->
+                <div class="flex items-center gap-4 w-full lg:w-auto">
+                    <div class="w-16 h-16 rounded-full border-2 border-majakara-gold/50 p-1 flex-shrink-0 bg-white/10 backdrop-blur-sm shadow-[0_0_15px_rgba(212,175,55,0.3)]">
+                        @php
+                            $nama = auth()->user()->nama ?? 'Anggota';
+                            $initials = collect(explode(' ', $nama))->map(fn($w) => substr($w, 0, 1))->take(2)->join('');
+                        @endphp
+                        <div class="w-full h-full rounded-full bg-gradient-to-br from-majakara-gold to-majakara-dark-gold flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                            {{ strtoupper($initials) }}
                         </div>
                     </div>
-                    <div class="flex-1 w-full max-w-md space-y-2 lg:space-y-3">
+                    <div>
+                        @php
+                            $hour = now()->format('H');
+                            $greeting = 'Selamat Pagi';
+                            if ($hour >= 12 && $hour < 15) $greeting = 'Selamat Siang';
+                            elseif ($hour >= 15 && $hour < 18) $greeting = 'Selamat Sore';
+                            elseif ($hour >= 18) $greeting = 'Selamat Malam';
+                        @endphp
+                        <p class="text-xs md:text-sm font-medium text-white/70 tracking-[0.2em] uppercase mb-1">{{ $greeting }},</p>
+                        <h1 class="text-2xl md:text-4xl font-bold font-display text-white drop-shadow-md">{{ $nama }}</h1>
+                        <p class="text-[10px] md:text-xs text-white/50 mt-1 font-mono tracking-widest">NO. ANGGOTA : {{ auth()->user()->id }}</p>
+                    </div>
+                </div>
+                
+                <!-- Cards Container -->
+                <div class="flex flex-col sm:flex-row gap-4 w-full lg:w-auto justify-end">
+                    <!-- Balance / Card chip (Total Saldo) -->
+                    <div class="bg-white/10 backdrop-blur-xl rounded-[1.5rem] p-5 border border-white/20 min-w-[240px] flex-1 sm:flex-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] relative overflow-hidden group-hover:bg-white/15 transition-all duration-500">
+
+
+                        <div class="flex items-center gap-2 mb-2">
+                            <p class="text-[10px] md:text-xs text-white/80 uppercase tracking-[0.15em] font-bold">Total Saldo Aktif</p>
+                            <button @click="showBalance = !showBalance" class="text-white/60 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                                <svg x-show="!showBalance" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                <svg x-show="showBalance" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                        </div>
+                        @php
+                            $totalSaldo = ($stats['saldo_tabungan'] ?? 0) + ($stats['total_deposito'] ?? 0);
+                        @endphp
+                        <div class="h-10 flex items-center">
+                            <p x-show="showBalance" class="text-2xl md:text-3xl font-black font-display tracking-tight text-white drop-shadow-sm" style="display: none;">
+                                <span class="text-lg md:text-xl font-bold">Rp</span> {{ number_format($totalSaldo, 0, ',', '.') }}
+                            </p>
+                            <p x-show="!showBalance" class="text-2xl md:text-3xl font-black font-display tracking-[0.2em] text-white/90 drop-shadow-sm flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Total Pinjaman & Gadai (Kewajiban) -->
+                    <div class="bg-white/10 backdrop-blur-xl rounded-[1.5rem] p-5 border border-white/20 min-w-[240px] flex-1 sm:flex-none shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] relative overflow-hidden group-hover:bg-white/15 transition-all duration-500">
+                        <div class="flex items-center gap-2 mb-2">
+                            <p class="text-[10px] md:text-xs text-white/80 uppercase tracking-[0.15em] font-bold">Total Kewajiban</p>
+                            <button @click="showBalance = !showBalance" class="text-white/60 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10">
+                                <svg x-show="!showBalance" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path></svg>
+                                <svg x-show="showBalance" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: none;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                        </div>
+                        @php
+                            $totalKewajiban = ($stats['total_pinjaman'] ?? 0) + ($stats['total_gadai'] ?? 0);
+                        @endphp
+                        <div class="h-10 flex items-center">
+                            <p x-show="showBalance" class="text-2xl md:text-3xl font-black font-display tracking-tight text-white drop-shadow-sm" style="display: none;">
+                                <span class="text-lg md:text-xl font-bold">Rp</span> {{ number_format($totalKewajiban, 0, ',', '.') }}
+                            </p>
+                            <p x-show="!showBalance" class="text-2xl md:text-3xl font-black font-display tracking-[0.2em] text-white/90 drop-shadow-sm flex items-center gap-1">
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                                <span class="w-2.5 h-2.5 md:w-3 md:h-3 rounded-full bg-white"></span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Access (Akses Cepat) - Full Width Grid -->
+        <div class="mb-8 relative z-20">
+            <div class="flex items-center justify-between mb-3 px-2">
+                <h2 class="text-sm font-bold font-display text-gray-900 uppercase tracking-wider">Akses Cepat</h2>
+            </div>
+            <div class="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
+                @php
+                    $quickAccess = [
+                        ['route' => 'nasabah.tabungan.nabung-sekarang', 'label' => 'Nabung', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.tabungan.penarikan', 'label' => 'Tarik', 'icon' => 'M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z'],
+                        ['route' => 'nasabah.pinjaman.pembayaran', 'label' => 'Bayar', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                        ['route' => 'nasabah.pinjaman.angsuran', 'params' => ['jenis' => 'bulanan'], 'label' => 'Angsuran', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.deposito.pengajuan', 'label' => 'Deposito', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                        ['route' => 'nasabah.gadai_baru.index', 'label' => 'Gadai', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
+                        ['route' => 'nasabah.pengajuan-pending', 'label' => 'Status', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.pinjaman.pinjaman-aktif', 'label' => 'Pinjaman', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
+                    ];
+                @endphp
+
+                @foreach($quickAccess as $item)
+                <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex flex-col items-center gap-2 group">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white border border-gray-100 shadow-[0_4px_10px_-2px_rgba(0,0,0,0.05)] flex items-center justify-center text-majakara-brown group-hover:bg-gradient-to-br group-hover:from-majakara-brown group-hover:to-majakara-dark-gold group-hover:text-white group-hover:border-transparent group-hover:shadow-[0_10px_20px_-5px_rgba(103,76,29,0.3)] transition-all duration-300 transform group-hover:-translate-y-1 relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                        <svg class="w-6 h-6 md:w-7 md:h-7 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
+                        </svg>
+                    </div>
+                    <span class="text-[10px] md:text-xs font-bold text-gray-600 group-hover:text-majakara-dark-gold transition-colors text-center leading-tight">{{ $item['label'] }}</span>
+                </a>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Main Split Dashboard Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+            
+            <!-- Asset Distribution -->
+            <div class="lg:col-span-7 bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col relative overflow-hidden">
+                <!-- Decorative background elements -->
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-majakara-gold/5 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="flex items-center justify-between mb-6 relative z-10">
+                    <div>
+                        <h2 class="text-lg font-bold font-display text-gray-900 flex items-center gap-2">
+                            Distribusi Aset
+                            <span class="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+                        </h2>
+                        <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Portofolio Keuangan</p>
+                    </div>
+                </div>
+                
+                <div class="flex-1 flex flex-col sm:flex-row items-center gap-6 sm:gap-8 relative z-10">
+                    <!-- Chart -->
+                    <div class="relative w-48 h-48 sm:w-56 sm:h-56 flex-shrink-0">
+                        <canvas id="assetChart"></canvas>
+                        <!-- Center text -->
+                        <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                            <p class="text-[9px] font-black text-gray-400 uppercase tracking-[0.2em] mb-0.5">Total</p>
+                            <h4 class="text-xl sm:text-2xl font-black text-majakara-dark-gold font-display">100%</h4>
+                        </div>
+                    </div>
+                    
+                    <!-- Legend List -->
+                    <div class="flex-1 w-full space-y-3">
                         @php
                             $chartItems = [
                                 ['label' => 'Tabungan', 'value' => $stats['saldo_tabungan'], 'color' => '#674c1d', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
@@ -39,25 +179,21 @@
                             @php
                                 $percent = $totalVal > 0 ? ($item['value'] / $totalVal) * 100 : 0;
                             @endphp
-                            <div class="group cursor-default p-2.5 rounded-2xl hover:bg-gray-50 transition-all duration-300 border border-transparent hover:border-gray-100">
-                                <div class="flex items-center justify-between mb-2">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110" style="background-color: {{ $item['color'] }}20">
-                                            <svg class="w-4 h-4" style="color: {{ $item['color'] }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
-                                            </svg>
-                                        </div>
-                                        <div>
-                                            <span class="block text-[11px] font-black text-gray-500 uppercase tracking-wider">{{ $item['label'] }}</span>
-                                            <span class="text-[10px] font-bold text-gray-400">{{ number_format($percent, 1) }}% Distribusi</span>
-                                        </div>
+                            <div class="group flex items-center justify-between p-2.5 rounded-xl hover:bg-gray-50 transition-colors border border-transparent hover:border-gray-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style="background-color: {{ $item['color'] }}15">
+                                        <svg class="w-4 h-4" style="color: {{ $item['color'] }}" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
+                                        </svg>
                                     </div>
-                                    <div class="text-right">
-                                        <span class="block text-sm font-black text-gray-900">Rp {{ number_format($item['value'], 0, ',', '.') }}</span>
+                                    <div>
+                                        <span class="block text-xs font-bold text-gray-800 uppercase tracking-wide">{{ $item['label'] }}</span>
+                                        <span class="text-[9px] font-semibold text-gray-400">{{ number_format($percent, 1) }}% Distribusi</span>
                                     </div>
                                 </div>
-                                <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden shadow-inner">
-                                    <div class="h-full rounded-full transition-all duration-1000 ease-out group-hover:brightness-110" style="width: {{ $percent }}%; background-color: {{ $item['color'] }}"></div>
+                                <div class="text-right">
+                                    <span class="block text-sm font-black text-gray-900 font-display" x-show="showBalance" style="display: none;">Rp {{ number_format($item['value'], 0, ',', '.') }}</span>
+                                    <span class="block text-sm font-black text-gray-900 font-display tracking-widest" x-show="!showBalance">••••••</span>
                                 </div>
                             </div>
                         @endforeach
@@ -65,132 +201,64 @@
                 </div>
             </div>
 
-            <!-- Akses Cepat (Root2Root) -->
-            <div class="lg:col-span-4 bg-white rounded-[1.5rem] p-4 lg:p-6 shadow-sm border border-gray-100 flex flex-col">
-                <div class="flex items-center justify-between mb-4">
+            <!-- Recent Transactions (List View) -->
+            <div class="lg:col-span-5 bg-white rounded-[2rem] p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 flex flex-col">
+                <div class="flex items-center justify-between mb-6">
                     <div>
-                        <h2 class="text-lg font-black text-gray-900 leading-none">Akses Cepat</h2>
-                        <p class="text-[9px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Menu Navigasi</p>
+                        <h2 class="text-lg font-bold font-display text-gray-900">Aktivitas Terakhir</h2>
+                        <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Riwayat Transaksi</p>
                     </div>
+                    <a href="{{ route('nasabah.tabungan.index') }}" class="text-[10px] font-bold text-majakara-dark-gold hover:text-majakara-brown uppercase tracking-wider flex items-center gap-1 group">
+                        Lihat Semua
+                        <svg class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                    </a>
                 </div>
-                <div class="grid grid-cols-2 gap-2 flex-1">
-                @php
-                    $quickAccess = [
-                        ['route' => 'nasabah.tabungan.nabung-sekarang', 'label' => 'Nabung', 'sub' => 'Sekarang', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.tabungan.penarikan', 'label' => 'Tarik', 'sub' => 'Tabungan', 'icon' => 'M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z'],
-                        ['route' => 'nasabah.pinjaman.pembayaran', 'label' => 'Bayar', 'sub' => 'Pinjaman', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-                        ['route' => 'nasabah.pinjaman.angsuran', 'params' => ['jenis' => 'bulanan'], 'label' => 'Angsuran', 'sub' => 'Bulanan', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.deposito.pengajuan', 'label' => 'Buka', 'sub' => 'Deposito', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                        ['route' => 'nasabah.gadai_baru.index', 'label' => 'Gadai', 'sub' => 'Barang', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
-                        ['route' => 'nasabah.pengajuan-pending', 'label' => 'Status', 'sub' => 'Pengajuan', 'icon' => 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.pinjaman.pinjaman-aktif', 'label' => 'Pinjaman', 'sub' => 'Aktif', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
-                    ];
-                @endphp
-
-                @foreach($quickAccess as $item)
-                <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="bg-white p-3 rounded-[1.15rem] border border-gray-100 shadow-sm hover:shadow-md hover:border-majakara-gold/40 transition-all group relative overflow-hidden">
-                    <div class="absolute inset-0 bg-gradient-to-br from-majakara-gold/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <div class="flex flex-col items-center text-center gap-1.5 relative z-10">
-                        <div class="w-9 h-9 bg-majakara-brown/5 text-majakara-brown rounded-xl flex items-center justify-center group-hover:bg-gradient-to-br group-hover:from-majakara-brown group-hover:to-majakara-dark-gold group-hover:text-white transition-all duration-300 shadow-sm">
-                            <svg class="w-4.5 h-4.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
-                            </svg>
+                
+                <div class="flex-1 overflow-y-auto pr-1 space-y-4" style="max-height: 280px;">
+                    @forelse(collect($transaksiTerbaru ?? [])->take(5) as $transaksi)
+                        @php
+                            $isSetoran = optional($transaksi->jnsTransaksi)->kode === 'STR';
+                        @endphp
+                        <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="flex items-center justify-between group p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-gray-100 {{ $isSetoran ? 'bg-green-50/50 text-green-500' : 'bg-red-50/50 text-red-500' }} group-hover:scale-110 transition-transform duration-300">
+                                    @if($isSetoran)
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
+                                    @else
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path></svg>
+                                    @endif
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-majakara-dark-gold transition-colors">{{ optional($transaksi->jnsTransaksi)->nama ?? 'Transaksi' }}</h4>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">{{ $transaksi->tgl_transaksi->format('d M Y • H:i') }}</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-sm font-black font-display {{ $isSetoran ? 'text-green-600' : 'text-red-600' }}" x-show="showBalance" style="display: none;">
+                                    {{ $isSetoran ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
+                                </span>
+                                <span class="block text-sm font-black font-display text-gray-400 tracking-widest" x-show="!showBalance">••••••</span>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="flex flex-col items-center justify-center h-full text-center py-6">
+                            <div class="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center text-gray-300 mb-3">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            </div>
+                            <h3 class="text-sm font-bold text-gray-700">Belum Ada Transaksi</h3>
+                            <p class="text-[10px] text-gray-400 mt-1 max-w-[200px]">Mulai bertransaksi untuk melihat riwayat aktivitas Anda di sini.</p>
                         </div>
-                        <div>
-                            <p class="text-[10px] font-black text-gray-900 leading-tight">{{ $item['label'] }}</p>
-                            <p class="text-[7px] font-bold text-gray-400 uppercase tracking-wider mt-0.5">{{ $item['sub'] }}</p>
-                        </div>
-                    </div>
-                </a>
-                @endforeach
+                    @endforelse
                 </div>
-            </div>
-        </div>
-
-        <!-- Recent Transactions -->
-        <div class="bg-white rounded-[1.5rem] shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-6 border-b border-gray-50 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h2 class="text-xl font-black text-gray-900">Transaksi Terakhir</h2>
-                    <p class="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wider font-bold">Aktivitas Sistem</p>
-                </div>
-                <a href="{{ route('nasabah.tabungan.index') }}" class="px-6 py-2.5 bg-gradient-to-r from-majakara-brown to-majakara-dark-gold text-white text-[10px] font-black rounded-xl hover:shadow-lg transition-all uppercase tracking-[0.1em] text-center">Lihat Semua</a>
             </div>
             
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead>
-                        <tr class="bg-gray-50/50">
-                            <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Data Waktu</th>
-                            <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Jenis Transaksi</th>
-                            <th class="px-8 py-5 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Metode</th>
-                            <th class="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Nominal</th>
-                            <th class="px-8 py-5 text-right text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-50">
-                        @forelse($transaksiTerbaru ?? [] as $transaksi)
-                            @php
-                                $isSetoran = optional($transaksi->jnsTransaksi)->kode === 'STR';
-                            @endphp
-                            <tr class="hover:bg-gray-50/50 transition-all duration-200 group">
-                                <td class="px-8 py-6 whitespace-nowrap">
-                                    <div class="text-sm font-black text-gray-900 group-hover:text-majakara-dark-gold transition-colors">{{ $transaksi->tgl_transaksi->format('d M Y') }}</div>
-                                    <div class="text-[10px] text-gray-400 font-mono font-bold mt-0.5">{{ $transaksi->tgl_transaksi->format('H:i:s') }}</div>
-                                </td>
-                                <td class="px-8 py-6 whitespace-nowrap">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 rounded-xl flex items-center justify-center {{ $isSetoran ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }}">
-                                            @if($isSetoran)
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
-                                            @else
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path></svg>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <span class="text-sm font-bold text-gray-800">{{ optional($transaksi->jnsTransaksi)->nama ?? 'Transaksi' }}</span>
-                                            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-tighter">{{ $isSetoran ? 'Kredit Masuk' : 'Debit Keluar' }}</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-8 py-6 whitespace-nowrap">
-                                    <span class="px-3 py-1.5 bg-gray-100 rounded-xl text-[10px] font-black text-gray-500 uppercase tracking-wider group-hover:bg-white group-hover:shadow-sm transition-all border border-transparent group-hover:border-gray-100">{{ optional($transaksi->jnsVia)->nama ?? 'Manual' }}</span>
-                                </td>
-                                <td class="px-8 py-6 whitespace-nowrap text-right">
-                                    <span class="text-base font-black {{ $isSetoran ? 'text-green-600' : 'text-red-600' }}">
-                                        {{ $isSetoran ? '+' : '-' }} Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
-                                    </span>
-                                </td>
-                                <td class="px-8 py-6 whitespace-nowrap text-right">
-                                    <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-gray-50 text-gray-400 group-hover:bg-majakara-dark-gold group-hover:text-white transition-all transform group-hover:rotate-45">
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-                                        </svg>
-                                    </a>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5" class="px-8 py-20 text-center">
-                                    <div class="flex flex-col items-center">
-                                        <div class="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center text-gray-300 mb-4">
-                                            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path></svg>
-                                        </div>
-                                        <h3 class="text-sm font-black text-gray-900 uppercase tracking-widest">Tidak Ada Data</h3>
-                                        <p class="text-[10px] text-gray-400 font-bold mt-1">Belum ada transaksi yang tercatat di sistem.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 @endsection
 
 @push('scripts')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('assetChart').getContext('2d');
@@ -212,8 +280,8 @@
                             '#a67c52'  // Gadai (Light Brown)
                         ] : ['#f3f4f6'],
                         borderWidth: 0,
-                        hoverOffset: 10,
-                        borderRadius: 10
+                        hoverOffset: 6,
+                        borderRadius: hasData ? 4 : 0
                     }]
                 },
                 options: {
@@ -226,16 +294,27 @@
                         },
                         tooltip: {
                             enabled: hasData,
+                            backgroundColor: 'rgba(255, 255, 255, 0.98)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#4b5563',
+                            borderColor: 'rgba(212, 175, 55, 0.2)',
+                            borderWidth: 1,
+                            padding: 12,
+                            boxPadding: 6,
+                            usePointStyle: true,
                             callbacks: {
                                 label: function(context) {
-                                    return context.label + ': ' + context.formattedValue + '%';
+                                    return ' ' + context.label + ': ' + context.formattedValue + '%';
                                 }
                             }
                         }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true
                     }
                 }
             });
         });
     </script>
 @endpush
-

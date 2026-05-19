@@ -152,7 +152,7 @@
         </div>
 
         <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-            <p class="text-[#f0d060] text-xs font-bold uppercase tracking-[0.2em] mb-3">Koperasi Majakara</p>
+            <p class="text-[#f0d060] text-xs font-bold uppercase tracking-[0.2em] mb-3">Halo {{ explode(' ', auth()->user()->nama ?? 'Nasabah')[0] }},</p>
             
             <h1 class="text-white text-3xl md:text-4xl font-bold leading-tight font-display mb-4">
                 Kembangkan Uang Anda<br>
@@ -398,36 +398,44 @@
 
 
     {{-- ===== RIWAYAT PENGAJUAN ===== --}}
-    @if($riwayatPengajuan->isNotEmpty())
     <div class="mx-4 mb-5">
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-base font-bold text-[#674c1d] font-display">Riwayat Pengajuan</h2>
             <a href="{{ route('nasabah.deposito.riwayat') }}" class="text-sm text-[#d4af37] font-bold hover:text-[#674c1d] transition-colors">Lihat Semua →</a>
         </div>
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 space-y-3">
-            @foreach($riwayatPengajuan as $pjn)
-            @php
-                $statusMap = ['1' => ['label' => 'Proses', 'class' => 'bg-amber-100 text-amber-700'], '2' => ['label' => 'Disetujui', 'class' => 'bg-green-100 text-green-700'], '3' => ['label' => 'Ditolak', 'class' => 'bg-red-100 text-red-700']];
-                $st = $statusMap[$pjn->status] ?? $statusMap['1'];
-            @endphp
-            <a href="{{ route('nasabah.deposito.status-pengajuan', $pjn->id) }}" class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-gray-50 -mx-4 px-4 transition-colors">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
-                        <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
+            @if($riwayatPengajuan->isNotEmpty())
+                @foreach($riwayatPengajuan as $pjn)
+                @php
+                    $statusMap = ['1' => ['label' => 'Proses', 'class' => 'bg-amber-100 text-amber-700'], '2' => ['label' => 'Disetujui', 'class' => 'bg-green-100 text-green-700'], '3' => ['label' => 'Ditolak', 'class' => 'bg-red-100 text-red-700']];
+                    $st = $statusMap[$pjn->status] ?? $statusMap['1'];
+                @endphp
+                <a href="{{ route('nasabah.deposito.status-pengajuan', $pjn->id) }}" class="flex items-center justify-between py-3 border-b border-gray-50 last:border-0 hover:bg-[#674c1d]/5 -mx-4 px-4 transition-colors">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-amber-50 rounded-xl flex items-center justify-center">
+                            <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold text-gray-800 text-sm">Deposito {{ $pjn->tenor?->tenor_bulan ?? '-' }} Bulan</p>
+                            <p class="text-xs text-gray-500">Rp {{ number_format($pjn->nominal, 0, ',', '.') }} · {{ $pjn->created_at->format('d M Y') }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p class="font-semibold text-gray-800 text-sm">Deposito {{ $pjn->tenor?->tenor_bulan ?? '-' }} Bulan</p>
-                        <p class="text-xs text-gray-500">Rp {{ number_format($pjn->nominal, 0, ',', '.') }} · {{ $pjn->created_at->format('d M Y') }}</p>
+                    <span class="text-xs font-bold px-3 py-1 rounded-full {{ $st['class'] }}">{{ $st['label'] }}</span>
+                </a>
+                @endforeach
+            @else
+                <div class="py-6 flex flex-col items-center justify-center text-center">
+                    <div class="w-16 h-16 bg-gradient-to-br from-[#faf9f0] to-[#fff9e0] border border-[#d4af37]/30 rounded-full flex items-center justify-center mb-3">
+                        <svg class="w-8 h-8 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                     </div>
+                    <p class="text-sm font-semibold text-gray-700">Belum Ada Pengajuan</p>
+                    <p class="text-xs text-gray-500 mt-1 max-w-xs mx-auto">Anda belum pernah mengajukan deposito. Yuk, rencanakan masa depan finansial Anda dari sekarang!</p>
                 </div>
-                <span class="text-xs font-bold px-3 py-1 rounded-full {{ $st['class'] }}">{{ $st['label'] }}</span>
-            </a>
-            @endforeach
+            @endif
         </div>
     </div>
-    @endif
 
     {{-- ===== KEUNGGULAN ===== --}}
     <div class="mx-4 mb-5">
@@ -452,51 +460,7 @@
         </div>
     </div>
 
-    {{-- ===== TABEL SIMULASI SEABANK STYLE ===== --}}
-    <div class="mx-4 mb-5">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-4 border-b border-gray-100">
-                <h2 class="text-base font-bold text-[#674c1d] font-display">Tabel Simulasi Bunga</h2>
-                <p class="text-xs text-gray-500 mt-1">Contoh perhitungan dengan penempatan Rp 10.000.000</p>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-xs">
-                    <thead>
-                        <tr class="bg-[#674c1d]/5">
-                            <th class="px-4 py-3 text-left font-bold text-[#674c1d] border-b border-gray-100">Keterangan</th>
-                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">1 Bulan</th>
-                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">3 Bulan</th>
-                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">6 Bulan</th>
-                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">12 Bulan</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @php
-                            $rows = [
-                                ['label' => 'Suku Bunga', 'vals' => ['6,00%', '7,50%', '9,00%', '12,00%']],
-                                ['label' => 'Pokok', 'vals' => ['Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000']],
-                                ['label' => 'Bunga Kotor', 'vals' => ['Rp 47.671', 'Rp 184.932', 'Rp 443.836', 'Rp 1.200.000']],
-                                ['label' => 'Pajak (20%)', 'vals' => ['Rp 9.534', 'Rp 36.986', 'Rp 88.767', 'Rp 240.000'], 'class' => 'text-red-500'],
-                                ['label' => 'Bunga Bersih', 'vals' => ['Rp 38.137', 'Rp 147.946', 'Rp 355.069', 'Rp 960.000'], 'class' => 'text-green-600 font-bold'],
-                                ['label' => 'Total Cair', 'vals' => ['Rp 10.038.137', 'Rp 10.147.946', 'Rp 10.355.069', 'Rp 10.960.000'], 'class' => 'font-black text-[#674c1d]'],
-                            ];
-                        @endphp
-                        @foreach($rows as $i => $row)
-                        <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50' }}">
-                            <td class="px-4 py-3 text-gray-600 border-b border-gray-50 whitespace-nowrap">{{ $row['label'] }}</td>
-                            @foreach($row['vals'] as $v)
-                            <td class="px-4 py-3 text-center border-b border-gray-50 {{ $row['class'] ?? 'text-gray-800' }} whitespace-nowrap">{{ $v }}</td>
-                            @endforeach
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="p-4 bg-amber-50/50 border-t border-[#d4af37]/20">
-                <p class="text-xs text-gray-500 italic">*Simulasi di atas adalah estimasi. Bunga aktual mengikuti suku bunga yang berlaku saat pencairan.</p>
-            </div>
-        </div>
-    </div>
+
 
 </div>
 
