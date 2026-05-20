@@ -257,7 +257,8 @@ class TabunganController extends Controller
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', $nominal,
                         "Setoran Tabungan Nasabah (#{$pengajuan->id})",
-                        $pengajuan->id, 'tbl_pengajuan_tabungan', 'transfer'
+                        $pengajuan->id, 'tbl_pengajuan_tabungan', 'transfer',
+                        \App\Services\PettyCashConstants::SUMBER_TABUNGAN
                     );
                 }
             }

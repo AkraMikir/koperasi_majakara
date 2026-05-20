@@ -247,8 +247,9 @@ class DepositoController extends Controller
 
                         PettyCashSaldo::buatMutasi(
                             $owner->id, 'owner', $nominal,
-                            "Setoran Deposito Nasabah (#{$pengajuan->id})",
-                            (string)$pengajuan->id, PettyCashConstants::REF_DEPOSITO_P, 'transfer', 'deposito'
+                            "Setoran Deposito (#{$pengajuan->id})",
+                            $pengajuan->id, 'tbl_pengajuan_deposito', 'transfer',
+                            \App\Services\PettyCashConstants::SUMBER_DEPOSITO
                         );
                     }
                 }
@@ -493,7 +494,7 @@ class DepositoController extends Controller
 
             $penerimaanId = IdGenerator::generate('petty_cash_penerimaan', 'PCP', 'OW', 'KRM');
 
-            // 1. Buat PettyCashPenerimaan (Owner -> Admin, sumber=deposito, tipe=transfer)
+            // 1. Buat PettyCashPenerimaan (Owner -> Admin, sumber=deposito, tipe=transfer untuk dikirim ke nasabah)
             PettyCashPenerimaan::create([
                 'id'          => $penerimaanId,
                 'owner_id'    => $ownerId,
@@ -506,11 +507,12 @@ class DepositoController extends Controller
                 'ref_id'      => (string) $pencairan->id,
             ]);
 
-            // 2. Hold saldo Owner (transfer)
+            // Transfer Koperasi: Mutasi Saldo Owner (TF - DEPOSITO) berkurang
             PettyCashSaldo::buatMutasi(
                 $ownerId, 'owner', -$nominal,
-                'HOLD: Dana Pencairan Deposito ' . $nomorDep . ' (TF) ke Admin',
-                $penerimaanId, 'petty_cash_penerimaan', 'transfer'
+                "Pencairan Deposito (Transfer) #{$pencairan->id}",
+                $pencairan->id, 'tbl_pencairan_deposito', 'transfer',
+                \App\Services\PettyCashConstants::SUMBER_DEPOSITO
             );
 
             // 3. Catat di PettyCashOwnerTransaksi
@@ -1102,11 +1104,12 @@ class DepositoController extends Controller
                 'ref_id'      => (string) $item->id, // link ke persiapan cair
             ]);
 
-            // 2. Hold Saldo Owner
+            // Tunai Koperasi (CASH Owner - DEPOSITO) berkurang
             PettyCashSaldo::buatMutasi(
                 $ownerId, 'owner', -$nominal,
-                'HOLD: Persiapan Dana Deposito ' . $nomorDep,
-                $penerimaanId, 'petty_cash_penerimaan', 'cash'
+                "Pencairan Deposito (Tunai Koperasi) #{$item->id}",
+                $item->id, 'tbl_pencairan_deposito', 'cash',
+                \App\Services\PettyCashConstants::SUMBER_DEPOSITO
             );
 
             // 3. Catat di Owner Wallet Detail

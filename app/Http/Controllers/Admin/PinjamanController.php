@@ -369,10 +369,12 @@ class PinjamanController extends Controller
                         'ref_table'       => PettyCashConstants::REF_PINJAMAN_H,
                     ]);
 
+                    // Owner memberikan pinjaman (saldo keluar)
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', -(float)$pinjaman->jumlah_pinjam,
-                        "Pencairan Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
-                        $pinjaman->id, PettyCashConstants::REF_PINJAMAN_H, 'transfer'
+                        "Pencairan Pinjaman: " . ($pinjaman->nasabah->user->nama ?? '-') . " (#{$pinjaman->id})",
+                        $pinjaman->id, 'tbl_pinjaman', 'transfer',
+                        \App\Services\PettyCashConstants::SUMBER_PINJAMAN
                     );
                 }
             }
@@ -540,7 +542,8 @@ class PinjamanController extends Controller
                 ->with('success', 'Janji temu selesai. Pinjaman telah disetujui dan dicairkan; jadwal angsuran telah dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -773,7 +776,7 @@ class PinjamanController extends Controller
             // Tentukan jumlah tagihan: 
             // - Untuk angsuran 1 sampai n-1: angsuranBulanan (sudah dibulatkan)
             // - Untuk angsuran terakhir (ke-n): sisa total kewajiban
-            $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsuranTerakhir;
+            $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsurTerakhir;
 
             $data = [
                 'id' => $currentId,
@@ -1127,10 +1130,12 @@ class PinjamanController extends Controller
                         'ref_id'       => $pengajuan->id,
                     ]);
 
+                    // Owner menerima angsuran (saldo masuk)
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', (float)$pengajuan->nominal,
-                        "Angsuran Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
-                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer', 'pinjaman'
+                        "Penerimaan Angsuran: " . ($pengajuan->pinjaman->nasabah->user->nama ?? '-') . " (#{$pengajuan->id_pinjaman})",
+                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer',
+                        \App\Services\PettyCashConstants::SUMBER_PINJAMAN
                     );
                 }
             }
