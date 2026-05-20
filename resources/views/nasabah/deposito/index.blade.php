@@ -67,7 +67,7 @@
     {{-- ===== TOP SECTION: Active Deposito OR Hero Banner ===== --}}
     @if($depositoAktif->isNotEmpty())
     {{-- ===== DEPOSITO AKTIF (menggantikan hero) ===== --}}
-    <div class="bg-gradient-to-br from-[#3a2800] to-[#674c1d] px-4 pt-5 pb-4 relative overflow-hidden">
+    <div class="bg-gradient-to-br from-[#3a2800] to-[#674c1d] mx-4 mt-4 rounded-2xl px-5 pt-5 pb-4 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-20 -mt-20"></div>
         <div class="relative z-10">
             <div class="flex items-center justify-between mb-3">
@@ -143,7 +143,7 @@
 
     @else
     {{-- ===== HERO BANNER (tampil jika belum punya deposito aktif) ===== --}}
-    <div class="bg-gradient-to-br from-[#4a3514] to-[#8b6f2f] px-6 py-12 text-center relative overflow-hidden">
+    <div class="bg-gradient-to-br from-[#4a3514] to-[#8b6f2f] mx-4 mt-4 rounded-2xl px-6 py-12 text-center relative overflow-hidden">
         {{-- Background Decorations --}}
         <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-50 z-0 text-[#d4af37]">
             <svg class="absolute -right-20 -top-20 w-96 h-96 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>

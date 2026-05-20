@@ -114,7 +114,7 @@ class DashboardController extends Controller
     {
         $pengajuan = [];
 
-        // Pengajuan Tabungan
+        // Pengajuan Tabungan (Setoran)
         $tabungan = PengajuanTabungan::where('status', '1')
             ->with('nasabah.user')
             ->latest()
@@ -123,11 +123,15 @@ class DashboardController extends Controller
 
         foreach ($tabungan as $t) {
             $pengajuan[] = [
-                'id' => $t->id,
-                'type' => 'tabungan',
-                'nama' => $t->nasabah->user->nama ?? 'N/A',
-                'nominal' => $t->nominal, // Added nominal
-                'tanggal' => $t->created_at->format('d M Y'),
+                'id'            => $t->id,
+                'type'          => 'tabungan',
+                'label'         => 'Setoran',
+                'nama'          => $t->nasabah->user->nama ?? 'N/A',
+                'nominal'       => $t->nominal,
+                'tanggal'       => $t->created_at->format('d M Y'),
+                'route_approve' => route('admin.tabungan.approve-setor', $t->id),
+                'route_reject'  => route('admin.tabungan.reject-setor', $t->id),
+                'route_index'   => route('admin.tabungan.index'),
             ];
         }
 
@@ -140,11 +144,15 @@ class DashboardController extends Controller
 
         foreach ($pinjaman as $p) {
             $pengajuan[] = [
-                'id' => $p->id,
-                'type' => 'pinjaman',
-                'nama' => $p->nasabah->user->nama ?? 'N/A',
-                'nominal' => $p->nominal,
-                'tanggal' => $p->created_at->format('d M Y'),
+                'id'            => $p->id,
+                'type'          => 'pinjaman',
+                'label'         => 'Pinjaman',
+                'nama'          => $p->nasabah->user->nama ?? 'N/A',
+                'nominal'       => $p->nominal,
+                'tanggal'       => $p->created_at->format('d M Y'),
+                'route_approve' => route('admin.pinjaman.approve-pengajuan', $p->id),
+                'route_reject'  => route('admin.pinjaman.reject-pengajuan', $p->id),
+                'route_index'   => route('admin.pinjaman.index'),
             ];
         }
 
@@ -158,11 +166,15 @@ class DashboardController extends Controller
 
             foreach ($deposito as $d) {
                 $pengajuan[] = [
-                    'id' => $d->id,
-                    'type' => 'deposito',
-                    'nama' => $d->nasabah->user->nama ?? 'N/A',
-                    'nominal' => $d->nominal,
-                    'tanggal' => $d->created_at->format('d M Y'),
+                    'id'            => $d->id,
+                    'type'          => 'deposito',
+                    'label'         => 'Deposito',
+                    'nama'          => $d->nasabah->user->nama ?? 'N/A',
+                    'nominal'       => $d->nominal,
+                    'tanggal'       => $d->created_at->format('d M Y'),
+                    'route_approve' => route('admin.deposito.approve', $d->id),
+                    'route_reject'  => route('admin.deposito.reject', $d->id),
+                    'route_index'   => route('admin.deposito.index'),
                 ];
             }
         } catch (\Exception $e) {}
@@ -180,11 +192,15 @@ class DashboardController extends Controller
 
         foreach ($gadai as $g) {
             $pengajuan[] = [
-                'id' => $g->id,
-                'type' => 'gadai',
-                'nama' => $g->nasabah->user->nama ?? 'N/A',
-                'nominal' => $g->nominal_diajukan,
-                'tanggal' => $g->created_at->format('d M Y'),
+                'id'            => $g->id,
+                'type'          => 'gadai',
+                'label'         => 'Gadai',
+                'nama'          => $g->nasabah->user->nama ?? 'N/A',
+                'nominal'       => $g->nominal_diajukan,
+                'tanggal'       => $g->created_at->format('d M Y'),
+                'route_approve' => route('admin.gadai_baru.pengajuan.approve', $g->id),
+                'route_reject'  => route('admin.gadai_baru.pengajuan.reject', $g->id),
+                'route_index'   => route('admin.gadai_baru.index'),
             ];
         }
         } catch (\Exception $e) {}

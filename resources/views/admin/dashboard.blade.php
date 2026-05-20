@@ -199,7 +199,7 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-[10px] font-black uppercase tracking-wider border border-gray-200">
-                                {{ $pengajuan['type'] }}
+                                {{ $pengajuan['label'] ?? $pengajuan['type'] }}
                             </span>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
@@ -210,19 +210,19 @@
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end gap-2 opacity-100 md:opacity-50 group-hover:opacity-100 transition-opacity">
-                                <form action="{{ route('admin.' . $pengajuan['type'] . '.approve', $pengajuan['id'] ?? 0) }}" method="POST" class="inline">
+                                <form action="{{ $pengajuan['route_approve'] ?? '#' }}" method="POST" class="inline">
                                     @csrf
                                     <button type="button" onclick="confirmApprove(this)" class="p-2 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white rounded-lg transition-colors border border-green-100 hover:border-green-600 shadow-sm" title="Setujui">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
                                     </button>
                                 </form>
-                                <form action="{{ route('admin.' . $pengajuan['type'] . '.reject', $pengajuan['id'] ?? 0) }}" method="POST" class="inline">
+                                <form action="{{ $pengajuan['route_reject'] ?? '#' }}" method="POST" class="inline">
                                     @csrf
                                     <button type="button" onclick="confirmReject(this)" class="p-2 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-100 hover:border-red-600 shadow-sm" title="Tolak">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
                                     </button>
                                 </form>
-                                <a href="{{ route('admin.' . $pengajuan['type'] . '.index') }}" class="p-2 bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-lg transition-colors border border-gray-200 shadow-sm" title="Detail">
+                                <a href="{{ $pengajuan['route_index'] ?? '#' }}" class="p-2 bg-gray-50 text-gray-500 hover:bg-gray-200 hover:text-gray-700 rounded-lg transition-colors border border-gray-200 shadow-sm" title="Detail">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
                                 </a>
                             </div>
