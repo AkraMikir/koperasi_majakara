@@ -9,6 +9,15 @@ use App\Http\Controllers\Nasabah\TabunganController;
 use App\Http\Controllers\Nasabah\DepositoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
+Route::get('/fix-sumber-janji-temu', function() {
+    $count = \Illuminate\Support\Facades\DB::table('petty_cash_saldo')
+        ->where('role', 'admin')
+        ->where('sumber', 'other')
+        ->where('keterangan', 'like', 'Setoran dari Janji Temu %')
+        ->update(['sumber' => 'tabungan']);
+    return 'Updated ' . $count . ' records. Silakan kembali ke dashboard, data sudah diperbaiki.';
+});
+
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');

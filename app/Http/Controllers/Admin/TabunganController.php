@@ -858,7 +858,9 @@ class TabunganController extends Controller
                     $nominal,
                     $pettyId,
                     'Setoran dari Janji Temu #' . $janjiTemu->id,
-                    'petty_cash_transaksi_nasabah'
+                    'petty_cash_transaksi_nasabah',
+                    'cash',
+                    \App\Services\PettyCashConstants::SUMBER_TABUNGAN
                 );
             }
 
