@@ -278,6 +278,28 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
+
+                @isAdminUtama
+                <!-- Pinjaman Debugger (Time Travel) -->
+                <div class="border-t border-dashed border-gray-200 my-1"></div>
+                <a href="{{ route('admin.master-data.pinjaman-debugger.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Pinjaman Debugger</p>
+                            <p class="text-xs text-indigo-600 font-bold">Time Travel Denda</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                @endisAdminUtama
             </div>
         </div>
 
@@ -360,6 +382,28 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
                 </a>
+
+                @isAdminUtama
+                <!-- Deposito Debugger (Time Travel) -->
+                <div class="border-t border-dashed border-gray-200 my-1"></div>
+                <a href="{{ route('admin.master-data.deposito-debugger.index') }}"
+                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
+                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-800">Deposito Debugger</p>
+                            <p class="text-xs text-indigo-600 font-bold">Time Travel Cair</p>
+                        </div>
+                    </div>
+                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </a>
+                @endisAdminUtama
             </div>
         </div>
 

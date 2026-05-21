@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Artisan;
 
 class MasterDataController extends Controller
 {
@@ -860,6 +861,85 @@ class MasterDataController extends Controller
 
         return redirect()->route('admin.master-data.gadai-debugger.index')
             ->with('success', "Berhasil mensimulasikan waktu maju $days hari dan mengecek status Gadai!")
+            ->with('output', $output);
+    }
+
+    // ==================== PINJAMAN DEBUGGER (TIME TRAVEL) ====================
+
+    public function pinjamanDebuggerIndex()
+    {
+        $this->checkCrudPermission();
+        // Load some active pinjaman data to show
+        $pinjamanList = \App\Models\PinjamanH::where('lunas', 'belum')
+            ->with(['nasabah.user', 'tempoBulanan', 'tempoMingguan'])
+            ->latest()
+            ->take(10)
+            ->get();
+        return view('admin.master-data.pinjaman-debugger.index', compact('pinjamanList'));
+    }
+
+    public function pinjamanDebuggerMajuHari(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'days' => 'required|integer|min:1|max:365'
+        ]);
+
+        $days = (int) $request->days;
+
+        // Kurangi tanggal jatuh tempo di angsuran bulanan
+        DB::table('tempo_pinjaman_b')->update([
+            'tgl_jatuh_tempo' => DB::raw("DATE_SUB(tgl_jatuh_tempo, INTERVAL $days DAY)"),
+        ]);
+
+        // Kurangi tanggal jatuh tempo di angsuran mingguan
+        DB::table('tempo_pinjaman_m')->update([
+            'tgl_jatuh_tempo' => DB::raw("DATE_SUB(tgl_jatuh_tempo, INTERVAL $days DAY)"),
+        ]);
+
+        // Jalankan Cron Job untuk meng-update denda di database seketika
+        Artisan::call('pinjaman:update-telat-status');
+        $output = Artisan::output();
+
+        return redirect()->route('admin.master-data.pinjaman-debugger.index')
+            ->with('success', "Berhasil memundurkan tanggal jatuh tempo angsuran pinjaman sebanyak $days hari dan denda telah di-generate ke database!")
+            ->with('output', $output);
+    }
+
+    // ==================== DEPOSITO DEBUGGER (TIME TRAVEL) ====================
+
+    public function depositoDebuggerIndex()
+    {
+        $this->checkCrudPermission();
+        $depositoList = \App\Models\DepositoH::where('status', 'aktif')
+            ->with(['nasabah.user'])
+            ->latest()
+            ->take(10)
+            ->get();
+        return view('admin.master-data.deposito-debugger.index', compact('depositoList'));
+    }
+
+    public function depositoDebuggerMajuHari(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'days' => 'required|integer|min:1|max:365'
+        ]);
+
+        $days = (int) $request->days;
+
+        // Kurangi tanggal mulai dan jatuh tempo di deposito aktif
+        DB::table('tbl_deposito_h')->update([
+            'tgl_mulai'       => DB::raw("DATE_SUB(tgl_mulai, INTERVAL $days DAY)"),
+            'tgl_jatuh_tempo' => DB::raw("DATE_SUB(tgl_jatuh_tempo, INTERVAL $days DAY)"),
+        ]);
+
+        // Jalankan Cron Job deposito
+        Artisan::call('deposito:generate-peringatan');
+        $output = Artisan::output();
+
+        return redirect()->route('admin.master-data.deposito-debugger.index')
+            ->with('success', "Berhasil memundurkan tanggal deposito sebanyak $days hari dan mengecek jatuh tempo!")
             ->with('output', $output);
     }
 }

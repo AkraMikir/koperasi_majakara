@@ -481,6 +481,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerIndex'])->name('index');
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerMajuHari'])->name('maju-hari');
         });
+
+        // Debugger Pinjaman (Testing Time Travel) - ONLY Admin Utama
+        Route::prefix('pinjaman-debugger')->name('pinjaman-debugger.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerIndex'])->name('index');
+            Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerMajuHari'])->name('maju-hari');
+        });
+
+        // Debugger Deposito (Testing Time Travel) - ONLY Admin Utama
+        Route::prefix('deposito-debugger')->name('deposito-debugger.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerIndex'])->name('index');
+            Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerMajuHari'])->name('maju-hari');
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama

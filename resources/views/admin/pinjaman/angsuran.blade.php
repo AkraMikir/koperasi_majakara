@@ -67,7 +67,7 @@
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-14">No</th>
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase">Id Pinjaman</th>
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase">Nasabah</th>
-                        <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase min-w-[280px]">Detail Angsuran</th>
+                        <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase min-w-[400px]">Detail Angsuran</th>
                         <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase min-w-[200px]">Status Pembayaran</th>
                         <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase min-w-[120px]">Aksi</th>
                     </tr>
@@ -94,7 +94,9 @@
                                         <tr class="bg-linear-to-r from-[#674c1d]/15 to-[#8b6f2f]/10">
                                             <th class="px-3 py-2 text-center font-semibold text-[#674c1d]">No</th>
                                             <th class="px-3 py-2 text-left font-semibold text-[#674c1d]">Jatuh Tempo</th>
-                                            <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Jumlah Tagihan</th>
+                                            <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Tagihan</th>
+                                            <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Denda</th>
+                                            <th class="px-3 py-2 text-right font-semibold text-[#674c1d]">Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -102,8 +104,14 @@
                                         @php $isTelat = $t->tgl_jatuh_tempo < now() && $t->status_bayar !== 'lunas'; @endphp
                                         <tr class="{{ $isTelat ? 'bg-red-100 border-l-4 border-red-500' : 'border-t border-[#8b6f2f]/10 hover:bg-amber-50/50' }} transition-colors align-middle">
                                             <td class="px-3 py-2 text-center align-middle font-medium {{ $isTelat ? 'text-red-800' : 'text-gray-700' }}">#{{ $t->no_urut }}</td>
-                                            <td class="px-3 py-2 align-middle {{ $isTelat ? 'text-red-800 font-medium' : 'text-gray-600' }}">{{ $t->tgl_jatuh_tempo->format('d M Y') }}@if($isTelat) <span class="text-red-600 text-[10px]">(Telat)</span>@endif</td>
+                                            <td class="px-3 py-2 align-middle {{ $isTelat ? 'text-red-800 font-medium' : 'text-gray-600' }}">{{ $t->tgl_jatuh_tempo->format('d M Y') }}@if($isTelat) <span class="text-red-600 text-[10px] ml-1">(Telat)</span>@endif</td>
                                             <td class="px-3 py-2 text-right align-middle font-semibold {{ $isTelat ? 'text-red-800' : 'text-[#674c1d]' }}">Rp {{ number_format($t->jumlah_tagihan, 0, ',', '.') }}</td>
+                                            <td class="px-3 py-2 text-right align-middle font-semibold text-red-600">
+                                                {{ $t->denda > 0 ? '+ Rp ' . number_format($t->denda, 0, ',', '.') : '-' }}
+                                            </td>
+                                            <td class="px-3 py-2 text-right align-middle font-bold text-[#674c1d]">
+                                                Rp {{ number_format($t->jumlah_tagihan + $t->denda, 0, ',', '.') }}
+                                            </td>
                                         </tr>
                                         @endforeach
                                     </tbody>
