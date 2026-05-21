@@ -130,9 +130,9 @@ class PinjamanController extends Controller
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
         $masterDenda = MasterDendaPinjaman::getDendaAktif();
 
-        // Get admin petty cash balances
-        $adminSaldoCash = PettyCashSaldo::getSaldoCash(Auth::id());
-        $adminSaldoTransfer = PettyCashSaldo::getSaldoTransfer(Auth::id());
+        // Get admin petty cash balances (Modal Awal only, for pencairan)
+        $adminSaldoCash = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'other');
+        $adminSaldoTransfer = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'transfer', 'other');
         $adminSaldo = (object) [
             'cash' => $adminSaldoCash,
             'transfer' => $adminSaldoTransfer
@@ -776,7 +776,7 @@ class PinjamanController extends Controller
             // Tentukan jumlah tagihan: 
             // - Untuk angsuran 1 sampai n-1: angsuranBulanan (sudah dibulatkan)
             // - Untuk angsuran terakhir (ke-n): sisa total kewajiban
-            $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsurTerakhir;
+            $jumlahTagihan = ($i < $jumlahAngsuran) ? $angsuranBulanan : $angsuranTerakhir;
 
             $data = [
                 'id' => $currentId,

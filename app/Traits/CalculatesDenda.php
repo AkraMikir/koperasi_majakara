@@ -83,7 +83,8 @@ trait CalculatesDenda
     {
         // 1. Hitung denda berjalan saat ini
         $dendaBerjalan = $this->hitungDenda();
-        $totalHarusDibayar = $this->sisa_tagihan + $dendaBerjalan;
+        // Total tagihan keseluruhan (Pokok Angsuran + Denda)
+        $totalTagihanDanDenda = $this->jumlah_tagihan + $dendaBerjalan;
 
         // 2. Hitung jumlah terbayar baru
         $nominal = (float) $nominal;
@@ -94,9 +95,9 @@ trait CalculatesDenda
         $dendaBaru = $dendaBerjalan;
 
         // 3. Cek apakah lunas (melebihi atau sama dengan tagihan + denda)
-        if ($jumlahTerbayarBaru >= $totalHarusDibayar) {
+        if ($jumlahTerbayarBaru >= $totalTagihanDanDenda) {
             $statusBayar = 'lunas';
-            $jumlahTerbayarBaru = $totalHarusDibayar;
+            $jumlahTerbayarBaru = $totalTagihanDanDenda;
             // Jika lunas, denda yang tersimpan adalah denda yang dibayar
             // Namun beberapa bagian kode lama mereset ke 0, kita ikuti agar aman 
             // tapi sebenarnya lebih baik menyimpan nilainya. 
