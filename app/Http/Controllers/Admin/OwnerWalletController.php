@@ -183,7 +183,7 @@ class OwnerWalletController extends Controller
         }
 
         // Validasi Saldo
-        if (!PettyCashSaldo::validateKirimOwner($userId, $nominalCash, $nominalTf)) {
+        if (!PettyCashSaldo::validateKirimOwner($userId, $nominalCash, $nominalTf, $request->sumber)) {
             return back()->withErrors(['nominal_cash' => 'Saldo Owner tidak mencukupi untuk penarikan ini.'])->withInput();
         }
 
