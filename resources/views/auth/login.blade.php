@@ -297,7 +297,7 @@
 
             <!-- Footer Info -->
             <div class="text-center mt-8 text-gray-600 text-sm">
-                <p>© 2026 Koperasi Majakara. All rights reserved.</p>
+                <p>© 2026 Koperasi Majakara. Hak cipta dilindungi undang-undang.</p>
             </div>
         </div>
     </div>

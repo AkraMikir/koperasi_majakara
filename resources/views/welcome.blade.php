@@ -453,7 +453,7 @@
                                     <span class="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">TINGGI</span>
                                 </div>
                                 <div class="text-xl md:text-2xl font-bold mb-1">Deposito</div>
-                                <div class="text-xs md:text-sm opacity-90">Return Maksimal</div>
+                                <div class="text-xs md:text-sm opacity-90">Imbal Hasil Maksimal</div>
                             </div>
                         </div>
                     </div>
@@ -473,7 +473,7 @@
                     </div>
                     <div class="group cursor-pointer">
                         <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #8b6f2f 0%, #d4af37 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">< 24j</div>
-                        <div class="text-xs md:text-sm text-gray-600 font-medium">Proses Approval</div>
+                        <div class="text-xs md:text-sm text-gray-600 font-medium">Proses Persetujuan</div>
                     </div>
                     <div class="group cursor-pointer">
                         <div class="text-3xl md:text-4xl font-bold mb-2 group-hover:scale-110 transition-transform" style="background: linear-gradient(135deg, #d4af37 0%, #f4d03f 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">5+</div>
@@ -1007,8 +1007,8 @@
                 <div class="fade-in-up animate-on-scroll delay-400">
                     <h3 class="font-bold text-lg mb-4">Hubungi Kami</h3>
                     <ul class="space-y-2 text-sm text-white/80">
-                        <li><a href="#" class="hover:text-white transition">Customer Service</a></li>
-                        <li><a href="#" class="hover:text-white transition">Email Support</a></li>
+                        <li><a href="#" class="hover:text-white transition">Layanan Pelanggan</a></li>
+                        <li><a href="#" class="hover:text-white transition">Dukungan via Email</a></li>
                         <li><a href="#" class="hover:text-white transition">Lokasi Kantor</a></li>
                         <li><a href="#" class="hover:text-white transition">Kontak Darurat</a></li>
                     </ul>
@@ -1017,7 +1017,7 @@
 
             <div class="border-t border-white/20 pt-8 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-white/80 text-sm mb-4 md:mb-0">
-                    Copyright © 2025 Koperasi Majakara. All rights reserved.
+                    Copyright © 2025 Koperasi Majakara. Hak cipta dilindungi undang-undang.
                 </p>
                 <div class="flex items-center space-x-4">
                     <span class="text-white/80 text-sm">Ikuti Kami:</span>

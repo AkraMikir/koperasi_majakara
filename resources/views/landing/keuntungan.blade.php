@@ -858,7 +858,7 @@
                 </div>
             </div>
             <div class="border-t border-white/20 pt-8 text-center">
-                <p class="text-white/80 text-sm">Copyright © 2026 Koperasi Majakara. All rights reserved.</p>
+                <p class="text-white/80 text-sm">Copyright © 2026 Koperasi Majakara. Hak cipta dilindungi undang-undang.</p>
             </div>
         </div>
     </footer>

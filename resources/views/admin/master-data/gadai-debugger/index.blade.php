@@ -111,9 +111,9 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($gadai->status == 'active')
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800">ACTIVE</span>
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-green-100 text-green-800">AKTIF</span>
                                 @elseif($gadai->status == 'grace_period')
-                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800">GRACE PERIOD</span>
+                                    <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-red-100 text-red-800">MASA TENGGANG</span>
                                 @else
                                     <span class="px-3 py-1 inline-flex text-xs leading-5 font-bold rounded-full bg-gray-100 text-gray-800">{{ strtoupper($gadai->status) }}</span>
                                 @endif
