@@ -30,7 +30,7 @@
                     <div>
                         @php
                             $hour = now()->format('H');
-                            $greeting = 'Selamat Pagi';
+                            $greeting = 'Selamat Datang';
                             if ($hour >= 12 && $hour < 15) $greeting = 'Selamat Siang';
                             elseif ($hour >= 15 && $hour < 18) $greeting = 'Selamat Sore';
                             elseif ($hour >= 18) $greeting = 'Selamat Malam';
