@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             JnsLokasiPerusahaanSeeder::class,
             PinjamanSeeder::class,
             GadaiMasterInapKendaraanSeeder::class,
+            PaketDepositoSeeder::class,
         ]);
     }
 }

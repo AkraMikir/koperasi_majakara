@@ -95,6 +95,25 @@
             </div>
         </div>
 
+        @if(isset($bankInfo) && !$bankInfo['allowed'])
+        <!-- Premium Feature Lock Banner -->
+        <div class="mb-6 bg-red-50 border border-red-200 rounded-2xl p-4 md:p-5 flex items-start gap-4 shadow-sm animate-fade-in relative z-20">
+            <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold text-red-800 mb-1">Akses Fitur Dibatasi</h3>
+                <p class="text-xs text-red-600 leading-relaxed">{{ $bankInfo['reason'] }}</p>
+                <div class="mt-3">
+                    <a href="{{ route('nasabah.tabungan.nabung-sekarang') }}" class="inline-flex items-center gap-1.5 text-xs font-bold text-red-700 hover:text-red-800 bg-white px-3 py-1.5 rounded-lg border border-red-200 shadow-sm transition-colors">
+                        Setor Tabungan
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Quick Access (Akses Cepat) - Full Width Grid -->
         <div class="mb-8 relative z-20">
             <div class="flex items-center justify-between mb-3 px-2">
@@ -103,18 +122,35 @@
             <div class="grid grid-cols-4 md:grid-cols-8 gap-3 md:gap-4">
                 @php
                     $quickAccess = [
-                        ['route' => 'nasabah.tabungan.nabung-sekarang', 'label' => 'Nabung', 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.tabungan.penarikan', 'label' => 'Tarik', 'icon' => 'M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z'],
-                        ['route' => 'nasabah.pinjaman.pembayaran', 'label' => 'Bayar', 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
-                        ['route' => 'nasabah.pinjaman.angsuran', 'params' => ['jenis' => 'bulanan'], 'label' => 'Angsuran', 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.deposito.pengajuan', 'label' => 'Deposito', 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
-                        ['route' => 'nasabah.gadai_baru.index', 'label' => 'Gadai', 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
-                        ['route' => 'nasabah.pengajuan-pending', 'label' => 'Status', 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
-                        ['route' => 'nasabah.pinjaman.pinjaman-aktif', 'label' => 'Pinjaman', 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
+                        ['route' => 'nasabah.tabungan.nabung-sekarang', 'label' => 'Nabung', 'is_premium' => false, 'icon' => 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.tabungan.penarikan', 'label' => 'Tarik', 'is_premium' => false, 'icon' => 'M15 13l-3 3m0 0l-3-3m3 3V8m0 13a9 9 0 110-18 9 9 0 010 18z'],
+                        ['route' => 'nasabah.pinjaman.pembayaran', 'label' => 'Bayar', 'is_premium' => false, 'icon' => 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2'],
+                        ['route' => 'nasabah.pinjaman.angsuran', 'params' => ['jenis' => 'bulanan'], 'label' => 'Angsuran', 'is_premium' => false, 'icon' => 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.deposito.pengajuan', 'label' => 'Deposito', 'is_premium' => true, 'icon' => 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'],
+                        ['route' => 'nasabah.gadai_baru.index', 'label' => 'Gadai', 'is_premium' => true, 'icon' => 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z'],
+                        ['route' => 'nasabah.pengajuan-pending', 'label' => 'Status', 'is_premium' => false, 'icon' => 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'],
+                        ['route' => 'nasabah.pinjaman.pinjaman-aktif', 'label' => 'Pinjaman', 'is_premium' => false, 'icon' => 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z'],
                     ];
                 @endphp
 
                 @foreach($quickAccess as $item)
+                @php
+                    $isDisabled = isset($item['is_premium']) && $item['is_premium'] && isset($bankInfo) && !$bankInfo['allowed'];
+                @endphp
+                @if($isDisabled)
+                <div class="flex flex-col items-center gap-2 cursor-not-allowed opacity-60 group relative" title="Akses dibatasi">
+                    <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 relative overflow-hidden">
+                        <svg class="w-6 h-6 md:w-7 md:h-7 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
+                        </svg>
+                        <!-- Lock Icon overlay -->
+                        <div class="absolute inset-0 bg-white/40 backdrop-blur-[1px] flex items-center justify-center z-20">
+                            <svg class="w-5 h-5 text-gray-600 drop-shadow-md" fill="solid" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        </div>
+                    </div>
+                    <span class="text-[10px] md:text-xs font-bold text-gray-400 text-center leading-tight">{{ $item['label'] }}</span>
+                </div>
+                @else
                 <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex flex-col items-center gap-2 group">
                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-white border border-gray-100 shadow-[0_4px_10px_-2px_rgba(0,0,0,0.05)] flex items-center justify-center text-majakara-brown group-hover:bg-gradient-to-br group-hover:from-majakara-brown group-hover:to-majakara-dark-gold group-hover:text-white group-hover:border-transparent group-hover:shadow-[0_10px_20px_-5px_rgba(103,76,29,0.3)] transition-all duration-300 transform group-hover:-translate-y-1 relative overflow-hidden">
                         <div class="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
@@ -124,6 +160,7 @@
                     </div>
                     <span class="text-[10px] md:text-xs font-bold text-gray-600 group-hover:text-majakara-dark-gold transition-colors text-center leading-tight">{{ $item['label'] }}</span>
                 </a>
+                @endif
                 @endforeach
             </div>
         </div>

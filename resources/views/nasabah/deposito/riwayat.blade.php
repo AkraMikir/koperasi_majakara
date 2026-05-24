@@ -66,9 +66,9 @@
                                         $iconColorClass = 'text-blue-500';
                                         $linkTujuan = route('nasabah.deposito.detail', $depo->id);
                                     } elseif ($depo->status === 'ditutup') {
-                                        $statusLabel = 'Ditutup';
-                                        $statusClass = 'bg-gray-200 text-gray-700';
-                                        $iconColorClass = 'text-gray-500';
+                                        $statusLabel = 'Dibatalkan (Ditutup)';
+                                        $statusClass = 'bg-red-100 text-red-700';
+                                        $iconColorClass = 'text-red-500';
                                         $linkTujuan = route('nasabah.deposito.detail', $depo->id);
                                     } else {
                                         $statusLabel = ucfirst($depo->status);

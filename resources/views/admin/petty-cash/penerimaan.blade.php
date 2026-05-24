@@ -38,6 +38,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Dari Owner</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#674c1d] uppercase">Bukti</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-[#674c1d] uppercase">Transfer</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-[#674c1d] uppercase">Cash</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-[#674c1d] uppercase">Total</th>
@@ -62,6 +63,23 @@
                                 </p>
                             @endif
                         </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex justify-center gap-2">
+                                @if($item->bukti_tf)
+                                    <button type="button" onclick="openZoomModal('{{ Storage::url($item->bukti_tf) }}')" class="px-2 py-1 bg-blue-50 text-blue-600 rounded hover:bg-blue-100 text-[10px] font-bold" title="Lihat Bukti Transfer">
+                                        <i class="fas fa-image mb-1 block text-sm"></i> TF
+                                    </button>
+                                @endif
+                                @if($item->foto_cash)
+                                    <button type="button" onclick="openZoomModal('{{ Storage::url($item->foto_cash) }}')" class="px-2 py-1 bg-green-50 text-green-600 rounded hover:bg-green-100 text-[10px] font-bold" title="Lihat Bukti Cash">
+                                        <i class="fas fa-camera mb-1 block text-sm"></i> Cash
+                                    </button>
+                                @endif
+                                @if(!$item->bukti_tf && !$item->foto_cash)
+                                    <span class="text-xs text-gray-400">-</span>
+                                @endif
+                            </div>
+                        </td>
                         <td class="px-6 py-4 text-right text-sm">Rp {{ number_format($item->nominal_tf, 0, ',', '.') }}</td>
                         <td class="px-6 py-4 text-right text-sm">Rp {{ number_format($item->nominal_cash, 0, ',', '.') }}</td>
                         <td class="px-6 py-4 text-right font-bold text-[#674c1d]">Rp {{ number_format($item->nominal_tf + $item->nominal_cash, 0, ',', '.') }}</td>
@@ -77,15 +95,6 @@
                         <td class="px-6 py-4 text-center">
                             @if($item->status === 'pending')
                             <div class="flex items-center justify-center gap-2">
-                                {{-- Lihat Bukti --}}
-                                @if($item->bukti_tf)
-                                <a href="{{ Storage::url($item->bukti_tf) }}" target="_blank"
-                                   class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Lihat Bukti TF">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                    </svg>
-                                </a>
-                                @endif
                                 {{-- ACC Modal Trigger --}}
                                 <button type="button"
                                         onclick="document.getElementById('approve-modal-{{ $item->id }}').classList.remove('hidden')"
@@ -177,4 +186,45 @@
         @endif
     </div>
 </div>
+
+{{-- Modal Image Zoom --}}
+<div id="imageZoomModal" class="hidden fixed inset-0 z-[110] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="relative max-w-4xl w-full">
+        <button type="button" onclick="closeZoomModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300">
+            <i class="fas fa-times text-2xl"></i>
+        </button>
+        <img id="zoomedImage" src="" alt="Bukti Foto" class="w-full h-auto max-h-[85vh] object-contain rounded-lg shadow-2xl">
+    </div>
+</div>
+
+@push('scripts')
+<script>
+    function openZoomModal(url) {
+        document.getElementById('zoomedImage').src = url;
+        document.getElementById('imageZoomModal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeZoomModal() {
+        document.getElementById('imageZoomModal').classList.add('hidden');
+        document.getElementById('zoomedImage').src = '';
+        document.body.style.overflow = 'auto';
+    }
+
+    // Close on click outside
+    document.getElementById('imageZoomModal').addEventListener('click', function(e) {
+        if(e.target === this) {
+            closeZoomModal();
+        }
+    });
+    
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Escape' && !document.getElementById('imageZoomModal').classList.contains('hidden')) {
+            closeZoomModal();
+        }
+    });
+</script>
+@endpush
+
 @endsection

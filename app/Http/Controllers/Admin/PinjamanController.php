@@ -393,6 +393,25 @@ class PinjamanController extends Controller
                 'tgl_cair' => $request->tgl_cair,
             ]);
 
+            // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
+            if ($metode !== 'petty_cash') {
+                $bankService = app(\App\Services\BankAccessService::class);
+                $namaBank = $bankService->getNamaBank($pengajuan->id_anggota);
+                
+                if ($namaBank && !$bankService->isBcaUser($pengajuan->id_anggota)) {
+                    $potong = $bankService->potongBiayaTransfer(
+                        $pengajuan->id_anggota,
+                        $namaBank,
+                        'Pencairan Pinjaman #' . $pinjaman->id,
+                        Auth::id()
+                    );
+                    
+                    if (!$potong['success']) {
+                        throw new \Exception($potong['message']);
+                    }
+                }
+            }
+
             DB::commit();
 
             app(ActivityLogService::class)->logCairkanPinjaman($pinjaman->id, $pinjaman->jumlah_pinjam, $pengajuan->nasabah->user->nama ?? 'N/A');

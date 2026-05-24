@@ -483,4 +483,79 @@ class ActivityLogService
             $adminId
         );
     }
+    // --- DEPOSITO ---
+
+    public function logApprovePengajuanDeposito(string $pengajuanId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'approve_pengajuan_deposito',
+            'deposito',
+            "Menyetujui pengajuan deposito Rp " . number_format($nominal, 0, ',', '.') . " atas nama nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'PengajuanDeposito',
+            $pengajuanId
+        );
+    }
+
+    public function logRejectPengajuanDeposito(string $pengajuanId, float $nominal, string $nasabahNama, string $alasan = ''): void
+    {
+        $this->log(
+            'reject_pengajuan_deposito',
+            'deposito',
+            "Menolak pengajuan deposito Rp " . number_format($nominal, 0, ',', '.') . " atas nama nasabah {$nasabahNama}" . ($alasan ? ". Alasan: {$alasan}" : ''),
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama, 'alasan' => $alasan],
+            'PengajuanDeposito',
+            $pengajuanId
+        );
+    }
+
+    public function logPencairanDeposito(string $depositoId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'pencairan_deposito',
+            'deposito',
+            "Mencairkan deposito Rp " . number_format($nominal, 0, ',', '.') . " untuk nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'DepositoH',
+            $depositoId
+        );
+    }
+
+    // --- GADAI ---
+
+    public function logApprovePengajuanGadai(string $pengajuanId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'approve_pengajuan_gadai',
+            'gadai',
+            "Menyetujui pengajuan gadai Rp " . number_format($nominal, 0, ',', '.') . " atas nama nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'PengajuanGadai',
+            $pengajuanId
+        );
+    }
+
+    public function logRejectPengajuanGadai(string $pengajuanId, float $nominal, string $nasabahNama, string $alasan = ''): void
+    {
+        $this->log(
+            'reject_pengajuan_gadai',
+            'gadai',
+            "Menolak pengajuan gadai Rp " . number_format($nominal, 0, ',', '.') . " atas nama nasabah {$nasabahNama}" . ($alasan ? ". Alasan: {$alasan}" : ''),
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama, 'alasan' => $alasan],
+            'PengajuanGadai',
+            $pengajuanId
+        );
+    }
+
+    public function logPelunasanGadai(string $gadaiId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'pelunasan_gadai',
+            'gadai',
+            "Menerima pelunasan gadai Rp " . number_format($nominal, 0, ',', '.') . " dari nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'GadaiH',
+            $gadaiId
+        );
+    }
 }

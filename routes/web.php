@@ -134,6 +134,8 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
         // Ajukan pencairan deposito
         Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
+        // Ajukan cancel deposito
+        Route::post('/aktif/{id}/cancel', [DepositoController::class, 'ajukanCancel'])->name('ajukan-cancel');
     });
 
             // Gadai Baru Routes

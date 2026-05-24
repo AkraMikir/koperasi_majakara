@@ -8,6 +8,7 @@ use App\Models\GadaiActive;
 use App\Models\JnsLokasiPerusahaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\BankAccessService;
 
 class NasabahGadaiBaruController extends Controller
 {
@@ -70,6 +71,16 @@ class NasabahGadaiBaruController extends Controller
         $lokasi = JnsLokasiPerusahaan::all();
         $nasabah = Auth::user()->nasabah;
 
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
         return view('nasabah.gadai_baru.show', compact('kategori', 'item', 'lokasi', 'nasabah'));
     }
 
@@ -111,6 +122,14 @@ class NasabahGadaiBaruController extends Controller
             abort(403);
         }
 
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        $access = app(BankAccessService::class)->checkPremiumAccess($gadai->nasabah_id);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
+
         // 🛡️ Guard Perpanjangan rules
         if (in_array($jenis, ['perpanjang', 'perpanjangan'])) {
             if (!in_array($gadai->status, ['active', 'grace_period'])) {
@@ -148,6 +167,14 @@ class NasabahGadaiBaruController extends Controller
         if ($gadai->nasabah_id !== Auth::user()->nasabah->id) {
             abort(403);
         }
+
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        $access = app(BankAccessService::class)->checkPremiumAccess($gadai->nasabah_id);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
 
         // Verify PIN
         $user = Auth::user();

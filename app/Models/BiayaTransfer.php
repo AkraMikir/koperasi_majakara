@@ -15,14 +15,16 @@ class BiayaTransfer extends Model
         'bank_pengirim',
         'bank_penerima',
         'biaya_admin',
+        'min_saldo_non_bca',
         'keterangan',
         'is_active',
     ];
 
     protected $casts = [
-        'biaya_admin' => 'decimal:2',
-        'is_active' => 'boolean',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
+        'biaya_admin'       => 'decimal:2',
+        'min_saldo_non_bca' => 'decimal:2',
+        'is_active'         => 'boolean',
+        'created_at'        => 'datetime',
+        'updated_at'        => 'datetime',
     ];
 }

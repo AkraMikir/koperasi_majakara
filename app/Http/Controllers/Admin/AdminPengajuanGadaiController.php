@@ -188,6 +188,13 @@ class AdminPengajuanGadaiController extends Controller
             }
 
             DB::commit();
+
+            app(\App\Services\ActivityLogService::class)->logApprovePengajuanGadai((string)$pengajuan->id, (float)$pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
+            if ($pengajuan->jenis_pengajuan == 'lunas') {
+                app(\App\Services\ActivityLogService::class)->logPelunasanGadai((string)$gadai->id, (float)$pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+            }
+
             return back()->with('success', 'Pengajuan ' . $pengajuan->jenis_pengajuan . ' berhasil disetujui!');
 
         } catch (\Exception $e) {
@@ -198,7 +205,7 @@ class AdminPengajuanGadaiController extends Controller
 
     public function reject(Request $request, $id)
     {
-        $pengajuan = GadaiPengajuan::findOrFail($id);
+        $pengajuan = GadaiPengajuan::with('nasabah.user')->findOrFail($id);
         
         if ($pengajuan->status !== 'pending') {
             return back()->with('error', 'Pengajuan ini sudah diproses sebelumnya.');
@@ -210,6 +217,8 @@ class AdminPengajuanGadaiController extends Controller
             'processed_at' => now(),
             'keterangan' => $request->keterangan ?? 'Ditolak oleh admin'
         ]);
+
+        app(\App\Services\ActivityLogService::class)->logRejectPengajuanGadai((string)$pengajuan->id, (float)$pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->keterangan ?? 'Ditolak oleh admin');
 
         return back()->with('success', 'Pengajuan berhasil ditolak.');
     }

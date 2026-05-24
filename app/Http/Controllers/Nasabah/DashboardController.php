@@ -118,11 +118,16 @@ class DashboardController extends Controller
             'chart_data' => $chartData,
         ];
         
+        // Check premium feature access
+        $bankService = app(\App\Services\BankAccessService::class);
+        $bankInfo = $bankService->checkPremiumAccess($idAnggota);
+
         return view('nasabah.dashboard', [
             'user' => auth()->user(),
             'dummyNasabah' => $dummyNasabah,
             'stats' => $stats,
             'transaksiTerbaru' => $transaksiTerbaru,
+            'bankInfo' => $bankInfo,
         ]);
     }
 

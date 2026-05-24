@@ -72,8 +72,11 @@
                         <p class="text-xs text-gray-400">{{ $p->nasabah?->user?->email ?? '-' }}</p>
                     </td>
                     <td class="px-4 py-3 font-mono text-xs text-gray-700">{{ $p->deposito?->nomor_deposito ?? '-' }}</td>
-                    <td class="px-4 py-3 font-bold text-[#674c1d]">
-                        Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}
+                    <td class="px-4 py-3">
+                        <p class="font-bold text-[#674c1d]">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</p>
+                        @if($p->is_cancel)
+                            <p class="text-[10px] text-red-500 font-bold uppercase mt-0.5">Pembatalan (Pokok Saja)</p>
+                        @endif
                     </td>
                     <td class="px-4 py-3 text-gray-600 text-xs">
                         {{ $p->deposito?->tgl_jatuh_tempo?->format('d M Y') ?? '-' }}

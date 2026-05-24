@@ -292,6 +292,8 @@ class DepositoController extends Controller
 
             DB::commit();
 
+            app(\App\Services\ActivityLogService::class)->logApprovePengajuanDeposito((string)$pengajuan->id, (float)$nominal, $pengajuan->nasabah->user->nama ?? 'N/A');
+
             NasabahNotification::notify(
                 $pengajuan->id_nasabah, 'deposito',
                 'Pengajuan Deposito Disetujui',
@@ -326,6 +328,8 @@ class DepositoController extends Controller
         }
 
         $pengajuan->update(['status' => '3', 'catatan_admin' => $request->catatan_admin]);
+
+        app(\App\Services\ActivityLogService::class)->logRejectPengajuanDeposito((string)$pengajuan->id, (float)$pengajuan->nominal, $pengajuan->nasabah->user->nama ?? 'N/A', $request->catatan_admin);
 
         NasabahNotification::notify(
             $pengajuan->id_nasabah, 'deposito',
@@ -612,14 +616,34 @@ class DepositoController extends Controller
                 'approved_by'   => $adminId,
             ]);
 
-            // 5. Update status deposito → dicairkan
-            $pencairan->deposito->update(['status' => 'dicairkan']);
+            // 5. Update status deposito → dicairkan atau ditutup jika is_cancel
+            $statusDep = $pencairan->is_cancel ? 'ditutup' : 'dicairkan';
+            $pencairan->deposito->update(['status' => $statusDep]);
 
             // 6. Sinkronisasi persiapan cair
             DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
                 ->update(['status' => 'selesai']);
 
+            // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
+            $bankService = app(\App\Services\BankAccessService::class);
+            $namaBank = $bankService->getNamaBank($pencairan->deposito->id_nasabah);
+            
+            if ($namaBank && !$bankService->isBcaUser($pencairan->deposito->id_nasabah)) {
+                $potong = $bankService->potongBiayaTransfer(
+                    $pencairan->deposito->id_nasabah,
+                    $namaBank,
+                    'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF)',
+                    $adminId
+                );
+                
+                if (!$potong['success']) {
+                    throw new \Exception($potong['message']);
+                }
+            }
+
             DB::commit();
+
+            app(\App\Services\ActivityLogService::class)->logPencairanDeposito((string)$pencairan->deposito_id, (float)$nominal, $pencairan->nasabah->user->nama ?? 'N/A');
 
             return redirect()->route('admin.deposito.pencairan-tf.index')
                 ->with('success', 'Pencairan deposito berhasil diselesaikan.');
@@ -837,14 +861,17 @@ class DepositoController extends Controller
                 'approved_by'   => $adminId,
             ]);
 
-            // 5. Update status deposito → dicairkan
-            $pencairan->deposito->update(['status' => 'dicairkan']);
+            // 5. Update status deposito → dicairkan atau ditutup jika is_cancel
+            $statusDep = $pencairan->is_cancel ? 'ditutup' : 'dicairkan';
+            $pencairan->deposito->update(['status' => $statusDep]);
 
             // 6. Sinkronisasi persiapan cair
             DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
                 ->update(['status' => 'selesai']);
 
             DB::commit();
+
+            app(\App\Services\ActivityLogService::class)->logPencairanDeposito((string)$pencairan->deposito_id, (float)$nominal, $pencairan->nasabah->user->nama ?? 'N/A');
 
             // Notifikasi nasabah
             NasabahNotification::notify(
