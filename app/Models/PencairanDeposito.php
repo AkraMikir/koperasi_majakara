@@ -22,10 +22,12 @@ class PencairanDeposito extends Model
         'status',            // pending | diproses | selesai | ditolak
         'catatan',
         'approved_by',
+        'is_cancel',
     ];
 
     protected $casts = [
         'nominal_akhir' => 'decimal:2',
+        'is_cancel'     => 'boolean',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
     ];
@@ -52,6 +54,7 @@ class PencairanDeposito extends Model
     public function isTf(): bool           { return $this->jenis_pencairan === 'rek_nasabah'; }
     public function isTabungan(): bool     { return $this->jenis_pencairan === 'saldo_tabungan'; }
     public function isPettyCash(): bool    { return $this->jenis_pencairan === 'petty_cash_operator'; }
+    public function isCancel(): bool       { return $this->is_cancel; }
 
     /** Apakah pencairan ini butuh dana fisik/transfer Owner? */
     public function needsFisikOwner(): bool

@@ -107,6 +107,18 @@ class PettyCashController extends Controller
         $nominalCash = (float) ($request->nominal_cash ?? 0);
         $sumber      = $request->sumber;
 
+        // Anti Double Submit Protection (Delay 2 Detik)
+        $lastSubmit = PettyCashPenerimaan::where('owner_id', Auth::id())
+            ->where('admin_id', $request->admin_id)
+            ->where('nominal_tf', $nominalTf)
+            ->where('nominal_cash', $nominalCash)
+            ->where('created_at', '>=', now()->subSeconds(2))
+            ->first();
+
+        if ($lastSubmit) {
+            return back()->with('error', 'Terdeteksi pengiriman ganda. Mohon tunggu beberapa saat sebelum mengirim lagi.');
+        }
+
         if (($nominalTf + $nominalCash) <= 0) {
             return back()->withErrors(['nominal_tf' => 'Minimal satu nominal harus diisi.'])->withInput();
         }
@@ -223,7 +235,21 @@ class PettyCashController extends Controller
         }
 
         $penerimaan = $query->paginate(15);
-        $saldoAdmin  = PettyCashSaldo::getSaldo(Auth::id(), 'admin');
+        
+        // 🛡️ Menghitung Saldo Modal Awal dari SUM mutasi agar menghitung dari semua data yang ada
+        $saldoCash = PettyCashSaldo::where('user_id', Auth::id())
+            ->where('role', 'admin')
+            ->where('tipe', 'cash')
+            ->where('sumber', 'other')
+            ->sum('mutasi');
+            
+        $saldoTf = PettyCashSaldo::where('user_id', Auth::id())
+            ->where('role', 'admin')
+            ->where('tipe', 'transfer')
+            ->where('sumber', 'other')
+            ->sum('mutasi');
+            
+        $saldoAdmin = $saldoCash + $saldoTf;
 
         return view('admin.petty-cash.penerimaan', compact('penerimaan', 'saldoAdmin'));
     }

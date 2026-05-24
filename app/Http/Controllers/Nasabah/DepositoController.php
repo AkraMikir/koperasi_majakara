@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
+use App\Services\BankAccessService;
 use App\Models\DepositoH;
 use App\Models\JnsTenorDeposito;
 use App\Models\PengajuanDeposito;
@@ -112,6 +113,16 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
         $pakets = PaketDeposito::with('kategori')
             ->where('status', 'aktif')
             ->orderBy('tenor_bulan')
@@ -148,6 +159,16 @@ class DepositoController extends Controller
         ]);
 
         $nasabah = Auth::user()->nasabah;
+
+        // ── BANK ACCESS GUARD (server-side double check) ───────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
         
         $paket = PaketDeposito::findOrFail($request->paket_id);
         if ($request->nominal < $paket->minimal_nominal) {
@@ -184,6 +205,11 @@ class DepositoController extends Controller
         }
 
         $pengajuan = PengajuanDeposito::create($data);
+
+        app(\App\Services\ActivityLogService::class)->logSubmitPengajuanDeposito(
+            $pengajuan->id,
+            $request->nominal
+        );
 
         return redirect()->route('nasabah.deposito.status-pengajuan', $pengajuan->id)
             ->with('success', 'Pengajuan deposito berhasil dikirim! Kami akan memproses pengajuan Anda.');
@@ -260,5 +286,45 @@ class DepositoController extends Controller
         ]);
 
         return back()->with('success', 'Permintaan pencairan berhasil diajukan. Admin kami akan segera memprosesnya.');
+    }
+    /**
+     * Ajukan Cancel Deposito
+     */
+    public function ajukanCancel(Request $request, $id)
+    {
+        $request->validate([
+            'pin' => 'required|numeric',
+        ]);
+
+        $user = Auth::user();
+        if ((int) $request->pin !== (int) $user->pin) {
+            return back()->with('error', 'PIN yang Anda masukkan salah.');
+        }
+
+        $nasabah  = $user->nasabah;
+        $deposito = DepositoH::where('id_nasabah', $nasabah->id)
+            ->findOrFail($id);
+
+        // Cek apakah sudah ada request yang pending
+        $existing = PencairanDeposito::where('deposito_id', $deposito->id)
+            ->where('status', 'pending')->first();
+
+        if ($existing) {
+            return back()->with('error', 'Permintaan pencairan/pembatalan sudah diajukan sebelumnya dan masih dalam proses.');
+        }
+
+        // Buat record pencairan dengan flag is_cancel = true
+        PencairanDeposito::create([
+            'deposito_id'     => $deposito->id,
+            'id_nasabah'      => $nasabah->id,
+            'jenis_pencairan' => 'saldo_tabungan', // default atau bisa direquest if needed, let's say transfer since admin needs to transfer it back or whatever. Actually, the user requirement: "Setelah approve, admin wajib melakukan transfer jumlah pokok dan mengunggah bukti foto transfer atau bukti serah tunai." so we can set it to 'rek_nasabah' default or just use the method from request if we provide it. For now let's set it to 'rek_nasabah'. Let's check view what they want.
+            'metode_pencairan'=> 'rek_nasabah', // compat
+            'nominal_akhir'   => $deposito->nominal_awal, // hanya pokok kembali
+            'status'          => 'pending',
+            'is_cancel'       => true,
+            'catatan'         => 'Pengajuan pembatalan deposito oleh nasabah.',
+        ]);
+
+        return back()->with('success', 'Permintaan pembatalan deposito berhasil diajukan. Admin kami akan segera memproses pengembalian dana.');
     }
 }

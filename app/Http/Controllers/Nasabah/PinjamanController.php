@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Nasabah;
 
 use App\Http\Controllers\Controller;
 use App\Services\ActivityLogService;
+use App\Services\BankAccessService;
 use App\Models\PengajuanPinjaman;
 use App\Models\User;
 use App\Models\PinjamanH;
@@ -138,6 +139,14 @@ class PinjamanController extends Controller
     public function pengajuanPinjaman(Request $request)
     {
         $idAnggota = $this->getIdAnggota();
+
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
 
         $riwayatPengajuan = PengajuanPinjaman::where('id_anggota', $idAnggota)
             ->with('pinjaman')
@@ -303,6 +312,14 @@ class PinjamanController extends Controller
 
         $idAnggota = $this->getIdAnggota();
         $jenisPencairan = 'transfer'; // Auto set to transfer for this form
+
+        // ── BANK ACCESS GUARD (server-side double check) ───────────
+        $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
 
         // Bunga dari master_bunga_pinjaman sesuai durasi
         $durasi = (int) $request->durasi;
@@ -485,6 +502,14 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
+
+        // ── BANK ACCESS GUARD (server-side double check) ───────────
+        $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
 
         // 🛡️ Guard duplikasi harian: satu nasabah max 1 janji temu pinjaman PENDING per tanggal
         $sudahAdaHariIni = \App\Models\JanjiTemuPinjaman::where('id_nasabah', $idAnggota)

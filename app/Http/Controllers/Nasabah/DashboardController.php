@@ -65,11 +65,93 @@ class DashboardController extends Controller
             ->get();
         $totalGadai = $gadaiAktif->sum('jumlah_pinjaman') ?? 0;
 
-        // Get Recent Transactions
-        $transaksiTerbaru = TransTabungan::where('id_anggota', $idAnggota)
+        // Get Recent Transactions (Combined)
+        $allTransaksi = [];
+
+        // 1. Tabungan
+        $transTabungan = TransTabungan::where('id_anggota', $idAnggota)
             ->latest('tgl_transaksi')
             ->take(5)
             ->get();
+            
+        foreach($transTabungan as $t) {
+            $isSetoran = optional($t->jnsTransaksi)->kode === 'STR';
+            $allTransaksi[] = (object)[
+                'id' => 'T-'.$t->id,
+                'tgl_transaksi' => $t->tgl_transaksi,
+                'nominal' => $t->nominal,
+                'jenis' => 'Tabungan - ' . (optional($t->jnsTransaksi)->nama ?? 'Transaksi'),
+                'is_inflow' => $isSetoran,
+                'url' => route('nasabah.tabungan.detail-transaksi', $t->id),
+                'icon_type' => 'tabungan'
+            ];
+        }
+
+        // 2. Deposito
+        try {
+            $transDeposito = \App\Models\TransDeposito::whereHas('deposito', function($q) use ($idAnggota) {
+                $q->where('id_nasabah', $idAnggota);
+            })->latest('tgl_transaksi')->take(5)->get();
+            
+            foreach($transDeposito as $t) {
+                $isInflow = (strtolower($t->jenis) == 'setoran' || strtolower($t->jenis) == 'bunga');
+                $allTransaksi[] = (object)[
+                    'id' => 'D-'.$t->id,
+                    'tgl_transaksi' => $t->tgl_transaksi,
+                    'nominal' => $t->nominal,
+                    'jenis' => 'Deposito - ' . ucfirst($t->jenis),
+                    'is_inflow' => $isInflow,
+                    'url' => '#', 
+                    'icon_type' => 'deposito'
+                ];
+            }
+        } catch (\Exception $e) {}
+
+        // 3. Gadai
+        try {
+            $transGadai = \App\Models\TransGadai::where('nasabah_id', $idAnggota)
+                ->latest('tgl_transaksi')->take(5)->get();
+                
+            foreach($transGadai as $t) {
+                $isInflow = (strtolower($t->jenis) == 'pencairan');
+                $allTransaksi[] = (object)[
+                    'id' => 'G-'.$t->id,
+                    'tgl_transaksi' => $t->tgl_transaksi,
+                    'nominal' => $t->nominal,
+                    'jenis' => 'Gadai - ' . ucfirst($t->jenis),
+                    'is_inflow' => $isInflow,
+                    'url' => '#', 
+                    'icon_type' => 'gadai'
+                ];
+            }
+        } catch (\Exception $e) {}
+
+        // 4. Pinjaman
+        try {
+            $transPinjaman = \App\Models\TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
+                $q->where('id_anggota', $idAnggota);
+            })->where('status_bayar', 'lunas')->whereNotNull('tgl_bayar')->latest('tgl_bayar')->take(5)->get();
+            
+            foreach($transPinjaman as $t) {
+                $allTransaksi[] = (object)[
+                    'id' => 'P-'.$t->id,
+                    'tgl_transaksi' => $t->tgl_bayar,
+                    'nominal' => $t->jumlah_terbayar,
+                    'jenis' => 'Pinjaman - Angsuran',
+                    'is_inflow' => false,
+                    'url' => '#', 
+                    'icon_type' => 'pinjaman'
+                ];
+            }
+        } catch (\Exception $e) {}
+
+        // Sort by tgl_transaksi descending
+        usort($allTransaksi, function($a, $b) {
+            return $b->tgl_transaksi->timestamp - $a->tgl_transaksi->timestamp;
+        });
+        
+        // Take latest 5
+        $transaksiTerbaru = array_slice($allTransaksi, 0, 5);
 
         // Calculate Total Assets
         $totalAssets = $saldoTabungan + $totalDeposito;
@@ -118,11 +200,16 @@ class DashboardController extends Controller
             'chart_data' => $chartData,
         ];
         
+        // Check premium feature access
+        $bankService = app(\App\Services\BankAccessService::class);
+        $bankInfo = $bankService->checkPremiumAccess($idAnggota);
+
         return view('nasabah.dashboard', [
             'user' => auth()->user(),
             'dummyNasabah' => $dummyNasabah,
             'stats' => $stats,
             'transaksiTerbaru' => $transaksiTerbaru,
+            'bankInfo' => $bankInfo,
         ]);
     }
 

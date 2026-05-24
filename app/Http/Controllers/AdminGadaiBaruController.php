@@ -165,6 +165,25 @@ class AdminGadaiBaruController extends Controller
                 'other'
             );
 
+            // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
+            if ($metode === 'transfer') {
+                $bankService = app(\App\Services\BankAccessService::class);
+                $namaBank = $bankService->getNamaBank($request->nasabah_id);
+                
+                if ($namaBank && !$bankService->isBcaUser($request->nasabah_id)) {
+                    $potong = $bankService->potongBiayaTransfer(
+                        $request->nasabah_id,
+                        $namaBank,
+                        'Pencairan Gadai Baru ' . $gadai->slot_kode,
+                        $adminId
+                    );
+                    
+                    if (!$potong['success']) {
+                        throw new \Exception($potong['message']);
+                    }
+                }
+            }
+
             DB::commit();
             return redirect()->route('admin.gadai_baru.detail', $gadai->id)->with('success', 'Gadai berhasil dibuat!');
 

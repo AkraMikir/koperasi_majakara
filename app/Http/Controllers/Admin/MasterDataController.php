@@ -547,6 +547,7 @@ class MasterDataController extends Controller
             'bank_pengirim' => 'required|string|max:50',
             'bank_penerima' => 'required|string|max:50',
             'biaya_admin' => 'required|numeric|min:0',
+            'min_saldo_non_bca' => 'nullable|numeric|min:0',
             'keterangan' => 'nullable|string',
         ]);
 
@@ -568,6 +569,7 @@ class MasterDataController extends Controller
             'bank_pengirim' => 'required|string|max:50',
             'bank_penerima' => 'required|string|max:50',
             'biaya_admin' => 'required|numeric|min:0',
+            'min_saldo_non_bca' => 'nullable|numeric|min:0',
             'keterangan' => 'nullable|string',
         ]);
 

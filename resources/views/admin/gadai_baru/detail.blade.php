@@ -23,9 +23,9 @@
             <div class="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center gap-2">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status:</span>
                 @if($gadai->status == 'active')
-                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black rounded-lg">ACTIVE</span>
+                    <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black rounded-lg">AKTIF</span>
                 @elseif($gadai->status == 'grace_period')
-                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-black rounded-lg animate-pulse">GRACE PERIOD</span>
+                    <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-black rounded-lg animate-pulse">MASA TENGGANG</span>
                 @elseif($gadai->status == 'lunas')
                     <span class="px-3 py-1 bg-blue-100 text-blue-700 text-xs font-black rounded-lg">LUNAS / SELESAI</span>
                 @elseif($gadai->status == 'expired_final')

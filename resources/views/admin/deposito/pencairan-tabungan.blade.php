@@ -68,7 +68,7 @@
                     $dep = $p->deposito;
                     $bungaKotor = $dep ? ($dep->nominal_awal * $dep->bunga * ($dep->tenor?->tenor_hari ?? 365) / 365) : 0;
                     $pajak = $bungaKotor * 0.2;
-                    $estimasiCair = $dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0;
+                    $estimasiCair = $p->is_cancel ? ($dep?->nominal_awal ?? 0) : ($dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0);
                 @endphp
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-4 py-3">
@@ -78,7 +78,11 @@
                     <td class="px-4 py-3 font-mono text-xs text-gray-700">{{ $dep?->nomor_deposito ?? '-' }}</td>
                     <td class="px-4 py-3">
                         <p class="font-bold text-[#674c1d]">Rp {{ number_format($p->nominal_akhir, 0, ',', '.') }}</p>
-                        <p class="text-xs text-gray-400">Est: Rp {{ number_format($estimasiCair, 0, ',', '.') }}</p>
+                        @if($p->is_cancel)
+                            <p class="text-[10px] text-red-500 font-bold uppercase mt-0.5">Pembatalan (Pokok Saja)</p>
+                        @else
+                            <p class="text-xs text-gray-400">Est: Rp {{ number_format($estimasiCair, 0, ',', '.') }}</p>
+                        @endif
                     </td>
                     <td class="px-4 py-3 text-gray-600 text-xs">
                         {{ $dep?->tgl_jatuh_tempo?->format('d M Y') ?? '-' }}

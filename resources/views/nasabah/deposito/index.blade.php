@@ -459,7 +459,51 @@
             </div>
         </div>
     </div>
-
+{{-- ===== TABEL SIMULASI SEABANK STYLE ===== --}}
+    <div class="mx-4 mb-5">
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="p-4 border-b border-gray-100">
+                <h2 class="text-base font-bold text-[#674c1d] font-display">Tabel Simulasi Bunga</h2>
+                <p class="text-xs text-gray-500 mt-1">Contoh perhitungan dengan penempatan Rp 10.000.000</p>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full text-xs">
+                    <thead>
+                        <tr class="bg-[#674c1d]/5">
+                            <th class="px-4 py-3 text-left font-bold text-[#674c1d] border-b border-gray-100">Keterangan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">1 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">3 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">6 Bulan</th>
+                            <th class="px-4 py-3 text-center font-bold text-[#674c1d] border-b border-gray-100">12 Bulan</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @php
+                            $rows = [
+                                ['label' => 'Suku Bunga', 'vals' => ['6,00%', '7,50%', '9,00%', '12,00%']],
+                                ['label' => 'Pokok', 'vals' => ['Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000']],
+                                ['label' => 'Bunga Kotor', 'vals' => ['Rp 47.671', 'Rp 184.932', 'Rp 443.836', 'Rp 1.200.000']],
+                                ['label' => 'Pajak (20%)', 'vals' => ['Rp 9.534', 'Rp 36.986', 'Rp 88.767', 'Rp 240.000'], 'class' => 'text-red-500'],
+                                ['label' => 'Bunga Bersih', 'vals' => ['Rp 38.137', 'Rp 147.946', 'Rp 355.069', 'Rp 960.000'], 'class' => 'text-green-600 font-bold'],
+                                ['label' => 'Total Cair', 'vals' => ['Rp 10.038.137', 'Rp 10.147.946', 'Rp 10.355.069', 'Rp 10.960.000'], 'class' => 'font-black text-[#674c1d]'],
+                            ];
+                        @endphp
+                        @foreach($rows as $i => $row)
+                        <tr class="{{ $i % 2 === 0 ? 'bg-white' : 'bg-gray-50/50' }}">
+                            <td class="px-4 py-3 text-gray-600 border-b border-gray-50 whitespace-nowrap">{{ $row['label'] }}</td>
+                            @foreach($row['vals'] as $v)
+                            <td class="px-4 py-3 text-center border-b border-gray-50 {{ $row['class'] ?? 'text-gray-800' }} whitespace-nowrap">{{ $v }}</td>
+                            @endforeach
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 bg-amber-50/50 border-t border-[#d4af37]/20">
+                <p class="text-xs text-gray-500 italic">*Simulasi di atas adalah estimasi. Bunga aktual mengikuti suku bunga yang berlaku saat pencairan.</p>
+            </div>
+        </div>
+    </div>
 
 
 </div>

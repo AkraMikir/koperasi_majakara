@@ -95,6 +95,13 @@ class DepositoH extends Model
     {
         return $this->belongsTo(PaketDeposito::class, 'paket_id');
     }
+
+    public function isCancelled(): bool
+    {
+        return $this->status === 'ditutup' && 
+               $this->pencairan && 
+               $this->pencairan->is_cancel;
+    }
 }
 
 

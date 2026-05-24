@@ -170,7 +170,7 @@
                 </div>
             </div>
 
-            <form action="{{ route('admin.petty-cash.penerimaan.store') }}" method="POST" enctype="multipart/form-data" class="px-10 py-10 space-y-8">
+            <form action="{{ route('admin.petty-cash.penerimaan.store') }}" method="POST" enctype="multipart/form-data" class="px-10 py-10 space-y-8" id="formKirimDana">
                 @csrf
                 
                 <div>
@@ -415,6 +415,40 @@
     document.addEventListener('keydown', function(event) {
         if (event.key === 'Escape') {
             closeKirimModal();
+        }
+    });
+
+    // Anti Double Submit
+    document.getElementById('formKirimDana').addEventListener('submit', function(e) {
+        const btn = this.querySelector('button[type="submit"]');
+        if (btn.disabled) {
+            e.preventDefault();
+            return;
+        }
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> MEMPROSES...';
+    });
+
+    // Image Upload Feedback
+    document.querySelector('input[name="bukti_tf"]').addEventListener('change', function(e) {
+        const span = this.parentElement.querySelector('span');
+        if(this.files && this.files[0]) {
+            span.textContent = this.files[0].name;
+            span.classList.add('text-[#674c1d]');
+        } else {
+            span.textContent = 'Pilih Screenshot';
+            span.classList.remove('text-[#674c1d]');
+        }
+    });
+
+    document.querySelector('input[name="foto_cash"]').addEventListener('change', function(e) {
+        const span = this.parentElement.querySelector('span');
+        if(this.files && this.files[0]) {
+            span.textContent = this.files[0].name;
+            span.classList.add('text-[#674c1d]');
+        } else {
+            span.textContent = 'Pilih Foto Uang';
+            span.classList.remove('text-[#674c1d]');
         }
     });
 

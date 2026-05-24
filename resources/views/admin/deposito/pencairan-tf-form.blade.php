@@ -17,15 +17,26 @@
         @php
             $dep = $pencairan->deposito;
             $nasabah = $pencairan->nasabah;
+            $isCancel = $pencairan->is_cancel;
             $isEarly = $dep && $dep->tgl_jatuh_tempo > now();
             $bungaKotor = ($dep && !$isEarly) ? ($dep->nominal_awal * $dep->bunga * (($dep->tenor?->tenor_hari ?? 365) / 365)) : 0;
             $pajak = $bungaKotor * 0.2;
-            $estimasiCair = $dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0;
+            
+            if ($isCancel) {
+                $estimasiCair = $dep ? $dep->nominal_awal : 0;
+            } else {
+                $estimasiCair = $dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0;
+            }
         @endphp
 
         {{-- Simplified Destination Card --}}
-        <div class="bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-2xl p-6 text-white mb-6 shadow-lg">
-            <p class="text-white/60 text-[10px] font-bold uppercase tracking-widest mb-4">Tujuan Transfer (Nasabah)</p>
+        <div class="bg-gradient-to-br {{ $isCancel ? 'from-red-600 to-red-800' : 'from-[#674c1d] to-[#8b6f2f]' }} rounded-2xl p-6 text-white mb-6 shadow-lg">
+            <div class="flex items-center justify-between mb-4">
+                <p class="text-white/80 text-[10px] font-bold uppercase tracking-widest">{{ $isCancel ? 'Pembatalan - Tujuan Transfer' : 'Tujuan Transfer (Nasabah)' }}</p>
+                @if($isCancel)
+                    <span class="bg-white/20 text-white text-[10px] px-2 py-1 rounded font-bold uppercase">Tanpa Bunga</span>
+                @endif
+            </div>
             <div class="flex items-center justify-between">
                 <div>
                     <p class="text-2xl font-black font-mono tracking-tighter">{{ $nasabah?->dataRek?->no_rekening ?? '-' }}</p>

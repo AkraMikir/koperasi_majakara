@@ -12,8 +12,13 @@ use App\Models\PengajuanTabungan;
 use App\Models\PengajuanPinjaman;
 use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
+use App\Models\TempoPinjamanB;
+use App\Models\TempoPinjamanM;
+use App\Models\TransDeposito;
+use App\Models\TransGadai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -50,9 +55,62 @@ class DashboardController extends Controller
         $aktivitas_terkini = $this->getAktivitasTerkini();
 
         // Grafik Likuiditas (15 Hari Terakhir)
-        // Sumber: petty_cash_saldo (role=owner) — mutasi positif = kas masuk, negatif = kas keluar
-        // Ini mencakup: setoran tabungan, setoran deposito, angsuran pinjaman, pembayaran gadai (masuk)
-        // dan: pencairan pinjaman, penarikan tabungan, pencairan deposito, dll (keluar)
+        // Sumber Data Real dari Transaksi Modul: 
+        // Masuk: Setoran Tabungan, Setor Awal Deposito, Angsuran Pinjaman, Pembayaran Gadai
+        // Keluar: Penarikan Tabungan, Pencairan Pinjaman, Pencairan Deposito, Pencairan Gadai
+        
+        $startDate = now()->subDays(14)->startOfDay();
+        $endDate = now()->endOfDay();
+
+        // 1. Tabungan
+        $tabunganMasuk = TransTabungan::whereHas('jnsTransaksi', function($q) { $q->where('kode', 'STR'); })
+            ->whereBetween('tgl_transaksi', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_transaksi) as date, SUM(nominal) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        $tabunganKeluar = TransTabungan::whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
+            ->whereBetween('tgl_transaksi', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_transaksi) as date, SUM(nominal) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        // 2. Pinjaman
+        $pinjamanKeluar = PinjamanH::whereIn('lunas', ['belum', 'lunas'])
+            ->whereBetween('tgl_pinjam', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_pinjam) as date, SUM(jumlah_pinjam) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        $angsuranMasukB = TempoPinjamanB::where('status_bayar', 'lunas')
+            ->whereBetween('tgl_bayar', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_bayar) as date, SUM(jumlah_terbayar) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        $angsuranMasukM = TempoPinjamanM::where('status_bayar', 'lunas')
+            ->whereBetween('tgl_bayar', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_bayar) as date, SUM(jumlah_terbayar) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        // 3. Deposito
+        $depositoMasuk = TransDeposito::where('jenis', 'setor_awal')
+            ->whereBetween('tgl_transaksi', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_transaksi) as date, SUM(nominal) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        $depositoKeluar = TransDeposito::where('jenis', 'pencairan')
+            ->whereBetween('tgl_transaksi', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_transaksi) as date, SUM(nominal) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        // 4. Gadai
+        $gadaiKeluar = GadaiH::whereIn('status', ['aktif', 'lunas', 'dilelang'])
+            ->whereBetween('tgl_mulai', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_mulai) as date, SUM(jumlah_pinjaman) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
+        $gadaiMasuk = TransGadai::whereIn('jenis', ['bunga', 'pelunasan', 'pelunasan_akhir', 'denda', 'lelang'])
+            ->whereBetween('tgl_transaksi', [$startDate, $endDate])
+            ->selectRaw('DATE(tgl_transaksi) as date, SUM(nominal) as total')
+            ->groupBy('date')->pluck('total', 'date')->toArray();
+
         $labels     = [];
         $dataMasuk  = [];
         $dataKeluar = [];
@@ -62,24 +120,21 @@ class DashboardController extends Controller
             $dateStr  = $date->toDateString();
             $labels[] = $date->format('d M');
 
-            // KAS MASUK ke koperasi: semua mutasi POSITIF di saldo owner
-            // Mencakup: deposito masuk, setoran tabungan, angsuran pinjaman, gadai, dll.
-            $masuk = DB::table('petty_cash_saldo')
-                ->where('role', 'owner')
-                ->where('mutasi', '>', 0)
-                ->whereDate('created_at', $dateStr)
-                ->sum('mutasi');
+            // Total Masuk
+            $masuk = ($tabunganMasuk[$dateStr] ?? 0)
+                   + ($angsuranMasukB[$dateStr] ?? 0)
+                   + ($angsuranMasukM[$dateStr] ?? 0)
+                   + ($depositoMasuk[$dateStr] ?? 0)
+                   + ($gadaiMasuk[$dateStr] ?? 0);
 
-            // KAS KELUAR dari koperasi: semua mutasi NEGATIF di saldo owner
-            // Mencakup: pencairan pinjaman, pencairan deposito, penarikan tabungan, dll.
-            $keluar = DB::table('petty_cash_saldo')
-                ->where('role', 'owner')
-                ->where('mutasi', '<', 0)
-                ->whereDate('created_at', $dateStr)
-                ->sum('mutasi'); // nilai negatif, dikonversi abs() di bawah
+            // Total Keluar
+            $keluar = ($tabunganKeluar[$dateStr] ?? 0)
+                    + ($pinjamanKeluar[$dateStr] ?? 0)
+                    + ($depositoKeluar[$dateStr] ?? 0)
+                    + ($gadaiKeluar[$dateStr] ?? 0);
 
             $dataMasuk[]  = (float) $masuk;
-            $dataKeluar[] = (float) abs($keluar); // jadikan positif untuk chart
+            $dataKeluar[] = (float) $keluar;
         }
 
         $grafik_likuiditas = [
@@ -229,6 +284,7 @@ class DashboardController extends Controller
                 'type' => 'tabungan',
                 'deskripsi' => ($t->nasabah->user->nama ?? 'Nasabah') . ' - ' . ucfirst($jenis) . ' Rp ' . number_format($t->nominal, 0, ',', '.'),
                 'waktu' => $t->created_at->diffForHumans(),
+                'timestamp' => $t->created_at->timestamp,
             ];
         }
 
@@ -243,15 +299,73 @@ class DashboardController extends Controller
                 'type' => 'pinjaman',
                 'deskripsi' => ($p->nasabah->user->nama ?? 'Nasabah') . ' - Pinjaman baru Rp ' . number_format($p->jumlah_pinjam, 0, ',', '.'),
                 'waktu' => $p->created_at->diffForHumans(),
+                'timestamp' => $p->created_at->timestamp,
             ];
         }
 
+        // Deposito Terbaru
+        $deposito = TransDeposito::with('deposito.nasabah.user')
+            ->latest('tgl_transaksi')
+            ->take(5)
+            ->get();
+            
+        foreach ($deposito as $d) {
+            $jenis = str_replace('_', ' ', $d->jenis);
+            $aktivitas[] = [
+                'type' => 'deposito',
+                'deskripsi' => ($d->deposito->nasabah->user->nama ?? 'Nasabah') . ' - Deposito (' . ucfirst($jenis) . ') Rp ' . number_format($d->nominal, 0, ',', '.'),
+                'waktu' => $d->created_at->diffForHumans(),
+                'timestamp' => $d->created_at->timestamp,
+            ];
+        }
+        
+        // Gadai Terbaru
+        $gadai = TransGadai::with('nasabah.user')
+            ->latest('tgl_transaksi')
+            ->take(5)
+            ->get();
+            
+        foreach ($gadai as $g) {
+            $jenis = str_replace('_', ' ', $g->jenis);
+            $aktivitas[] = [
+                'type' => 'gadai',
+                'deskripsi' => ($g->nasabah->user->nama ?? 'Nasabah') . ' - Gadai (' . ucfirst($jenis) . ') Rp ' . number_format($g->nominal, 0, ',', '.'),
+                'waktu' => $g->created_at->diffForHumans(),
+                'timestamp' => $g->created_at->timestamp,
+            ];
+        }
+
+        // Log Sistem Terbaru (dari ActivityLog)
+        try {
+            $sysLogs = \App\Models\ActivityLog::latest('created_at')->take(10)->get();
+            foreach ($sysLogs as $log) {
+                $type = in_array($log->module, ['tabungan', 'pinjaman', 'deposito', 'gadai']) ? $log->module : 'other';
+                $aktivitas[] = [
+                    'type' => $type,
+                    'deskripsi' => ($log->user_name ?? 'Sistem') . ' - ' . $log->description,
+                    'waktu' => $log->created_at->diffForHumans(),
+                    'timestamp' => $log->created_at->timestamp,
+                ];
+            }
+        } catch (\Exception $e) {}
+
         // Sort by waktu terbaru
         usort($aktivitas, function($a, $b) {
-            return strtotime($b['waktu']) - strtotime($a['waktu']);
+            return $b['timestamp'] - $a['timestamp'];
         });
 
-        return array_slice($aktivitas, 0, 10);
+        // Unique filter to prevent identical descriptions at the same timestamp (optional but good for clean UI)
+        $uniqueAktivitas = [];
+        $seen = [];
+        foreach ($aktivitas as $item) {
+            $key = $item['timestamp'] . '_' . $item['deskripsi'];
+            if (!isset($seen[$key])) {
+                $uniqueAktivitas[] = $item;
+                $seen[$key] = true;
+            }
+        }
+
+        return array_slice($uniqueAktivitas, 0, 10);
     }
 
     private function getPendapatanBulanIni()
