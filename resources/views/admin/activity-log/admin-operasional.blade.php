@@ -10,6 +10,8 @@ $moduleColors = [
     'nasabah'     => 'bg-green-50 text-green-700 border-green-200',
     'akun'        => 'bg-purple-50 text-purple-700 border-purple-200',
     'master_data' => 'bg-gray-100 text-gray-600 border-gray-200',
+    'deposito'    => 'bg-blue-50 text-blue-700 border-blue-200',
+    'gadai'       => 'bg-orange-50 text-orange-700 border-orange-200',
 ];
 $moduleLabels = [
     'tabungan'    => 'Tabungan',
@@ -17,6 +19,8 @@ $moduleLabels = [
     'nasabah'     => 'Nasabah',
     'akun'        => 'Akun',
     'master_data' => 'Master Data',
+    'deposito'    => 'Deposito',
+    'gadai'       => 'Gadai',
 ];
 $actionColors = [
     'green'  => 'bg-green-50 text-green-700 border-green-200',
@@ -106,6 +110,8 @@ $roleLabels = [
                 <option value="pinjaman" {{ request('module') === 'pinjaman' ? 'selected' : '' }}>Pinjaman</option>
                 <option value="nasabah" {{ request('module') === 'nasabah' ? 'selected' : '' }}>Nasabah</option>
                 <option value="master_data" {{ request('module') === 'master_data' ? 'selected' : '' }}>Master Data</option>
+                <option value="deposito" {{ request('module') === 'deposito' ? 'selected' : '' }}>Deposito</option>
+                <option value="gadai" {{ request('module') === 'gadai' ? 'selected' : '' }}>Gadai</option>
             </select>
             <input type="date" name="date_from" value="{{ request('date_from') }}"
                 class="px-3 py-2.5 border-2 border-gray-200 rounded-xl text-sm focus:border-[#674c1d] outline-none">

@@ -206,6 +206,11 @@ class DepositoController extends Controller
 
         $pengajuan = PengajuanDeposito::create($data);
 
+        app(\App\Services\ActivityLogService::class)->logSubmitPengajuanDeposito(
+            $pengajuan->id,
+            $request->nominal
+        );
+
         return redirect()->route('nasabah.deposito.status-pengajuan', $pengajuan->id)
             ->with('success', 'Pengajuan deposito berhasil dikirim! Kami akan memproses pengajuan Anda.');
     }

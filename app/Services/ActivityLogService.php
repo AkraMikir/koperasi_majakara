@@ -485,6 +485,18 @@ class ActivityLogService
     }
     // --- DEPOSITO ---
 
+    public function logSubmitPengajuanDeposito(string $pengajuanId, float $nominal): void
+    {
+        $this->log(
+            'submit_pengajuan_deposito',
+            'deposito',
+            "Mengajukan deposito sebesar Rp " . number_format($nominal, 0, ',', '.'),
+            ['nominal' => $nominal],
+            'PengajuanDeposito',
+            $pengajuanId
+        );
+    }
+
     public function logApprovePengajuanDeposito(string $pengajuanId, float $nominal, string $nasabahNama): void
     {
         $this->log(
@@ -521,7 +533,55 @@ class ActivityLogService
         );
     }
 
+    public function logSubmitCancelDeposito(string $pencairanId, float $nominal): void
+    {
+        $this->log(
+            'submit_cancel_deposito',
+            'deposito',
+            "Mengajukan pembatalan deposito Rp " . number_format($nominal, 0, ',', '.'),
+            ['nominal' => $nominal],
+            'PencairanDeposito',
+            $pencairanId
+        );
+    }
+
+    public function logSubmitPencairanDeposito(string $pencairanId, float $nominal): void
+    {
+        $this->log(
+            'submit_pencairan_deposito',
+            'deposito',
+            "Mengajukan pencairan deposito Rp " . number_format($nominal, 0, ',', '.'),
+            ['nominal' => $nominal],
+            'PencairanDeposito',
+            $pencairanId
+        );
+    }
+
     // --- GADAI ---
+
+    public function logCreateGadai(string $gadaiId, float $nominal, string $nasabahNama): void
+    {
+        $this->log(
+            'create_gadai',
+            'gadai',
+            "Membuat gadai baru Rp " . number_format($nominal, 0, ',', '.') . " untuk nasabah {$nasabahNama}",
+            ['nominal' => $nominal, 'nasabah' => $nasabahNama],
+            'GadaiActive',
+            $gadaiId
+        );
+    }
+
+    public function logSubmitPengajuanGadai(string $pengajuanId, float $nominal): void
+    {
+        $this->log(
+            'submit_pengajuan_gadai',
+            'gadai',
+            "Mengajukan gadai dengan estimasi pencairan Rp " . number_format($nominal, 0, ',', '.'),
+            ['nominal' => $nominal],
+            'PengajuanGadai',
+            $pengajuanId
+        );
+    }
 
     public function logApprovePengajuanGadai(string $pengajuanId, float $nominal, string $nasabahNama): void
     {

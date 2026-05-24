@@ -335,12 +335,37 @@ class DashboardController extends Controller
             ];
         }
 
+        // Log Sistem Terbaru (dari ActivityLog)
+        try {
+            $sysLogs = \App\Models\ActivityLog::latest('created_at')->take(10)->get();
+            foreach ($sysLogs as $log) {
+                $type = in_array($log->module, ['tabungan', 'pinjaman', 'deposito', 'gadai']) ? $log->module : 'other';
+                $aktivitas[] = [
+                    'type' => $type,
+                    'deskripsi' => ($log->user_name ?? 'Sistem') . ' - ' . $log->description,
+                    'waktu' => $log->created_at->diffForHumans(),
+                    'timestamp' => $log->created_at->timestamp,
+                ];
+            }
+        } catch (\Exception $e) {}
+
         // Sort by waktu terbaru
         usort($aktivitas, function($a, $b) {
             return $b['timestamp'] - $a['timestamp'];
         });
 
-        return array_slice($aktivitas, 0, 10);
+        // Unique filter to prevent identical descriptions at the same timestamp (optional but good for clean UI)
+        $uniqueAktivitas = [];
+        $seen = [];
+        foreach ($aktivitas as $item) {
+            $key = $item['timestamp'] . '_' . $item['deskripsi'];
+            if (!isset($seen[$key])) {
+                $uniqueAktivitas[] = $item;
+                $seen[$key] = true;
+            }
+        }
+
+        return array_slice($uniqueAktivitas, 0, 10);
     }
 
     private function getPendapatanBulanIni()

@@ -247,25 +247,51 @@
                 <div class="flex-1 overflow-y-auto pr-1 space-y-4" style="max-height: 280px;">
                     @forelse(collect($transaksiTerbaru ?? [])->take(5) as $transaksi)
                         @php
-                            $isSetoran = optional($transaksi->jnsTransaksi)->kode === 'STR';
+                            $isInflow = $transaksi->is_inflow;
+                            $iconColor = '';
+                            $iconBg = '';
+                            $svgPath = '';
+                            
+                            switch($transaksi->icon_type) {
+                                case 'tabungan':
+                                    $iconColor = 'text-[#674c1d]';
+                                    $iconBg = 'bg-[#674c1d]/10';
+                                    $svgPath = 'M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+                                    break;
+                                case 'deposito':
+                                    $iconColor = 'text-[#d4af37]';
+                                    $iconBg = 'bg-[#d4af37]/10';
+                                    $svgPath = 'M2 19l10-10 4 4 6-6m0 0v6m0-6h6';
+                                    break;
+                                case 'pinjaman':
+                                    $iconColor = 'text-[#8b6f2f]';
+                                    $iconBg = 'bg-[#8b6f2f]/10';
+                                    $svgPath = 'M2 10a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4zm0 0V6a2 2 0 012-2h14a2 2 0 012 2v4M6 12h.01M10 12h.01M14 12h.01M18 12h.01';
+                                    break;
+                                case 'gadai':
+                                    $iconColor = 'text-[#a67c52]';
+                                    $iconBg = 'bg-[#a67c52]/10';
+                                    $svgPath = 'M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z';
+                                    break;
+                                default:
+                                    $iconColor = 'text-gray-500';
+                                    $iconBg = 'bg-gray-100';
+                                    $svgPath = 'M9 5l7 7-7 7';
+                            }
                         @endphp
-                        <a href="{{ route('nasabah.tabungan.detail-transaksi', $transaksi->id) }}" class="flex items-center justify-between group p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
+                        <a href="{{ $transaksi->url }}" class="flex items-center justify-between group p-2 -mx-2 rounded-xl hover:bg-gray-50 transition-colors">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-gray-100 {{ $isSetoran ? 'bg-green-50/50 text-green-500' : 'bg-red-50/50 text-red-500' }} group-hover:scale-110 transition-transform duration-300">
-                                    @if($isSetoran)
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"></path></svg>
-                                    @else
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"></path></svg>
-                                    @endif
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-gray-100 {{ $iconBg }} {{ $iconColor }} group-hover:scale-110 transition-transform duration-300">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $svgPath }}"></path></svg>
                                 </div>
                                 <div>
-                                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-majakara-dark-gold transition-colors">{{ optional($transaksi->jnsTransaksi)->nama ?? 'Transaksi' }}</h4>
-                                    <p class="text-[10px] text-gray-400 mt-0.5">{{ $transaksi->tgl_transaksi->format('d M Y • H:i') }}</p>
+                                    <h4 class="text-sm font-bold text-gray-800 group-hover:text-majakara-dark-gold transition-colors">{{ $transaksi->jenis }}</h4>
+                                    <p class="text-[10px] text-gray-400 mt-0.5">{{ \Carbon\Carbon::parse($transaksi->tgl_transaksi)->format('d M Y • H:i') }}</p>
                                 </div>
                             </div>
                             <div class="text-right">
-                                <span class="block text-sm font-black font-display {{ $isSetoran ? 'text-green-600' : 'text-red-600' }}" x-show="showBalance" style="display: none;">
-                                    {{ $isSetoran ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
+                                <span class="block text-sm font-black font-display {{ $isInflow ? 'text-green-600' : 'text-red-600' }}" x-show="showBalance" style="display: none;">
+                                    {{ $isInflow ? '+' : '-' }}Rp {{ number_format($transaksi->nominal, 0, ',', '.') }}
                                 </span>
                                 <span class="block text-sm font-black font-display text-gray-400 tracking-widest" x-show="!showBalance">••••••</span>
                             </div>

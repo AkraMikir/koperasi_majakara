@@ -222,6 +222,11 @@ class NasabahGadaiBaruController extends Controller
 
         $pengajuan->save();
 
+        app(\App\Services\ActivityLogService::class)->logSubmitPengajuanGadai(
+            $pengajuan->id,
+            $nominal
+        );
+
         // Handle Multiple Files
         if ($request->metode == 'transfer' && $request->hasFile('bukti_transfer')) {
             foreach ($request->file('bukti_transfer') as $index => $file) {
