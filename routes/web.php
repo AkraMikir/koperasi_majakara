@@ -156,6 +156,18 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
 Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
+    // Admin Profile & Settings
+    Route::prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\ProfileController::class, 'index'])->name('index');
+        Route::put('/update', [\App\Http\Controllers\Admin\ProfileController::class, 'update'])->name('update');
+    });
+
+    Route::prefix('setting')->name('setting.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('index');
+        Route::put('/update-password', [\App\Http\Controllers\Admin\SettingController::class, 'updatePassword'])->name('update-password');
+        Route::put('/update-pin', [\App\Http\Controllers\Admin\SettingController::class, 'updatePin'])->name('update-pin');
+    });
+
     // Notifikasi Admin
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markAsRead'])->name('notifications.mark-read');

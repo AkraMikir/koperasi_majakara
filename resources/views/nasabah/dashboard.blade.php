@@ -23,9 +23,13 @@
                             $nama = auth()->user()->nama ?? 'Anggota';
                             $initials = collect(explode(' ', $nama))->map(fn($w) => substr($w, 0, 1))->take(2)->join('');
                         @endphp
-                        <div class="w-full h-full rounded-full bg-gradient-to-br from-majakara-gold to-majakara-dark-gold flex items-center justify-center text-white font-bold text-xl shadow-inner">
-                            {{ strtoupper($initials) }}
-                        </div>
+                        @if(auth()->user()->foto && auth()->user()->foto !== 'default-avatar.jpg')
+                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Foto Profil" class="w-full h-full rounded-full object-cover shadow-inner">
+                        @else
+                            <div class="w-full h-full rounded-full bg-gradient-to-br from-majakara-gold to-majakara-dark-gold flex items-center justify-center text-white font-bold text-xl shadow-inner">
+                                {{ strtoupper($initials) }}
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <p class="text-xs md:text-sm font-medium text-white/70 tracking-[0.2em] uppercase mb-1">Selamat Datang,</p>

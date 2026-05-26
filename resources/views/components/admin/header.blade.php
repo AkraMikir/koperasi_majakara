@@ -100,9 +100,13 @@
         <!-- Profile Dropdown -->
         <div class="relative" x-data="{ open: false }">
             <button @click="open = !open" class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
-                    {{ substr(auth()->user()->nama ?? 'A', 0, 1) }}
-                </div>
+                @if(auth()->user()->foto && Storage::disk('public')->exists(auth()->user()->foto) && auth()->user()->foto !== 'default-avatar.jpg')
+                    <img src="{{ Storage::url(auth()->user()->foto) }}" alt="{{ auth()->user()->nama }}" class="w-10 h-10 rounded-full object-cover border border-gray-200">
+                @else
+                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
+                        {{ substr(auth()->user()->nama ?? 'A', 0, 1) }}
+                    </div>
+                @endif
                 <div class="hidden md:block text-left">
                     <p class="text-sm font-semibold text-gray-900">{{ auth()->user()->nama ?? 'Admin' }}</p>
                     @php
@@ -133,8 +137,8 @@
                  x-transition:leave-start="transform opacity-100 scale-100"
                  x-transition:leave-end="transform opacity-0 scale-95"
                 class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
-                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan</a>
+                <a href="{{ route('admin.profile.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil Saya</a>
+                <a href="{{ route('admin.setting.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Pengaturan</a>
                 <div class="border-t border-gray-200 my-2"></div>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
