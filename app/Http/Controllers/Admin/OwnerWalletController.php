@@ -43,9 +43,6 @@ class OwnerWalletController extends Controller
 
         $transaksi = $query->paginate(20);
         
-        $saldoCash = PettyCashSaldo::getSaldo($userId, 'owner', 'cash');
-        $saldoTf   = PettyCashSaldo::getSaldo($userId, 'owner', 'transfer');
-
         // 🔥 Hitung saldo per sumber dengan breakdown Cash/TF untuk container detail
         $sourceDetails = DB::table('vw_saldo_owner_detail')
             ->where('user_id', $userId)
@@ -57,6 +54,14 @@ class OwnerWalletController extends Controller
             ->get()
             ->keyBy('sumber')
             ->toArray();
+
+        // Calculate total saldo cash and tf from the view to ensure consistency
+        $saldoCash = 0;
+        $saldoTf = 0;
+        foreach ($sourceDetails as $source) {
+            $saldoCash += $source->total_cash;
+            $saldoTf += $source->total_tf;
+        }
 
         return view('admin.petty-cash.owner-wallet', compact('transaksi', 'saldoCash', 'saldoTf', 'sourceDetails'));
     }
@@ -178,7 +183,7 @@ class OwnerWalletController extends Controller
         }
 
         // Validasi Saldo
-        if (!PettyCashSaldo::validateKirimOwner($userId, $nominalCash, $nominalTf)) {
+        if (!PettyCashSaldo::validateKirimOwner($userId, $nominalCash, $nominalTf, $request->sumber)) {
             return back()->withErrors(['nominal_cash' => 'Saldo Owner tidak mencukupi untuk penarikan ini.'])->withInput();
         }
 

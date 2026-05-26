@@ -18,6 +18,7 @@
                 </svg>
                 Dana Masuk (Modal)
             </button>
+            {{--
             <button onclick="openModal('modalKeluar')"
                     class="px-4 py-2 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-all flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -25,6 +26,7 @@
                 </svg>
                 Dana Keluar
             </button>
+            --}}
             <button onclick="openModal('modalWithdraw')"
                     class="px-4 py-2 bg-purple-600 text-white rounded-xl text-sm font-semibold hover:bg-purple-700 transition-all flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -32,6 +34,7 @@
                 </svg>
                 Tarik Saldo
             </button>
+            {{--
             <button onclick="openModal('modalTransferInternal')"
                     class="px-4 py-2 bg-amber-600 text-white rounded-xl text-sm font-semibold hover:bg-amber-700 transition-all flex items-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -39,6 +42,7 @@
                 </svg>
                 Pindah Dana ke Modal
             </button>
+            --}}
         </div>
     </div>
 

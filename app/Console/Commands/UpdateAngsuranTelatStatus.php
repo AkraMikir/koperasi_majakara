@@ -63,7 +63,6 @@ class UpdateAngsuranTelatStatus extends Command
 
         // Check pinjaman yang sudah lunas (semua angsuran sudah lunas)
         $pinjamanBelumLunas = PinjamanH::where('lunas', 'belum')
-            ->whereIn('status', ['pencairan', 'telaksana'])
             ->with(['tempoBulanan', 'tempoMingguan'])
             ->get();
 

@@ -9,6 +9,15 @@ use App\Http\Controllers\Nasabah\TabunganController;
 use App\Http\Controllers\Nasabah\DepositoController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 
+Route::get('/fix-sumber-janji-temu', function() {
+    $count = \Illuminate\Support\Facades\DB::table('petty_cash_saldo')
+        ->where('role', 'admin')
+        ->where('sumber', 'other')
+        ->where('keterangan', 'like', 'Setoran dari Janji Temu %')
+        ->update(['sumber' => 'tabungan']);
+    return 'Updated ' . $count . ' records. Silakan kembali ke dashboard, data sudah diperbaiki.';
+});
+
 Route::get('/', function () {
     return view('welcome');
 })->name('welcome');
@@ -485,6 +494,18 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::prefix('gadai-debugger')->name('gadai-debugger.')->middleware('admin.utama')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerIndex'])->name('index');
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'gadaiDebuggerMajuHari'])->name('maju-hari');
+        });
+
+        // Debugger Pinjaman (Testing Time Travel) - ONLY Admin Utama
+        Route::prefix('pinjaman-debugger')->name('pinjaman-debugger.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerIndex'])->name('index');
+            Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerMajuHari'])->name('maju-hari');
+        });
+
+        // Debugger Deposito (Testing Time Travel) - ONLY Admin Utama
+        Route::prefix('deposito-debugger')->name('deposito-debugger.')->middleware('admin.utama')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerIndex'])->name('index');
+            Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerMajuHari'])->name('maju-hari');
         });
     });
     

@@ -130,9 +130,9 @@ class PinjamanController extends Controller
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
         $masterDenda = MasterDendaPinjaman::getDendaAktif();
 
-        // Get admin petty cash balances
-        $adminSaldoCash = PettyCashSaldo::getSaldoCash(Auth::id());
-        $adminSaldoTransfer = PettyCashSaldo::getSaldoTransfer(Auth::id());
+        // Get admin petty cash balances (Modal Awal only, for pencairan)
+        $adminSaldoCash = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'other');
+        $adminSaldoTransfer = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'transfer', 'other');
         $adminSaldo = (object) [
             'cash' => $adminSaldoCash,
             'transfer' => $adminSaldoTransfer
@@ -369,10 +369,12 @@ class PinjamanController extends Controller
                         'ref_table'       => PettyCashConstants::REF_PINJAMAN_H,
                     ]);
 
+                    // Owner memberikan pinjaman (saldo keluar)
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', -(float)$pinjaman->jumlah_pinjam,
-                        "Pencairan Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
-                        $pinjaman->id, PettyCashConstants::REF_PINJAMAN_H, 'transfer'
+                        "Pencairan Pinjaman: " . ($pinjaman->nasabah->user->nama ?? '-') . " (#{$pinjaman->id})",
+                        $pinjaman->id, 'tbl_pinjaman', 'transfer',
+                        \App\Services\PettyCashConstants::SUMBER_PINJAMAN
                     );
                 }
             }
@@ -559,7 +561,8 @@ class PinjamanController extends Controller
                 ->with('success', 'Janji temu selesai. Pinjaman telah disetujui dan dicairkan; jadwal angsuran telah dibuat.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
 
@@ -1146,10 +1149,12 @@ class PinjamanController extends Controller
                         'ref_id'       => $pengajuan->id,
                     ]);
 
+                    // Owner menerima angsuran (saldo masuk)
                     PettyCashSaldo::buatMutasi(
                         $owner->id, 'owner', (float)$pengajuan->nominal,
-                        "Angsuran Pinjaman #{$pinjaman->id} (#{$pengajuan->id})",
-                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer', 'pinjaman'
+                        "Penerimaan Angsuran: " . ($pengajuan->pinjaman->nasabah->user->nama ?? '-') . " (#{$pengajuan->id_pinjaman})",
+                        $pengajuan->id, PettyCashConstants::REF_PINJAMAN_D, 'transfer',
+                        \App\Services\PettyCashConstants::SUMBER_PINJAMAN
                     );
                 }
             }

@@ -32,7 +32,9 @@
                         @endif
                     </div>
                     <div>
+
                         <p class="text-xs md:text-sm font-medium text-white/70 tracking-[0.2em] uppercase mb-1">Selamat Datang,</p>
+
                         <h1 class="text-2xl md:text-4xl font-bold font-display text-white drop-shadow-md">{{ $nama }}</h1>
                         <p class="text-[10px] md:text-xs text-white/50 mt-1 font-mono tracking-widest">NO. ANGGOTA : {{ auth()->user()->id }}</p>
                     </div>
