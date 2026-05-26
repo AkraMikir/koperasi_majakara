@@ -82,6 +82,35 @@
                     </span>
                 </div>
             </a>
+
+            {{-- Pinjaman Debugger (hanya tampil untuk Admin Utama) --}}
+            @isAdminUtama
+            <a href="{{ route('admin.master-data.pinjaman-debugger.index') }}"
+                class="group bg-white rounded-2xl border border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
+                            Simulator
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">Pinjaman Debugger</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Simulator pengujian jatuh tempo pinjaman (time travel), simulasi kalkulasi bunga dan denda.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-indigo-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+            @endisAdminUtama
         </div>
     </div>
 
@@ -148,6 +177,35 @@
                     </span>
                 </div>
             </a>
+
+            {{-- Deposito Debugger (hanya tampil untuk Admin Utama) --}}
+            @isAdminUtama
+            <a href="{{ route('admin.master-data.deposito-debugger.index') }}"
+                class="group bg-white rounded-2xl border border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
+                            Simulator
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">Deposito Debugger</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Penguji jatuh tempo pencairan deposito (time travel), dan simulasi perolehan bagi hasil.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-indigo-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+            @endisAdminUtama
         </div>
     </div>
 
@@ -267,6 +325,35 @@
                     </span>
                 </div>
             </a>
+
+            {{-- Gadai Debugger (hanya tampil untuk Admin Utama) --}}
+            @isAdminUtama
+            <a href="{{ route('admin.master-data.gadai-debugger.index') }}"
+                class="group bg-white rounded-2xl border border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
+                            Simulator
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">Gadai Debugger</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Penguji jatuh tempo gadai (time travel debugger), simulasi kalkulasi bunga, dan denda gadai.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-indigo-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+            @endisAdminUtama
         </div>
     </div>
 
@@ -390,378 +477,8 @@
             </a>
             @endisAdminUtama
 
-            {{-- Gadai Debugger (hanya tampil untuk Admin Utama) --}}
-            @isAdminUtama
-            <a href="{{ route('admin.master-data.gadai-debugger.index') }}"
-                class="group bg-white rounded-2xl border border-indigo-100 shadow-sm p-6 hover:shadow-md hover:border-indigo-500/30 transition-all duration-200 flex flex-col justify-between h-full">
-                <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-600 to-indigo-700 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
-                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold border border-indigo-100">
-                            Simulator
-                        </span>
-                    </div>
-                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-indigo-600 transition-colors">Gadai Debugger</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed">Penguji jatuh tempo gadai (time travel debugger), simulasi kalkulasi bunga, dan denda gadai.</p>
-                </div>
-                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
-                    <span class="text-xs font-semibold text-indigo-600 group-hover:underline flex items-center gap-1">
-                        Kelola
-                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
-                        </svg>
-                    </span>
-                </div>
-            </a>
-            @endisAdminUtama
         </div>
     </div>
 
-<<<<<<< HEAD
-=======
-    {{-- ===== MENU NAVIGASI MASTER DATA ===== --}}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {{-- Kolom 1: Pinjaman --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-5 py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-white font-bold text-base">Master Data Pinjaman</h2>
-            </div>
-            <div class="p-4 space-y-2">
-                <a href="{{ route('admin.master-data.bunga-pinjaman.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-[#674c1d]/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-[#674c1d]" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Bunga Pinjaman</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_bunga_pinjaman'] }} data aktif</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.denda-pinjaman.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-red-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-red-500" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Denda Pinjaman</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_denda_pinjaman'] }} data aktif</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-
-                @isAdminUtama
-                <!-- Pinjaman Debugger (Time Travel) -->
-                <div class="border-t border-dashed border-gray-200 my-1"></div>
-                <a href="{{ route('admin.master-data.pinjaman-debugger.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Pinjaman Debugger</p>
-                            <p class="text-xs text-indigo-600 font-bold">Time Travel Denda</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                @endisAdminUtama
-            </div>
-        </div>
-
-        {{-- Kolom 2: Tabungan & Deposito --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-5 py-4 bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-white font-bold text-base">Tabungan & Deposito</h2>
-            </div>
-            <div class="p-4 space-y-2">
-                <a href="{{ route('admin.master-data.tenor-deposito.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-yellow-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-yellow-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Tenor Deposito</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_tenor_deposito'] }} data aktif</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.kategori-deposito.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-orange-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-orange-500" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Kategori Deposito</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_kategori_deposito'] }} kategori promo</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.suku-bunga-deposito.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-[#d4af37]/10 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-[#d4af37]" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Suku Bunga Deposito</p>
-                            <p class="text-xs text-gray-400">Berdasarkan tenor</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.jenis-deposito.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-purple-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-purple-500" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Jenis Deposito</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_jenis_deposito'] }} jenis</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-
-                @isAdminUtama
-                <!-- Deposito Debugger (Time Travel) -->
-                <div class="border-t border-dashed border-gray-200 my-1"></div>
-                <a href="{{ route('admin.master-data.deposito-debugger.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Deposito Debugger</p>
-                            <p class="text-xs text-indigo-600 font-bold">Time Travel Cair</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                @endisAdminUtama
-            </div>
-        </div>
-
-        {{-- Kolom 3: Gadai, Transfer, & Admin --}}
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="px-5 py-4 bg-gradient-to-r from-[#4a3514] to-[#674c1d] flex items-center gap-3">
-                <div class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center">
-                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
-                </div>
-                <h2 class="text-white font-bold text-base">Gadai & Operasional</h2>
-            </div>
-            <div class="p-4 space-y-2">
-                <a href="{{ route('admin.master-data.kategori-gadai.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-blue-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Kategori Gadai</p>
-                            <p class="text-xs text-gray-400">Atur bunga & denda</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.item-gadai.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-amber-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-amber-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Item Gadai</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_barang_gadai'] }} jenis item</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.inap-kendaraan.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-indigo-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-indigo-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 16c0 1.105-1.343 2-3 2s-3-.895-3-2M9 16c0 1.105-1.343 2-3 2s-3-.895-3-2m16 0V9a2 2 0 00-2-2H5a2 2 0 00-2 2v7m16 0h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 12H4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Inap Kendaraan</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_inap_kendaraan'] ?? 0 }} golongan</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.lokasi-perusahaan.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-emerald-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Lokasi Perusahaan</p>
-                            <p class="text-xs text-gray-400">{{ $stats['total_lokasi_perusahaan'] }} kantor</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.slot-storage.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-gray-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-gray-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Slot Storage Grid</p>
-                            <p class="text-xs text-gray-400">Dimensi baris & kolom</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                <a href="{{ route('admin.master-data.biaya-transfer.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl hover:bg-[#674c1d]/5 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-sky-50 rounded-lg flex items-center justify-center">
-                            <svg class="w-4.5 h-4.5 text-sky-600" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Biaya Transfer</p>
-                            <p class="text-xs text-gray-400">Antar bank</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-gray-300 group-hover:text-[#674c1d] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-
-                {{-- Admin Operasional link - hanya Admin Utama --}}
-                @isAdminUtama
-                <div class="border-t border-dashed border-gray-200 my-1"></div>
-                <a href="{{ route('admin.master-data.admin-operasional.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl bg-gradient-to-r from-[#674c1d]/5 to-[#8b6f2f]/5 hover:from-[#674c1d]/10 hover:to-[#8b6f2f]/10 border border-[#674c1d]/15 transition-colors group">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-1.5">
-                                <p class="text-sm font-semibold text-gray-800">Admin Operasional</p>
-                                <span class="px-1.5 py-0.5 bg-[#674c1d] text-white rounded text-xs font-bold leading-none">{{ $stats['total_admin_operasional'] }}</span>
-                            </div>
-                            <p class="text-xs text-gray-400">Manajemen akun admin</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-[#674c1d] group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                
-                <!-- Gadai Debugger (Time Travel) -->
-                <a href="{{ route('admin.master-data.gadai-debugger.index') }}"
-                    class="flex items-center justify-between p-3.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-100 transition-colors group mt-2">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 bg-indigo-600 rounded-lg flex items-center justify-center shadow-sm">
-                            <svg class="w-4.5 h-4.5 text-white" style="width:18px;height:18px" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-sm font-semibold text-gray-800">Gadai Debugger</p>
-                            <p class="text-xs text-indigo-600 font-bold">Time Travel & Testing</p>
-                        </div>
-                    </div>
-                    <svg class="w-4 h-4 text-indigo-600 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                    </svg>
-                </a>
-                @endisAdminUtama
-            </div>
-        </div>
-    </div>
-
->>>>>>> Dessarr
 </div>
 @endsection
