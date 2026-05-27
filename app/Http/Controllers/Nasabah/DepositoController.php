@@ -26,6 +26,16 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
         // Ambil semua paket deposito aktif
         $pakets = PaketDeposito::with('kategori')
             ->where('status', 'aktif')
@@ -68,6 +78,16 @@ class DepositoController extends Controller
     public function riwayat()
     {
         $nasabah = Auth::user()->nasabah;
+
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
 
         $riwayat = PengajuanDeposito::where('id_nasabah', $nasabah->id)
             ->with(['tenor', 'deposito.pencairan'])
@@ -235,6 +255,16 @@ class DepositoController extends Controller
     public function detail($id)
     {
         $nasabah = Auth::user()->nasabah;
+
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
 
         $deposito = DepositoH::where('id_nasabah', $nasabah->id)
             ->with(['tenor', 'bungaHarian', 'transDeposito', 'pencairan'])

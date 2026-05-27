@@ -22,8 +22,20 @@ class NasabahGadaiBaruController extends Controller
         $pengajuanPerpanjang = collect();
         $gadaiSelesai = collect();
 
-        if (Auth::user() && Auth::user()->nasabah) {
-            $nasabahId = Auth::user()->nasabah->id;
+        $nasabah = Auth::user()->nasabah;
+        
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
+        if ($nasabah) {
+            $nasabahId = $nasabah->id;
             
             $gadaiAktif = GadaiActive::with(['kategori', 'item', 'lokasi'])
                 ->where('nasabah_id', $nasabahId)
@@ -87,6 +99,17 @@ class NasabahGadaiBaruController extends Controller
     public function showActiveDetail($id)
     {
         $nasabah = Auth::user()->nasabah;
+        
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
         $gadai = GadaiActive::with(['kategori', 'item', 'lokasi', 'files', 'paymentLogs', 'history'])
             ->where('nasabah_id', $nasabah->id)
             ->findOrFail($id);
@@ -97,6 +120,16 @@ class NasabahGadaiBaruController extends Controller
     public function riwayat()
     {
         $nasabah = Auth::user()->nasabah;
+        
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
         
         $gadaiAktif = GadaiActive::with(['kategori', 'item', 'lokasi'])
             ->where('nasabah_id', $nasabah->id)
@@ -253,6 +286,17 @@ class NasabahGadaiBaruController extends Controller
     public function statusPengajuan()
     {
         $nasabah = Auth::user()->nasabah;
+
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
+
         $pengajuan = \App\Models\GadaiPengajuan::with(['gadaiActive.item', 'gadaiActive.kategori', 'files'])
             ->where('nasabah_id', $nasabah->id)
             ->orderBy('created_at', 'desc')

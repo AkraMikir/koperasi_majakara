@@ -55,7 +55,7 @@
                     @error('bank_penerima')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-1">
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Biaya Admin *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
@@ -64,6 +64,18 @@
                             oninput="formatCurrency(this)">
                     </div>
                     @error('biaya_admin')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Min Saldo Non-BCA (Opsional)</label>
+                    <div class="relative">
+                        <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">Rp</span>
+                        <input type="text" name="min_saldo_non_bca" id="min_saldo_non_bca" value="{{ number_format($data->min_saldo_non_bca, 0, '.', '') }}"
+                            class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none text-lg font-semibold"
+                            oninput="formatCurrency(this)">
+                    </div>
+                    @error('min_saldo_non_bca')<p class="text-red-600 text-sm mt-1">{{ $message }}</p>@enderror
+                    <p class="text-xs text-gray-500 mt-2">Batas minimum saldo nasabah non-BCA untuk akses fitur premium</p>
                 </div>
 
                 <div class="md:col-span-2">
@@ -99,6 +111,11 @@
         const biayaInput = document.getElementById('biaya_admin');
         if (biayaInput) {
             biayaInput.value = biayaInput.value.replace(/[^\d]/g, '');
+        }
+        
+        const minSaldoInput = document.getElementById('min_saldo_non_bca');
+        if (minSaldoInput) {
+            minSaldoInput.value = minSaldoInput.value.replace(/[^\d]/g, '');
         }
     });
 </script>
