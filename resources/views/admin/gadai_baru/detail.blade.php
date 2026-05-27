@@ -241,42 +241,6 @@
                 </div>
             </div>
 
-            @if(in_array($gadai->status, ['active', 'grace_period', 'extended']))
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Set Biaya Ekstra</h3>
-                <form method="POST" action="{{ route('admin.gadai_baru.set_extra_pinjaman', $gadai->id) }}" class="space-y-4">
-                    @csrf
-                    <div>
-                        <label for="extra_pinjaman_nominal" class="block text-xs font-bold text-gray-500 uppercase mb-1">Nominal Ekstra (Rp)</label>
-                        <input type="number" step="0.01" min="0"
-                               class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
-                               id="extra_pinjaman_nominal"
-                               name="extra_pinjaman_nominal"
-                               value="{{ old('extra_pinjaman_nominal', (float)$gadai->extra_pinjaman_nominal) }}"
-                               required>
-                    </div>
-
-                    <div>
-                        <label for="extra_pinjaman_reason" class="block text-xs font-bold text-gray-500 uppercase mb-1">Alasan / Keterangan</label>
-                        <textarea class="w-full px-3 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                                  id="extra_pinjaman_reason"
-                                  name="extra_pinjaman_reason"
-                                  rows="3"
-                                  placeholder="Contoh: Struk fisik hilang, biaya administrasi tambahan">{{ old('extra_pinjaman_reason', $gadai->extra_pinjaman_reason) }}</textarea>
-                    </div>
-
-                    @if ($gadai->extra_pinjaman_set_at)
-                        <div class="p-3 bg-blue-50 rounded-xl text-blue-700 text-xs font-medium">
-                            Terakhir diatur pada {{ $gadai->extra_pinjaman_set_at->format('d/m/Y H:i') }} oleh {{ $gadai->extraPinjamanAdmin->nama ?? 'Admin' }}.
-                        </div>
-                    @endif
-
-                    <button type="submit" class="w-full py-2.5 bg-[#674c1d] hover:bg-[#523d17] text-white font-bold rounded-xl transition-colors shadow-sm">
-                        Simpan Biaya Ekstra
-                    </button>
-                </form>
-            </div>
-            @endif
         </div>
 
     </div>

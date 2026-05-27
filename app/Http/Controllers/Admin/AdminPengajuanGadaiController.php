@@ -118,7 +118,32 @@ class AdminPengajuanGadaiController extends Controller
                     'catatan' => 'Perpanjangan ke-' . $gadai->jumlah_perpanjangan . ' (Approved from Pengajuan #' . $pengajuan->id . ')'
                 ]);
             } else if ($pengajuan->jenis_pengajuan == 'lunas') {
-                $gadai->update(['status' => 'lunas']);
+                $gadaiUpdateData = ['status' => 'lunas'];
+                
+                // Handle Extra Pinjaman for LUNAS
+                if ($request->filled('extra_pinjaman_nominal') && $request->extra_pinjaman_nominal > 0) {
+                    if (!$request->filled('extra_pinjaman_reason')) {
+                        throw new \Exception('Alasan extra pinjaman harus diisi jika nominal extra lebih dari 0.');
+                    }
+                    $gadaiUpdateData['extra_pinjaman_nominal'] = $request->extra_pinjaman_nominal;
+                    $gadaiUpdateData['extra_pinjaman_reason'] = $request->extra_pinjaman_reason;
+                    $gadaiUpdateData['extra_pinjaman_admin_id'] = $adminId;
+                    $gadaiUpdateData['extra_pinjaman_set_at'] = now();
+                    
+                    // Create mutation for the extra pinjaman (cash only)
+                    PettyCashSaldo::buatMutasi(
+                        $adminId,
+                        'admin',
+                        $request->extra_pinjaman_nominal,
+                        'Extra Pinjaman/Denda Gadai ' . $gadai->slot_kode . ' (' . $request->extra_pinjaman_reason . ')',
+                        $gadai->id,
+                        'tbl_gadai_active',
+                        'cash',
+                        'gadai'
+                    );
+                }
+                
+                $gadai->update($gadaiUpdateData);
 
                 // Free the slot
                 $gridTable = $this->getGridTableName($gadai->slot_table);
