@@ -27,13 +27,19 @@ class GadaiActive extends Model
         'tgl_tenggang',
         'jumlah_perpanjangan',
         'status',
-        'admin_id'
+        'admin_id',
+        'extra_pinjaman_nominal',
+        'extra_pinjaman_reason',
+        'extra_pinjaman_admin_id',
+        'extra_pinjaman_set_at'
     ];
 
     protected $casts = [
         'tgl_mulai' => 'datetime',
         'tgl_jatuh_tempo' => 'datetime',
         'tgl_tenggang' => 'datetime',
+        'extra_pinjaman_nominal' => 'decimal:2',
+        'extra_pinjaman_set_at' => 'datetime',
     ];
 
     public function nasabah()
@@ -59,6 +65,11 @@ class GadaiActive extends Model
     public function admin()
     {
         return $this->belongsTo(User::class, 'admin_id');
+    }
+
+    public function extraPinjamanAdmin()
+    {
+        return $this->belongsTo(User::class, 'extra_pinjaman_admin_id');
     }
 
     public function history()

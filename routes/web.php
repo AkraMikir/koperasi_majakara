@@ -612,6 +612,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/create', [\App\Http\Controllers\AdminGadaiBaruController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\AdminGadaiBaruController::class, 'store'])->name('store');
         Route::get('/{id}', [\App\Http\Controllers\AdminGadaiBaruController::class, 'detail'])->name('detail');
+        Route::post('/{id}/set-extra-pinjaman', [\App\Http\Controllers\AdminGadaiBaruController::class, 'setExtraPinjaman'])->name('set_extra_pinjaman');
         Route::post('/{id}/perpanjang', [\App\Http\Controllers\GadaiBaruActionController::class, 'perpanjang'])->name('perpanjang');
         Route::post('/{id}/lunas', [\App\Http\Controllers\GadaiBaruActionController::class, 'lunas'])->name('lunas');
         Route::post('/{id}/lelang', [\App\Http\Controllers\GadaiBaruActionController::class, 'lelang'])->name('lelang');
