@@ -34,6 +34,14 @@ class PinjamanController extends Controller
     {
         $idAnggota = $this->getIdAnggota();
 
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        $access = app(\App\Services\BankAccessService::class)->checkPremiumAccess($idAnggota);
+        if (!$access['allowed']) {
+            return redirect()->route('nasabah.dashboard')
+                ->with('error', $access['reason']);
+        }
+        // ──────────────────────────────────────────────────────────
+
         // Get pinjaman aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
             ->where('lunas', 'belum')
