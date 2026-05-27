@@ -141,7 +141,7 @@ class NasabahGadaiBaruController extends Controller
         }
 
         // Calculate totals (re-using logic from dashboard)
-        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap; // Denda hanya untuk perpanjang
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0); // Denda hanya untuk perpanjang
         $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
         
         $nominal = ($jenis == 'lunas') ? $totalTagihan : $totalPerpanjang;
@@ -204,7 +204,7 @@ class NasabahGadaiBaruController extends Controller
         }
 
         // Calculate nominal again to be safe
-        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap; // Denda hanya untuk perpanjang
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0); // Denda hanya untuk perpanjang
         $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
         $nominal = ($jenis == 'lunas') ? $totalTagihan : $totalPerpanjang;
 

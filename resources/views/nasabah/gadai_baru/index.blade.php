@@ -62,7 +62,7 @@
                     $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
                     $tenggang   = \Carbon\Carbon::parse($gadai->tgl_tenggang)->startOfDay();
                     $sisaHari   = (int) ($isTenggang ? $today->diffInDays($tenggang, false) : $today->diffInDays($jatuhTempo, false));
-                    $totalTagihan   = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap;
+                    $totalTagihan   = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0);
                     $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
                     // Progress bar
                     $mulai = \Carbon\Carbon::parse($gadai->tgl_mulai)->startOfDay();

@@ -346,4 +346,27 @@ class AdminGadaiBaruController extends Controller
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    public function setExtraPinjaman(Request $request, $id)
+    {
+        $gadai = GadaiActive::findOrFail($id);
+
+        if (!in_array($gadai->status, ['active', 'grace_period', 'extended'])) {
+            return redirect()->back()->with('error', 'Extra nilai pinjaman hanya bisa diatur untuk status gadai aktif.');
+        }
+
+        $validated = $request->validate([
+            'extra_pinjaman_nominal' => 'required|numeric|min:0',
+            'extra_pinjaman_reason'  => 'nullable|string|max:500',
+        ]);
+
+        $gadai->update([
+            'extra_pinjaman_nominal'   => $validated['extra_pinjaman_nominal'],
+            'extra_pinjaman_reason'    => $validated['extra_pinjaman_reason'],
+            'extra_pinjaman_admin_id'  => \Illuminate\Support\Facades\Auth::id(),
+            'extra_pinjaman_set_at'    => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Extra nilai pinjaman berhasil disimpan.');
+    }
 }

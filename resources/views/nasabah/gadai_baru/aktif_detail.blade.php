@@ -7,7 +7,7 @@
     $isTenggang = $gadai->status == 'grace_period';
     $isLunas = $gadai->status == 'lunas';
     $isHangus = $gadai->status == 'expired_final';
-    $totalTebus = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
+    $totalTebus = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0);
     $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
     $today = now()->startOfDay();
     $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
@@ -116,6 +116,9 @@
                         ['label' => 'Denda Keterlambatan', 'sub' => 'Tarif: '.number_format($gadai->kategori->rate_denda,2).'%', 'value' => $gadai->denda_aktif, 'color' => $gadai->denda_aktif > 0 ? 'text-red-600' : 'text-gray-400'],
                         ['label' => 'Biaya Inap', 'sub' => $gadai->item->nominal_inap > 0 ? 'Flat: Rp '.number_format($gadai->item->nominal_inap,0,',','.') : 'Tarif: '.number_format($gadai->kategori->rate_inap_persen,2).'%', 'value' => $gadai->biaya_inap, 'color' => $gadai->biaya_inap > 0 ? 'text-amber-600' : 'text-gray-400'],
                     ];
+                    if (($gadai->extra_pinjaman_nominal ?? 0) > 0) {
+                        $biayaRows[] = ['label' => 'Biaya Ekstra (Administrasi/Lainnya)', 'sub' => 'Alasan: ' . ($gadai->extra_pinjaman_reason ?? '-'), 'value' => $gadai->extra_pinjaman_nominal, 'color' => 'text-red-700 bg-red-50/50 px-2 rounded-lg'];
+                    }
                 @endphp
                 @foreach($biayaRows as $row)
                 <div class="flex justify-between items-center py-3 {{ !$loop->last ? 'border-b border-dashed border-gray-100' : '' }}">
