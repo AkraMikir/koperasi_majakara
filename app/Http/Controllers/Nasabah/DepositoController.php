@@ -26,15 +26,7 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        if ($nasabah) {
-            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
-            if (!$access['allowed']) {
-                return redirect()->route('nasabah.dashboard')
-                    ->with('error', $access['reason']);
-            }
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat riwayat deposito
 
         // Ambil semua paket deposito aktif
         $pakets = PaketDeposito::with('kategori')
@@ -79,15 +71,7 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        if ($nasabah) {
-            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
-            if (!$access['allowed']) {
-                return redirect()->route('nasabah.dashboard')
-                    ->with('error', $access['reason']);
-            }
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari riwayat agar nasabah selalu bisa melihat riwayat deposito
 
         $riwayat = PengajuanDeposito::where('id_nasabah', $nasabah->id)
             ->with(['tenor', 'deposito.pencairan'])

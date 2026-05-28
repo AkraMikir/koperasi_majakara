@@ -24,15 +24,7 @@ class NasabahGadaiBaruController extends Controller
 
         $nasabah = Auth::user()->nasabah;
         
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        if ($nasabah) {
-            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
-            if (!$access['allowed']) {
-                return redirect()->route('nasabah.dashboard')
-                    ->with('error', $access['reason']);
-            }
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat daftar gadainya
 
         if ($nasabah) {
             $nasabahId = $nasabah->id;
@@ -100,15 +92,7 @@ class NasabahGadaiBaruController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
         
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        if ($nasabah) {
-            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
-            if (!$access['allowed']) {
-                return redirect()->route('nasabah.dashboard')
-                    ->with('error', $access['reason']);
-            }
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari showActiveDetail agar nasabah selalu bisa melihat detail gadai aktifnya
 
         $gadai = GadaiActive::with(['kategori', 'item', 'lokasi', 'files', 'paymentLogs', 'history'])
             ->where('nasabah_id', $nasabah->id)
@@ -121,15 +105,7 @@ class NasabahGadaiBaruController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
         
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        if ($nasabah) {
-            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
-            if (!$access['allowed']) {
-                return redirect()->route('nasabah.dashboard')
-                    ->with('error', $access['reason']);
-            }
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari riwayat agar nasabah selalu bisa melihat riwayat gadainya
         
         $gadaiAktif = GadaiActive::with(['kategori', 'item', 'lokasi'])
             ->where('nasabah_id', $nasabah->id)

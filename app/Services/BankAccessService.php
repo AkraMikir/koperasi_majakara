@@ -106,10 +106,30 @@ class BankAccessService
             ];
         }
 
-        // Nasabah non-BCA: cek saldo
+        // Bypass check: Jika ada transaksi aktif (pinjaman, deposito, gadai), beri akses penuh
+        $hasActivePinjaman = \App\Models\PinjamanH::where('id_anggota', $nasabahId)
+            ->where('lunas', 'Belum')->exists();
+            
+        $hasActiveDeposito = \App\Models\DepositoH::where('id_nasabah', $nasabahId)
+            ->where('status', 'aktif')->exists();
+            
+        $hasActiveGadai = \App\Models\GadaiH::where('id_nasabah', $nasabahId)
+            ->where('status', 'aktif')->exists();
+
         $saldo     = $this->getSaldoTabungan($nasabahId);
         $minSaldo  = $this->getMinSaldoNonBca();
 
+        if ($hasActivePinjaman || $hasActiveDeposito || $hasActiveGadai) {
+            return [
+                'allowed'   => true,
+                'reason'    => '',
+                'bank'      => $namaBank,
+                'saldo'     => $saldo,
+                'min_saldo' => $minSaldo,
+            ];
+        }
+
+        // Nasabah non-BCA tanpa transaksi aktif: cek saldo
         $allowed = $saldo >= $minSaldo;
 
         $reason = '';

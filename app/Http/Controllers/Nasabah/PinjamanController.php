@@ -34,13 +34,7 @@ class PinjamanController extends Controller
     {
         $idAnggota = $this->getIdAnggota();
 
-        // ── BANK ACCESS GUARD ──────────────────────────────────────
-        $access = app(\App\Services\BankAccessService::class)->checkPremiumAccess($idAnggota);
-        if (!$access['allowed']) {
-            return redirect()->route('nasabah.dashboard')
-                ->with('error', $access['reason']);
-        }
-        // ──────────────────────────────────────────────────────────
+        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat riwayat pinjamannya
 
         // Get pinjaman aktif
         $pinjamanAktif = PinjamanH::where('id_anggota', $idAnggota)
