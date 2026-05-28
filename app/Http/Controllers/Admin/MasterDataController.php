@@ -543,6 +543,11 @@ class MasterDataController extends Controller
 
     public function biayaTransferStore(Request $request)
     {
+        $request->merge([
+            'biaya_admin' => preg_replace('/[^\d]/', '', $request->biaya_admin),
+            'min_saldo_non_bca' => preg_replace('/[^\d]/', '', $request->min_saldo_non_bca),
+        ]);
+
         $request->validate([
             'bank_pengirim' => 'required|string|max:50',
             'bank_penerima' => 'required|string|max:50',
@@ -565,6 +570,11 @@ class MasterDataController extends Controller
 
     public function biayaTransferUpdate(Request $request, $id)
     {
+        $request->merge([
+            'biaya_admin' => preg_replace('/[^\d]/', '', $request->biaya_admin),
+            'min_saldo_non_bca' => preg_replace('/[^\d]/', '', $request->min_saldo_non_bca),
+        ]);
+
         $request->validate([
             'bank_pengirim' => 'required|string|max:50',
             'bank_penerima' => 'required|string|max:50',

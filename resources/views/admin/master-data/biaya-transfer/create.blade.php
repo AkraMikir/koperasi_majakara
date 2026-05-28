@@ -112,6 +112,11 @@
         if (biayaInput) {
             biayaInput.value = biayaInput.value.replace(/[^\d]/g, '');
         }
+        
+        const minSaldoInput = document.getElementById('min_saldo_non_bca');
+        if (minSaldoInput) {
+            minSaldoInput.value = minSaldoInput.value.replace(/[^\d]/g, '');
+        }
     });
 </script>
 @endpush
