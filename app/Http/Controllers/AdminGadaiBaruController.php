@@ -42,7 +42,12 @@ class AdminGadaiBaruController extends Controller
 
     public function create()
     {
-        $nasabahs = Nasabah::with('user')->get();
+        $nasabahs = Nasabah::with(['user', 'dataRek'])->get();
+        $bankService = app(\App\Services\BankAccessService::class);
+        $nasabahs->each(function ($n) use ($bankService) {
+            $n->saldo_tabungan = $bankService->getSaldoTabungan($n->id);
+        });
+
         $kategoriList = GadaiMasterKategori::all();
         $itemList = GadaiMasterItem::all();
         $lokasiList = JnsLokasiPerusahaan::all();
@@ -53,7 +58,21 @@ class AdminGadaiBaruController extends Controller
             'gold' => DB::table('tbl_gadai_grid_gold')->where('is_occupied', false)->orderBy('baris')->orderBy('kolom')->get(),
         ];
 
-        return view('admin.gadai_baru.create', compact('nasabahs', 'kategoriList', 'itemList', 'lokasiList', 'availableSlots'));
+        $adminId = Auth::id();
+        $adminSaldoCash = PettyCashSaldo::getSaldo($adminId, 'admin', 'cash', 'other');
+        $adminSaldoTransfer = PettyCashSaldo::getSaldo($adminId, 'admin', 'transfer', 'other');
+        $biayaTransfer = \App\Models\BiayaTransfer::where('is_active', true)->get();
+
+        return view('admin.gadai_baru.create', compact(
+            'nasabahs', 
+            'kategoriList', 
+            'itemList', 
+            'lokasiList', 
+            'availableSlots', 
+            'adminSaldoCash', 
+            'adminSaldoTransfer', 
+            'biayaTransfer'
+        ));
     }
 
     public function store(Request $request)
