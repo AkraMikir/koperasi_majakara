@@ -404,8 +404,8 @@
     @endif
 
     {{-- MODAL CANCEL DEPOSITO --}}
-    <div id="cancelModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden transform transition-all scale-95 opacity-0 duration-300" id="cancelModalContent">
+    <div id="cancelModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4" style="z-index: 9999;" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-y-auto transform transition-all scale-95 opacity-0 duration-300" style="max-height: 90vh;" id="cancelModalContent">
             <div class="p-6">
                 <!-- Icon Warning Premium -->
                 <div class="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -427,8 +427,29 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('nasabah.deposito.ajukan-cancel', $deposito->id) }}" class="space-y-4" id="cancelForm">
+                 <form method="POST" action="{{ route('nasabah.deposito.ajukan-cancel', $deposito->id) }}" class="space-y-4" id="cancelForm">
                     @csrf
+
+                    <div class="text-left mb-4">
+                        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Pilih Metode Pengembalian Dana</label>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#674c1d] transition has-[:checked]:border-[#674c1d] has-[:checked]:bg-[#faf9f0]">
+                                <input type="radio" name="jenis_pencairan" value="rek_nasabah" class="accent-[#674c1d]" required checked>
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-800">Transfer ke Rekening Bank</p>
+                                    <p class="text-[10px] text-gray-500">Dana ditransfer ke rekening bank terdaftar Anda</p>
+                                </div>
+                            </label>
+                            <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-[#674c1d] transition has-[:checked]:border-[#674c1d] has-[:checked]:bg-[#faf9f0]">
+                                <input type="radio" name="jenis_pencairan" value="saldo_tabungan" class="accent-[#674c1d]">
+                                <div>
+                                    <p class="text-xs font-semibold text-gray-800">Masuk ke Saldo Tabungan</p>
+                                    <p class="text-[10px] text-gray-500">Dana langsung ditambahkan ke saldo tabungan Anda</p>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
                     <div class="text-left">
                         <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Masukkan PIN 6 Digit</label>
                         <input type="password" name="pin" id="cancelPinInput" maxlength="6" placeholder="••••••" required

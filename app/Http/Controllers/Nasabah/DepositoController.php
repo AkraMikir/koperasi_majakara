@@ -308,6 +308,7 @@ class DepositoController extends Controller
     {
         $request->validate([
             'pin' => 'required|numeric',
+            'jenis_pencairan' => 'required|in:saldo_tabungan,rek_nasabah',
         ]);
 
         $user = Auth::user();
@@ -331,12 +332,13 @@ class DepositoController extends Controller
         PencairanDeposito::create([
             'deposito_id'     => $deposito->id,
             'id_nasabah'      => $nasabah->id,
-            'jenis_pencairan' => 'saldo_tabungan', // default atau bisa direquest if needed, let's say transfer since admin needs to transfer it back or whatever. Actually, the user requirement: "Setelah approve, admin wajib melakukan transfer jumlah pokok dan mengunggah bukti foto transfer atau bukti serah tunai." so we can set it to 'rek_nasabah' default or just use the method from request if we provide it. For now let's set it to 'rek_nasabah'. Let's check view what they want.
-            'metode_pencairan'=> 'rek_nasabah', // compat
+            'jenis_pencairan' => $request->jenis_pencairan,
+            'metode_pencairan'=> $request->jenis_pencairan, // compat
             'nominal_akhir'   => $deposito->nominal_awal, // hanya pokok kembali
             'status'          => 'pending',
             'is_cancel'       => true,
-            'catatan'         => 'Pengajuan pembatalan deposito oleh nasabah.',
+            'catatan'         => 'Pengajuan pembatalan deposito oleh nasabah via ' .
+                ($request->jenis_pencairan === 'rek_nasabah' ? 'Transfer ke Rekening Bank' : 'Saldo Tabungan') . '.',
         ]);
 
         return back()->with('success', 'Permintaan pembatalan deposito berhasil diajukan. Admin kami akan segera memproses pengembalian dana.');

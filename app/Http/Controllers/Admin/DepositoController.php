@@ -453,8 +453,11 @@ class DepositoController extends Controller
         }
 
         $admins = User::where('role', 'admin_operasional')->get();
+        $biayaTransfer = \App\Models\BiayaTransfer::where('is_active', true)->get();
+        $saldoTabunganNasabah = app(\App\Services\BankAccessService::class)->getSaldoTabungan($pencairan->id_nasabah);
+        $adminSaldoTransfer = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'transfer', 'other');
 
-        return view('admin.deposito.pencairan-tf-form', compact('pencairan', 'admins'));
+        return view('admin.deposito.pencairan-tf-form', compact('pencairan', 'admins', 'biayaTransfer', 'saldoTabunganNasabah', 'adminSaldoTransfer'));
     }
 
     /**
@@ -564,6 +567,7 @@ class DepositoController extends Controller
             'foto_bukti_tf' => 'required|image|max:5120',
             'nominal_akhir' => 'required|numeric|min:1',
             'catatan'       => 'nullable|string|max:500',
+            'bank_pengirim' => 'nullable|string',
         ]);
 
         try {
@@ -610,12 +614,35 @@ class DepositoController extends Controller
                 'tgl_transaksi' => now(),
             ]);
 
+            // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
+            $bankService = app(\App\Services\BankAccessService::class);
+            $namaBank = $bankService->getNamaBank($pencairan->deposito->id_nasabah);
+            $bankPengirim = $request->input('bank_pengirim', 'BCA');
+            $biayaTransfer = 0;
+            
+            if ($namaBank && !$bankService->isBcaUser($pencairan->deposito->id_nasabah)) {
+                $potong = $bankService->potongBiayaTransfer(
+                    $pencairan->deposito->id_nasabah,
+                    $namaBank,
+                    'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF)',
+                    $adminId,
+                    $bankPengirim
+                );
+                
+                if (!$potong['success']) {
+                    throw new \Exception($potong['message']);
+                }
+                $biayaTransfer = $potong['biaya'] ?? 0;
+            }
+
             // 4. Update status pencairan
             $pencairan->update([
                 'nominal_akhir' => $nominal,
                 'foto_bukti_tf' => $fotoPath,
                 'status'        => 'selesai',
                 'approved_by'   => $adminId,
+                'bank_pengirim' => $bankPengirim,
+                'biaya_transfer' => $biayaTransfer,
             ]);
 
             // 5. Update status deposito → dicairkan atau ditutup jika is_cancel
@@ -625,23 +652,6 @@ class DepositoController extends Controller
             // 6. Sinkronisasi persiapan cair
             DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
                 ->update(['status' => 'selesai']);
-
-            // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
-            $bankService = app(\App\Services\BankAccessService::class);
-            $namaBank = $bankService->getNamaBank($pencairan->deposito->id_nasabah);
-            
-            if ($namaBank && !$bankService->isBcaUser($pencairan->deposito->id_nasabah)) {
-                $potong = $bankService->potongBiayaTransfer(
-                    $pencairan->deposito->id_nasabah,
-                    $namaBank,
-                    'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF)',
-                    $adminId
-                );
-                
-                if (!$potong['success']) {
-                    throw new \Exception($potong['message']);
-                }
-            }
 
             DB::commit();
 
@@ -688,8 +698,9 @@ class DepositoController extends Controller
         $pencairans = $query->paginate(15)->withQueryString();
         $pendingCount = PencairanDeposito::where('jenis_pencairan', 'saldo_tabungan')->where('status', 'pending')->count();
         $admins = User::where('role', 'admin_operasional')->get();
+        $adminSaldoTransfer = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'transfer', 'other');
 
-        return view('admin.deposito.pencairan-tabungan', compact('pencairans', 'pendingCount', 'admins'));
+        return view('admin.deposito.pencairan-tabungan', compact('pencairans', 'pendingCount', 'admins', 'adminSaldoTransfer'));
     }
 
     /**

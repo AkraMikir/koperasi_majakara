@@ -23,6 +23,8 @@ class PencairanDeposito extends Model
         'catatan',
         'approved_by',
         'is_cancel',
+        'bank_pengirim',
+        'biaya_transfer',
     ];
 
     protected $casts = [
@@ -30,6 +32,7 @@ class PencairanDeposito extends Model
         'is_cancel'     => 'boolean',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
+        'biaya_transfer' => 'decimal:2',
     ];
 
     public function deposito(): BelongsTo
