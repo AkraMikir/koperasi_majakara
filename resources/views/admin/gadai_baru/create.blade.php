@@ -118,12 +118,13 @@
                                     <option value="">Pilih Item</option>
                                     @foreach($itemList as $item)
                                         <option value="{{ $item->id }}" data-kategori="{{ $item->kategori_id }}"
+                                            data-min="{{ $item->nominal_low }}"
                                             data-max="{{ $item->nominal_high }}" class="item-option hidden">{{ $item->head_1 }}
                                             @if($item->head_2)({{ $item->head_2 }})@endif</option>
                                     @endforeach
                                 </select>
-                                <p id="taksiran_info" class="text-xs text-amber-600 font-bold mt-2 hidden">Max Taksiran: Rp
-                                    <span id="max_taksiran_text">0</span></p>
+                                <p id="taksiran_info" class="text-xs text-amber-600 font-bold mt-2 hidden">Taksiran: Rp
+                                    <span id="min_taksiran_text">0</span> - Rp <span id="max_taksiran_text">0</span></p>
                             </div>
 
                             <div>
@@ -289,6 +290,7 @@
                     const opt = document.createElement('option');
                     opt.value = item.id;
                     opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
+                    opt.dataset.min = item.nominal_low;
                     opt.dataset.max = item.nominal_high;
                     itemSelect.appendChild(opt);
                 });
@@ -310,9 +312,11 @@
                     return;
                 }
                 const selectedOpt = this.options[this.selectedIndex];
-                const max = parseFloat(selectedOpt.dataset.max);
+                const min = parseFloat(selectedOpt.dataset.min) || 0;
+                const max = parseFloat(selectedOpt.dataset.max) || 0;
 
                 // Format to IDR
+                document.getElementById('min_taksiran_text').textContent = new Intl.NumberFormat('id-ID').format(min);
                 maxTaksiranText.textContent = new Intl.NumberFormat('id-ID').format(max);
                 tInfoBox.classList.remove('hidden');
 

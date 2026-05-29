@@ -46,6 +46,23 @@
         </div>
     </td>
     <td class="px-6 py-4 text-center">
+        <div class="flex items-center justify-center gap-2">
+            @if($item->bukti_tf)
+                <a href="{{ asset('storage/' . $item->bukti_tf) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg text-[10px] font-bold border border-blue-200 transition-colors" title="Lihat Bukti Transfer">
+                    <i class="fas fa-image text-xs"></i> TF
+                </a>
+            @endif
+            @if($item->foto_cash)
+                <a href="{{ asset('storage/' . $item->foto_cash) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-[10px] font-bold border border-emerald-200 transition-colors" title="Lihat Foto Cash">
+                    <i class="fas fa-camera text-xs"></i> Cash
+                </a>
+            @endif
+            @if(!$item->bukti_tf && !$item->foto_cash)
+                <span class="text-xs text-gray-400 italic">-</span>
+            @endif
+        </div>
+    </td>
+    <td class="px-6 py-4 text-center">
         @if($item->status === 'pending')
             <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-[11px] font-bold uppercase tracking-wider">Pending</span>
         @elseif($item->status === 'approved')
@@ -61,7 +78,7 @@
 </tr>
 @empty
 <tr>
-    <td colspan="5" class="px-6 py-20 text-center">
+    <td colspan="6" class="px-6 py-20 text-center">
         <div class="max-w-xs mx-auto">
             <i class="fas fa-paper-plane text-4xl text-gray-200 mb-4"></i>
             <p class="text-gray-500 font-medium">Data tidak ditemukan atau belum ada pengiriman</p>

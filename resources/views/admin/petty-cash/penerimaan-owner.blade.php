@@ -126,6 +126,7 @@
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Admin / ID</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Nominal</th>
                         <th class="px-6 py-4 text-left text-xs font-bold text-[#674c1d] uppercase">Via</th>
+                        <th class="px-6 py-4 text-center text-xs font-bold text-[#674c1d] uppercase">Bukti Foto</th>
                         <th class="px-6 py-4 text-center text-xs font-bold text-[#674c1d] uppercase">Status</th>
                         <th class="px-6 py-4 text-right text-xs font-bold text-[#674c1d] uppercase">Tanggal</th>
                     </tr>
