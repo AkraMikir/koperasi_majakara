@@ -19,7 +19,7 @@
             <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
             </svg>
-            <span class="text-primary font-medium">@yield('title', 'Dashboard')</span>
+            <span class="text-majakara-brown font-medium">@yield('title', 'Dashboard')</span>
         </div>
     </div>
     
@@ -27,20 +27,24 @@
     <div class="flex items-center space-x-4">
         <!-- Search -->
         <div class="hidden md:flex items-center relative">
-            <input type="text" placeholder="Cari..." 
-                class="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none text-sm">
-            <svg class="w-5 h-5 text-gray-400 absolute left-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
+            <form action="#" method="GET" class="w-full relative" @submit.prevent="if($refs.searchInput.value) window.location.search = '?q=' + encodeURIComponent($refs.searchInput.value)">
+                <input x-ref="searchInput" type="text" name="q" placeholder="Cari data nasabah, transaksi..." value="{{ request('q') }}"
+                    class="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-majakara-brown focus:border-majakara-brown outline-none text-sm transition-all duration-300 focus:w-80">
+                <button type="submit" class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-majakara-brown">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                </button>
+            </form>
         </div>
         
-        <!-- Notifications (hover = preview dropdown, badge = jumlah belum dibaca) -->
+        <!-- Notifications (click toggle, badge = jumlah belum dibaca) -->
         @php
             $notificationsUnreadCount = $notificationsUnreadCount ?? 0;
             $notificationsRecent = $notificationsRecent ?? collect([]);
         @endphp
         <div class="relative group" x-data="{ open: false }">
-            <a href="{{ route('admin.notifications.index') }}" class="relative inline-flex p-2 text-gray-600 hover:text-primary transition-colors rounded-lg hover:bg-gray-100" @mouseenter="open = true" @mouseleave="open = false">
+            <button @click="open = !open" type="button" class="relative inline-flex p-2 text-gray-600 hover:text-majakara-brown transition-colors rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-majakara-brown">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                 </svg>
@@ -49,28 +53,30 @@
                         {{ $notificationsUnreadCount > 99 ? '99+' : $notificationsUnreadCount }}
                     </span>
                 @endif
-            </a>
-            <!-- Dropdown preview on hover -->
+            </button>
+            <!-- Dropdown on click -->
             <div x-show="open" x-cloak
-                 @mouseenter="open = true" @mouseleave="open = false"
+                 @click.away="open = false"
                  x-transition:enter="transition ease-out duration-150"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:enter-start="opacity-0 scale-95 transform"
+                 x-transition:enter-end="opacity-100 scale-100 transform"
                  x-transition:leave="transition ease-in duration-100"
-                 class="absolute right-0 mt-1 w-80 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-[100]">
+                 x-transition:leave-start="opacity-100 scale-100 transform"
+                 x-transition:leave-end="opacity-0 scale-95 transform"
+                 class="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-[100] ring-1 ring-black ring-opacity-5">
                 <div class="px-4 py-2 border-b border-gray-100 flex items-center justify-between">
                     <span class="font-semibold text-gray-900">Notifikasi</span>
                     @if($notificationsUnreadCount > 0)
                         <form method="POST" action="{{ route('admin.notifications.mark-all-read') }}" class="inline">
                             @csrf
-                            <button type="submit" class="text-xs text-[#674c1d] hover:underline">Tandai semua dibaca</button>
+                            <button type="submit" class="text-xs text-majakara-brown hover:underline">Tandai semua dibaca</button>
                         </form>
                     @endif
                 </div>
                 <div class="max-h-80 overflow-y-auto">
                     @forelse($notificationsRecent as $notif)
                         @php $targetUrl = $notif->link ?: route('admin.notifications.index'); @endphp
-                        <form method="POST" action="{{ route('admin.notifications.mark-read', $notif->id) }}" class="block border-b border-gray-50 last:border-0 {{ $notif->read_at ? '' : 'bg-[#674c1d]/5' }}">
+                        <form method="POST" action="{{ route('admin.notifications.mark-read', $notif->id) }}" class="block border-b border-gray-50 last:border-0 {{ $notif->read_at ? '' : 'bg-majakara-brown/5' }}">
                             @csrf
                             <input type="hidden" name="redirect" value="{{ $targetUrl }}">
                             <button type="submit" class="w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors">
@@ -86,7 +92,7 @@
                     @endforelse
                 </div>
                 <div class="px-4 py-2 border-t border-gray-100 text-center">
-                    <a href="{{ route('admin.notifications.index') }}" class="text-sm font-medium text-[#674c1d] hover:underline">Lihat semua notifikasi</a>
+                    <a href="{{ route('admin.notifications.index') }}" class="text-sm font-medium text-majakara-brown hover:underline">Lihat semua notifikasi</a>
                 </div>
             </div>
         </div>
@@ -103,7 +109,7 @@
                 @if(auth()->user()->foto && Storage::disk('public')->exists(auth()->user()->foto) && auth()->user()->foto !== 'default-avatar.jpg')
                     <img src="{{ Storage::url(auth()->user()->foto) }}" alt="{{ auth()->user()->nama }}" class="w-10 h-10 rounded-full object-cover border border-gray-200">
                 @else
-                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center text-white font-bold">
+                    <div class="w-10 h-10 bg-linear-to-br from-majakara-brown to-majakara-dark-gold rounded-full flex items-center justify-center text-white font-bold">
                         {{ substr(auth()->user()->nama ?? 'A', 0, 1) }}
                     </div>
                 @endif

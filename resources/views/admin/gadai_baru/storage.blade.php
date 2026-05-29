@@ -64,27 +64,27 @@
         $fillPct      = $totalSlots > 0 ? round(($filledSlots / $totalSlots) * 100) : 0;
     @endphp
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-center">
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/60 shadow-xl text-center">
             <p class="text-2xl font-black text-gray-900">{{ $totalSlots }}</p>
             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total Slot</p>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-red-100 shadow-sm text-center">
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-red-200/50 shadow-xl text-center">
             <p class="text-2xl font-black text-red-600">{{ $filledSlots }}</p>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Terisi</p>
+            <p class="text-[10px] font-bold text-red-400/80 uppercase tracking-widest mt-1">Terisi</p>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-emerald-100 shadow-sm text-center">
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-emerald-200/50 shadow-xl text-center">
             <p class="text-2xl font-black text-emerald-600">{{ $emptySlots }}</p>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Kosong</p>
+            <p class="text-[10px] font-bold text-emerald-400/80 uppercase tracking-widest mt-1">Kosong</p>
         </div>
-        <div class="bg-white rounded-2xl p-4 border border-amber-100 shadow-sm text-center">
+        <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-amber-200/50 shadow-xl text-center">
             <p class="text-2xl font-black text-amber-600">{{ $expiredSlots }}</p>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Hangus / Siap Lelang</p>
+            <p class="text-[10px] font-bold text-amber-400/80 uppercase tracking-widest mt-1">Hangus / Siap Lelang</p>
         </div>
     </div>
 
     {{-- ===== OCCUPANCY BAR ===== --}}
     @if($totalSlots > 0)
-    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/60 shadow-xl">
         <div class="flex items-center justify-between mb-2">
             <span class="text-xs font-bold text-gray-500">Tingkat Hunian Storage</span>
             <span class="text-xs font-black text-gray-800">{{ $fillPct }}% terisi</span>
@@ -96,7 +96,7 @@
     @endif
 
     {{-- ===== LEGEND ===== --}}
-    <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+    <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/60 shadow-xl">
         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Keterangan Warna Slot</p>
         <div class="flex flex-wrap gap-4">
             <div class="flex items-center gap-2">
@@ -115,7 +115,7 @@
     </div>
 
     {{-- ===== GRID STORAGE ===== --}}
-    <div class="bg-white border border-gray-100 rounded-2xl shadow-sm p-6 overflow-x-auto">
+    <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-xl p-6 overflow-x-auto">
         <div class="min-w-max space-y-5">
             @forelse($groupedGrid as $baris => $koloms)
                 <div class="flex gap-4 items-center">
@@ -141,7 +141,7 @@
                                     </div>
                                     @if($isExpired)
                                         <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
-                                            class="w-full py-2 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
+                                            class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
                                             🔨 Kosongkan & Lelang
                                         </button>
                                     @else
@@ -182,13 +182,13 @@
 <div id="emptyAuctionModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
     <div class="flex items-center justify-center min-h-screen p-4">
         <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeEmptyAuctionModal()"></div>
-        <div class="relative bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden z-10 animate-in fade-in zoom-in duration-300">
+        <div class="relative bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 max-w-lg w-full overflow-hidden z-10 animate-in fade-in zoom-in duration-300">
             <form action="{{ route('admin.gadai_baru.storage.empty-auction') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <input type="hidden" name="gadai_id" id="modal_gadai_id">
 
                 {{-- Modal Header --}}
-                <div class="bg-gradient-to-r from-amber-600 to-[#8b6f2f] px-6 py-5 flex items-center justify-between">
+                <div class="bg-gradient-to-r from-[#674c1d] to-[#d4af37] px-6 py-5 flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl">🔨</div>
                         <div>
@@ -250,13 +250,13 @@
                     </div>
                 </div>
 
-                <div class="bg-gray-50 px-6 py-4 flex gap-3 justify-end rounded-b-3xl border-t border-gray-100">
+                <div class="bg-white/50 backdrop-blur-md px-6 py-4 flex gap-3 justify-end rounded-b-3xl border-t border-gray-100">
                     <button type="button" onclick="closeEmptyAuctionModal()"
                         class="px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all">
                         Batal
                     </button>
                     <button type="submit"
-                        class="px-6 py-2.5 bg-amber-600 hover:bg-amber-700 active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-md shadow-amber-600/20 uppercase tracking-wide"
+                        class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#d4af37] hover:from-[#5a4118] hover:to-[#b3952f] active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-xl shadow-[#674c1d]/20 uppercase tracking-wide"
                         onsubmit="this.disabled=true;this.textContent='Memproses...'">
                         🔨 Konfirmasi & Proses Lelang
                     </button>

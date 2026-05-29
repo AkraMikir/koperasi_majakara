@@ -12,7 +12,7 @@
                 <p class="text-gray-500 mt-1">Proses penyerahan barang fisik dan pencairan dana gadai</p>
             </div>
             <a href="{{ route('admin.gadai_baru.index') }}"
-                class="flex items-center gap-2 px-4 py-2 bg-white text-gray-700 border border-gray-200 font-medium rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+                class="flex items-center gap-2 px-4 py-2 bg-white/80 backdrop-blur-md text-gray-700 border border-white/60 font-medium rounded-xl hover:bg-white transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18">
                     </path>
@@ -34,7 +34,7 @@
             </div>
         @endif
 
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-xl overflow-hidden">
             <div class="p-8">
                 <form action="{{ route('admin.gadai_baru.store') }}" method="POST" enctype="multipart/form-data"
                     class="space-y-8"
@@ -58,7 +58,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nasabah Pemohon <span
                                         class="text-red-500">*</span></label>
                                 <select name="nasabah_id"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d] select2"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Nasabah...</option>
                                     @foreach($nasabahs as $n)
@@ -72,7 +72,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Cabang Penyimpanan <span
                                         class="text-red-500">*</span></label>
                                 <select name="lokasi_id"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="">Pilih Cabang...</option>
                                     @foreach($lokasiList as $l)
@@ -100,7 +100,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Kategori <span
                                         class="text-red-500">*</span></label>
                                 <select name="kategori_id" id="kategori_id"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="">Pilih Kategori</option>
                                     @foreach($kategoriList as $k)
@@ -113,7 +113,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Item Barang <span
                                         class="text-red-500">*</span></label>
                                 <select name="item_id" id="item_id"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="">Pilih Item</option>
                                     @foreach($itemList as $item)
@@ -134,7 +134,7 @@
                                         <span class="text-gray-500 font-medium">Rp</span>
                                     </div>
                                     <input type="number" name="nominal_deal" id="nominal_deal"
-                                        class="w-full pl-10 border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
+                                        class="w-full pl-10 border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
                                         required placeholder="0">
                                 </div>
                                 <p id="error_nominal"
@@ -151,7 +151,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Metode Pencairan <span
                                         class="text-red-500">*</span></label>
                                 <select name="metode_pencairan"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="cash">Tunai (Cash)</option>
                                     <option value="transfer">Transfer Bank</option>
@@ -162,7 +162,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Slot Storage <span
                                         class="text-red-500">*</span></label>
                                 <select name="slot_kode" id="slot_kode"
-                                    class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="">Pilih Kategori Dulu</option>
                                 </select>
@@ -205,7 +205,7 @@
                                         file:text-sm file:font-semibold
                                         file:bg-emerald-50 file:text-emerald-700
                                         hover:file:bg-emerald-100 transition-colors
-                                        border border-gray-200 rounded-xl bg-gray-50 p-1" required accept="image/*">
+                                        border border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm p-1" required accept="image/*">
                                     <button type="button"
                                         class="w-11 h-11 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100 hover:bg-red-100 transition-colors cursor-not-allowed opacity-50"
                                         disabled>
@@ -224,8 +224,8 @@
                     </div>
 
                     {{-- Info Box --}}
-                    <div class="bg-[#8b6f2f]/10 border border-[#8b6f2f]/20 rounded-xl p-5 flex items-start gap-4">
-                        <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-sm">
+                    <div class="bg-gradient-to-r from-[#674c1d]/10 to-[#d4af37]/10 backdrop-blur-md border border-[#674c1d]/20 rounded-2xl p-5 flex items-start gap-4 shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-white/80 flex items-center justify-center shrink-0 shadow-sm">
                             <svg class="w-6 h-6 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -245,7 +245,7 @@
                     {{-- Submit Button --}}
                     <div class="pt-2">
                         <button type="submit" id="btnSubmit"
-                            class="w-full flex items-center justify-center gap-2 py-4 px-8 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-0.5">
+                            class="w-full flex items-center justify-center gap-2 py-4 px-8 bg-gradient-to-r from-[#674c1d] to-[#d4af37] hover:from-[#5a4118] hover:to-[#b3952f] text-white font-black rounded-xl shadow-xl shadow-[#674c1d]/20 transition-all hover:-translate-y-0.5 uppercase tracking-wide">
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -355,7 +355,7 @@
                     file:text-sm file:font-semibold
                     file:bg-emerald-50 file:text-emerald-700
                     hover:file:bg-emerald-100 transition-colors
-                    border border-gray-200 rounded-xl bg-gray-50 p-1" required accept="image/*">
+                    border border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm p-1" required accept="image/*">
                 <button type="button" class="w-11 h-11 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100 hover:bg-red-100 transition-colors remove-file-btn">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                 </button>

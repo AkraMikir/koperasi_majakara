@@ -13,13 +13,6 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
-        :root {
-            --primary: #674c1d;
-            --primary-light: #8b6f2f;
-            --primary-dark: #4a3514;
-            --gold: #d4af37;
-        }
-        
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -35,7 +28,7 @@
         }
 
         .gradient-animate {
-            background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 25%, #d4af37 50%, #8b6f2f 75%, #674c1d 100%);
+            background: linear-gradient(135deg, var(--color-majakara-brown) 0%, var(--color-majakara-dark-gold) 25%, var(--color-majakara-gold) 50%, var(--color-majakara-dark-gold) 75%, var(--color-majakara-brown) 100%);
             background-size: 400% 400%;
             animation: gradient-shift 15s ease infinite;
         }
@@ -97,7 +90,7 @@
                             <div class="inline-block">
                                 <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Koperasi Majakara" class="h-20 w-auto mx-auto mb-4 pulse-glow">
                             </div>
-                            <h1 class="text-3xl font-bold text-[#674c1d] font-display mb-2">Selamat Datang</h1>
+                            <h1 class="text-3xl font-bold text-majakara-brown font-display mb-2">Selamat Datang</h1>
                             <p class="text-gray-600">Masuk ke akun Anda untuk melanjutkan</p>
                         </div>
 
@@ -141,7 +134,7 @@
                                         </svg>
                                     </div>
                                     <input type="email" name="email" id="email" value="{{ old('email') }}" required
-                                        class="w-full pl-11 pr-4 py-3 border @error('email') border-red-300 @else border-gray-300 @enderror rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] transition-all outline-none bg-white/50"
+                                        class="w-full pl-11 pr-4 py-3 border @error('email') border-red-300 @else border-gray-300 @enderror rounded-xl focus:ring-2 focus:ring-majakara-dark-gold focus:border-majakara-dark-gold transition-all outline-none bg-white/50"
                                         placeholder="nama@email.com">
                                 </div>
                                 @error('email')
@@ -168,7 +161,7 @@
                                         </svg>
                                     </div>
                                     <input type="password" name="password" id="password" required
-                                        class="w-full pl-11 pr-12 py-3 border @error('password') border-red-300 @else border-gray-300 @enderror rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] transition-all outline-none bg-white/50"
+                                        class="w-full pl-11 pr-12 py-3 border @error('password') border-red-300 @else border-gray-300 @enderror rounded-xl focus:ring-2 focus:ring-majakara-dark-gold focus:border-majakara-dark-gold transition-all outline-none bg-white/50"
                                         placeholder="Masukkan password">
                                     <button type="button" onclick="togglePassword()" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600">
                                         <svg id="eyeIcon" class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,15 +186,15 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
                                     <input type="checkbox" name="remember" id="remember" 
-                                        class="w-4 h-4 text-[#674c1d] border-gray-300 rounded focus:ring-[#674c1d]">
+                                        class="w-4 h-4 text-majakara-brown border-gray-300 rounded focus:ring-majakara-brown">
                                     <label for="remember" class="ml-2 text-sm text-gray-600">Ingat saya</label>
                                 </div>
-                                <a href="#" class="text-sm text-[#674c1d] hover:text-[#8b6f2f] font-medium transition-colors">Lupa password?</a>
+                                <a href="#" class="text-sm text-majakara-brown hover:text-majakara-dark-gold font-medium transition-colors">Lupa password?</a>
                             </div>
 
                             <!-- Submit Button -->
                             <button type="submit" id="loginButton"
-                                class="w-full px-8 py-3.5 bg-linear-to-r from-[#674c1d] via-[#8b6f2f] to-[#674c1d] bg-size-200 bg-pos-0 hover:bg-pos-100 text-white rounded-xl transition-all duration-500 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                class="w-full px-8 py-3.5 bg-linear-to-r from-majakara-brown via-majakara-dark-gold to-majakara-brown bg-size-200 bg-pos-0 hover:bg-pos-100 text-white rounded-xl transition-all duration-500 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                                 <span id="loginButtonText" class="flex items-center justify-center gap-2">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
@@ -228,7 +221,7 @@
                                     <span class="px-4 bg-white text-gray-500">Belum punya akun?</span>
                                 </div>
                             </div>
-                            <a href="{{ route('register') }}" class="mt-4 inline-flex items-center gap-2 text-[#674c1d] font-semibold hover:text-[#8b6f2f] transition-colors">
+                            <a href="{{ route('register') }}" class="mt-4 inline-flex items-center gap-2 text-majakara-brown font-semibold hover:text-majakara-dark-gold transition-colors">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
                                 </svg>
@@ -306,7 +299,7 @@
     <div id="pinModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 fade-in-up">
             <div class="text-center mb-6">
-                <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4 pulse-glow">
+                <div class="w-16 h-16 mx-auto bg-linear-to-br from-majakara-brown to-majakara-dark-gold rounded-full flex items-center justify-center mb-4 pulse-glow">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>
@@ -321,7 +314,7 @@
                     <div>
                         <label for="pin" class="block text-sm font-semibold text-gray-700 mb-2">PIN</label>
                         <input type="password" name="pin" id="pin" maxlength="6" required autofocus
-                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none text-center text-2xl tracking-widest font-mono bg-gray-50"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-majakara-brown focus:border-majakara-brown transition-all outline-none text-center text-2xl tracking-widest font-mono bg-gray-50"
                             placeholder="••••••" autocomplete="off" inputmode="numeric">
                         <div id="pinError" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg hidden">
                             <div class="flex items-start gap-2">
@@ -339,7 +332,7 @@
                             Batal
                         </button>
                         <button type="submit" id="verifyPinButton"
-                            class="flex-1 px-4 py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl hover:shadow-lg transition-all font-semibold">
+                            class="flex-1 px-4 py-3 bg-linear-to-r from-majakara-brown to-majakara-dark-gold text-white rounded-xl hover:shadow-lg transition-all font-semibold">
                             <span id="verifyPinButtonText">Verifikasi</span>
                             <span id="verifyPinButtonLoading" class="hidden flex items-center justify-center gap-2">
                                 <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

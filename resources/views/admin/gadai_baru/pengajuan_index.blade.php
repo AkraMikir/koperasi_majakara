@@ -11,18 +11,84 @@
             <p class="text-gray-500 text-sm">Daftar antrean pengajuan pelunasan dan perpanjangan gadai dari nasabah.</p>
         </div>
         <div class="flex items-center gap-2">
-            <span class="px-3 py-1 bg-amber-100 text-[#674c1d] text-xs font-bold rounded-full border border-amber-200 shadow-sm">
+            <span class="px-3 py-1 bg-amber-100 text-majakara-brown text-xs font-bold rounded-full border border-amber-200 shadow-sm">
                 {{ $pengajuan->count() }} Antrean Menunggu
             </span>
         </div>
     </div>
 
     <!-- Table Card -->
-    <div class="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="overflow-x-auto">
+    <div class="bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl border border-white/60 overflow-hidden">
+        
+        <!-- Mobile View (Card Layout) -->
+        <div class="grid grid-cols-1 gap-4 p-4 md:hidden">
+            @forelse($pengajuan as $item)
+                <div class="bg-white rounded-2xl border border-gray-100 p-4 shadow-sm flex flex-col gap-3">
+                    <div class="flex items-start justify-between border-b border-gray-50 pb-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-majakara-brown to-majakara-gold flex items-center justify-center text-white font-bold shadow-sm shrink-0">
+                                {{ substr($item->nasabah->user->nama ?? 'N', 0, 1) }}
+                            </div>
+                            <div>
+                                <div class="font-bold text-gray-900 leading-tight">{{ $item->nasabah->user->nama }}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->item->nama_item }}</div>
+                            </div>
+                        </div>
+                        <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase border {{ $item->jenis_pengajuan == 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
+                            {{ $item->jenis_pengajuan }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center py-1">
+                        <span class="text-xs text-gray-500 font-medium">Slot</span>
+                        <span class="font-mono bg-gray-100 px-2 py-0.5 text-xs rounded text-gray-700">{{ $item->gadaiActive->slot_kode }}/{{ $item->gadaiActive->slot_table }}</span>
+                    </div>
+
+                    <div class="flex justify-between items-center py-1 border-b border-gray-50 pb-3">
+                        <span class="text-xs text-gray-500 font-medium">Nominal</span>
+                        <span class="font-bold text-gray-900">Rp {{ number_format($item->nominal, 0, ',', '.') }}</span>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-1">
+                        <div class="flex items-center gap-1.5">
+                            <span class="text-[10px] font-black text-gray-800 uppercase tracking-tighter">{{ $item->metode }}</span>
+                            @if($item->metode == 'transfer')
+                                <span class="w-1.5 h-1.5 rounded-full bg-blue-500"></span>
+                            @endif
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="openDetailsModal({{ $item->id }})" class="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95" title="Lihat Detail">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                            </button>
+                            <button type="button" onclick="openApproveModal({{ $item->id }}, '{{ addslashes($item->nasabah->user->nama) }}', '{{ strtoupper($item->jenis_pengajuan) }}')" class="w-8 h-8 flex items-center justify-center bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm active:scale-95" title="Setujui">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                            </button>
+                            <button onclick="openRejectModal({{ $item->id }}, '{{ addslashes($item->nasabah->user->nama) }}')" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95" title="Tolak">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @empty
+                <div class="col-span-1">
+                    <x-admin.empty-state 
+                        title="Antrean Kosong" 
+                        message="Belum ada pengajuan pembayaran gadai saat ini." 
+                        minHeight="300px" 
+                    >
+                        <x-slot name="icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                        </x-slot>
+                    </x-admin.empty-state>
+                </div>
+            @endforelse
+        </div>
+
+        <!-- Desktop View (Table) -->
+        <div class="hidden md:block overflow-x-auto">
             <table class="w-full text-left">
                 <thead>
-                    <tr class="bg-gray-50/50 border-b border-gray-100">
+                    <tr class="bg-white/40 border-b border-white/60">
                         <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nasabah & Item</th>
                         <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Jenis & Nominal</th>
                         <th class="px-6 py-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Metode & Bukti</th>
@@ -34,7 +100,7 @@
                     <tr class="hover:bg-gray-50/30 transition-colors">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-2xl bg-linear-to-br from-[#674c1d] to-[#8b6f2f] flex items-center justify-center text-white font-bold shadow-sm">
+                                <div class="w-10 h-10 rounded-2xl bg-gradient-to-br from-majakara-brown to-majakara-gold flex items-center justify-center text-white font-bold shadow-sm">
                                     {{ substr($item->nasabah->user->nama ?? 'N', 0, 1) }}
                                 </div>
                                 <div>
@@ -45,7 +111,7 @@
                         </td>
                         <td class="px-6 py-4">
                             <div class="mb-1">
-                                <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase {{ $item->jenis_pengajuan == 'lunas' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700' }}">
+                                <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border {{ $item->jenis_pengajuan == 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
                                     {{ $item->jenis_pengajuan }}
                                 </span>
                             </div>
@@ -69,12 +135,12 @@
                                     <div class="flex flex-wrap gap-1 mt-0.5">
                                         @if($item->files->count() > 0)
                                             @foreach($item->files as $file)
-                                                <button onclick="showPhotoPreview('{{ asset('storage/'.$file->path_file) }}', 'Bukti Transfer {{ $item->nasabah->user->nama }}')" class="w-7 h-7 rounded-lg overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                                                <button onclick="showPhotoPreview('{{ asset('storage/'.$file->path_file) }}', 'Bukti Transfer {{ $item->nasabah->user->nama }}')" class="w-7 h-7 rounded-lg overflow-hidden border border-gray-200 hover:border-majakara-brown transition-all shadow-xs scale-95 hover:scale-105">
                                                     <img src="{{ asset('storage/'.$file->path_file) }}" class="w-full h-full object-cover">
                                                 </button>
                                             @endforeach
                                         @else
-                                            <button onclick="showPhotoPreview('{{ asset('storage/'.$item->bukti_transfer) }}', 'Bukti Transfer {{ $item->nasabah->user->nama }}')" class="w-7 h-7 rounded-lg overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                                            <button onclick="showPhotoPreview('{{ asset('storage/'.$item->bukti_transfer) }}', 'Bukti Transfer {{ $item->nasabah->user->nama }}')" class="w-7 h-7 rounded-lg overflow-hidden border border-gray-200 hover:border-majakara-brown transition-all shadow-xs scale-95 hover:scale-105">
                                                 <img src="{{ asset('storage/'.$item->bukti_transfer) }}" class="w-full h-full object-cover">
                                             </button>
                                         @endif
@@ -101,16 +167,15 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-32 text-center">
-                            <div class="flex flex-col items-center gap-4">
-                                <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center animate-pulse">
-                                    <svg class="w-12 h-12 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
-                                </div>
-                                <div class="flex flex-col items-center gap-1">
-                                    <h3 class="text-gray-400 font-bold tracking-tight">Antrean Kosong</h3>
-                                    <p class="text-gray-300 text-xs">Belum ada pengajuan pembayaran gadai saat ini.</p>
-                                </div>
-                            </div>
+                        <td colspan="4" class="p-0">
+                            <x-admin.empty-state 
+                                title="Antrean Kosong" 
+                                message="Belum ada pengajuan pembayaran gadai saat ini." 
+                            >
+                                <x-slot name="icon">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
+                                </x-slot>
+                            </x-admin.empty-state>
                         </td>
                     </tr>
                     @endforelse
@@ -122,11 +187,11 @@
 
 <!-- Modal Detail Pengajuan (Tailwind) -->
 <div id="details-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div class="bg-white/95 backdrop-blur-2xl border border-white/50 rounded-[2.5rem] shadow-2xl max-w-2xl w-full overflow-hidden animate-in fade-in zoom-in duration-300">
         <div class="p-8">
             <div class="flex items-center justify-between mb-6">
                 <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-amber-50 text-[#674c1d] rounded-2xl flex items-center justify-center shadow-inner">
+                    <div class="w-12 h-12 bg-amber-50 text-majakara-brown rounded-2xl flex items-center justify-center shadow-inner">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                     </div>
                     <div>
@@ -208,7 +273,7 @@
 
 <!-- Modal Approve (Tailwind) -->
 <div id="approve-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div class="bg-white/95 backdrop-blur-2xl border border-white/50 rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-300">
         <div class="p-8">
             <div class="flex items-center gap-5 mb-6">
                 <div class="w-14 h-14 bg-green-100 text-green-600 rounded-[1.25rem] flex items-center justify-center shadow-inner">
@@ -284,7 +349,7 @@
     </div>
 </div>
 <div id="reject-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300">
+    <div class="bg-white/95 backdrop-blur-2xl border border-white/50 rounded-[2.5rem] shadow-2xl max-w-md w-full overflow-hidden animate-in fade-in zoom-in duration-300">
         <div class="p-8">
             <div class="flex items-center gap-5 mb-8">
                 <div class="w-14 h-14 bg-red-100 text-red-600 rounded-[1.25rem] flex items-center justify-center shadow-inner">
@@ -377,7 +442,7 @@
             photoSection.classList.remove('hidden');
             data.photos.forEach((photoUrl) => {
                 grid.innerHTML += `
-                    <button type="button" onclick="showPhotoPreview('${photoUrl}', 'Lampiran Foto ${data.nasabahName}')" class="aspect-square rounded-xl overflow-hidden border border-gray-200 hover:border-[#674c1d] transition-all shadow-xs scale-95 hover:scale-105">
+                    <button type="button" onclick="showPhotoPreview('${photoUrl}', 'Lampiran Foto ${data.nasabahName}')" class="aspect-square rounded-xl overflow-hidden border border-gray-200 hover:border-majakara-brown transition-all shadow-xs scale-95 hover:scale-105">
                         <img src="${photoUrl}" class="w-full h-full object-cover">
                     </button>
                 `;

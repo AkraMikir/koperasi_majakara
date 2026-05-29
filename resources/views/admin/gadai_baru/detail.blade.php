@@ -20,7 +20,7 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <div class="px-4 py-2 bg-white rounded-xl border border-gray-200 shadow-sm flex items-center gap-2">
+            <div class="px-4 py-2 bg-white/80 backdrop-blur-md rounded-xl border border-white/60 shadow-sm flex items-center gap-2">
                 <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Status:</span>
                 @if($gadai->status == 'active')
                     <span class="px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-black rounded-lg">AKTIF</span>
@@ -35,7 +35,7 @@
                 @endif
             </div>
             <a href="{{ route('admin.gadai_baru.index') }}" 
-                class="flex items-center gap-2 px-4 py-2.5 bg-white text-gray-700 border border-gray-200 font-medium rounded-xl hover:bg-gray-50 transition-colors shadow-sm">
+                class="flex items-center gap-2 px-4 py-2.5 bg-white/80 backdrop-blur-md text-gray-700 border border-white/60 font-medium rounded-xl hover:bg-white transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
@@ -67,12 +67,12 @@
         
         {{-- KOLOM 1: Info Nasabah & Barang --}}
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                <div class="absolute top-0 left-0 w-1 h-full bg-blue-500"></div>
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-blue-400 to-blue-600"></div>
                 <div class="p-6">
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Informasi Nasabah</h3>
                     <div class="flex items-center gap-4 mb-5">
-                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-xl">
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold text-xl shadow-inner border border-blue-100/50">
                             {{ substr($gadai->nasabah->user->nama ?? 'N/A', 0, 2) }}
                         </div>
                         <div>
@@ -83,18 +83,18 @@
                             </p>
                         </div>
                     </div>
-                    <div class="p-4 bg-gray-50 rounded-xl">
+                    <div class="p-4 bg-gray-50/80 rounded-xl border border-gray-100/50">
                         <p class="text-xs text-gray-500 font-medium mb-1">Disimpan di Cabang:</p>
                         <p class="font-semibold text-gray-800 flex items-center gap-2">
-                            <svg class="w-4 h-4 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                            <svg class="w-4 h-4 text-majakara-brown" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                             {{ $gadai->lokasi->nama_lokasi }}
                         </p>
                     </div>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                <div class="absolute top-0 left-0 w-1 h-full bg-amber-500"></div>
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-amber-600"></div>
                 <div class="p-6">
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Data Barang Fisik</h3>
                     
@@ -102,20 +102,20 @@
                         <div class="flex items-start justify-between">
                             <div>
                                 <p class="text-xs text-gray-500 font-medium mb-1">Kategori Barang</p>
-                                <span class="inline-flex px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-bold">{{ $gadai->kategori->nama_kategori }}</span>
+                                <span class="inline-flex px-2 py-1 rounded bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200/50">{{ $gadai->kategori->nama_kategori }}</span>
                             </div>
                             <div class="text-right">
                                 <p class="text-xs text-gray-500 font-medium mb-1">Status Barang</p>
                                 @if($gadai->status == 'active')
-                                    <span class="inline-flex px-2 py-1 rounded bg-blue-100 text-blue-700 text-xs font-bold">Aktif Tersimpan</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100/50">Aktif Tersimpan</span>
                                 @elseif($gadai->status == 'grace_period')
-                                    <span class="inline-flex px-2 py-1 rounded bg-red-100 text-red-700 text-xs font-bold">Tenggang (Aman)</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg bg-red-50 text-red-700 text-xs font-bold border border-red-100/50">Tenggang (Aman)</span>
                                 @elseif($gadai->status == 'lunas')
-                                    <span class="inline-flex px-2 py-1 rounded bg-emerald-100 text-emerald-700 text-xs font-bold">Sudah Diambil</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-bold border border-emerald-100/50">Sudah Diambil</span>
                                 @elseif($gadai->status == 'auctioned')
-                                    <span class="inline-flex px-2 py-1 rounded bg-amber-100 text-amber-700 text-xs font-bold">Dilelang</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg bg-amber-50 text-amber-700 text-xs font-bold border border-amber-100/50">Dilelang</span>
                                 @elseif($gadai->status == 'expired_final')
-                                    <span class="inline-flex px-2 py-1 rounded bg-gray-100 text-gray-700 text-xs font-bold">Menunggu Lelang</span>
+                                    <span class="inline-flex px-2 py-1 rounded-lg bg-gray-100 text-gray-700 text-xs font-bold border border-gray-200/50">Menunggu Lelang</span>
                                 @endif
                             </div>
                         </div>
@@ -131,8 +131,9 @@
 
         {{-- KOLOM 2: Info Keuangan & Siklus --}}
         <div class="space-y-6">
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div class="p-6">
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                <div class="p-6 relative z-10">
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Rincian Keuangan</h3>
                     
                     <div class="space-y-3 mb-6">
@@ -188,29 +189,30 @@
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                <div class="absolute top-0 left-0 w-1 h-full bg-[#674c1d]"></div>
-                <div class="p-6">
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-majakara-brown to-majakara-gold"></div>
+                <div class="absolute top-0 right-0 w-24 h-24 bg-majakara-gold/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+                <div class="p-6 relative z-10">
                     <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Siklus & Waktu</h3>
                     
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 font-medium">Tanggal Mulai</span>
-                            <span class="font-semibold text-gray-800">{{ $gadai->tgl_mulai->format('d M Y') }}</span>
+                            <span class="font-semibold text-gray-800 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100/50">{{ $gadai->tgl_mulai->format('d M Y') }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 font-medium">Jatuh Tempo</span>
-                            <span class="font-bold text-blue-600">{{ $gadai->tgl_jatuh_tempo->format('d M Y') }}</span>
+                            <span class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100/50">{{ $gadai->tgl_jatuh_tempo->format('d M Y') }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 font-medium">Batas Akhir Tenggang</span>
-                            <span class="font-bold text-red-600">{{ $gadai->tgl_tenggang->format('d M Y') }}</span>
+                            <span class="font-bold text-red-600 bg-red-50 px-2 py-1 rounded-lg border border-red-100/50">{{ $gadai->tgl_tenggang->format('d M Y') }}</span>
                         </div>
-                        <div class="pt-3 border-t border-gray-100">
-                            <p class="text-xs text-gray-500 mb-2">Riwayat Perpanjangan (Maks {{ $gadai->kategori->max_extend_default }}x)</p>
-                            <div class="w-full bg-gray-100 rounded-full h-2.5 mb-1 relative overflow-hidden">
+                        <div class="pt-4 border-t border-gray-100/60">
+                            <p class="text-xs text-gray-500 mb-2 flex justify-between"><span>Riwayat Perpanjangan</span> <span>Maks {{ $gadai->kategori->max_extend_default }}x</span></p>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 mb-1.5 relative overflow-hidden shadow-inner">
                                 @php $pct = ($gadai->jumlah_perpanjangan / $gadai->kategori->max_extend_default) * 100; @endphp
-                                <div class="bg-[#674c1d] h-2.5 rounded-full" style="width: {{ $pct }}%"></div>
+                                <div class="bg-gradient-to-r from-majakara-brown to-majakara-gold h-2.5 rounded-full" style="width: {{ $pct }}%"></div>
                             </div>
                             <p class="text-xs font-bold text-right text-gray-700">{{ $gadai->jumlah_perpanjangan }} / {{ $gadai->kategori->max_extend_default }} Kali</p>
                         </div>
@@ -222,22 +224,24 @@
         {{-- KOLOM 3: Aksi & Media --}}
         <div class="space-y-6">
             {{-- Foto Media --}}
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="p-6 relative z-10">
                 <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Media Fisik Barang</h3>
                 <div class="grid grid-cols-2 gap-3">
                     @forelse($gadai->files as $file)
-                        <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-xl overflow-hidden border border-gray-100 bg-gray-50">
+                        <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-[1.25rem] overflow-hidden border-2 border-white shadow-sm bg-gray-50">
                             <img src="{{ asset('storage/' . $file->path_file) }}" alt="Foto" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
                             <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             </div>
                         </a>
                     @empty
-                        <div class="col-span-2 py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-100 rounded-xl bg-gray-50">
+                        <div class="col-span-2 py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-200/60 rounded-[1.25rem] bg-gray-50/50">
                             <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             <span class="text-xs font-medium text-gray-400">Belum ada foto.</span>
                         </div>
                     @endforelse
+                </div>
                 </div>
             </div>
 
@@ -249,10 +253,12 @@
 
 
     {{-- ===== RIWAYAT LOG ===== --}}
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mt-6">
-        <div class="px-6 py-4 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
+    <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative mt-6">
+        <div class="px-6 py-5 border-b border-gray-100/60 bg-gradient-to-r from-gray-50/80 to-white/50 flex items-center justify-between">
             <h3 class="font-bold text-gray-800 flex items-center gap-2">
-                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                <div class="w-8 h-8 rounded-lg bg-majakara-gold/10 text-majakara-brown flex items-center justify-center border border-majakara-gold/20">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
                 Log Transaksi & Riwayat Sistem
             </h3>
         </div>

@@ -30,74 +30,50 @@
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Total Nasabah -->
-        <div class="bg-white rounded-[1.5rem] p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-majakara-gold/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:bg-majakara-gold/10 transition-colors"></div>
-            <div class="flex justify-between items-start mb-4 relative z-10">
-                <div>
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Anggota</p>
-                    <h3 class="text-2xl font-black text-gray-900 font-display">{{ number_format($stats['total_nasabah'] ?? 0, 0, ',', '.') }}</h3>
-                </div>
-                <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400 group-hover:border-majakara-brown/20 group-hover:text-majakara-brown transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 relative z-10">
-                <span class="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-md border border-green-100">+12%</span>
-                <span class="text-[10px] text-gray-400 font-medium">Aktif bulan ini</span>
-            </div>
-        </div>
+        <x-admin.stats-card 
+            title="Total Anggota" 
+            value="{{ number_format($stats['total_nasabah'] ?? 0, 0, ',', '.') }}" 
+            badgeText="+12%" 
+            subtext="Aktif bulan ini"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+        </x-admin.stats-card>
 
         <!-- Total Aset -->
-        <div class="bg-white rounded-[1.5rem] p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-majakara-gold/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:bg-majakara-gold/10 transition-colors"></div>
-            <div class="flex justify-between items-start mb-4 relative z-10">
-                <div class="w-full pr-4">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Total Aset Masuk</p>
-                    <h3 class="text-xl font-black text-gray-900 font-display truncate" title="Rp {{ number_format($totalAset, 0, ',', '.') }}">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($totalAset) }}</h3>
-                </div>
-                <div class="w-10 h-10 shrink-0 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400 group-hover:border-blue-500/20 group-hover:text-blue-600 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 relative z-10">
-                <span class="text-[10px] text-gray-400 font-medium truncate">Total Tabungan & Deposito</span>
-            </div>
-        </div>
+        <x-admin.stats-card 
+            title="Total Aset Masuk" 
+            value="Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($totalAset) }}" 
+            fullValue="Rp {{ number_format($totalAset, 0, ',', '.') }}"
+            subtext="Total Tabungan & Deposito"
+            iconHoverBorder="group-hover:border-blue-500/20"
+            iconHoverColor="group-hover:text-blue-600"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </x-admin.stats-card>
 
         <!-- Total Penyaluran -->
-        <div class="bg-white rounded-[1.5rem] p-5 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all">
-            <div class="absolute top-0 right-0 w-24 h-24 bg-majakara-gold/5 rounded-full blur-xl -translate-y-1/2 translate-x-1/2 group-hover:bg-majakara-gold/10 transition-colors"></div>
-            <div class="flex justify-between items-start mb-4 relative z-10">
-                <div class="w-full pr-4">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest mb-1">Dana Disalurkan</p>
-                    <h3 class="text-xl font-black text-gray-900 font-display truncate" title="Rp {{ number_format($totalPenyaluran, 0, ',', '.') }}">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($totalPenyaluran) }}</h3>
-                </div>
-                <div class="w-10 h-10 shrink-0 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100 text-gray-400 group-hover:border-yellow-500/20 group-hover:text-yellow-600 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 relative z-10">
-                <span class="text-[10px] text-gray-400 font-medium truncate">Total Pinjaman & Gadai Aktif</span>
-            </div>
-        </div>
+        <x-admin.stats-card 
+            title="Dana Disalurkan" 
+            value="Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($totalPenyaluran) }}" 
+            fullValue="Rp {{ number_format($totalPenyaluran, 0, ',', '.') }}"
+            subtext="Total Pinjaman & Gadai Aktif"
+            iconHoverBorder="group-hover:border-yellow-500/20"
+            iconHoverColor="group-hover:text-yellow-600"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+        </x-admin.stats-card>
 
         <!-- Pendapatan Bulan Ini -->
-        <div class="bg-gradient-to-br from-majakara-brown to-majakara-dark-gold rounded-[1.5rem] p-5 shadow-md border border-majakara-gold/20 relative overflow-hidden group hover:shadow-lg transition-all text-white">
-            <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
-            <div class="absolute bottom-0 left-0 w-24 h-24 bg-majakara-gold/40 rounded-full blur-xl translate-y-1/2 -translate-x-1/2"></div>
-            <div class="flex justify-between items-start mb-4 relative z-10">
-                <div class="w-full pr-4">
-                    <p class="text-[10px] text-white/80 font-bold uppercase tracking-widest mb-1">Pendapatan Bunga</p>
-                    <h3 class="text-xl font-black font-display truncate" title="Rp {{ number_format($stats['pendapatan_bulan'] ?? 0, 0, ',', '.') }}">Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['pendapatan_bulan'] ?? 0) }}</h3>
-                </div>
-                <div class="w-10 h-10 shrink-0 rounded-xl bg-white/10 flex items-center justify-center border border-white/20 backdrop-blur-sm shadow-inner group-hover:scale-110 transition-transform">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                </div>
-            </div>
-            <div class="flex items-center gap-2 relative z-10">
-                <span class="text-[10px] font-bold text-white bg-white/20 px-2 py-0.5 rounded-md backdrop-blur-sm border border-white/10">Bulan Ini</span>
-            </div>
-        </div>
+        <x-admin.stats-card 
+            title="Pendapatan Bunga" 
+            value="Rp {{ \App\Helpers\CurrencyHelper::formatBerbilang($stats['pendapatan_bulan'] ?? 0) }}" 
+            fullValue="Rp {{ number_format($stats['pendapatan_bulan'] ?? 0, 0, ',', '.') }}"
+            badgeText="Bulan Ini"
+            badgeClass="text-white bg-white/20 border border-white/10"
+            gradient="true"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+        </x-admin.stats-card>
     </div>
 
     <!-- Chart & Aktivitas -->
@@ -153,9 +129,16 @@
                     </div>
                 </div>
                 @empty
-                <div class="flex flex-col items-center justify-center h-full text-center opacity-50 py-8">
-                    <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                    <p class="text-xs text-gray-500 font-medium">Belum ada aktivitas</p>
+                <div class="opacity-50">
+                    <x-admin.empty-state 
+                        title="Belum ada aktivitas" 
+                        message="Log aktivitas sistem akan muncul di sini."
+                        minHeight="py-8"
+                    >
+                        <x-slot name="icon">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </x-slot>
+                    </x-admin.empty-state>
                 </div>
                 @endforelse
             </div>
@@ -177,8 +160,9 @@
             <span class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-[10px] font-black border border-red-200">{{ $stats['pengajuan_pending'] ?? 0 }} Antrean</span>
         </div>
         
-        <div class="overflow-x-auto">
-            <table class="w-full">
+        <div class="overflow-hidden md:overflow-x-auto">
+            <!-- Table View for Desktop -->
+            <table class="w-full hidden md:table">
                 <thead>
                     <tr class="bg-gray-50/80 border-b border-gray-100">
                         <th class="px-6 py-4 text-left text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">Nasabah</th>
@@ -232,17 +216,71 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="5" class="px-6 py-12 text-center">
-                            <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-50 mb-3 border border-gray-100">
-                                <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7"></path></svg>
-                            </div>
-                            <h3 class="text-sm font-bold text-gray-900 font-display">Semua Beres!</h3>
-                            <p class="text-xs text-gray-400 mt-1 font-medium">Tidak ada pengajuan yang perlu persetujuan saat ini.</p>
+                        <td colspan="5" class="p-0">
+                            <x-admin.empty-state 
+                                title="Semua Beres!" 
+                                message="Tidak ada pengajuan yang perlu persetujuan saat ini."
+                                minHeight="py-12"
+                            />
                         </td>
                     </tr>
                     @endforelse
                 </tbody>
             </table>
+
+            <!-- Card List View for Mobile -->
+            <div class="md:hidden flex flex-col divide-y divide-gray-50">
+                @forelse(($pengajuan_pending ?? []) as $pengajuan)
+                <div class="p-4 flex flex-col gap-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-majakara-gold/10 text-majakara-brown flex items-center justify-center font-bold text-sm uppercase shadow-sm shrink-0">
+                                {{ substr($pengajuan['nama'] ?? 'N', 0, 1) }}
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block leading-tight">{{ $pengajuan['nama'] ?? 'N/A' }}</span>
+                                <span class="text-[10px] text-gray-500 font-medium">{{ $pengajuan['tanggal'] ?? 'N/A' }}</span>
+                            </div>
+                        </div>
+                        <span class="px-2.5 py-1 bg-gray-100 text-gray-600 rounded-md text-[10px] font-black uppercase tracking-wider border border-gray-200 shrink-0">
+                            {{ $pengajuan['label'] ?? $pengajuan['type'] }}
+                        </span>
+                    </div>
+                    
+                    <div class="flex items-end justify-between mt-1">
+                        <div>
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Nominal</span>
+                            <span class="text-sm font-black font-display text-gray-800">Rp {{ number_format($pengajuan['nominal'] ?? 0, 0, ',', '.') }}</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <form action="{{ $pengajuan['route_approve'] ?? '#' }}" method="POST" class="inline">
+                                @csrf
+                                <button type="button" onclick="confirmApprove(this)" class="p-2 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white rounded-lg transition-colors border border-green-100 shadow-sm" title="Setujui">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                                </button>
+                            </form>
+                            <form action="{{ $pengajuan['route_reject'] ?? '#' }}" method="POST" class="inline">
+                                @csrf
+                                <button type="button" onclick="confirmReject(this)" class="p-2 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white rounded-lg transition-colors border border-red-100 shadow-sm" title="Tolak">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path></svg>
+                                </button>
+                            </form>
+                            <a href="{{ $pengajuan['route_index'] ?? '#' }}" class="p-2 bg-gray-50 text-gray-500 hover:bg-gray-200 rounded-lg transition-colors border border-gray-200 shadow-sm" title="Detail">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                @empty
+                <div class="p-0">
+                    <x-admin.empty-state 
+                        title="Semua Beres!" 
+                        message="Tidak ada pengajuan yang perlu persetujuan saat ini."
+                        minHeight="py-12"
+                    />
+                </div>
+                @endforelse
+            </div>
         </div>
     </div>
 </div>
@@ -250,7 +288,6 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const likuiditasCtx = document.getElementById('likuiditasChart');
@@ -387,8 +424,6 @@
             text: "Pastikan data nasabah sudah valid.",
             icon: 'question',
             showCancelButton: true,
-            confirmButtonColor: '#10b981',
-            cancelButtonColor: '#d1d5db',
             confirmButtonText: 'Ya, Setujui',
             cancelButtonText: 'Batal'
         }).then((result) => {
@@ -404,8 +439,6 @@
             text: "Pengajuan ini akan dibatalkan.",
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ef4444',
-            cancelButtonColor: '#d1d5db',
             confirmButtonText: 'Ya, Tolak',
             cancelButtonText: 'Kembali'
         }).then((result) => {

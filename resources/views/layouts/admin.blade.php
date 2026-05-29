@@ -12,33 +12,12 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
     <style>
-        :root {
-            --primary: #674c1d;
-            --primary-light: #8b6f2f;
-            --primary-dark: #4a3514;
-            --accent: #d4af37;
-            --bg-light: #faf9f6;
-        }
-        
         body {
             font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
         }
         
         .font-display {
             font-family: 'Playfair Display', serif;
-        }
-        
-        .gradient-primary {
-            background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
-        }
-        
-        .text-primary {
-            color: #674c1d;
-        }
-        
-        .bg-primary {
-            background-color: #674c1d;
         }
     </style>
     
@@ -67,8 +46,22 @@
     @stack('scripts')
     
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script>
+        // Custom Majakara Styling for SweetAlert2
+        const swalMajakara = Swal.mixin({
+            customClass: {
+                popup: 'rounded-2xl border border-gray-100 shadow-xl',
+                title: 'text-gray-900 font-display font-bold',
+                htmlContainer: 'text-gray-600',
+                confirmButton: 'bg-majakara-brown hover:bg-majakara-dark-gold text-white font-bold py-2.5 px-6 rounded-lg transition-colors shadow-sm',
+                cancelButton: 'bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-2.5 px-6 rounded-lg transition-colors border border-gray-200 shadow-sm'
+            },
+            buttonsStyling: false
+        });
+        // Make it default
+        window.Swal = swalMajakara;
         // ─── UPDATE JAM ─────────────────────────────────────────────────────────────
         // Guard: if (!window.__clockInterval) pastikan setInterval hanya spawn SEKALI.
         // Tanpa guard ini, setiap Turbo page swap spawn interval baru.
