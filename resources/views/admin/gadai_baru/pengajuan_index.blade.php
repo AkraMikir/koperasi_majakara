@@ -208,8 +208,8 @@
 
 <!-- Modal Approve (Tailwind) -->
 <div id="approve-modal" class="fixed inset-0 bg-black/60 backdrop-blur-md z-[110] hidden items-center justify-center p-4">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-300">
-        <div class="p-8">
+    <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div class="p-8 overflow-y-auto flex-1">
             <div class="flex items-center gap-5 mb-6">
                 <div class="w-14 h-14 bg-green-100 text-green-600 rounded-[1.25rem] flex items-center justify-center shadow-inner">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
