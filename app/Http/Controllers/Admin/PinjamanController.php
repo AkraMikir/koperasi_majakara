@@ -126,6 +126,10 @@ class PinjamanController extends Controller
         $pengajuan = PengajuanPinjaman::with(['nasabah.user', 'nasabah.dataKtp', 'nasabah.dataRek', 'nasabah.pekerjaan', 'pinjaman'])
             ->findOrFail($id);
 
+        if ($pengajuan->nasabah) {
+            $pengajuan->nasabah->saldo = app(\App\Services\BankAccessService::class)->getSaldoTabungan($pengajuan->id_anggota);
+        }
+
         // Get bunga dari master data berdasarkan durasi
         $masterBunga = MasterBungaPinjaman::getBungaByDurasi($pengajuan->durasi);
         $masterDenda = MasterDendaPinjaman::getDendaAktif();

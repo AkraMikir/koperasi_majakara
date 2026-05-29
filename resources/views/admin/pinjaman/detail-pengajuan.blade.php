@@ -315,7 +315,7 @@
                 <!-- Cairkan Modal -->
                 <div id="cairkanModal"
                     class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 mt-16">
-                    <div class="bg-white rounded-2xl p-6 max-w-lg w-full shadow-2xl border border-gray-100">
+                    <div class="bg-white rounded-2xl p-6 max-w-lg w-full max-h-[80vh] overflow-y-auto shadow-2xl border border-gray-100">
                         <div class="flex items-center justify-between mb-4 pb-4 border-b">
                             <h3 class="text-xl font-bold text-gray-900 font-display">Cairkan Pinjaman</h3>
                             <button onclick="hideCairkanModal()" class="text-gray-400 hover:text-gray-600">
