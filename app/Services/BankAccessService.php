@@ -195,9 +195,11 @@ class BankAccessService
         int $nasabahId,
         string $bankNasabah,
         string $keteranganRef,
-        int $adminId
+        int $adminId,
+        ?string $bankPengirim = null
     ): array {
-        $biaya = $this->getBiayaTransfer(self::BANK_KOPERASI, $bankNasabah);
+        $pengirim = $bankPengirim ?: self::BANK_KOPERASI;
+        $biaya = $this->getBiayaTransfer($pengirim, $bankNasabah);
 
         if ($biaya <= 0) {
             return ['success' => true, 'message' => 'Tidak ada biaya transfer.', 'biaya' => 0.0];
@@ -237,6 +239,7 @@ class BankAccessService
 
             Log::info('BankAccessService: Biaya transfer dipotong', [
                 'nasabah_id'   => $nasabahId,
+                'bank_pengirim'=> $pengirim,
                 'bank_nasabah' => $bankNasabah,
                 'biaya'        => $biaya,
                 'ref'          => $keteranganRef,

@@ -364,11 +364,42 @@
 
                                 <!-- Method Label & Hidden Input -->
                                 <div
-                                    class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between">
+                                    class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between mb-4">
                                     <span class="text-sm text-gray-600">Metode:</span>
                                     <span class="text-sm font-bold text-gray-900">Petty Cash (Transfer)</span>
                                 </div>
                                 <input type="hidden" name="metode_pencairan" value="petty_tf">
+
+                                <!-- Dropdown Bank Pengirim (Untuk Transfer) -->
+                                @if(($pengajuan->jenis_pencairan ?? 'transfer') === 'transfer')
+                                    <div class="mb-4">
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Bank Koperasi (Pengirim) *</label>
+                                        <select name="bank_pengirim" id="bank_pengirim" required onchange="calculateBiaya()"
+                                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none bg-white">
+                                            <option value="">-- Pilih Bank --</option>
+                                            <option value="BCA" selected>BCA (Bank Utama)</option>
+                                            <option value="BNI">BNI</option>
+                                            <option value="Mandiri">Mandiri</option>
+                                            <option value="BRI">BRI</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <!-- Container Biaya Admin -->
+                                    <div id="biaya-section" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-lg mb-4">
+                                        <div class="flex items-center justify-between mb-2">
+                                            <p class="text-sm font-semibold">Biaya Transfer (dipotong dari tabungan):</p>
+                                            <p class="font-bold text-amber-700" id="biaya-display">Rp 0</p>
+                                        </div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <p class="text-sm font-semibold">Nominal Pinjaman Dicairkan:</p>
+                                            <p class="font-bold" id="total-dipotong-display">Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</p>
+                                        </div>
+                                        <p class="text-xs text-amber-700 mt-2">Biaya admin transfer antarbank ditanggung nasabah (dipotong dari saldo tabungan).</p>
+                                        <div id="warningTabungan" class="hidden mt-2 p-2 bg-red-100 rounded text-xs text-red-700 font-bold">
+                                            Saldo tabungan nasabah tidak cukup untuk membayar biaya transfer!
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
 
                             <div class="mb-4">
@@ -413,6 +444,10 @@
     <script>
         const nominalPengajuan = {{ $pengajuan->nominal }};
         const saldoTransfer = {{ $adminSaldo->transfer }};
+        
+        const bankNasabah = "{{ $pengajuan->nasabah->dataRek->nama_bank ?? '' }}";
+        const saldoTabunganNasabah = {{ $pengajuan->nasabah->saldo ?? 0 }};
+        const biayaTransferData = @json($biayaTransfer ?? []);
 
         function showRejectModal() {
             document.getElementById('rejectModal').classList.remove('hidden');
@@ -424,25 +459,69 @@
 
         function showCairkanModal() {
             document.getElementById('cairkanModal').classList.remove('hidden');
-            updateButtonState();
+            calculateBiaya();
         }
 
         function hideCairkanModal() {
             document.getElementById('cairkanModal').classList.add('hidden');
         }
 
-        function updateButtonState() {
+        function calculateBiaya() {
+            const dropdown = document.getElementById('bank_pengirim');
+            if (!dropdown) {
+                updateButtonState(0);
+                return;
+            }
+            const bankPengirim = dropdown.value;
+            const biayaSection = document.getElementById('biaya-section');
+            const biayaDisplay = document.getElementById('biaya-display');
+            
+            if (!bankPengirim || bankNasabah === '') {
+                if (biayaSection) biayaSection.classList.add('hidden');
+                updateButtonState(0);
+                return;
+            }
+            
+            let biayaAdmin = 0;
+            const mapping = biayaTransferData.find(b => b.bank_pengirim === bankPengirim && b.bank_penerima === bankNasabah);
+            
+            if (mapping) {
+                biayaAdmin = parseFloat(mapping.biaya_admin);
+            } else if (bankPengirim !== bankNasabah) {
+                biayaAdmin = 6500; // default antarbank
+            }
+            
+            if (biayaAdmin > 0 && biayaSection) {
+                biayaSection.classList.remove('hidden');
+                biayaDisplay.innerText = 'Rp ' + biayaAdmin.toLocaleString('id-ID');
+            } else if (biayaSection) {
+                biayaSection.classList.add('hidden');
+            }
+            
+            updateButtonState(biayaAdmin);
+        }
+
+        function updateButtonState(biayaAdmin = 0) {
             const warning = document.getElementById('warningBalance');
+            const warningTabungan = document.getElementById('warningTabungan');
             const btn = document.getElementById('btnSubmitCairkan');
 
-            const isInsufficient = (saldoTransfer < nominalPengajuan);
+            const isInsufficientAdmin = (saldoTransfer < nominalPengajuan);
+            const isInsufficientTabungan = (saldoTabunganNasabah < biayaAdmin);
 
-            if (isInsufficient) {
-                warning.classList.remove('hidden');
+            if (isInsufficientAdmin) {
+                if (warning) warning.classList.remove('hidden');
+                if (warningTabungan) warningTabungan.classList.add('hidden');
                 btn.disabled = true;
-                btn.innerHTML = 'Saldo Tidak Cukup';
+                btn.innerHTML = 'Saldo Admin Kurang';
+            } else if (isInsufficientTabungan) {
+                if (warning) warning.classList.add('hidden');
+                if (warningTabungan) warningTabungan.classList.remove('hidden');
+                btn.disabled = true;
+                btn.innerHTML = 'Saldo Nasabah Kurang';
             } else {
-                warning.classList.add('hidden');
+                if (warning) warning.classList.add('hidden');
+                if (warningTabungan) warningTabungan.classList.add('hidden');
                 btn.disabled = false;
                 btn.innerHTML = '✓ Cairkan';
             }

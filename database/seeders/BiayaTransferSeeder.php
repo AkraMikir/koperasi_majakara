@@ -2,43 +2,63 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\BiayaTransfer;
 use Illuminate\Database\Seeder;
 
 class BiayaTransferSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
-    public function run(): void
+    public function run()
     {
         $data = [
-            // BCA to others
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'BCA', 'biaya_admin' => 0, 'keterangan' => 'Sesama BCA gratis', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'BNI', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke BNI', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'Mandiri', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke Mandiri', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'BRI', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke BRI', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'CIMB Niaga', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke CIMB Niaga', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'Permata', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke Permata', 'is_active' => true],
-            ['bank_pengirim' => 'BCA', 'bank_penerima' => 'Bank Lainnya', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BCA ke bank lain', 'is_active' => true],
+            // BCA → BCA (tidak ada biaya)
+            [
+                'bank_pengirim' => 'BCA',
+                'bank_penerima' => 'BCA',
+                'biaya_admin' => 0,
+                'min_saldo_non_bca' => 0,
+                'keterangan' => 'Transfer dalam bank yang sama',
+                'is_active' => 1,
+            ],
             
-            // BNI to others
-            ['bank_pengirim' => 'BNI', 'bank_penerima' => 'BNI', 'biaya_admin' => 0, 'keterangan' => 'Sesama BNI gratis', 'is_active' => true],
-            ['bank_pengirim' => 'BNI', 'bank_penerima' => 'BCA', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BNI ke BCA', 'is_active' => true],
-            ['bank_pengirim' => 'BNI', 'bank_penerima' => 'Mandiri', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BNI ke Mandiri', 'is_active' => true],
-            ['bank_pengirim' => 'BNI', 'bank_penerima' => 'BRI', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BNI ke BRI', 'is_active' => true],
-            ['bank_pengirim' => 'BNI', 'bank_penerima' => 'Bank Lainnya', 'biaya_admin' => 6500, 'keterangan' => 'Transfer BNI ke bank lain', 'is_active' => true],
+            // BCA → Mandiri
+            [
+                'bank_pengirim' => 'BCA',
+                'bank_penerima' => 'Mandiri',
+                'biaya_admin' => 5000,
+                'min_saldo_non_bca' => 20000,
+                'keterangan' => 'Transfer ke Mandiri',
+                'is_active' => 1,
+            ],
             
-            // Mandiri to others
-            ['bank_pengirim' => 'Mandiri', 'bank_penerima' => 'Mandiri', 'biaya_admin' => 0, 'keterangan' => 'Sesama Mandiri gratis', 'is_active' => true],
-            ['bank_pengirim' => 'Mandiri', 'bank_penerima' => 'BCA', 'biaya_admin' => 6500, 'keterangan' => 'Transfer Mandiri ke BCA', 'is_active' => true],
-            ['bank_pengirim' => 'Mandiri', 'bank_penerima' => 'BNI', 'biaya_admin' => 6500, 'keterangan' => 'Transfer Mandiri ke BNI', 'is_active' => true],
-            ['bank_pengirim' => 'Mandiri', 'bank_penerima' => 'BRI', 'biaya_admin' => 6500, 'keterangan' => 'Transfer Mandiri ke BRI', 'is_active' => true],
-            ['bank_pengirim' => 'Mandiri', 'bank_penerima' => 'Bank Lainnya', 'biaya_admin' => 6500, 'keterangan' => 'Transfer Mandiri ke bank lain', 'is_active' => true],
+            // BCA → BNI
+            [
+                'bank_pengirim' => 'BCA',
+                'bank_penerima' => 'BNI',
+                'biaya_admin' => 4000,
+                'min_saldo_non_bca' => 20000,
+                'keterangan' => 'Transfer ke BNI',
+                'is_active' => 1,
+            ],
+            
+            // BCA → BRI
+            [
+                'bank_pengirim' => 'BCA',
+                'bank_penerima' => 'BRI',
+                'biaya_admin' => 4000,
+                'min_saldo_non_bca' => 20000,
+                'keterangan' => 'Transfer ke BRI',
+                'is_active' => 1,
+            ],
         ];
 
         foreach ($data as $item) {
-            \App\Models\BiayaTransfer::create($item);
+            BiayaTransfer::firstOrCreate(
+                [
+                    'bank_pengirim' => $item['bank_pengirim'], 
+                    'bank_penerima' => $item['bank_penerima']
+                ],
+                $item
+            );
         }
     }
 }

@@ -138,7 +138,10 @@ class PinjamanController extends Controller
             'transfer' => $adminSaldoTransfer
         ];
 
-        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan', 'masterBunga', 'masterDenda', 'adminSaldo'));
+        // Biaya transfer mapping
+        $biayaTransfer = \App\Models\BiayaTransfer::where('is_active', true)->get();
+
+        return view('admin.pinjaman.detail-pengajuan', compact('pengajuan', 'masterBunga', 'masterDenda', 'adminSaldo', 'biayaTransfer'));
     }
 
     /**
@@ -396,22 +399,36 @@ class PinjamanController extends Controller
             ]);
 
             // 🔥 INTEGRASI BIAYA TRANSFER ANTARBANK
+            $biayaTransfer = 0;
+            $bankPengirim = null;
+
             if ($metode !== 'petty_cash') {
                 $bankService = app(\App\Services\BankAccessService::class);
                 $namaBank = $bankService->getNamaBank($pengajuan->id_anggota);
+                $bankPengirim = $request->input('bank_pengirim', 'BCA');
                 
                 if ($namaBank && !$bankService->isBcaUser($pengajuan->id_anggota)) {
                     $potong = $bankService->potongBiayaTransfer(
                         $pengajuan->id_anggota,
                         $namaBank,
                         'Pencairan Pinjaman #' . $pinjaman->id,
-                        Auth::id()
+                        Auth::id(),
+                        $bankPengirim
                     );
                     
                     if (!$potong['success']) {
                         throw new \Exception($potong['message']);
                     }
+                    $biayaTransfer = $potong['biaya'] ?? 0;
                 }
+            }
+
+            // Simpan info bank pengirim dan biaya transfer ke tabel pinjaman_h
+            if ($bankPengirim || $biayaTransfer > 0) {
+                $pinjaman->update([
+                    'bank_pengirim' => $bankPengirim,
+                    'biaya_transfer' => $biayaTransfer,
+                ]);
             }
 
             DB::commit();

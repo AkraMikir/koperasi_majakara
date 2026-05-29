@@ -29,6 +29,9 @@ class PinjamanH extends Model
         'ags_bulan',
         'tgl_pinjam',
         'lunas',
+        'foto_bukti_tf_admin',
+        'bank_pengirim',
+        'biaya_transfer',
     ];
 
     protected $casts = [
@@ -39,6 +42,7 @@ class PinjamanH extends Model
         'tgl_pinjam' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+        'biaya_transfer' => 'decimal:2',
     ];
 
     public function nasabah(): BelongsTo
