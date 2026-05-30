@@ -209,7 +209,7 @@
                             <span class="text-sm text-gray-500 font-medium">Tanggal Mulai</span>
                             <span class="font-semibold text-gray-800 bg-gray-50 px-2 py-1 rounded-lg border border-gray-100/50">{{ $gadai->tgl_mulai->format('d M Y') }}</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-500 font-medium">Jatuh Tempo</span>
                             <span class="font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg border border-blue-100/50">{{ $gadai->tgl_jatuh_tempo->format('d M Y') }}</span>
                         </div>

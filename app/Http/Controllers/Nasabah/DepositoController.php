@@ -26,7 +26,15 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat riwayat deposito
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
 
         // Ambil semua paket deposito aktif
         $pakets = PaketDeposito::with('kategori')

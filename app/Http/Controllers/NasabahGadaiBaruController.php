@@ -24,7 +24,15 @@ class NasabahGadaiBaruController extends Controller
 
         $nasabah = Auth::user()->nasabah;
         
-        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat daftar gadainya
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
 
         if ($nasabah) {
             $nasabahId = $nasabah->id;
