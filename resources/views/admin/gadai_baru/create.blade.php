@@ -57,13 +57,14 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nasabah Pemohon <span
                                         class="text-red-500">*</span></label>
-                                <select name="nasabah_id"
+                                <select name="nasabah_id" id="nasabah_id"
                                     class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Nasabah...</option>
                                     @foreach($nasabahs as $n)
-                                        <option value="{{ $n->id }}">{{ $n->user->nama ?? 'Tanpa Nama' }}
-                                            ({{ $n->user->nomor_hp ?? 'Tanpa HP' }})</option>
+                                        <option value="{{ $n->id }}" data-bank="{{ $n->dataRek?->nama_bank ?? '' }}" data-saldo="{{ $n->saldo_tabungan ?? 0 }}">
+                                            {{ $n->user->nama ?? 'Tanpa Nama' }} ({{ $n->user->nomor_hp ?? 'Tanpa HP' }})
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -151,7 +152,7 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Metode Pencairan <span
                                         class="text-red-500">*</span></label>
-                                <select name="metode_pencairan"
+                                <select name="metode_pencairan" id="metode_pencairan"
                                     class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
                                     required>
                                     <option value="cash">Tunai (Cash)</option>
@@ -221,6 +222,57 @@
 
                             <p class="text-xs text-gray-500 mt-2">Format yang didukung: JPG, JPEG, PNG. Maksimal 2MB per
                                 file. Harap fotokan barang dari berbagai sisi beserta dokumen kelengkapannya.</p>
+                        </div>
+                    </div>
+
+                    <!-- Verification & Petty Cash Summary (Dynamic) -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-lg font-bold text-gray-800">Verifikasi & Petty Cash</h3>
+                        </div>
+
+                        <!-- Petty Cash Card -->
+                        <div class="p-4 rounded-xl border-2 border-[#674c1d] bg-[#674c1d]/5 transition-all">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1" id="petty-cash-label">
+                                        Saldo Petty Cash (Cash) Anda</p>
+                                    <p class="text-xl font-black text-[#674c1d]" id="petty-cash-value">Rp 0</p>
+                                </div>
+                                <div class="text-right">
+                                    <div id="badge-petty-cash" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                        <!-- Dynamic badge content via JS -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Petty Cash -->
+                        <div id="warningPetty" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl">
+                            <p class="text-xs text-red-600 font-semibold flex items-center">
+                                <svg class="w-4 h-4 mr-1 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                </svg>
+                                Saldo Petty Cash Anda tidak mencukupi untuk pencairan nominal deal ini!
+                            </p>
+                        </div>
+
+                        <!-- Transfer Fee Info (Antarbank) -->
+                        <div id="biaya-section" class="hidden p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <div class="flex items-center justify-between mb-2">
+                                <p class="text-xs font-bold text-gray-500 uppercase">Biaya Transfer (dipotong dari tabungan):</p>
+                                <p class="font-bold text-amber-700 text-sm" id="biaya-display">Rp 0</p>
+                            </div>
+                            <p class="text-[10px] text-amber-700">Biaya admin transfer antarbank ditanggung nasabah (dipotong dari saldo tabungan nasabah).</p>
+                            <div id="warningTabungan" class="hidden mt-2 p-2 bg-red-100 rounded text-xs text-red-700 font-bold">
+                                Saldo tabungan nasabah tidak cukup untuk membayar biaya transfer!
+                            </div>
                         </div>
                     </div>
 
@@ -371,6 +423,118 @@
                     row.remove();
                 });
             });
+
+            // Balance and Transfer Fee checking logic
+            const adminSaldoCash = {{ $adminSaldoCash ?? 0 }};
+            const adminSaldoTransfer = {{ $adminSaldoTransfer ?? 0 }};
+            const biayaTransferData = @json($biayaTransfer ?? []);
+
+            const selectNasabah = document.getElementById('nasabah_id');
+            const selectMetode = document.getElementById('metode_pencairan');
+            
+            function validateBalances() {
+                const metode = selectMetode.value;
+                const dealNominal = parseFloat(nominalInput.value) || 0;
+                
+                const selectedNasabahOpt = selectNasabah.options[selectNasabah.selectedIndex];
+                const bankNasabah = selectedNasabahOpt ? selectedNasabahOpt.dataset.bank || '' : '';
+                const saldoTabunganNasabah = selectedNasabahOpt ? parseFloat(selectedNasabahOpt.dataset.saldo) || 0 : 0;
+                
+                let adminSaldoAvailable = 0;
+                let pettyLabel = '';
+                
+                if (metode === 'cash') {
+                    adminSaldoAvailable = adminSaldoCash;
+                    pettyLabel = 'Saldo Petty Cash (Cash) Anda';
+                } else {
+                    adminSaldoAvailable = adminSaldoTransfer;
+                    pettyLabel = 'Saldo Petty Cash (Transfer) Anda';
+                }
+                
+                document.getElementById('petty-cash-label').innerText = pettyLabel;
+                document.getElementById('petty-cash-value').innerText = 'Rp ' + adminSaldoAvailable.toLocaleString('id-ID');
+                
+                // Calculate Transfer Fee
+                let biayaAdmin = 0;
+                const biayaSection = document.getElementById('biaya-section');
+                const biayaDisplay = document.getElementById('biaya-display');
+                
+                if (metode === 'transfer' && bankNasabah !== '' && bankNasabah.toUpperCase() !== 'BCA') {
+                    const mapping = biayaTransferData.find(b => b.bank_pengirim === 'BCA' && b.bank_penerima === bankNasabah);
+                    if (mapping) {
+                        biayaAdmin = parseFloat(mapping.biaya_admin);
+                    } else {
+                        biayaAdmin = 6500; // default antarbank
+                    }
+                    
+                    if (biayaSection) biayaSection.classList.remove('hidden');
+                    if (biayaDisplay) biayaDisplay.innerText = 'Rp ' + biayaAdmin.toLocaleString('id-ID');
+                } else {
+                    if (biayaSection) biayaSection.classList.add('hidden');
+                }
+                
+                const isInsufficientPetty = (adminSaldoAvailable < dealNominal);
+                const isInsufficientTabungan = (metode === 'transfer' && saldoTabunganNasabah < biayaAdmin);
+                
+                const badgePetty = document.getElementById('badge-petty-cash');
+                const warningPetty = document.getElementById('warningPetty');
+                const warningTabungan = document.getElementById('warningTabungan');
+                
+                // Update badge Petty Cash
+                if (badgePetty) {
+                    if (isInsufficientPetty) {
+                        badgePetty.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700";
+                        badgePetty.innerHTML = '<span class="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>Saldo Kurang';
+                    } else {
+                        badgePetty.className = "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700";
+                        badgePetty.innerHTML = '<span class="w-2 h-2 rounded-full bg-green-500 mr-1.5"></span>Saldo Cukup';
+                    }
+                }
+                
+                let isdealExceed = false;
+                if (itemSelect.value) {
+                    const selectedOpt = itemSelect.options[itemSelect.selectedIndex];
+                    const max = parseFloat(selectedOpt.dataset.max);
+                    if (dealNominal > max) {
+                        isdealExceed = true;
+                    }
+                }
+
+                if (isInsufficientPetty) {
+                    if (warningPetty) warningPetty.classList.remove('hidden');
+                    if (warningTabungan) warningTabungan.classList.add('hidden');
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                } else if (isInsufficientTabungan) {
+                    if (warningPetty) warningPetty.classList.add('hidden');
+                    if (warningTabungan) warningTabungan.classList.remove('hidden');
+                    btnSubmit.disabled = true;
+                    btnSubmit.classList.add('opacity-50', 'cursor-not-allowed');
+                } else {
+                    if (warningPetty) warningPetty.classList.add('hidden');
+                    if (warningTabungan) warningTabungan.classList.add('hidden');
+                    if (!isdealExceed) {
+                        btnSubmit.disabled = false;
+                        btnSubmit.classList.remove('opacity-50', 'cursor-not-allowed');
+                    }
+                }
+            }
+
+            // Bind change events
+            selectNasabah.addEventListener('change', validateBalances);
+            selectMetode.addEventListener('change', validateBalances);
+            nominalInput.addEventListener('input', validateBalances);
+            nominalInput.addEventListener('keyup', validateBalances);
+            
+            // For Select2 integration (it triggers 'change' event on jquery)
+            $(document).ready(function() {
+                if ($('.select2').length) {
+                    $('.select2').on('change', validateBalances);
+                }
+            });
+            
+            // Initial run
+            validateBalances();
         });
     </script>
 @endsection
