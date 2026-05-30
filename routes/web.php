@@ -133,6 +133,10 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'angsuran'])->name('struk-angsuran');
     });
 
+    // Struk Gadai
+    Route::get('/gadai/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'gadaiActive'])->name('struk-gadai');
+    Route::get('/deposito/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'depositoActive'])->name('struk-deposito');
+
     // Deposito Routes
     Route::prefix('deposito')->name('deposito.')->group(function () {
         Route::get('/', [DepositoController::class, 'index'])->name('index');
@@ -176,6 +180,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::put('/update-password', [\App\Http\Controllers\Admin\SettingController::class, 'updatePassword'])->name('update-password');
         Route::put('/update-pin', [\App\Http\Controllers\Admin\SettingController::class, 'updatePin'])->name('update-pin');
     });
+
+    // Settings Struk
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/struk', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'index'])->name('struk');
+        Route::post('/struk/update-header', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateHeader'])->name('struk.update-header');
+        Route::post('/struk/update-syarat-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadai'])->name('struk.update-syarat-gadai');
+        Route::post('/struk/update-extra-kehilangan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateExtraKehilangan'])->name('struk.update-extra-kehilangan');
+        Route::post('/struk/preview-tabungan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewTabungan'])->name('struk.preview-tabungan');
+        Route::post('/struk/preview-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewPinjaman'])->name('struk.preview-pinjaman');
+        Route::post('/struk/preview-deposito', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewDeposito'])->name('struk.preview-deposito');
+        Route::post('/struk/preview-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewGadai'])->name('struk.preview-gadai');
+    });
+
+    // Struk Gadai
+    Route::get('/gadai/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiActive'])->name('struk-gadai');
+    Route::get('/deposito/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'depositoActive'])->name('struk-deposito');
 
     // Notifikasi Admin
     Route::get('/notifications', [\App\Http\Controllers\Admin\NotificationController::class, 'index'])->name('notifications.index');

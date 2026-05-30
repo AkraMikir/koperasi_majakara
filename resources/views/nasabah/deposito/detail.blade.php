@@ -28,7 +28,14 @@
                     <p class="text-white/70 text-xs font-mono">{{ $deposito->nomor_deposito }}</p>
                     <h1 class="text-white font-bold text-lg">Detail Deposito</h1>
                 </div>
-                <div class="ml-auto">
+                <div class="ml-auto flex items-center gap-2">
+                    <a href="{{ route('nasabah.struk-deposito', $deposito->id) }}" target="_blank"
+                       class="px-3 py-1.5 bg-white/20 text-white text-xs font-black rounded-lg border border-white/30 hover:bg-white/30 flex items-center gap-1.5 transition-colors">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Struk PDF
+                    </a>
                     @php
                         $statusMap = [
                             'aktif'     => ['Aktif', 'bg-green-400/30 text-green-200 border border-green-400/30'],

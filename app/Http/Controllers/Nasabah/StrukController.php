@@ -8,6 +8,9 @@ use App\Models\PinjamanH;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
 use App\Models\PengajuanPembayaranPinjaman;
+use App\Models\GadaiActive;
+use App\Models\SettingsStruk;
+use App\Models\DepositoH;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
@@ -118,5 +121,69 @@ class StrukController extends Controller
         $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
         $filename = 'Struk-Angsuran-' . $id . '.pdf';
         return $pdf->download($filename);
+    }
+
+    /**
+     * Download Struk Gadai Active (Nasabah)
+     */
+    public function gadaiActive(string $id)
+    {
+        $idAnggota = $this->getIdAnggota();
+        
+        $gadai = GadaiActive::where('nasabah_id', $idAnggota)
+            ->with(['nasabah.user', 'nasabah.dataKtp', 'kategori', 'item', 'lokasi'])
+            ->findOrFail($id);
+        
+        $settings = SettingsStruk::getSettings();
+        
+        // Hitung total biaya
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + $gadai->denda_aktif;
+        if ($gadai->extra_pinjaman_nominal) {
+            $totalTagihan += $gadai->extra_pinjaman_nominal;
+        }
+        
+        $data = [
+            'settings' => $settings,
+            'gadai' => $gadai,
+            'total_tagihan' => $totalTagihan,
+            'no_struk' => SettingsStruk::generateNoStruk('GD'),
+            'tanggal_cetak' => now()->format('d/m/Y H:i'),
+        ];
+        
+        $pdf = Pdf::loadView('struk.gadai', $data);
+        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // Thermal size
+        return $pdf->download('Struk-Gadai-' . $gadai->slot_kode . '.pdf');
+    }
+
+    /**
+     * Download Struk Deposito Active (Nasabah)
+     */
+    public function depositoActive(string $id)
+    {
+        $idAnggota = $this->getIdAnggota();
+        
+        $deposito = DepositoH::where('id_nasabah', $idAnggota)
+            ->with(['nasabah.user', 'nasabah.dataKtp', 'tenor'])
+            ->findOrFail($id);
+        
+        $settings = SettingsStruk::getSettings();
+        
+        // Estimasi bunga & nominal akhir
+        $tenorBulan = $deposito->tenor->tenor_bulan ?? 1;
+        $estimasiBunga = ($deposito->nominal_awal * ($deposito->bunga) * $tenorBulan) / 12;
+        $nominalAkhir = $deposito->nominal_awal + $estimasiBunga;
+        
+        $data = [
+            'settings' => $settings,
+            'deposito' => $deposito,
+            'estimasi_bunga' => $estimasiBunga,
+            'nominal_akhir' => $nominalAkhir,
+            'no_struk' => SettingsStruk::generateNoStruk('DEP'),
+            'tanggal_cetak' => now()->format('d/m/Y H:i'),
+        ];
+        
+        $pdf = Pdf::loadView('struk.deposito', $data);
+        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // Thermal size
+        return $pdf->download('Struk-Deposito-' . $deposito->nomor_deposito . '.pdf');
     }
 }

@@ -33,11 +33,20 @@
                                 <p class="font-bold text-gray-800">{{ $item->gadaiActive->item->nama_item }}</p>
                             </div>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right flex flex-col items-end gap-1.5">
                             <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $item->status == 'pending' ? 'bg-amber-200 text-amber-800' : ($item->status == 'approved' ? 'bg-emerald-200 text-emerald-800' : 'bg-red-200 text-red-800') }}">
                                 {{ $item->status }}
                             </span>
-                            <p class="text-[10px] text-gray-500 mt-1">{{ $item->created_at->format('d M Y H:i') }}</p>
+                            @if($item->status == 'approved')
+                            <a href="{{ route('nasabah.struk-gadai', $item->gadai_active_id) }}" target="_blank"
+                               class="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[9px] font-black rounded-lg transition-colors flex items-center gap-1">
+                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Struk
+                            </a>
+                            @endif
+                            <p class="text-[10px] text-gray-500">{{ $item->created_at->format('d M Y H:i') }}</p>
                         </div>
                     </div>
                     

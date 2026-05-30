@@ -12,9 +12,14 @@
         hr { border: none; border-top: 1px solid #333; margin: 6px 0; }
     </style>
 </head>
+@php
+    $strukSettings = \App\Models\SettingsStruk::getSettings();
+@endphp
 <body>
-    <div class="center bold mb">{{ config('app.name', 'Koperasi Majakara') }}</div>
-    <div class="center mb">STRUK PEMBAYARAN ANGSURAN</div>
+    <div class="center bold mb">{{ $strukSettings->nama_koperasi }}</div>
+    <div class="center text-[8px] leading-tight" style="font-size: 8px; color: #555;">{{ $strukSettings->alamat_koperasi }}</div>
+    <div class="center text-[8px]" style="font-size: 8px; color: #555; margin-bottom: 4px;">Telp: {{ $strukSettings->no_telp }}</div>
+    <div class="center mb bold">STRUK PEMBAYARAN ANGSURAN</div>
     <hr>
     <div class="mt">ID Pengajuan : {{ $pengajuan->id }}</div>
     <div>Tanggal Pembayaran : {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</div>
@@ -28,6 +33,6 @@
     <div class="mt">Status : Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</div>
     <hr>
     <div class="center mt">Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-    <div class="center">Dicetak dari {{ config('app.name', 'Koperasi Majakara') }}</div>
+    <div class="center">Dicetak dari {{ $strukSettings->nama_pt }}</div>
 </body>
 </html>

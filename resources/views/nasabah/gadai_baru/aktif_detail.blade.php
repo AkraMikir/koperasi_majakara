@@ -33,7 +33,16 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                     Kembali
                 </a>
-                <span class="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full font-mono border border-white/30">{{ $gadai->slot_kode }}</span>
+                <div class="flex gap-2">
+                    <a href="{{ route('nasabah.struk-gadai', $gadai->id) }}" 
+                       class="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full border border-white/30 hover:bg-white/30 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download Struk
+                    </a>
+                    <span class="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full font-mono border border-white/30">{{ $gadai->slot_kode }}</span>
+                </div>
             </div>
 
             {{-- Status label --}}

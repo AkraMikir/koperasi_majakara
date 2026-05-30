@@ -12,8 +12,34 @@
         </div>
         <div class="flex items-center gap-2">
             <span class="px-3 py-1 bg-amber-100 text-majakara-brown text-xs font-bold rounded-full border border-amber-200 shadow-sm">
-                {{ $pengajuan->count() }} Antrean Menunggu
+                @if($status === 'pending')
+                    {{ $pengajuan->count() }} Antrean Menunggu
+                @elseif($status === 'approved')
+                    {{ $pengajuan->count() }} Pengajuan Disetujui
+                @elseif($status === 'rejected')
+                    {{ $pengajuan->count() }} Pengajuan Ditolak
+                @else
+                    Total {{ $pengajuan->count() }} Pengajuan
+                @endif
             </span>
+        </div>
+    </div>
+
+    <!-- Tab Filter -->
+    <div class="flex flex-wrap items-center justify-between gap-4 bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm">
+        <div class="flex flex-wrap gap-2">
+            <a href="?status=pending" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'pending' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
+                Menunggu ({{ \App\Models\GadaiPengajuan::where('status', 'pending')->count() }})
+            </a>
+            <a href="?status=approved" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'approved' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
+                Disetujui ({{ \App\Models\GadaiPengajuan::where('status', 'approved')->count() }})
+            </a>
+            <a href="?status=rejected" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'rejected' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
+                Ditolak ({{ \App\Models\GadaiPengajuan::where('status', 'rejected')->count() }})
+            </a>
+            <a href="?status=all" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'all' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
+                Semua ({{ \App\Models\GadaiPengajuan::count() }})
+            </a>
         </div>
     </div>
 
@@ -34,9 +60,24 @@
                                 <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->item->nama_item }}</div>
                             </div>
                         </div>
-                        <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase border {{ $item->jenis_pengajuan == 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
-                            {{ $item->jenis_pengajuan }}
-                        </span>
+                        <div class="flex flex-col items-end gap-1">
+                            <span class="px-2 py-1 rounded-lg text-[9px] font-black uppercase border {{ $item->jenis_pengajuan == 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
+                                {{ $item->jenis_pengajuan }}
+                            </span>
+                            @if($item->status == 'approved')
+                                <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[9px] font-black uppercase">
+                                    Approved
+                                </span>
+                            @elseif($item->status == 'rejected')
+                                <span class="px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[9px] font-black uppercase">
+                                    Rejected
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[9px] font-black uppercase animate-pulse">
+                                    Pending
+                                </span>
+                            @endif
+                        </div>
                     </div>
                     
                     <div class="flex justify-between items-center py-1">
@@ -60,12 +101,14 @@
                             <button type="button" onclick="openDetailsModal({{ $item->id }})" class="w-8 h-8 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm active:scale-95" title="Lihat Detail">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                             </button>
+                            @if($item->status === 'pending')
                             <button type="button" onclick="openApproveModal({{ $item->id }}, '{{ addslashes($item->nasabah->user->nama) }}', '{{ strtoupper($item->jenis_pengajuan) }}')" class="w-8 h-8 flex items-center justify-center bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm active:scale-95" title="Setujui">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                             </button>
                             <button onclick="openRejectModal({{ $item->id }}, '{{ addslashes($item->nasabah->user->nama) }}')" class="w-8 h-8 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm active:scale-95" title="Tolak">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -73,7 +116,7 @@
                 <div class="col-span-1">
                     <x-admin.empty-state 
                         title="Antrean Kosong" 
-                        message="Belum ada pengajuan pembayaran gadai saat ini." 
+                        message="{{ $status === 'pending' ? 'Belum ada antrean pengajuan pembayaran gadai saat ini.' : ($status === 'approved' ? 'Belum ada riwayat pengajuan gadai yang disetujui.' : ($status === 'rejected' ? 'Belum ada riwayat pengajuan gadai yang ditolak.' : 'Tidak ditemukan data pengajuan gadai.')) }}" 
                         minHeight="300px" 
                     >
                         <x-slot name="icon">
@@ -110,10 +153,23 @@
                             </div>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="mb-1">
+                            <div class="mb-1 flex items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded-lg text-[9px] font-black uppercase border {{ $item->jenis_pengajuan == 'lunas' ? 'bg-emerald-100 text-emerald-700 border-emerald-200' : 'bg-blue-100 text-blue-700 border-blue-200' }}">
                                     {{ $item->jenis_pengajuan }}
                                 </span>
+                                @if($item->status == 'approved')
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-[9px] font-black uppercase">
+                                        Approved
+                                    </span>
+                                @elseif($item->status == 'rejected')
+                                    <span class="px-2 py-0.5 bg-red-50 text-red-700 border border-red-200 rounded-lg text-[9px] font-black uppercase">
+                                        Rejected
+                                    </span>
+                                @else
+                                    <span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-200 rounded-lg text-[9px] font-black uppercase animate-pulse">
+                                        Pending
+                                    </span>
+                                @endif
                             </div>
                             <div class="font-bold text-gray-900">Rp {{ number_format($item->nominal, 0, ',', '.') }}</div>
                         </td>
@@ -154,6 +210,7 @@
                                     class="w-9 h-9 flex items-center justify-center bg-blue-50 text-blue-600 rounded-xl hover:bg-blue-600 hover:text-white transition-all shadow-sm hover:shadow-blue-100 active:scale-90" title="Lihat Detail">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
                                 </button>
+                                @if($item->status === 'pending')
                                 <button type="button" onclick="openApproveModal({{ $item->id }}, '{{ $item->nasabah->user->nama }}', '{{ strtoupper($item->jenis_pengajuan) }}')" 
                                     class="w-9 h-9 flex items-center justify-center bg-green-50 text-green-600 rounded-xl hover:bg-green-600 hover:text-white transition-all shadow-sm hover:shadow-green-100 active:scale-90" title="Setujui">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
@@ -162,6 +219,7 @@
                                     class="w-9 h-9 flex items-center justify-center bg-red-50 text-red-600 rounded-xl hover:bg-red-600 hover:text-white transition-all shadow-sm hover:shadow-red-100 active:scale-90" title="Tolak">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                                 </button>
+                                @endif
                             </div>
                         </td>
                     </tr>
@@ -170,7 +228,7 @@
                         <td colspan="4" class="p-0">
                             <x-admin.empty-state 
                                 title="Antrean Kosong" 
-                                message="Belum ada pengajuan pembayaran gadai saat ini." 
+                                message="{{ $status === 'pending' ? 'Belum ada antrean pengajuan pembayaran gadai saat ini.' : ($status === 'approved' ? 'Belum ada riwayat pengajuan gadai yang disetujui.' : ($status === 'rejected' ? 'Belum ada riwayat pengajuan gadai yang ditolak.' : 'Tidak ditemukan data pengajuan gadai.')) }}" 
                             >
                                 <x-slot name="icon">
                                     <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path></svg>
@@ -256,7 +314,14 @@
                     class="flex-1 px-6 py-3.5 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all active:scale-95 text-center text-sm">
                     Tutup
                 </button>
-                <div class="flex gap-2 flex-2">
+                <a id="detail-struk-btn" href="#" target="_blank"
+                    class="hidden flex-1 px-6 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl transition-all active:scale-95 text-center text-sm flex items-center justify-center gap-1.5 shadow-xl shadow-amber-100">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                    Download Struk
+                </a>
+                <div class="flex gap-2 flex-2" id="detail-action-buttons">
                     <button type="button" id="detail-reject-btn"
                         class="flex-1 px-6 py-3.5 bg-red-50 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 text-center text-sm">
                         Tolak
@@ -391,6 +456,8 @@
         @foreach($pengajuan as $item)
             "{{ $item->id }}": {
                 id: {{ $item->id }},
+                gadaiActiveId: {{ $item->gadai_active_id }},
+                status: "{{ $item->status }}",
                 nasabahName: "{{ addslashes($item->nasabah->user->nama) }}",
                 barangName: "{{ addslashes($item->gadaiActive->item->nama_item) }}",
                 slotCode: "{{ $item->gadaiActive->slot_code }} / {{ $item->gadaiActive->slot_table }}",
@@ -451,15 +518,31 @@
             photoSection.classList.add('hidden');
         }
 
-        // Bind actions to buttons inside detail modal
-        document.getElementById('detail-approve-btn').onclick = function() {
-            closeDetailsModal();
-            openApproveModal(data.id, data.nasabahName, data.jenis);
-        };
-        document.getElementById('detail-reject-btn').onclick = function() {
-            closeDetailsModal();
-            openRejectModal(data.id, data.nasabahName);
-        };
+        // Hide/show action buttons based on status
+        const actionButtons = document.getElementById('detail-action-buttons');
+        const strukBtn = document.getElementById('detail-struk-btn');
+        
+        if (data.status !== 'pending') {
+            actionButtons.classList.add('hidden');
+            if (data.status === 'approved') {
+                strukBtn.classList.remove('hidden');
+                strukBtn.href = "{{ route('admin.struk-gadai', ':id') }}".replace(':id', data.gadaiActiveId);
+            } else {
+                strukBtn.classList.add('hidden');
+            }
+        } else {
+            actionButtons.classList.remove('hidden');
+            strukBtn.classList.add('hidden');
+            // Bind actions to buttons inside detail modal
+            document.getElementById('detail-approve-btn').onclick = function() {
+                closeDetailsModal();
+                openApproveModal(data.id, data.nasabahName, data.jenis);
+            };
+            document.getElementById('detail-reject-btn').onclick = function() {
+                closeDetailsModal();
+                openRejectModal(data.id, data.nasabahName);
+            };
+        }
 
         const modal = document.getElementById('details-modal');
         modal.classList.remove('hidden');

@@ -61,6 +61,17 @@
             <div class="{{ $cfg['bg'] }} {{ $cfg['border'] }} border-b p-6 text-center">
                 <div class="text-5xl mb-3">{{ $cfg['icon'] }}</div>
                 <span class="text-sm font-bold px-4 py-1.5 rounded-full {{ $cfg['badge'] }}">{{ $cfg['label'] }}</span>
+                @if($pengajuan->status === '2' && $pengajuan->deposito)
+                <div class="mt-3">
+                    <a href="{{ route('nasabah.struk-deposito', $pengajuan->deposito->id) }}" target="_blank"
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors shadow-sm text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                        </svg>
+                        Download PDF Struk
+                    </a>
+                </div>
+                @endif
                 <p class="text-xs text-gray-600 mt-3 leading-relaxed">{{ $cfg['desc'] }}</p>
             </div>
 
