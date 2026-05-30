@@ -26,7 +26,7 @@ class UserSeeder extends Seeder
         $adminUtama = User::create([
             'nama' => 'Admin Utama',
             'email' => 'admin.utama@koperasi.com',
-            'pin' => 123456,
+            'pin' => '123456',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567890',
             'foto' => 'default-avatar.jpg',
@@ -38,7 +38,7 @@ class UserSeeder extends Seeder
         $adminOperasional1 = User::create([
             'nama' => 'Admin Operasional 1',
             'email' => 'admin.operasional1@koperasi.com',
-            'pin' => 567890,
+            'pin' => '567890',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567891',
             'foto' => 'default-avatar.jpg',
@@ -49,7 +49,7 @@ class UserSeeder extends Seeder
         $adminOperasional2 = User::create([
             'nama' => 'Admin Operasional 2',
             'email' => 'admin.operasional2@koperasi.com',
-            'pin' => 901234,
+            'pin' => '901234',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567892',
             'foto' => 'default-avatar.jpg',
@@ -61,7 +61,7 @@ class UserSeeder extends Seeder
         $nasabah1 = User::create([
             'nama' => 'Budi Santoso',
             'email' => 'budi.santoso@email.com',
-            'pin' => 111111,
+            'pin' => '111111',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567893',
             'foto' => 'default-avatar.jpg',
@@ -72,7 +72,7 @@ class UserSeeder extends Seeder
         $nasabah2 = User::create([
             'nama' => 'Siti Nurhaliza',
             'email' => 'siti.nurhaliza@email.com',
-            'pin' => 222222,
+            'pin' => '222222',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567894',
             'foto' => 'default-avatar.jpg',
@@ -83,7 +83,7 @@ class UserSeeder extends Seeder
         $nasabah3 = User::create([
             'nama' => 'Ahmad Fauzi',
             'email' => 'ahmad.fauzi@email.com',
-            'pin' => 333333,
+            'pin' => '333333',
             'password' => Hash::make('password123'),
             'nomor_hp' => '081234567895',
             'foto' => 'default-avatar.jpg',

@@ -16,6 +16,7 @@ use App\Models\JnsBank;
 use App\Models\KategoriDeposito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DepositoController extends Controller
 {
@@ -320,7 +321,7 @@ class DepositoController extends Controller
         ]);
 
         $user = Auth::user();
-        if ((int) $request->pin !== (int) $user->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return back()->with('error', 'PIN yang Anda masukkan salah.');
         }
 

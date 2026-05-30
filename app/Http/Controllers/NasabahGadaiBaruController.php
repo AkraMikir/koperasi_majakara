@@ -8,6 +8,7 @@ use App\Models\GadaiActive;
 use App\Models\JnsLokasiPerusahaan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use App\Services\BankAccessService;
 
 class NasabahGadaiBaruController extends Controller
@@ -195,7 +196,7 @@ class NasabahGadaiBaruController extends Controller
 
         // Verify PIN
         $user = Auth::user();
-        if (!$user->pin || (int)$user->pin !== (int)$request->pin) {
+        if (!$user->pin || !Hash::check($request->pin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));

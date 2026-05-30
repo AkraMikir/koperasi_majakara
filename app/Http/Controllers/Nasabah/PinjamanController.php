@@ -24,6 +24,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class PinjamanController extends Controller
 {
@@ -308,11 +309,8 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        // Convert both to integer for comparison
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        // Verify PIN using Hash::check
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
@@ -408,17 +406,11 @@ class PinjamanController extends Controller
                 ], 400);
             }
 
-            $userPin = (int) $user->pin;
-            $inputPin = (int) $request->pin;
-
             Log::info('Verifying PIN', [
                 'user_id' => $user->id,
-                'user_pin' => $userPin,
-                'input_pin' => $inputPin,
-                'match' => $userPin === $inputPin
             ]);
 
-            if ($userPin !== $inputPin) {
+            if (!Hash::check($request->pin, $user->pin)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'PIN yang Anda masukkan salah.'
@@ -497,10 +489,7 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->route('nasabah.pinjaman.janji-temu', [
                 'nominal' => $request->nominal ?? '',
                 'keterangan' => $request->keterangan ?? '',
@@ -1016,10 +1005,7 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
@@ -1129,10 +1115,7 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));

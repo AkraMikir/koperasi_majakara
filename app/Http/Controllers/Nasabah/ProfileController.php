@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class ProfileController extends Controller
 {
@@ -45,11 +46,10 @@ class ProfileController extends Controller
                 ->withInput();
         }
 
-        // Verify PIN
-        $inputPin = (int) str_replace(['.', ','], '', $request->pin);
-        $userPin = (int) $user->pin;
+        // Verify PIN using Hash::check
+        $inputPin = str_replace(['.', ','], '', $request->pin);
 
-        if ($inputPin !== $userPin) {
+        if (!Hash::check($inputPin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah.')
                 ->withInput();
