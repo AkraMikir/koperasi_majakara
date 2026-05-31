@@ -162,9 +162,11 @@ return new class extends Migration
             $table->string('slot_kode', 255);
             $table->string('kategori', 255);
             $table->enum('aksi', ['fill', 'empty']);
-            $table->foreignId('active_gadai_id')->nullable()->constrained('tbl_gadai_active')->onDelete('set null');
+            // Nama kolom: gadai_active_id (sesuai GadaiSlotLog model & semua controller)
+            $table->foreignId('gadai_active_id')->nullable()->constrained('tbl_gadai_active')->onDelete('set null');
             $table->timestamps();
         });
+
 
         // 11. Old Gadai Tables
         Schema::create('tbl_item_gadai', function (Blueprint $table) {

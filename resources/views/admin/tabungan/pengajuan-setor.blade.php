@@ -77,15 +77,15 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm">{{ $item->created_at->format('d M Y, H:i') }}</td>
-                        <td class="px-6 py-4">
+                        <td class="px-2 py-4">
                             @if($totalNominal > 0)
-                                <p class="font-semibold text-[#674c1d]">Rp {{ number_format($totalNominal, 0, ',', '.') }}</p>
+                                <p class="font-semibold text-[#674c1d] text-sm">Rp {{ number_format($totalNominal, 0, ',', '.') }}</p>
                             @else
                                 <p class="text-sm text-gray-400">-</p>
                             @endif
                         </td>
-                        <td class="px-6 py-4">
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                        <td class="px-2 py-4">
+                            <span class="px-4 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                 {{ $item->buktiFoto->count() ?? 0 }} foto
                             </span>
                         </td>

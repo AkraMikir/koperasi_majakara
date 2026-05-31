@@ -225,7 +225,6 @@
                     <input type="radio" name="metode_setor" value="transfer" class="mt-0.5 accent-[#674c1d]" onchange="toggleBuktiTf(this)">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-lg">🏦</span>
                             <p class="font-bold text-gray-800 text-sm">Transfer Bank</p>
                         </div>
                         <p class="text-xs text-gray-500">Setorkan dana ke rekening Koperasi Majakara, lalu upload bukti transfer</p>
@@ -236,7 +235,6 @@
                     <input type="radio" name="metode_setor" value="saldo_tabungan" class="mt-0.5 accent-[#674c1d]" onchange="toggleBuktiTf(this)">
                     <div class="flex-1">
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="text-lg">💳</span>
                             <p class="font-bold text-gray-800 text-sm">Saldo Tabungan</p>
                         </div>
                         <p class="text-xs text-gray-500">Potong langsung dari saldo tabungan Anda</p>
@@ -249,7 +247,7 @@
             <div id="bukti-tf-container" class="hidden mt-4 fade-in">
                 <div class="p-4 bg-amber-50 rounded-xl border border-[#d4af37]/30 mb-3">
                     <p class="text-xs font-bold text-[#674c1d] mb-3 flex items-center gap-2">
-                        <span>📋</span> Info Rekening Koperasi Majakara
+                        Info Rekening Koperasi Majakara
                     </p>
                     @forelse($banks as $bank)
                         <div class="mb-4 last:mb-0 pb-3 border-b border-[#d4af37]/20 last:border-0">
@@ -331,7 +329,7 @@
 
             <div class="mt-5 p-4 bg-amber-50 rounded-xl border border-[#d4af37]/30">
                 <p class="text-xs text-gray-500">
-                    🔔 Pengajuan akan diproses dalam <strong>1×24 jam kerja</strong>. Nomor Deposito akan dikirimkan setelah disetujui.
+                     Pengajuan akan diproses dalam <strong>1×24 jam kerja</strong>. Nomor Deposito akan dikirimkan setelah disetujui.
                 </p>
             </div>
         </div>
@@ -339,7 +337,7 @@
         <div class="flex gap-3 mb-4">
             <button type="button" onclick="goToStep(2)" class="flex-1 border-2 border-[#674c1d] text-[#674c1d] font-bold py-4 rounded-xl text-sm active:scale-95 transition-all">← Kembali</button>
             <button type="submit" class="flex-[2] bg-gradient-to-r from-[#674c1d] to-[#d4af37] text-white font-bold py-4 rounded-xl text-sm shadow-lg active:scale-95 transition-all">
-                ✅ Ajukan Deposito
+                Ajukan Deposito
             </button>
         </div>
     </div>

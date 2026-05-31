@@ -170,7 +170,9 @@ class DepositoController extends Controller
 
             if ($pengajuan->metode_setor === 'saldo_tabungan') {
                 $nasabah = $pengajuan->nasabah;
-                $saldo   = $this->getSaldoNasabah($nasabah->id);
+                // Kecualikan pengajuan ini sendiri dari perhitungan hold,
+                // karena yang diperiksa adalah saldo SEBELUM pengajuan ini memblokir.
+                $saldo   = $this->getSaldoNasabah($nasabah->id, $pengajuan->id);
                 if ($saldo < $nominal) {
                     DB::rollBack();
                     return back()->with('error', 'Saldo tabungan nasabah tidak mencukupi (Rp ' . number_format($saldo, 0, ',', '.') . ').');
@@ -1252,16 +1254,33 @@ class DepositoController extends Controller
     /* ══════════════════════════════════════════════════════════
      *  Helper – Hitung saldo nasabah
      * ══════════════════════════════════════════════════════════ */
-    private function getSaldoNasabah($idAnggota): float
+
+    /**
+     * Hitung saldo tabungan nasabah.
+     *
+     * @param  int|string  $idAnggota
+     * @param  int|string|null  $excludePengajuanId  ID pengajuan deposito yang sedang diproses (dikecualikan dari hold)
+     * @return float
+     */
+    private function getSaldoNasabah($idAnggota, $excludePengajuanId = null): float
     {
-        $totalSetoran  = TransTabungan::where('id_anggota', $idAnggota)
+        $totalSetoran = TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', fn($q) => $q->where('kode', 'STR'))->sum('nominal') ?? 0;
 
         $totalPenarikan = TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', fn($q) => $q->where('kode', 'PNR'))->sum('nominal') ?? 0;
 
-        $pendingDeposito = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
-            ->where('status', '1')->where('metode_setor', 'saldo_tabungan')->sum('nominal') ?? 0;
+        // Pengajuan deposito pending via saldo_tabungan yang BELUM diproses
+        // (dikecualikan: pengajuan yang sedang di-approve agar tidak double-count)
+        $pendingDepositoQuery = \App\Models\PengajuanDeposito::where('id_nasabah', $idAnggota)
+            ->where('status', '1')
+            ->where('metode_setor', 'saldo_tabungan');
+
+        if ($excludePengajuanId !== null) {
+            $pendingDepositoQuery->where('id', '!=', $excludePengajuanId);
+        }
+
+        $pendingDeposito = $pendingDepositoQuery->sum('nominal') ?? 0;
 
         return max(0, $totalSetoran - $totalPenarikan - $pendingDeposito);
     }

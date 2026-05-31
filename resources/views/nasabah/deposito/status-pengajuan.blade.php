@@ -26,7 +26,7 @@
         $statusConfig = [
             '1' => [
                 'label'    => 'Sedang Diproses',
-                'icon'     => '⏳',
+                'icon'     => ' ',
                 'desc'     => 'Pengajuan Anda sedang dalam antrian review. Proses evaluasi membutuhkan 1×24 jam kerja.',
                 'steps'    => ['done' => 1, 'active' => 2],
                 'bg'       => 'bg-amber-50',
@@ -35,7 +35,7 @@
             ],
             '2' => [
                 'label'    => 'Disetujui',
-                'icon'     => '✅',
+                'icon'     => ' ',
                 'desc'     => 'Selamat! Pengajuan deposito Anda telah disetujui. Nomor deposito akan segera diterbitkan.',
                 'steps'    => ['done' => 3, 'active' => 0],
                 'bg'       => 'bg-green-50',
@@ -44,7 +44,7 @@
             ],
             '3' => [
                 'label'    => 'Ditolak',
-                'icon'     => '❌',
+                'icon'     => ' ',
                 'desc'     => 'Mohon maaf, pengajuan Anda tidak dapat diproses. Silakan hubungi CS kami untuk informasi lebih lanjut.',
                 'steps'    => ['done' => 1, 'active' => 0],
                 'bg'       => 'bg-red-50',

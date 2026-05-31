@@ -256,7 +256,7 @@
                             </svg>
                         </div>
                         <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold border border-amber-100">
-                            {{ $stats['total_barang_gadai'] }} jenis
+                            {{ $stats['total_barang_gadai'] }} Item
                         </span>
                     </div>
                     <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-amber-700 transition-colors">Item Gadai</h3>

@@ -33,7 +33,7 @@ class GenerateDepositoPeringatan extends Command
         $today   = now()->toDateString();
         $batas   = now()->addDays($days)->toDateString();
 
-        $this->info("🔍 Mencari deposito aktif dengan jatuh tempo antara {$today} dan {$batas}...");
+        $this->info(" Mencari deposito aktif dengan jatuh tempo antara {$today} dan {$batas}...");
 
         // Ambil deposito aktif yang jatuh tempo dalam X hari ke depan
         // dan belum ada entri di deposito_persiapan_cair dengan status non-selesai
@@ -46,11 +46,11 @@ class GenerateDepositoPeringatan extends Command
             ->get();
 
         if ($depositos->isEmpty()) {
-            $this->info('✅ Tidak ada deposito yang perlu di-generate peringatan.');
+            $this->info('Tidak ada deposito yang perlu di-generate peringatan.');
             return self::SUCCESS;
         }
 
-        $this->info("📋 Ditemukan {$depositos->count()} deposito.\n");
+        $this->info("Ditemukan {$depositos->count()} deposito.\n");
 
         $generated = 0;
         $errors    = 0;
