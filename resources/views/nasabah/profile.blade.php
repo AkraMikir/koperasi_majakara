@@ -4,6 +4,58 @@
 
 @section('content')
 <div class="w-full pb-6">
+    <!-- Alerts -->
+    <div class="mx-4 mt-4">
+        @if(session('success'))
+            <div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl p-4 shadow-sm mb-4">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-green-800">{{ session('success') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 shadow-sm mb-4">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">{{ session('error') }}</p>
+                    </div>
+                </div>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 shadow-sm mb-4">
+                <div class="flex">
+                    <div class="shrink-0">
+                        <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                        </svg>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800">Terdapat kesalahan pada input Anda:</p>
+                        <ul class="mt-1 text-sm text-red-700 list-disc list-inside">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        @endif
+    </div>
     <!-- Profile Header -->
     <div class="mx-4 mt-4 mb-6">
         <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
@@ -370,10 +422,10 @@
     </div>
 </div>
 
-<!-- Modal Edit Data Profil -->
+<!-- Modal Edit Data Profil & PIN Verification -->
 <div id="modalEditProfile" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="sticky top-0 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] p-6 rounded-t-2xl">
+        <div class="sticky top-0 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] p-6 rounded-t-2xl z-10">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
@@ -383,7 +435,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-white" id="editModalTitle">Edit Data</h3>
                 </div>
-                <button onclick="closeEditModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
+                <button onclick="closeEditModal()" type="button" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -391,82 +443,76 @@
             </div>
         </div>
 
-        <form id="editProfileForm" class="p-6">
+        <form id="editProfileForm" action="{{ route('nasabah.profile.update-request') }}" method="POST" enctype="multipart/form-data" class="p-6">
+            @csrf
             <input type="hidden" id="edit_jenis_data" name="jenis_data" value="">
             
-            <!-- Form fields will be injected here by JavaScript -->
-            <div id="editFormFields"></div>
+            <!-- Step 1: Data Input -->
+            <div id="step1">
+                <!-- Form fields will be injected here by JavaScript -->
+                <div id="editFormFields"></div>
 
-            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                <div class="flex gap-3">
-                    <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
-                    <p class="text-sm text-blue-800">
-                        <strong>Catatan:</strong> Perubahan data akan masuk ke dalam antrian persetujuan dan memerlukan verifikasi PIN. Data akan diperbarui setelah admin menyetujui perubahan Anda.
-                    </p>
+                <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+                    <div class="flex gap-3">
+                        <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <p class="text-sm text-blue-800">
+                            <strong>Catatan:</strong> Perubahan data akan masuk ke dalam antrian persetujuan dan memerlukan verifikasi PIN. Data akan diperbarui setelah admin menyetujui perubahan Anda.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button type="button" onclick="closeEditModal()" 
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="goToStep2()" 
+                            class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
+                        Lanjutkan
+                    </button>
                 </div>
             </div>
 
-            <div class="mt-6 flex gap-3">
-                <button type="button" onclick="closeEditModal()" 
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="button" onclick="submitEditForm()" 
-                        class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
-                    Lanjutkan
-                </button>
+            <!-- Step 2: PIN Verification -->
+            <div id="step2" class="hidden">
+                <div class="text-center mb-6">
+                    <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Verifikasi PIN</h3>
+                    <p class="text-gray-600">Masukkan PIN Anda untuk mengajukan perubahan data</p>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 text-center">
+                            PIN <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" name="pin" id="pin_verification" maxlength="6" 
+                               class="w-full max-w-xs mx-auto block px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
+                               placeholder="••••••">
+                        <p class="text-xs text-gray-500 mt-2 text-center">Masukkan PIN 6 digit Anda</p>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="goToStep1()" 
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                        Kembali
+                    </button>
+                    <button type="submit" id="submitBtn"
+                            class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
+                        Ajukan Perubahan
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
-
-<!-- Modal PIN Verification untuk Edit Profile -->
-<div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
-        <div class="text-center mb-6">
-            <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4">
-                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                </svg>
-            </div>
-            <h3 class="text-2xl font-bold text-gray-900 mb-2">Verifikasi PIN</h3>
-            <p class="text-gray-600">Masukkan PIN Anda untuk mengajukan perubahan data</p>
-        </div>
-
-        <form action="{{ route('nasabah.profile.update-request') }}" method="POST" id="pinVerificationForm">
-            @csrf
-            <input type="hidden" id="pin_jenis_data" name="jenis_data" value="">
-            <div id="pinFormFields"></div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        PIN <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="pin" id="pin_verification" maxlength="6" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                           placeholder="••••••" required>
-                    <p class="text-xs text-gray-500 mt-1">Masukkan PIN 6 digit Anda</p>
-                </div>
-            </div>
-
-            <div class="mt-6 flex gap-3">
-                <button type="button" onclick="closePinVerificationModal()" 
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="submit" 
-                        class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
-                    Ajukan Perubahan
-                </button>
-            </div>
-        </form>
-    </div>
-</div>
-
-<!-- Modals PIN Telah Dipindahkan ke Halaman Setting -->
 
 <!-- ==================== EDIT PROFILE FUNCTIONS ====================-->
 <script>
@@ -475,6 +521,7 @@ const formTemplates = {
     'data_user': {
         title: 'Edit Data Akun User',
         fields: [
+            { name: 'foto', label: 'Foto Profil', type: 'file', accept: 'image/*', note: 'Biarkan kosong jika tidak ingin mengubah' },
             { name: 'nama', label: 'Nama (Display Name)', type: 'text', value: '{{ $nasabah->user->nama ?? "" }}' },
             { name: 'email', label: 'Email', type: 'email', value: '{{ $nasabah->user->email ?? "" }}' },
             { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ $nasabah->user->nomor_hp ?? "" }}' }
@@ -518,6 +565,12 @@ function openEditModal(jenisData) {
     const formFields = document.getElementById('editFormFields');
     const jenisDataInput = document.getElementById('edit_jenis_data');
     
+    // Reset form to step 1
+    goToStep1();
+    
+    // Reset form inputs (including file)
+    document.getElementById('editProfileForm').reset();
+    
     const template = formTemplates[jenisData];
     if (!template) {
         alert('Template tidak ditemukan');
@@ -532,20 +585,43 @@ function openEditModal(jenisData) {
     let html = '<div class="space-y-4">';
     template.fields.forEach(field => {
         html += '<div>';
-        html += `<label class="block text-sm font-semibold text-gray-700 mb-2">${field.label} <span class="text-red-500">*</span></label>`;
+        html += `<label class="block text-sm font-semibold text-gray-700 mb-2">${field.label} ${field.type !== 'file' ? '<span class="text-red-500">*</span>' : ''}</label>`;
         
+        if (field.note) {
+             html += `<p class="text-xs text-gray-500 mb-2">${field.note}</p>`;
+        }
+
         if (field.type === 'textarea') {
-            html += `<textarea name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" rows="3">${field.value}</textarea>`;
+            html += `<textarea name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" rows="3" required>${field.value}</textarea>`;
         } else if (field.type === 'select') {
-            html += `<select name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
+            html += `<select name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" required>`;
             html += `<option value="">Pilih ${field.label}</option>`;
             field.options.forEach(opt => {
                 const selected = opt.value === field.value ? 'selected' : '';
                 html += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
             });
             html += '</select>';
+        } else if (field.type === 'file') {
+            html += `
+            <div class="mt-2 flex justify-center rounded-xl border border-dashed border-gray-300 px-6 py-8 hover:border-[#8b6f2f] transition-colors relative bg-gray-50 cursor-pointer" onclick="document.getElementById('${field.name}_input').click()">
+                <div class="text-center">
+                    <img id="${field.name}_preview" class="mx-auto h-24 w-24 rounded-full object-cover mb-4 hidden border-4 border-white shadow-lg" src="#" alt="Preview" />
+                    <div id="${field.name}_icon">
+                        <svg class="mx-auto h-12 w-12 text-gray-300" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path fill-rule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clip-rule="evenodd" />
+                        </svg>
+                    </div>
+                    <div class="mt-4 flex text-sm leading-6 text-gray-600 justify-center">
+                        <span class="relative cursor-pointer rounded-md font-semibold text-[#8b6f2f] hover:text-[#674c1d]">
+                            <span>Upload foto</span>
+                            <input id="${field.name}_input" name="${field.name}" type="file" class="sr-only" accept="${field.accept}" onchange="previewImage(this, '${field.name}_preview', '${field.name}_icon')">
+                        </span>
+                    </div>
+                    <p class="text-xs leading-5 text-gray-500 mt-1">PNG, JPG, JPEG up to 2MB</p>
+                </div>
+            </div>`;
         } else {
-            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
+            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" required>`;
         }
         
         html += '</div>';
@@ -557,6 +633,34 @@ function openEditModal(jenisData) {
     document.body.style.overflow = 'hidden';
 }
 
+function previewImage(input, previewId, iconId) {
+    const preview = document.getElementById(previewId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.files && input.files[0]) {
+        // Validate file size (max 2MB)
+        if (input.files[0].size > 2 * 1024 * 1024) {
+            alert('Ukuran file maksimal 2MB');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            icon.classList.add('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '#';
+        preview.classList.add('hidden');
+        icon.classList.remove('hidden');
+    }
+}
+
 // Close edit modal
 function closeEditModal() {
     const modal = document.getElementById('modalEditProfile');
@@ -564,46 +668,42 @@ function closeEditModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Submit edit form (lanjut ke PIN verification)
-function submitEditForm() {
-    const jenisData = document.getElementById('edit_jenis_data').value;
+function goToStep2() {
+    // Validate required fields in step 1
     const form = document.getElementById('editProfileForm');
-    const formData = new FormData(form);
+    let isValid = true;
     
-    // Transfer data ke PIN modal
-    const pinFormFields = document.getElementById('pinFormFields');
-    const pinJenisData = document.getElementById('pin_jenis_data');
-    
-    pinJenisData.value = jenisData;
-    
-    // Create hidden fields untuk semua data
-    let html = '';
-    for (let [key, value] of formData.entries()) {
-        if (key !== 'jenis_data') {
-            html += `<input type="hidden" name="${key}" value="${value}">`;
+    // Simple validation for required fields in Step 1
+    const step1Inputs = document.getElementById('step1').querySelectorAll('input[required], select[required], textarea[required]');
+    step1Inputs.forEach(input => {
+        if (!input.value) {
+            isValid = false;
+            input.classList.add('border-red-500');
+        } else {
+            input.classList.remove('border-red-500');
         }
+    });
+
+    if (!isValid) {
+        alert('Mohon lengkapi semua kolom yang wajib diisi.');
+        return;
     }
-    pinFormFields.innerHTML = html;
-    
-    // Close edit modal dan open PIN modal
-    closeEditModal();
-    openPinVerificationModal();
-}
 
-// Open PIN verification modal
-function openPinVerificationModal() {
-    const modal = document.getElementById('modalPinVerification');
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('editModalTitle').textContent = 'Verifikasi PIN';
     document.getElementById('pin_verification').focus();
+    document.getElementById('pin_verification').setAttribute('required', 'required');
 }
 
-// Close PIN verification modal
-function closePinVerificationModal() {
-    const modal = document.getElementById('modalPinVerification');
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    document.getElementById('pin_verification').value = '';
+function goToStep1() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    
+    const jenisData = document.getElementById('edit_jenis_data').value;
+    const template = formTemplates[jenisData];
+    document.getElementById('editModalTitle').textContent = template ? template.title : 'Edit Data';
+    document.getElementById('pin_verification').removeAttribute('required');
 }
 
 // PIN input: only numbers
@@ -612,6 +712,18 @@ document.addEventListener('DOMContentLoaded', function() {
     if (pinInput) {
         pinInput.addEventListener('input', function(e) {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
+        });
+    }
+
+    // Submit button handling to prevent double submission
+    const form = document.getElementById('editProfileForm');
+    if (form) {
+        form.addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitBtn');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '<svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...';
+            }
         });
     }
 });

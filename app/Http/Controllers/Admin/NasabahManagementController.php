@@ -95,11 +95,17 @@ class NasabahManagementController extends Controller
             switch ($pengajuan->jenis_data) {
                 case 'data_user':
                     // Update user table only
-                    $nasabah->user->update([
+                    $updateDataUser = [
                         'nama' => $dataBaru['nama'] ?? $nasabah->user->nama,
                         'email' => $dataBaru['email'] ?? $nasabah->user->email,
                         'nomor_hp' => $dataBaru['nomor_hp'] ?? $nasabah->user->nomor_hp,
-                    ]);
+                    ];
+                    
+                    if (isset($dataBaru['foto']) && $dataBaru['foto']) {
+                        $updateDataUser['foto'] = $dataBaru['foto'];
+                    }
+                    
+                    $nasabah->user->update($updateDataUser);
                     break;
 
                 case 'data_pribadi':
