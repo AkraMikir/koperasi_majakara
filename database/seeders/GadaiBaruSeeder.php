@@ -100,7 +100,7 @@ class GadaiBaruSeeder extends Seeder
 
         // 3. Grid Slots (Contoh masing-masing 5x5 grid)
         $this->seedGrid('tbl_gadai_grid_electronic', 'EL', 5, 5);
-        $this->seedGrid('tbl_gadai_grid_vehicle', 'VK', 5, 5);
+        $this->seedGrid('tbl_gadai_grid_vehicle', 'VC', 5, 5);
         $this->seedGrid('tbl_gadai_grid_gold', 'EM', 5, 5);
     }
 

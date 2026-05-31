@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
@@ -130,13 +131,10 @@ class LoginController extends Controller
                 ->with('error', 'User tidak ditemukan.');
         }
 
-        // Verify PIN
-        // PIN stored as integer in database, but input is string
-        // Convert input PIN to integer for comparison
-        $inputPin = (int) str_replace(['.', ','], '', $request->pin);
-        $userPin = (int) $user->pin;
+        // Verify PIN using Hash::check
+        $inputPin = str_replace(['.', ','], '', $request->pin);
 
-        if ($inputPin !== $userPin) {
+        if (!Hash::check($inputPin, $user->pin)) {
             if ($request->expectsJson() || $request->ajax()) {
                 return response()->json([
                     'success' => false,

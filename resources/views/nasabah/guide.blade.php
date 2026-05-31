@@ -19,7 +19,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-white font-display mb-1">Panduan Layanan</h1>
-                    <p class="text-white/90 text-sm md:text-base">Kenali fitur Tabungan, Pinjaman, dan cara mengajukan layanan dengan mudah.</p>
+                    <p class="text-white/90 text-sm md:text-base">Kenali fitur Tabungan, Pinjaman, Deposito, Gadai dan cara mengajukan layanan dengan mudah.</p>
                 </div>
             </div>
         </div>
@@ -353,27 +353,231 @@
             </div>
         </section>
 
-        {{-- Gadai & Deposito (Coming Soon) --}}
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center opacity-90">
-                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                    </svg>
+        {{-- ========== GADAI ========== --}}
+        <section class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-yellow-600/10 to-[#8b6f2f]/10 px-6 py-5 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 font-display">Gadai</h2>
+                        <p class="text-gray-600 text-sm">Ajukan pinjaman cepat dengan jaminan barang berharga (Emas, Elektronik, Kendaraan)</p>
+                    </div>
                 </div>
-                <h3 class="font-bold text-gray-800 font-display mb-1">Gadai</h3>
-                <p class="text-gray-500 text-sm">Segera hadir. Layanan gadai akan dapat diakses di sini.</p>
             </div>
-            <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-6 text-center opacity-90">
-                <div class="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 19l10-10 4 4 6-6m0 0v6m0-6h6"></path>
-                    </svg>
+            <div class="p-6 space-y-4">
+                {{-- Pengajuan Gadai Baru --}}
+                <details class="group rounded-2xl border border-gray-100 bg-gray-50/50 overflow-hidden">
+                    <summary class="flex items-center justify-between cursor-pointer list-none px-5 py-4 hover:bg-[#674c1d]/5 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-[#674c1d]/15 rounded-xl flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">Pengajuan Gadai Baru</h3>
+                                <p class="text-sm text-gray-600">Alur pengajuan barang jaminan</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-5 pb-5 pt-0 space-y-4">
+                        {{-- Visualisasi alur --}}
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-[#8b6f2f]/30 shadow-sm">
+                                <span class="w-5 h-5 rounded-full bg-[#674c1d] text-white flex items-center justify-center font-bold">1</span>
+                                Pilih barang & kategori
+                            </span>
+                            <span class="text-gray-400">→</span>
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-[#8b6f2f]/30 shadow-sm">
+                                <span class="w-5 h-5 rounded-full bg-[#674c1d] text-white flex items-center justify-center font-bold">2</span>
+                                Masukkan deskripsi & foto
+                            </span>
+                            <span class="text-gray-400">→</span>
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-green-200 shadow-sm">
+                                <span class="w-5 h-5 rounded-full bg-green-600 text-white flex items-center justify-center font-bold">3</span>
+                                Kirim pengajuan & tunggu taksiran
+                            </span>
+                        </div>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span>Pilih kategori barang (Emas, Elektronik, atau Kendaraan). Setiap kategori memiliki ketentuan suku bunga, biaya jasa admin, dan biaya inap penyimpanan masing-masing.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span>Tuliskan deskripsi lengkap, upload foto barang, dan pilih metode pembayaran biaya jasa administrasi (Transfer atau Janji Temu). Masukkan PIN untuk konfirmasi.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span>Nilai taksiran maksimum dihitung otomatis. Admin akan melakukan verifikasi fisik langsung di kantor koperasi untuk menetapkan nilai pencairan deal akhir.</span>
+                            </li>
+                        </ul>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('nasabah.gadai_baru.index') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#674c1d]/10 text-[#674c1d] rounded-xl text-sm font-semibold hover:bg-[#674c1d]/20 transition-colors">
+                                Dashboard Gadai
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                            <a href="{{ route('nasabah.guide.gadai-pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-[#8b6f2f]/40 text-[#674c1d] rounded-xl text-sm font-medium hover:bg-[#674c1d]/5 transition-colors">
+                                Panduan Lengkap Pengajuan
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </details>
+
+                {{-- Menebus & Memperpanjang Gadai --}}
+                <details class="group rounded-2xl border border-gray-100 bg-gray-50/50 overflow-hidden">
+                    <summary class="flex items-center justify-between cursor-pointer list-none px-5 py-4 hover:bg-[#674c1d]/5 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-[#674c1d]/15 rounded-xl flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">Menebus & Memperpanjang Gadai</h3>
+                                <p class="text-sm text-gray-600">Pelunasan atau perpanjangan tenor gadai</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-5 pb-5 pt-0 space-y-4">
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span><strong>Tebus Gadai:</strong> Melunasi seluruh sisa pokok pinjaman ditambah biaya inap/penyimpanan dan denda jika terlambat untuk mendapatkan barang jaminan kembali.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span><strong>Perpanjang Gadai:</strong> Mengajukan perpanjangan jatuh tempo dengan membayar biaya perpanjangan. Sangat berguna agar barang tidak dilelang saat belum siap melunasi.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span><strong>Masa Tenggang & Lelang:</strong> Jika gadai melewati jatuh tempo tanpa penebusan atau perpanjangan, status berubah menjadi <strong>Tenggang</strong> (denda berjalan harian) sebelum akhirnya dilelang oleh koperasi.</span>
+                            </li>
+                        </ul>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('nasabah.gadai_baru.status-pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#674c1d]/10 text-[#674c1d] rounded-xl text-sm font-semibold hover:bg-[#674c1d]/20 transition-colors">
+                                Status & Gadai Aktif
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                            <a href="{{ route('nasabah.guide.gadai-aktif') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-[#8b6f2f]/40 text-[#674c1d] rounded-xl text-sm font-medium hover:bg-[#674c1d]/5 transition-colors">
+                                Panduan Gadai Aktif
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="pt-2 flex flex-wrap gap-3 border-t border-gray-100">
+                    <a href="{{ route('nasabah.gadai_baru.index') }}" class="text-sm font-medium text-[#8b6f2f] hover:underline">Dashboard Gadai</a>
+                    <a href="{{ route('nasabah.gadai_baru.status-pengajuan') }}" class="text-sm font-medium text-[#8b6f2f] hover:underline">Status Pengajuan & Aktif</a>
+                    <a href="{{ route('nasabah.gadai_baru.riwayat') }}" class="text-sm font-medium text-[#8b6f2f] hover:underline">Riwayat Gadai</a>
                 </div>
-                <h3 class="font-bold text-gray-800 font-display mb-1">Deposito</h3>
-                <p class="text-gray-500 text-sm">Segera hadir. Layanan deposito akan dapat diakses di sini.</p>
             </div>
-        </div>
+        </section>
+
+        {{-- ========== DEPOSITO ========== --}}
+        <section class="bg-white rounded-3xl shadow-lg border border-gray-100 overflow-hidden">
+            <div class="bg-gradient-to-r from-[#d4af37]/10 to-[#8b6f2f]/10 px-6 py-5 border-b border-gray-100">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-amber-100 rounded-2xl flex items-center justify-center">
+                        <svg class="w-8 h-8 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 19l10-10 4 4 6-6m0 0v6m0-6h6"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-xl font-bold text-gray-900 font-display">Deposito</h2>
+                        <p class="text-gray-600 text-sm">Investasikan dana Anda secara berjangka dengan bagi hasil / bunga yang lebih tinggi</p>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6 space-y-4">
+                {{-- Membuka Deposito Berjangka --}}
+                <details class="group rounded-2xl border border-gray-100 bg-gray-50/50 overflow-hidden">
+                    <summary class="flex items-center justify-between cursor-pointer list-none px-5 py-4 hover:bg-[#674c1d]/5 transition-colors">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 bg-[#d4af37]/15 rounded-xl flex items-center justify-center shrink-0">
+                                <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-900">Membuka Deposito Berjangka</h3>
+                                <p class="text-sm text-gray-600">Investasi aman dengan bunga optimal dan tenor fleksibel</p>
+                            </div>
+                        </div>
+                        <svg class="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </summary>
+                    <div class="px-5 pb-5 pt-0 space-y-4">
+                        {{-- Visualisasi alur --}}
+                        <div class="flex flex-wrap items-center gap-2 text-xs">
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-[#8b6f2f]/30 shadow-sm">
+                                <span class="w-5 h-5 rounded-full bg-[#d4af37] text-white flex items-center justify-center font-bold">1</span>
+                                Pilih tenor & paket
+                            </span>
+                            <span class="text-gray-400">→</span>
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-white rounded-lg border border-[#8b6f2f]/30 shadow-sm">
+                                <span class="w-5 h-5 rounded-full bg-[#d4af37] text-white flex items-center justify-center font-bold">2</span>
+                                Isi nominal & konfirmasi PIN
+                            </span>
+                            <span class="text-gray-400">→</span>
+                            <span class="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 rounded-lg border border-green-200 shadow-sm">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                Deposito disetujui & aktif
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            Deposito adalah program investasi berjangka koperasi dengan tingkat bagi hasil / bunga yang lebih tinggi dari tabungan biasa. Uang Anda akan dikunci selama tenor yang dipilih (1, 3, 6, atau 12 bulan).
+                        </p>
+                        <ul class="space-y-2 text-gray-700 text-sm">
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span>Minimal nominal penempatan deposito berjangka adalah <strong>Rp 1.000.000</strong>.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span>Hasil bunga/imbal hasil akan dikenakan potongan pajak sebesar 20% sesuai regulasi perpajakan yang berlaku.</span>
+                            </li>
+                            <li class="flex items-start gap-2">
+                                <span class="text-[#8b6f2f] mt-0.5 shrink-0">•</span>
+                                <span><strong>Pencairan Otomatis:</strong> Ketika deposito mencapai masa jatuh tempo (maturity), sistem akan otomatis mencairkan dana pokok beserta bunga bersih ke rekening Tabungan utama Anda secara instan.</span>
+                            </li>
+                        </ul>
+                        <div class="rounded-xl bg-blue-50 border border-blue-200/80 p-4">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-5 h-5 text-blue-700 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <div>
+                                    <h4 class="font-semibold text-blue-900 mb-1">Penarikan Sebelum Jatuh Tempo</h4>
+                                    <p class="text-xs text-blue-900/90">Jika Anda melakukan penutupan/pencairan sebelum masa jatuh tempo habis (break deposito), Anda tidak akan mendapatkan bunga atau imbal hasil berjalan, namun seluruh nominal pokok tetap akan dikembalikan utuh ke saldo tabungan Anda setelah disetujui admin.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <a href="{{ route('nasabah.deposito.pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 bg-[#d4af37]/15 text-[#674c1d] rounded-xl text-sm font-semibold hover:bg-[#d4af37]/25 transition-colors">
+                                Mulai Deposito
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                            <a href="{{ route('nasabah.guide.deposito-pengajuan') }}" class="inline-flex items-center gap-2 px-4 py-2 border border-[#8b6f2f]/40 text-[#674c1d] rounded-xl text-sm font-medium hover:bg-[#674c1d]/5 transition-colors">
+                                Panduan Pembukaan Deposito
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                            </a>
+                        </div>
+                    </div>
+                </details>
+
+                <div class="pt-2 flex flex-wrap gap-3 border-t border-gray-100">
+                    <a href="{{ route('nasabah.deposito.index') }}" class="text-sm font-medium text-[#d4af37] hover:underline">Dashboard Deposito</a>
+                    <a href="{{ route('nasabah.deposito.pengajuan') }}" class="text-sm font-medium text-[#d4af37] hover:underline">Buka Deposito Baru</a>
+                    <a href="{{ route('nasabah.deposito.riwayat') }}" class="text-sm font-medium text-[#d4af37] hover:underline">Riwayat Transaksi</a>
+                </div>
+            </div>
+        </section>
 
         {{-- Tips --}}
         <div class="bg-gradient-to-r from-[#674c1d]/5 to-[#d4af37]/10 rounded-2xl p-6 border border-[#8b6f2f]/20">

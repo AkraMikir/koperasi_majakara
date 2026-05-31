@@ -16,6 +16,7 @@ use App\Models\JnsBank;
 use App\Models\KategoriDeposito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class DepositoController extends Controller
 {
@@ -26,7 +27,15 @@ class DepositoController extends Controller
     {
         $nasabah = Auth::user()->nasabah;
 
-        // BANK ACCESS GUARD dihapus dari index agar nasabah selalu bisa melihat riwayat deposito
+        // ── BANK ACCESS GUARD ──────────────────────────────────────
+        if ($nasabah) {
+            $access = app(BankAccessService::class)->checkPremiumAccess($nasabah->id);
+            if (!$access['allowed']) {
+                return redirect()->route('nasabah.dashboard')
+                    ->with('error', $access['reason']);
+            }
+        }
+        // ──────────────────────────────────────────────────────────
 
         // Ambil semua paket deposito aktif
         $pakets = PaketDeposito::with('kategori')
@@ -276,7 +285,7 @@ class DepositoController extends Controller
         $pembagi = $isLeap ? 366 : 365;
         
         $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor->tenor_hari ?? 30) / $pembagi);
-        $pajak       = $bungaKotor * 0.20;
+        $pajak       = $bungaKotor * 0.10;
         $nominalAkhir = $deposito->nominal_awal + $bungaKotor - $pajak;
 
         // Cek apakah sudah ada request yang pending
@@ -312,7 +321,7 @@ class DepositoController extends Controller
         ]);
 
         $user = Auth::user();
-        if ((int) $request->pin !== (int) $user->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return back()->with('error', 'PIN yang Anda masukkan salah.');
         }
 

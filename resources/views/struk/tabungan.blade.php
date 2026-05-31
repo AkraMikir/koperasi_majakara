@@ -24,14 +24,19 @@
         .approver-value { font-weight: 600; }
     </style>
 </head>
+@php
+    $strukSettings = \App\Models\SettingsStruk::getSettings();
+@endphp
 <body>
     <div class="struk">
         <div class="header">
             @if(!empty($hasLogo) && !empty($logoPath))
             <img class="logo" src="{{ $logoPath }}" alt="Logo" />
             @endif
-            <div class="brand">Koperasi Majakara</div>
-            <div class="title">Struk Transaksi Tabungan</div>
+            <div class="brand">{{ $strukSettings->nama_koperasi }}</div>
+            <div style="font-size: 8px; color: #555; text-align: center; margin-top: 2px;">{{ $strukSettings->alamat_koperasi }}</div>
+            <div style="font-size: 8px; color: #555; text-align: center;">Telp: {{ $strukSettings->no_telp }}</div>
+            <div class="title" style="margin-top: 6px;">Struk Transaksi Tabungan</div>
             <div class="subtitle">{{ $transaksi->jenis === 'setoran' ? 'SETORAN' : 'PENARIKAN' }}</div>
         </div>
 
@@ -71,7 +76,7 @@
         <div class="divider"></div>
         <div class="footer">
             Dicetak : {{ now()->format('d-m-Y H:i') }}<br />
-            Dicetak dari Koperasi Majakara
+            Dicetak dari {{ $strukSettings->nama_pt }}
         </div>
     </div>
 </body>

@@ -34,6 +34,15 @@
                     <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-black rounded-lg">{{ strtoupper($gadai->status) }}</span>
                 @endif
             </div>
+            @if($gadai->status == 'active')
+            <a href="{{ route('admin.struk-gadai', $gadai->id) }}" 
+                class="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors shadow-sm text-sm">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Download Struk
+            </a>
+            @endif
             <a href="{{ route('admin.gadai_baru.index') }}" 
                 class="flex items-center gap-2 px-4 py-2.5 bg-white/80 backdrop-blur-md text-gray-700 border border-white/60 font-medium rounded-xl hover:bg-white transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

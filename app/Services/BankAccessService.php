@@ -136,7 +136,7 @@ class BankAccessService
         if (!$allowed) {
             $kekurangan = $minSaldo - $saldo;
             $reason = sprintf(
-                'Rekening %s Anda memerlukan saldo tabungan minimal Rp %s untuk mengakses fitur ini. ' .
+                'Rekening %s Anda memerlukan saldo tabungan minimal Rp %s untuk mengakses fitur lainnya. ' .
                 'Saldo Anda saat ini: Rp %s (kurang Rp %s). ' .
                 'Silakan lakukan setoran tabungan terlebih dahulu.',
                 strtoupper($namaBank),

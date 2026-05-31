@@ -19,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class TabunganController extends Controller
 {
@@ -196,7 +197,7 @@ class TabunganController extends Controller
             ], 400);
         }
 
-        if ($user->pin != $request->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return response()->json([
                 'success' => false,
                 'message' => 'PIN yang Anda masukkan salah.'
@@ -238,11 +239,7 @@ class TabunganController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        // Convert both to integer for comparison (handles string/int mismatch)
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->route('nasabah.tabungan.nabung-sekarang')
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
@@ -394,11 +391,7 @@ class TabunganController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        // Convert both to integer for comparison (handles string/int mismatch)
-        $userPin = (int) $user->pin;
-        $inputPin = (int) $request->pin;
-
-        if ($userPin !== $inputPin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->route('nasabah.tabungan.janji-temu', [
                 'nominal' => $request->nominal ?? '',
                 'keterangan' => $request->keterangan ?? '',
@@ -488,7 +481,7 @@ class TabunganController extends Controller
         // Verify PIN
         /** @var User $user */
         $user = Auth::user();
-        if (!$user->pin || (int)$user->pin !== (int)$request->pin) {
+        if (!$user->pin || !Hash::check($request->pin, $user->pin)) {
             return redirect()->back()
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
@@ -738,7 +731,7 @@ class TabunganController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        if ((int) $user->pin !== (int) $request->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
         }
 
@@ -766,7 +759,7 @@ class TabunganController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        if ((int) $user->pin !== (int) $request->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
         }
         
@@ -794,7 +787,7 @@ class TabunganController extends Controller
 
         /** @var User $user */
         $user = Auth::user();
-        if ((int) $user->pin !== (int) $request->pin) {
+        if (!Hash::check($request->pin, $user->pin)) {
             return redirect()->back()->with('error', 'PIN yang Anda masukkan salah!');
         }
         

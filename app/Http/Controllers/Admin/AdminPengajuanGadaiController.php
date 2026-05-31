@@ -15,14 +15,21 @@ use Illuminate\Support\Facades\DB;
 
 class AdminPengajuanGadaiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $pengajuan = GadaiPengajuan::with(['nasabah.user', 'gadaiActive.item', 'gadaiActive.kategori', 'files'])
-            ->where('status', 'pending')
-            ->orderBy('created_at', 'asc')
-            ->get();
+        $status = $request->query('status', 'pending');
+        
+        $query = GadaiPengajuan::with(['nasabah.user', 'gadaiActive.item', 'gadaiActive.kategori', 'files']);
+        
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        
+        $orderBy = $status === 'pending' ? 'asc' : 'desc';
+        
+        $pengajuan = $query->orderBy('created_at', $orderBy)->get();
             
-        return view('admin.gadai_baru.pengajuan_index', compact('pengajuan'));
+        return view('admin.gadai_baru.pengajuan_index', compact('pengajuan', 'status'));
     }
 
     public function approve(Request $request, $id)

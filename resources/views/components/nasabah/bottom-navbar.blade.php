@@ -35,6 +35,9 @@
         ['x' => 45, 'y' => -54],   // 3 Deposito
         ['x' => 69, 'y' => -12],   // 4 Gadai (paling kanan)
     ];
+    $nasabah = auth()->user() ? auth()->user()->nasabah : null;
+    $bankInfo = $nasabah ? app(\App\Services\BankAccessService::class)->checkPremiumAccess($nasabah->id) : null;
+    $isRestricted = $bankInfo && !$bankInfo['allowed'];
 @endphp
 
 <nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(103,76,29,0.08)] z-50 transition-transform duration-300">
@@ -44,7 +47,25 @@
             <div id="navSlider" class="absolute rounded-2xl bg-[#8b6f2f]/14 shadow-[0_4px_14px_rgba(139,111,47,0.2)] pointer-events-none z-0"
                  style="height: 44px; width: 48px; left: 0; bottom: 2rem; transition: left 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), width 0.4s cubic-bezier(0.34, 1.2, 0.64, 1);"></div>
             @foreach($allNavItems as $item)
-            @php $active = $navActive($item['key']); @endphp
+            @php 
+                $active = $navActive($item['key']); 
+                $isPremium = in_array($item['key'], ['pinjaman', 'deposito', 'gadai']);
+                $isLocked = $isPremium && $isRestricted;
+            @endphp
+            @if($isLocked)
+            <div class="nav-item group relative z-10 flex flex-col items-center justify-end min-w-[48px] px-1 py-2 rounded-2xl text-gray-400 opacity-40 cursor-not-allowed"
+                 data-nav-key="{{ $item['key'] }}"
+                 title="{{ $bankInfo['reason'] }}">
+                <span class="flex items-center justify-center w-12 h-10 rounded-2xl relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $item['icon'] }}"></path></svg>
+                    <!-- Small lock overlay -->
+                    <span class="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+                        <svg class="w-3.5 h-3.5 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+                    </span>
+                </span>
+                <span class="text-xs font-medium mt-1.5 block text-gray-400">{{ $item['label'] }}</span>
+            </div>
+            @else
             <a href="{{ $item['route'] === '#' ? '#' : route($item['route']) }}"
                class="nav-item group relative z-10 flex flex-col items-center justify-end min-w-[48px] px-1 py-2 rounded-2xl transition-colors duration-200 {{ $active ? 'text-[#8b6f2f]' : 'text-gray-500 hover:text-gray-700' }}"
                data-nav-key="{{ $item['key'] }}"
@@ -54,6 +75,7 @@
                 </span>
                 <span class="text-xs font-medium mt-1.5 block transition-colors duration-200 {{ $active ? 'text-[#8b6f2f] font-semibold' : '' }}">{{ $item['label'] }}</span>
             </a>
+            @endif
             @endforeach
         </div>
 
@@ -82,7 +104,24 @@
 <div id="burgerArcBackdrop" class="md:hidden fixed inset-0 z-40 bg-black/15 opacity-0 pointer-events-none transition-opacity duration-300" aria-hidden="true"></div>
 <div id="burgerArcMenu" class="md:hidden fixed left-1/2 bottom-[4.5rem] z-50 w-[220px] h-[95px] pointer-events-none" style="transform: translate(calc(-50% + 10px), 0);" aria-hidden="true">
     @foreach($arcItems as $idx => $arcItem)
-    @php $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70]; @endphp
+    @php 
+        $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70];
+        $isPremium = in_array($arcItem['key'], ['pinjaman', 'deposito', 'gadai']);
+        $isLocked = $isPremium && $isRestricted;
+    @endphp
+    @if($isLocked)
+    <div class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-gray-300 text-gray-500 border-2 border-gray-400 opacity-40 cursor-not-allowed pointer-events-none"
+       style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out;"
+       data-arc-x="{{ $pos['x'] ?? 0 }}"
+       data-arc-y="{{ $pos['y'] ?? -70 }}"
+       data-arc-delay="{{ $idx * 40 }}"
+       title="{{ $arcItem['label'] }} (Terkunci: {{ $bankInfo['reason'] }})">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $arcItem['icon'] }}"></path></svg>
+        <span class="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
+            <svg class="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>
+        </span>
+    </div>
+    @else
     <a href="{{ $arcItem['route'] === '#' ? '#' : route($arcItem['route']) }}"
        class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-[#a67c52]/90 to-[#8b6f2f]/95 text-white border-2 border-[#674c1d]/30 shadow-[0_4px_16px_rgba(139,111,47,0.35)] hover:scale-110 hover:shadow-[0_8px_24px_rgba(103,76,29,0.45)] hover:border-[#d4af37]/60 hover:from-[#8b6f2f] hover:to-[#674c1d] hover:ring-2 hover:ring-[#d4af37]/40 active:scale-95 transition-all duration-200 ease-out"
        style="margin-left: -24px; margin-top: -24px; transition: transform 0.3s ease-out, opacity 0.3s ease-out, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;"
@@ -92,6 +131,7 @@
        title="{{ $arcItem['label'] }}">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $arcItem['icon'] }}"></path></svg>
     </a>
+    @endif
     @endforeach
 </div>
 <style>

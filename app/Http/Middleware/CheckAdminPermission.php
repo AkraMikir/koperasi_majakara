@@ -42,6 +42,9 @@ class CheckAdminPermission
             case 'crud-master-data':
                 $hasPermission = $this->permissionService->canCrudMasterData($user);
                 break;
+            case 'crud-biaya-transfer':
+                $hasPermission = $this->permissionService->canCrudBiayaTransfer($user);
+                break;
             case 'manage-nasabah':
                 $hasPermission = $this->permissionService->canManageNasabah($user);
                 break;

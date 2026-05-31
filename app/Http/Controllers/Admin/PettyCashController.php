@@ -666,9 +666,18 @@ class PettyCashController extends Controller
         
         if ($userRole === 'admin_utama') {
             // 🔥 OWNER: Helicopter View
-            $saldoOwnerCash = PettyCashSaldo::getSaldo($userId, 'owner', 'cash');
-            $saldoOwnerTf   = PettyCashSaldo::getSaldo($userId, 'owner', 'transfer');
+            // Gunakan vw_saldo_owner_detail (SUM semua mutasi per sumber) agar
+            // konsisten dengan halaman Kelola Saldo Utama — bukan getSaldo()
+            // yang hanya mengambil record terakhir tanpa filter sumber.
+            $ownerTotals = DB::table('vw_saldo_owner_detail')
+                ->where('user_id', $userId)
+                ->selectRaw('SUM(nominal_cash) as total_cash, SUM(nominal_tf) as total_tf')
+                ->first();
+
+            $saldoOwnerCash  = (float) ($ownerTotals->total_cash ?? 0);
+            $saldoOwnerTf    = (float) ($ownerTotals->total_tf   ?? 0);
             $saldoOwnerTotal = $saldoOwnerCash + $saldoOwnerTf;
+
             
             $pendingSetoran = PettyCashSetoranKantor::where('status', 'pending')->count();
             

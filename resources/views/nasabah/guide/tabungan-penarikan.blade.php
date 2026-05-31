@@ -76,9 +76,47 @@
             </a>
         </div>
 
-        <div class="rounded-2xl bg-blue-50 border border-blue-200/80 p-5">
-            <h3 class="font-bold text-blue-900 mb-2">Biaya transfer</h3>
-            <p class="text-sm text-blue-900/90">Ketika admin menyetujui penarikan via transfer, biaya transfer dihitung dan dipotong dari saldo. Total didebet = nominal penarikan + biaya transfer. Yang Anda terima ke rekening = nominal penarikan saja. Lihat rincian di <a href="{{ route('nasabah.tabungan.status-pengajuan-tarik') }}" class="underline font-medium">Status Pengajuan Tarik</a> → Detail setelah Disetujui.</p>
+        {{-- Detail Biaya Transfer & Riwayat --}}
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-[#674c1d] font-display mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Biaya Transaksi & Rekening Penarikan
+            </h2>
+            <div class="space-y-4">
+                <p class="text-sm text-gray-600">
+                    Untuk penarikan dana dengan metode <strong>Transfer Rekening</strong>, sistem menerapkan ketentuan biaya transfer sebagai berikut:
+                </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="bg-blue-50/60 rounded-xl p-4 border border-blue-100">
+                        <h4 class="font-semibold text-blue-900 text-sm mb-1">Dihitung Dinamis</h4>
+                        <p class="text-xs text-gray-600">
+                            Biaya transfer ditentukan secara otomatis oleh sistem berdasarkan kecocokan <strong>Bank Pengirim Koperasi</strong> dengan <strong>Bank Tujuan (Nasabah)</strong> yang diatur oleh Admin.
+                        </p>
+                    </div>
+                    <div class="bg-amber-50/60 rounded-xl p-4 border border-amber-100">
+                        <h4 class="font-semibold text-amber-900 text-sm mb-1">Debet dari Saldo Tabungan</h4>
+                        <p class="text-xs text-gray-600">
+                            Biaya transfer ini <strong>memotong saldo tabungan Anda secara langsung</strong>. Saldo terpotong = Nominal Penarikan + Biaya Transfer. Dana yang masuk ke rekening Anda adalah utuh nominal penarikan.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 mt-6 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <span class="text-sm text-gray-500">Pantau status pencairan dana Anda atau lihat riwayat transaksi tabungan Anda.</span>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('nasabah.tabungan.status-pengajuan-tarik') }}" 
+                       class="px-4 py-2 text-sm font-semibold text-[#674c1d] bg-[#674c1d]/10 rounded-xl hover:bg-[#674c1d]/15 transition-colors">
+                        Pantau Status Penarikan
+                    </a>
+                    <a href="{{ route('nasabah.tabungan.index') }}" 
+                       class="px-4 py-2 text-sm font-semibold text-[#674c1d] border border-[#674c1d]/20 rounded-xl hover:bg-[#674c1d]/5 transition-colors">
+                        Riwayat Transaksi
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 </div>

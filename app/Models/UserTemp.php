@@ -24,6 +24,8 @@ class UserTemp extends Model
     ];
 
     protected $casts = [
+        'pin' => 'hashed',
+        'password' => 'hashed',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];

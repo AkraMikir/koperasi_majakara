@@ -22,13 +22,24 @@
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6 mb-4">
         <div class="flex items-center justify-between mb-5">
             <h1 class="text-lg font-bold text-gray-800">Detail Pengajuan Deposito</h1>
-            @if($pengajuan->status === '1')
-                <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold">Pending</span>
-            @elseif($pengajuan->status === '2')
-                <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Disetujui</span>
-            @else
-                <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Ditolak</span>
-            @endif
+            <div class="flex items-center gap-2">
+                @if($pengajuan->status === '2' && $pengajuan->deposito)
+                <a href="{{ route('admin.struk-deposito', $pengajuan->deposito->id) }}" target="_blank"
+                   class="px-3 py-1.5 bg-[#674c1d] hover:bg-[#8b6f2f] text-white rounded-lg transition-colors text-xs font-medium inline-flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Struk PDF
+                </a>
+                @endif
+                @if($pengajuan->status === '1')
+                    <span class="bg-amber-50 text-amber-600 px-3 py-1 rounded-full text-xs font-bold">Pending</span>
+                @elseif($pengajuan->status === '2')
+                    <span class="bg-green-50 text-green-700 px-3 py-1 rounded-full text-xs font-bold">Disetujui</span>
+                @else
+                    <span class="bg-red-50 text-red-600 px-3 py-1 rounded-full text-xs font-bold">Ditolak</span>
+                @endif
+            </div>
         </div>
 
         <div class="grid grid-cols-2 gap-4 text-sm">

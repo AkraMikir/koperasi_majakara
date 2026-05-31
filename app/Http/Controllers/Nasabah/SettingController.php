@@ -284,10 +284,7 @@ class SettingController extends Controller
             }
 
             // Cek apakah PIN lama benar
-            $pinLamaInput = (int) $request->pin_lama;
-            $pinLamaDb = (int) $user->pin;
-
-            if ($pinLamaInput !== $pinLamaDb) {
+            if (!Hash::check($request->pin_lama, $user->pin)) {
                 Log::warning('PIN lama salah', [
                     'user_id' => $user->id,
                     'email' => $user->email,
@@ -298,14 +295,13 @@ class SettingController extends Controller
             }
 
             // Cek apakah PIN baru sama dengan PIN lama
-            $pinBaruInput = (int) $request->pin_baru;
-            if ($pinBaruInput === $pinLamaDb) {
+            if (Hash::check($request->pin_baru, $user->pin)) {
                 return redirect()->back()
                     ->with('error', 'PIN baru tidak boleh sama dengan PIN lama.');
             }
 
             // Update PIN
-            $user->update(['pin' => $pinBaruInput]);
+            $user->update(['pin' => $request->pin_baru]);
 
             Log::info('PIN berhasil diubah', [
                 'user_id' => $user->id,

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
 use App\Models\JnsAngsuranBulan;
+use App\Models\PaketDeposito;
 
 class GuideController extends Controller
 {
@@ -38,12 +39,34 @@ class GuideController extends Controller
         return view('nasabah.guide.pinjaman-pengajuan', [
             'bungaPinjaman' => $bungaPinjaman,
             'dendaPinjaman' => $dendaPinjaman,
-            'durasiList' => $durasiList,
+            'durasiList'    => $durasiList,
         ]);
     }
 
     public function pinjamanPembayaran()
     {
         return view('nasabah.guide.pinjaman-pembayaran');
+    }
+
+    public function depositoPengajuan()
+    {
+        $paketDeposito = PaketDeposito::where('status', 'aktif')
+            ->with('kategori')
+            ->orderBy('tenor_bulan')
+            ->get();
+
+        return view('nasabah.guide.deposito-pengajuan', [
+            'paketDeposito' => $paketDeposito,
+        ]);
+    }
+
+    public function gadaiPengajuan()
+    {
+        return view('nasabah.guide.gadai-pengajuan');
+    }
+
+    public function gadaiAktif()
+    {
+        return view('nasabah.guide.gadai-aktif');
     }
 }

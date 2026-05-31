@@ -54,8 +54,7 @@
                                 <p class="text-xs text-gray-500 font-medium mt-1">Diajukan: {{ $item->created_at->format('d M Y, H:i') }}</p>
                             </div>
                         </div>
-                        
-                        <div class="flex items-center sm:flex-col sm:items-end gap-2 sm:gap-1">
+                        <div class="flex flex-col sm:items-end gap-2 sm:gap-2">
                             <span class="px-4 py-1.5 rounded-full text-xs font-bold tracking-wide shadow-sm border {{ $item->status == 'pending' ? 'bg-amber-100/50 text-amber-700 border-amber-200' : ($item->status == 'approved' ? 'bg-emerald-100/50 text-emerald-700 border-emerald-200' : 'bg-red-100/50 text-red-700 border-red-200') }}">
                                 @if($item->status == 'pending')
                                     <span class="flex items-center gap-1.5">
@@ -74,6 +73,15 @@
                                     </span>
                                 @endif
                             </span>
+                            @if($item->status == 'approved')
+                            <a href="{{ route('nasabah.struk-gadai', $item->gadai_active_id) }}" target="_blank"
+                               class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm mt-1 sm:mt-0 w-full sm:w-max">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                Cetak Struk
+                            </a>
+                            @endif
                         </div>
                     </div>
                     

@@ -8,7 +8,7 @@
     {{-- Header --}}
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">⚠️ Peringatan Jatuh Tempo Deposito</h1>
+            <h1 class="text-2xl font-bold text-gray-900">Peringatan Jatuh Tempo Deposito</h1>
             <p class="text-sm text-gray-500">Daftar deposito yang akan jatuh tempo dalam 7 hari ke depan — siapkan dana sebelum tenggat.</p>
         </div>
         <a href="{{ route('admin.deposito.index') }}" class="inline-flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-200 transition">
@@ -57,7 +57,7 @@
     @if($summary->isNotEmpty())
     <div class="bg-white rounded-xl border border-gray-100 shadow-sm mb-6">
         <div class="px-5 py-4 border-b border-gray-100">
-            <h2 class="font-bold text-gray-800 text-sm">📅 Ringkasan Dana per Tanggal Jatuh Tempo</h2>
+            <h2 class="font-bold text-gray-800 text-sm">Ringkasan Dana per Tanggal Jatuh Tempo</h2>
         </div>
         <div class="p-4 overflow-x-auto">
             <table class="w-full text-sm">
@@ -134,7 +134,6 @@
 
         @if($persiapan->isEmpty())
         <div class="text-center py-16">
-            <div class="text-5xl mb-3">✅</div>
             <p class="text-gray-500 font-medium">Tidak ada deposito yang perlu disiapkan saat ini.</p>
             <p class="text-sm text-gray-400 mt-1">Sistem akan otomatis menambahkan peringatan 7 hari sebelum jatuh tempo.</p>
         </div>
