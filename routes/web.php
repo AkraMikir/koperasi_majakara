@@ -589,6 +589,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/setoran-approval/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalReject'])->name('setoran-approval.reject');
     });
 
+    // ── Dashboard Bunga (Analisis Bunga - Admin Utama & Operasional) ──
+    Route::prefix('bunga')->name('bunga.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\BungaController::class, 'index'])->name('index');
+        Route::get('/pinjaman', [\App\Http\Controllers\Admin\BungaController::class, 'pinjaman'])->name('pinjaman');
+        Route::get('/deposito', [\App\Http\Controllers\Admin\BungaController::class, 'deposito'])->name('deposito');
+        Route::get('/gadai', [\App\Http\Controllers\Admin\BungaController::class, 'gadai'])->name('gadai');
+    });
+
     // ── Deposito ──
     Route::prefix('deposito')->name('deposito.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\DepositoController::class, 'index'])->name('index');
