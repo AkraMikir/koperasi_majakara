@@ -1,9 +1,0 @@
-TABLE: tbl_janji_temu_tabungan
-id, id_pengajuan, id_nasabah, lokasi_temu, jenis, nominal, tanggal_janji_temu, waktu_janji_temu, keterangan, status, keterangan_admin, created_at, updated_at
-
-TABLE: tbl_janji_temu_pinjaman
-id, id_pengajuan, id_nasabah, lokasi_temu, nominal, tanggal_janji_temu, waktu_janji_temu, keterangan, created_at, updated_at
-
-TABLE: tbl_janji_temu_pembayaran_pinjaman
-id, id_pengajuan, id_nasabah, lokasi_temu, nominal, tanggal_janji_temu, waktu_janji_temu, keterangan, created_at, updated_at
-

@@ -32,6 +32,7 @@ Route::get('/faq', [LandingPageController::class, 'faq'])->name('landing.faq');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
 Route::post('/register/ocr', [RegisterController::class, 'processOcr'])->name('register.ocr');
+Route::post('/register/check-unique', [RegisterController::class, 'checkUnique'])->name('register.check-unique');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
