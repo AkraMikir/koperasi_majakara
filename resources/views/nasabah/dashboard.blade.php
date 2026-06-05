@@ -167,10 +167,20 @@
 
                 @foreach($quickAccess as $item)
                 @php
-                    $isDisabled = isset($item['is_premium']) && $item['is_premium'] && isset($bankInfo) && !$bankInfo['allowed'];
+                    $isVerified = auth()->user() && auth()->user()->verified !== null;
+                    $isPremiumLocked = isset($item['is_premium']) && $item['is_premium'] && isset($bankInfo) && !$bankInfo['allowed'];
+                    $isUnverifiedLocked = !$isVerified && $item['label'] !== 'Status';
+                    $isDisabled = $isPremiumLocked || $isUnverifiedLocked;
+                    
+                    $lockTitle = 'Akses dibatasi';
+                    if ($isUnverifiedLocked) {
+                        $lockTitle = 'Akun Anda belum diverifikasi oleh admin.';
+                    } elseif ($isPremiumLocked) {
+                        $lockTitle = $bankInfo['reason'];
+                    }
                 @endphp
                 @if($isDisabled)
-                <div class="flex flex-col items-center gap-2 cursor-not-allowed opacity-60 group relative" title="Akses dibatasi">
+                <div class="flex flex-col items-center gap-2 cursor-not-allowed opacity-60 group relative" title="{{ $lockTitle }}">
                     <div class="w-14 h-14 md:w-16 md:h-16 rounded-[1.25rem] bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-400 relative overflow-hidden">
                         <svg class="w-6 h-6 md:w-7 md:h-7 relative z-10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>

@@ -4,6 +4,15 @@
     $currentTime = now()->format('H.i.s');
     $currentRoute = request()->route()->getName() ?? '';
     $isTabunganPage = str_contains($currentRoute, 'tabungan');
+
+    $user = auth()->user();
+    $needsEmergencyContact = false;
+    if ($user && $user->role === 'nasabah') {
+        $nasabah = $user->nasabah;
+        if (!$nasabah || !$nasabah->darurat) {
+            $needsEmergencyContact = true;
+        }
+    }
 @endphp
 
 
@@ -128,4 +137,29 @@
             </div>
         </div>
     </div>
+
+    @if($needsEmergencyContact)
+    <div class="bg-amber-50 border-t border-amber-200/60 py-2.5 px-4 transition-all duration-300">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+                <span class="flex h-2.5 w-2.5 relative shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500"></span>
+                </span>
+                <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <p class="text-xs sm:text-sm font-medium text-amber-800 text-center sm:text-left">
+                    Anda belum melengkapi data <strong class="font-bold">Kontak Darurat</strong>. Harap lengkapi untuk dapat mengakses fitur pinjaman dan gadai.
+                </p>
+            </div>
+            <a href="{{ route('nasabah.profile', ['focus' => 'kontak-darurat']) }}" class="text-xs sm:text-sm font-bold text-amber-700 hover:text-amber-900 transition-colors flex items-center gap-1 whitespace-nowrap">
+                Lengkapi Sekarang
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
+        </div>
+    </div>
+    @endif
 </header>

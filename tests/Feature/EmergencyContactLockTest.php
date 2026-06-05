@@ -30,6 +30,7 @@ class EmergencyContactLockTest extends TestCase
             'foto' => 'default-avatar.jpg',
             'role' => 'nasabah',
             'email_verified_at' => now(),
+            'verified' => now(),
         ]);
 
         $this->nasabah = Nasabah::create([

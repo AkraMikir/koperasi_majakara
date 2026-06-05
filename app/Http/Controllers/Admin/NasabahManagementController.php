@@ -348,4 +348,65 @@ class NasabahManagementController extends Controller
             'pin' => $pin,
         ]);
     }
+
+    /**
+     * Verify a newly registered nasabah account
+     * Route: POST /admin/nasabah/{id}/verify
+     */
+    public function verifyNasabah(Request $request, $id)
+    {
+        // Authorization: Only Admin Utama can verify nasabah
+        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat memverifikasi nasabah.');
+        }
+
+        $nasabah = Nasabah::with('user')->findOrFail($id);
+
+        if ($nasabah->user->verified !== null) {
+            return redirect()->back()->with('error', 'Nasabah ini sudah diverifikasi sebelumnya.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $nasabah->user->update([
+                'verified' => now(),
+            ]);
+
+            DB::commit();
+
+            Log::info('Admin verifikasi akun nasabah', [
+                'admin_id' => auth()->id(),
+                'admin_email' => auth()->user()->email,
+                'nasabah_id' => $nasabah->id,
+                'nasabah_email' => $nasabah->user->email,
+                'timestamp' => now(),
+            ]);
+
+            app(ActivityLogService::class)->logVerifyNasabah($nasabah->id, $nasabah->user->nama ?? 'N/A');
+
+            // Send notification to nasabah
+            \App\Models\NasabahNotification::notify(
+                $nasabah->id,
+                'profil',
+                'Akun diverifikasi',
+                'Selamat! Akun Anda telah diverifikasi oleh admin. Sekarang Anda dapat menggunakan seluruh layanan kami.',
+                route('nasabah.dashboard'),
+                (string) $nasabah->id,
+                'verifikasi_akun'
+            );
+
+            return redirect()->back()->with('success', 'Akun nasabah berhasil diverifikasi.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Error verify nasabah', [
+                'admin_id' => auth()->id(),
+                'nasabah_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat memverifikasi nasabah.');
+        }
+    }
 }

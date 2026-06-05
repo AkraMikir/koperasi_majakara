@@ -416,6 +416,18 @@ class ActivityLogService
         );
     }
 
+    public function logVerifyNasabah(int $nasabahId, string $nasabahNama): void
+    {
+        $this->log(
+            'verify_nasabah',
+            'nasabah',
+            "Memverifikasi akun nasabah {$nasabahNama}",
+            ['nasabah' => $nasabahNama],
+            'Nasabah',
+            $nasabahId
+        );
+    }
+
     // --- AKUN ---
 
     public function logUbahPassword(): void

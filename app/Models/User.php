@@ -25,6 +25,7 @@ class User extends Authenticatable
         'nomor_hp',
         'foto',
         'role',
+        'verified',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'pin' => 'hashed',
+            'verified' => 'datetime',
         ];
     }
 

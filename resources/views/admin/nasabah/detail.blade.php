@@ -26,41 +26,97 @@
         @endif
     </div>
 
+    <!-- Alert Messages -->
+    @if(session('success'))
+    <div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl p-4 shadow-md">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-green-700 font-semibold">{{ session('success') }}</p>
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 shadow-md">
+        <div class="flex items-center gap-3">
+            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-red-700 font-semibold">{{ session('error') }}</p>
+        </div>
+    </div>
+    @endif
+
     <!-- Profile Header -->
     <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-2xl shadow-2xl p-8 border-2 border-[#d4af37]/30">
-        <div class="flex items-center gap-6">
-            <div class="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white/30">
-                @if($nasabah->user->foto && $nasabah->user->foto !== 'default-avatar.jpg')
-                    <img src="{{ asset('storage/' . $nasabah->user->foto) }}" alt="Foto Profil" class="w-full h-full object-cover">
-                @else
-                    <span class="text-5xl font-bold text-white">{{ strtoupper(substr($nasabah->user->nama ?? 'N', 0, 1)) }}</span>
-                @endif
-            </div>
-            <div class="flex-1">
-                <h2 class="text-3xl font-bold text-white mb-2 font-display">{{ $nasabah->user->nama }}</h2>
-                <div class="flex flex-wrap gap-4 text-white/90">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                        </svg>
-                        {{ $nasabah->user->email }}
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                        </svg>
-                        {{ $nasabah->user->nomor_hp }}
-                    </div>
-                    @if($nasabah->dataKtp)
-                    <div class="flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
-                        </svg>
-                        NIK: {{ $nasabah->dataKtp->nik }}
-                    </div>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div class="flex items-center gap-6">
+                <div class="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white/30 shrink-0">
+                    @if($nasabah->user->foto && $nasabah->user->foto !== 'default-avatar.jpg')
+                        <img src="{{ asset('storage/' . $nasabah->user->foto) }}" alt="Foto Profil" class="w-full h-full object-cover">
+                    @else
+                        <span class="text-5xl font-bold text-white">{{ strtoupper(substr($nasabah->user->nama ?? 'N', 0, 1)) }}</span>
                     @endif
                 </div>
+                <div class="flex-1">
+                    <div class="flex items-center gap-3 flex-wrap mb-2">
+                        <h2 class="text-3xl font-bold text-white font-display">{{ $nasabah->user->nama }}</h2>
+                        @if($nasabah->user->verified)
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-500/20 backdrop-blur-md text-green-200 border border-green-400/40 rounded-full text-xs font-semibold shadow-inner">
+                                <svg class="w-3.5 h-3.5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Terverifikasi
+                            </span>
+                        @else
+                            <span class="inline-flex items-center gap-1 px-3 py-1 bg-yellow-500/20 backdrop-blur-md text-yellow-200 border border-yellow-400/40 rounded-full text-xs font-semibold shadow-inner animate-pulse">
+                                <svg class="w-3.5 h-3.5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                                Belum Verifikasi
+                            </span>
+                        @endif
+                    </div>
+                    <div class="flex flex-wrap gap-4 text-white/90">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                            {{ $nasabah->user->email }}
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            {{ $nasabah->user->nomor_hp }}
+                        </div>
+                        @if($nasabah->dataKtp)
+                        <div class="flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+                            </svg>
+                            NIK: {{ $nasabah->dataKtp->nik }}
+                        </div>
+                        @endif
+                    </div>
+                </div>
             </div>
+            
+            @if(!$nasabah->user->verified && auth()->check() && app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user()))
+                <div class="flex items-center shrink-0">
+                    <form action="{{ route('admin.nasabah.verify', $nasabah->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memverifikasi akun nasabah ini?')">
+                        @csrf
+                        <button type="submit" class="px-6 py-3.5 bg-green-600 hover:bg-green-700 text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] flex items-center gap-2 border border-green-500/30">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Verifikasi Akun
+                        </button>
+                    </form>
+                </div>
+            @endif
         </div>
     </div>
 
@@ -161,6 +217,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- Data Pekerjaan -->
         @if($nasabah->pekerjaan)
@@ -228,6 +285,7 @@
                 </div>
             </div>
         </div>
+        @endif
 
         <!-- Kontak Darurat -->
         @if($nasabah->darurat)
