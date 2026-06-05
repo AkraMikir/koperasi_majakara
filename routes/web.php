@@ -109,7 +109,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     });
     
     // Pinjaman Routes
-    Route::prefix('pinjaman')->name('pinjaman.')->group(function () {
+    Route::prefix('pinjaman')->middleware('emergency_contact')->name('pinjaman.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'index'])->name('index');
         Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
         Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
@@ -153,7 +153,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
     });
 
             // Gadai Baru Routes
-    Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
+    Route::prefix('gadai_baru')->middleware('emergency_contact')->name('gadai_baru.')->group(function () {
         Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
         Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
         Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');

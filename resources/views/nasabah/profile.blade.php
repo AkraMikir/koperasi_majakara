@@ -4,6 +4,53 @@
 
 @section('content')
 <div class="w-full pb-6">
+    <!-- Alert Messages -->
+    @if(session('success'))
+    <div class="mx-4 mb-6">
+        <div class="bg-green-50 border-l-4 border-green-500 rounded-r-xl p-4 shadow-md flex items-start gap-3">
+            <svg class="w-6 h-6 text-green-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-green-800">{{ session('success') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mx-4 mb-6">
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 shadow-md flex items-start gap-3">
+            <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+            <div class="flex-1">
+                <p class="text-sm font-semibold text-red-800">{{ session('error') }}</p>
+            </div>
+        </div>
+    </div>
+    @endif
+
+    @if($errors->any())
+    <div class="mx-4 mb-6">
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-r-xl p-4 shadow-md">
+            <div class="flex items-start gap-3 mb-2">
+                <svg class="w-6 h-6 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+                <div class="flex-1">
+                    <p class="text-sm font-bold text-red-800">Terdapat beberapa kesalahan input:</p>
+                </div>
+            </div>
+            <ul class="list-disc list-inside text-sm text-red-700 space-y-1 ml-9">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    </div>
+    @endif
+
     <!-- Profile Header -->
     <div class="mx-4 mt-4 mb-6">
         <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
@@ -268,51 +315,70 @@
     @endif
 
     <!-- Kontak Darurat -->
-    @if($nasabah->darurat)
-    <div class="mx-4 mb-6">
+    <div class="mx-4 mb-6" id="kontak-darurat-section">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-linear-to-br from-[#4a3514] to-[#674c1d] rounded-xl flex items-center justify-center">
-                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                    </svg>
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-linear-to-br from-[#4a3514] to-[#674c1d] rounded-xl flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                        </svg>
+                    </div>
+                    <h2 class="text-lg font-bold text-[#674c1d] font-display">Kontak Darurat</h2>
                 </div>
-                <h2 class="text-lg font-bold text-[#674c1d] font-display">Kontak Darurat</h2>
+                <button onclick="openEditModal('kontak_darurat')" class="px-4 py-2 bg-linear-to-r from-[#4a3514] to-[#674c1d] text-white rounded-lg hover:shadow-lg transition-all font-medium text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                    </svg>
+                    {{ $nasabah->darurat ? 'Edit' : 'Tambah' }}
+                </button>
             </div>
+
+            @if(!$nasabah->darurat)
+            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+                <div class="flex gap-3">
+                    <svg class="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <p class="text-sm text-yellow-800">
+                        <strong>Perhatian:</strong> Anda wajib mengisi kontak darurat terlebih dahulu untuk dapat mengajukan pinjaman atau gadai.
+                    </p>
+                </div>
+            </div>
+            @endif
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Nama Lengkap</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->nama_lengkap ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->nama_lengkap ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Hubungan</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->hubungan_peminjam ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->hubungan_peminjam ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. Telepon</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->no_telepon ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->no_telepon ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->email ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->email ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Pekerjaan</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->pekerjaan ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->pekerjaan ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->darurat->no_ktp ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->alamat ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->alamat ?? '-' }}</p>
                 </div>
             </div>
         </div>
     </div>
-    @endif
 
     <!-- Statistik Tabungan -->
     <div class="mx-4 mb-6">
@@ -371,8 +437,8 @@
 </div>
 
 <!-- Modal Edit Data Profil -->
-<div id="modalEditProfile" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+<div id="modalEditProfile" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[1000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[calc(100vh-6rem)] overflow-y-auto overflow-hidden">
         <div class="sticky top-0 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] p-6 rounded-t-2xl">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
@@ -397,7 +463,7 @@
             <!-- Form fields will be injected here by JavaScript -->
             <div id="editFormFields"></div>
 
-            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
+            <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="approvalNoteContainer">
                 <div class="flex gap-3">
                     <svg class="w-5 h-5 text-blue-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -423,8 +489,8 @@
 </div>
 
 <!-- Modal PIN Verification untuk Edit Profile -->
-<div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8">
+<div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[1000] flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 max-h-[calc(100vh-6rem)] overflow-y-auto overflow-hidden">
         <div class="text-center mb-6">
             <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -435,7 +501,7 @@
             <p class="text-gray-600">Masukkan PIN Anda untuk mengajukan perubahan data</p>
         </div>
 
-        <form action="{{ route('nasabah.profile.update-request') }}" method="POST" id="pinVerificationForm">
+        <form action="{{ route('nasabah.profile.update-request') }}" method="POST" id="pinVerificationForm" enctype="multipart/form-data">
             @csrf
             <input type="hidden" id="pin_jenis_data" name="jenis_data" value="">
             <div id="pinFormFields"></div>
@@ -470,43 +536,64 @@
 
 <!-- ==================== EDIT PROFILE FUNCTIONS ====================-->
 <script>
+const hasDarurat = {{ $nasabah->darurat ? 'true' : 'false' }};
+
 // Data template untuk setiap jenis data
 const formTemplates = {
     'data_user': {
         title: 'Edit Data Akun User',
         fields: [
-            { name: 'nama', label: 'Nama (Display Name)', type: 'text', value: '{{ $nasabah->user->nama ?? "" }}' },
-            { name: 'email', label: 'Email', type: 'email', value: '{{ $nasabah->user->email ?? "" }}' },
-            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ $nasabah->user->nomor_hp ?? "" }}' }
+            { name: 'nama', label: 'Nama (Display Name)', type: 'text', value: '{{ old("nama") ?? ($nasabah->user->nama ?? "") }}' },
+            { name: 'email', label: 'Email', type: 'email', value: '{{ old("email") ?? ($nasabah->user->email ?? "") }}' },
+            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ old("nomor_hp") ?? ($nasabah->user->nomor_hp ?? "") }}' }
         ]
     },
     'data_pribadi': {
         title: 'Edit Data Pribadi',
         fields: [
-            { name: 'nama', label: 'Nama Lengkap', type: 'text', value: '{{ $nasabah->dataKtp->nama_lengkap ?? $nasabah->user->nama ?? "" }}' },
-            { name: 'email', label: 'Email', type: 'email', value: '{{ $nasabah->user->email ?? "" }}' },
-            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ $nasabah->user->nomor_hp ?? "" }}' },
-            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ $nasabah->no_kk ?? "" }}' },
-            { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', value: '{{ $nasabah->tempat_lahir ?? ($nasabah->dataKtp->tempat_lahir ?? "") }}' },
-            { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', value: '{{ $nasabah->tanggal_lahir ? $nasabah->tanggal_lahir->format("Y-m-d") : ($nasabah->dataKtp && $nasabah->dataKtp->tanggal_lahir ? $nasabah->dataKtp->tanggal_lahir->format("Y-m-d") : "") }}' },
-            { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', value: '{{ $nasabah->jenis_kelamin ?? "" }}', options: [{value: 'L', label: 'Laki-laki'}, {value: 'P', label: 'Perempuan'}] },
-            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ $nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "") }}' }
+            { name: 'nama', label: 'Nama Lengkap', type: 'text', value: '{{ old("nama") ?? ($nasabah->dataKtp->nama_lengkap ?? ($nasabah->user->nama ?? "")) }}' },
+            { name: 'email', label: 'Email', type: 'email', value: '{{ old("email") ?? ($nasabah->user->email ?? "") }}' },
+            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ old("nomor_hp") ?? ($nasabah->user->nomor_hp ?? "") }}' },
+            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ old("no_kk") ?? ($nasabah->no_kk ?? "") }}' },
+            { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', value: '{{ old("tempat_lahir") ?? ($nasabah->tempat_lahir ?? ($nasabah->dataKtp->tempat_lahir ?? "")) }}' },
+            { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', value: '{{ old("tanggal_lahir") ?? ($nasabah->tanggal_lahir ? $nasabah->tanggal_lahir->format("Y-m-d") : ($nasabah->dataKtp && $nasabah->dataKtp->tanggal_lahir ? $nasabah->dataKtp->tanggal_lahir->format("Y-m-d") : "")) }}' },
+            { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', value: '{{ old("jenis_kelamin") ?? ($nasabah->jenis_kelamin ?? "") }}', options: [{value: 'L', label: 'Laki-laki'}, {value: 'P', label: 'Perempuan'}] },
+            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat") ?? ($nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "")) }}' }
         ]
     },
     'pekerjaan': {
         title: 'Edit Data Pekerjaan',
         fields: [
-            { name: 'pekerjaan', label: 'Pekerjaan', type: 'text', value: '{{ $nasabah->pekerjaan->pekerjaan ?? "" }}' },
-            { name: 'nama_perusahaan', label: 'Nama Perusahaan', type: 'text', value: '{{ $nasabah->pekerjaan->nama_perusahaan ?? "" }}' },
-            { name: 'penghasilan', label: 'Penghasilan', type: 'text', value: '{{ $nasabah->pekerjaan->penghasilan ?? "" }}' }
+            { name: 'pekerjaan', label: 'Pekerjaan', type: 'text', value: '{{ old("pekerjaan") ?? ($nasabah->pekerjaan->pekerjaan ?? "") }}' },
+            { name: 'nama_perusahaan', label: 'Nama Perusahaan', type: 'text', value: '{{ old("nama_perusahaan") ?? ($nasabah->pekerjaan->nama_perusahaan ?? "") }}' },
+            { name: 'penghasilan', label: 'Penghasilan', type: 'text', value: '{{ old("penghasilan") ?? ($nasabah->pekerjaan->penghasilan ?? "") }}' }
         ]
     },
     'rekening': {
         title: 'Edit Data Rekening Bank',
         fields: [
-            { name: 'nama_bank', label: 'Nama Bank', type: 'text', value: '{{ $nasabah->dataRek->nama_bank ?? "" }}' },
-            { name: 'no_rekening', label: 'No. Rekening', type: 'text', value: '{{ $nasabah->dataRek->no_rekening ?? "" }}' },
-            { name: 'nama_pemilik_rekening', label: 'Nama Pemilik Rekening', type: 'text', value: '{{ $nasabah->dataRek->nama_pemilik_rekening ?? "" }}' }
+            { name: 'nama_bank', label: 'Nama Bank', type: 'text', value: '{{ old("nama_bank") ?? ($nasabah->dataRek->nama_bank ?? "") }}' },
+            { name: 'no_rekening', label: 'No. Rekening', type: 'text', value: '{{ old("no_rekening") ?? ($nasabah->dataRek->no_rekening ?? "") }}' },
+            { name: 'nama_pemilik_rekening', label: 'Nama Pemilik Rekening', type: 'text', value: '{{ old("nama_pemilik_rekening") ?? ($nasabah->dataRek->nama_pemilik_rekening ?? "") }}' }
+        ]
+    },
+    'kontak_darurat': {
+        title: 'Edit Kontak Darurat',
+        fields: [
+            { name: 'nama_lengkap_darurat', label: 'Nama Lengkap', type: 'text', value: '{{ old("nama_lengkap_darurat") ?? ($nasabah->darurat->nama_lengkap ?? "") }}' },
+            { name: 'hubungan_peminjam', label: 'Hubungan', type: 'select', value: '{{ old("hubungan_peminjam") ?? ($nasabah->darurat->hubungan_peminjam ?? "") }}', options: [
+                { value: 'Suami/Istri', label: 'Suami/Istri' },
+                { value: 'Orang Tua', label: 'Orang Tua' },
+                { value: 'Anak', label: 'Anak' },
+                { value: 'Saudara', label: 'Saudara' },
+                { value: 'Lainnya', label: 'Lainnya' }
+            ] },
+            { name: 'no_telepon_darurat', label: 'No. Telepon', type: 'text', value: '{{ old("no_telepon_darurat") ?? ($nasabah->darurat->no_telepon ?? "") }}' },
+            { name: 'email_darurat', label: 'Email', type: 'email', value: '{{ old("email_darurat") ?? ($nasabah->darurat->email ?? "") }}', optional: true },
+            { name: 'alamat_darurat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat_darurat") ?? ($nasabah->darurat->alamat ?? "") }}' },
+            { name: 'pekerjaan_darurat', label: 'Pekerjaan', type: 'text', value: '{{ old("pekerjaan_darurat") ?? ($nasabah->darurat->pekerjaan ?? "") }}' },
+            { name: 'no_ktp_darurat', label: 'NIK (No KTP)', type: 'text', value: '{{ old("no_ktp_darurat") ?? ($nasabah->darurat->no_ktp ?? "") }}', numeric: true, maxlength: 16 },
+            { name: 'foto_ktp_darurat', label: 'Foto KTP', type: 'file', value: '{{ $nasabah->darurat->foto_ktp ?? "" }}', optional: true }
         ]
     }
 };
@@ -528,11 +615,40 @@ function openEditModal(jenisData) {
     title.textContent = template.title;
     jenisDataInput.value = jenisData;
     
+    // Show approval note since all changes now go through the approval queue
+    const approvalNote = document.getElementById('approvalNoteContainer');
+    if (approvalNote) {
+        approvalNote.classList.remove('hidden');
+    }
+    
     // Generate form fields
-    let html = '<div class="space-y-4">';
+    let html = '';
+    
+    @if($errors->any() && old('jenis_data'))
+        if (jenisData === '{{ old('jenis_data') }}') {
+            html += `
+            <div class="mb-4 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl">
+                <div class="flex items-start gap-2 mb-1">
+                    <svg class="w-5 h-5 text-red-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <span class="text-sm font-bold text-red-800">Gagal menyimpan data:</span>
+                </div>
+                <ul class="list-disc list-inside text-xs text-red-700 space-y-1 ml-7">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+            `;
+        }
+    @endif
+    
+    html += '<div class="space-y-4">';
     template.fields.forEach(field => {
         html += '<div>';
-        html += `<label class="block text-sm font-semibold text-gray-700 mb-2">${field.label} <span class="text-red-500">*</span></label>`;
+        const requiredAsterisk = field.optional ? '' : ' <span class="text-red-500">*</span>';
+        html += `<label class="block text-sm font-semibold text-gray-700 mb-2">${field.label}${requiredAsterisk}</label>`;
         
         if (field.type === 'textarea') {
             html += `<textarea name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" rows="3">${field.value}</textarea>`;
@@ -544,8 +660,15 @@ function openEditModal(jenisData) {
                 html += `<option value="${opt.value}" ${selected}>${opt.label}</option>`;
             });
             html += '</select>';
+        } else if (field.type === 'file') {
+            html += `<input type="file" name="${field.name}" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-[#674c1d] hover:file:bg-amber-100">`;
+            if (field.value) {
+                html += `<div class="mt-2 text-xs text-gray-500">File saat ini: <a href="/storage/${field.value}" target="_blank" class="text-[#8b6f2f] hover:underline font-semibold">Lihat Foto KTP</a></div>`;
+            }
         } else {
-            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
+            const maxlengthAttr = field.maxlength ? `maxlength="${field.maxlength}"` : '';
+            const oninputAttr = field.numeric ? 'oninput="this.value = this.value.replace(/[^0-9]/g, \'\')"' : '';
+            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" ${maxlengthAttr} ${oninputAttr} class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
         }
         
         html += '</div>';
@@ -568,22 +691,41 @@ function closeEditModal() {
 function submitEditForm() {
     const jenisData = document.getElementById('edit_jenis_data').value;
     const form = document.getElementById('editProfileForm');
-    const formData = new FormData(form);
     
     // Transfer data ke PIN modal
     const pinFormFields = document.getElementById('pinFormFields');
     const pinJenisData = document.getElementById('pin_jenis_data');
     
     pinJenisData.value = jenisData;
+    pinFormFields.innerHTML = '';
     
-    // Create hidden fields untuk semua data
-    let html = '';
-    for (let [key, value] of formData.entries()) {
-        if (key !== 'jenis_data') {
-            html += `<input type="hidden" name="${key}" value="${value}">`;
+    // Transfer text/select fields as hidden inputs, and clone file inputs
+    for (let element of form.elements) {
+        if (element.name && element.name !== 'jenis_data') {
+            if (element.type === 'file') {
+                if (element.files.length > 0) {
+                    // Clone file input using DataTransfer
+                    const hiddenFileInput = document.createElement('input');
+                    hiddenFileInput.type = 'file';
+                    hiddenFileInput.name = element.name;
+                    hiddenFileInput.style.display = 'none';
+                    
+                    const dt = new DataTransfer();
+                    for (let file of element.files) {
+                        dt.items.add(file);
+                    }
+                    hiddenFileInput.files = dt.files;
+                    pinFormFields.appendChild(hiddenFileInput);
+                }
+            } else {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = element.name;
+                hiddenInput.value = element.value;
+                pinFormFields.appendChild(hiddenInput);
+            }
         }
     }
-    pinFormFields.innerHTML = html;
     
     // Close edit modal dan open PIN modal
     closeEditModal();
@@ -593,6 +735,18 @@ function submitEditForm() {
 // Open PIN verification modal
 function openPinVerificationModal() {
     const modal = document.getElementById('modalPinVerification');
+    const description = modal.querySelector('p.text-gray-600');
+    const submitBtn = modal.querySelector('button[type="submit"]');
+    const jenisData = document.getElementById('pin_jenis_data').value;
+    
+    if (jenisData === 'kontak_darurat' && !hasDarurat) {
+        if (description) description.textContent = 'Masukkan PIN Anda untuk menyimpan kontak darurat';
+        if (submitBtn) submitBtn.textContent = 'Simpan Kontak Darurat';
+    } else {
+        if (description) description.textContent = 'Masukkan PIN Anda untuk mengajukan perubahan data';
+        if (submitBtn) submitBtn.textContent = 'Ajukan Perubahan';
+    }
+    
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     document.getElementById('pin_verification').focus();
@@ -614,6 +768,25 @@ document.addEventListener('DOMContentLoaded', function() {
             e.target.value = e.target.value.replace(/[^0-9]/g, '');
         });
     }
+
+    // Auto scroll/focus to kontak darurat if parameter focus=kontak-darurat
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('focus') === 'kontak-darurat') {
+        const section = document.getElementById('kontak-darurat-section');
+        if (section) {
+            section.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Highlight container briefly
+            section.classList.add('ring-4', 'ring-yellow-400/50', 'transition-all', 'duration-1000');
+            setTimeout(() => {
+                section.classList.remove('ring-4', 'ring-yellow-400/50');
+            }, 3000);
+        }
+    }
+
+    // Auto open edit modal if there is old input for jenis_data
+    @if(old('jenis_data'))
+        openEditModal('{{ old('jenis_data') }}');
+    @endif
 });
 </script>
 
