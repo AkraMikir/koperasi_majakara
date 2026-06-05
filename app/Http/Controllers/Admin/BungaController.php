@@ -17,7 +17,7 @@ class BungaController extends Controller
      */
     public function index()
     {
-        // Totals
+        // 1. Proyeksi (Active Portfolio)
         $pinjamanTotal = PinjamanH::whereHas('pengajuan', function($q) {
             $q->whereIn('status', ['3', '4']);
         })->where(function($q) {
@@ -26,7 +26,7 @@ class BungaController extends Controller
         
         $gadaiTotal = GadaiActive::whereIn('status', ['active', 'extended', 'expired_grace', 'expired_final'])->sum(DB::raw('biaya_jasa + biaya_inap'));
         
-        $depositoData = DepositoH::with('persiapanCair')->whereIn('status', ['aktif', 'selesai'])->get();
+        $depositoData = DepositoH::with(['persiapanCair', 'tenor'])->whereIn('status', ['aktif', 'selesai'])->get();
         $depositoTotalKotor = 0;
         $depositoPajak = 0;
         foreach($depositoData as $depo) {
@@ -34,18 +34,105 @@ class BungaController extends Controller
             if ($persiapan) {
                 $depositoTotalKotor += $persiapan->bunga_kotor;
                 $depositoPajak += $persiapan->pajak;
+            } elseif ($depo->status === 'aktif') {
+                // In-memory fallback
+                $pokok = (float) $depo->nominal_awal;
+                $bungaTahunan = (float) $depo->bunga;
+                
+                $tenorHari = 30;
+                if ($depo->tenor) {
+                    $tenorHari = (int) $depo->tenor->tenor_hari;
+                } elseif ($depo->tgl_mulai && $depo->tgl_jatuh_tempo) {
+                    $tenorHari = (int) $depo->tgl_mulai->diffInDays($depo->tgl_jatuh_tempo);
+                }
+                
+                $tahunJatuhTempo = $depo->tgl_jatuh_tempo ? $depo->tgl_jatuh_tempo->year : Carbon::now()->year;
+                $isLeap = ($tahunJatuhTempo % 4 === 0 && $tahunJatuhTempo % 100 !== 0) || ($tahunJatuhTempo % 400 === 0);
+                $pembagi = $isLeap ? 366 : 365;
+                
+                $bKotor = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
+                $pjk = $bKotor * 0.20;
+                
+                $depositoTotalKotor += $bKotor;
+                $depositoPajak += $pjk;
             }
         }
         $depositoTotal = $depositoTotalKotor - $depositoPajak;
 
         $netMargin = ($pinjamanTotal + $gadaiTotal) - $depositoTotal;
 
+        // 2. Realisasi Kas (Bulan Ini)
+        $currentMonth = Carbon::now()->month;
+        $currentYear = Carbon::now()->year;
+
+        // Realisasi Pinjaman Bulanan
+        $angsuranBulanan = \App\Models\TempoPinjamanB::with('pinjaman')
+            ->whereHas('pinjaman.pengajuan', function($q) {
+                $q->whereIn('status', ['3', '4']);
+            })
+            ->where('status_bayar', 'lunas')
+            ->whereMonth('tgl_bayar', $currentMonth)
+            ->whereYear('tgl_bayar', $currentYear)
+            ->get();
+
+        $realisasiPinjaman = 0;
+        foreach ($angsuranBulanan as $angsuran) {
+            $pinjaman = $angsuran->pinjaman;
+            if ($pinjaman && $pinjaman->lama_pinjam > 0) {
+                $realisasiPinjaman += ($pinjaman->bunga_rp / $pinjaman->lama_pinjam);
+            }
+        }
+
+        // Realisasi Pinjaman Mingguan
+        $angsuranMingguan = \App\Models\TempoPinjamanM::with('pinjaman')
+            ->whereHas('pinjaman.pengajuan', function($q) {
+                $q->whereIn('status', ['3', '4']);
+            })
+            ->where('status_bayar', 'lunas')
+            ->whereMonth('tgl_bayar', $currentMonth)
+            ->whereYear('tgl_bayar', $currentYear)
+            ->get();
+
+        foreach ($angsuranMingguan as $angsuran) {
+            $pinjaman = $angsuran->pinjaman;
+            // Mingguan: lama_pinjam dalam bulan, dikonversi ke minggu (x4)
+            $jumlahMinggu = $pinjaman && $pinjaman->lama_pinjam > 0 ? ($pinjaman->lama_pinjam * 4) : 0;
+            if ($jumlahMinggu > 0) {
+                $realisasiPinjaman += ($pinjaman->bunga_rp / $jumlahMinggu);
+            }
+        }
+
+        // Realisasi Gadai
+        $payments = \App\Models\GadaiPaymentLog::with('gadaiActive')
+            ->whereMonth('created_at', $currentMonth)
+            ->whereYear('created_at', $currentYear)
+            ->get();
+            
+        $realisasiGadai = 0;
+        foreach ($payments as $payment) {
+            if ($payment->jenis_pembayaran === 'tebus') {
+                $gadai = $payment->gadaiActive;
+                $bunga = $payment->nominal - ($gadai ? $gadai->nominal_deal : 0);
+                $realisasiGadai += max(0, $bunga); 
+            } else {
+                $realisasiGadai += $payment->nominal;
+            }
+        }
+
+        // Realisasi Deposito
+        $realisasiDeposito = \App\Models\DepositoPersiapanCair::where('status', 'selesai')
+            ->whereMonth('updated_at', $currentMonth)
+            ->whereYear('updated_at', $currentYear)
+            ->sum('bunga_bersih');
+
+        $netRealisasi = ($realisasiPinjaman + $realisasiGadai) - $realisasiDeposito;
+
         // Trend 6 Bulan
         $sixMonthsAgo = Carbon::now()->subMonths(5)->startOfMonth();
         
         $pinjamanItems = PinjamanH::where('tgl_pinjam', '>=', $sixMonthsAgo)->get();
         $gadaiItems = GadaiActive::where('tgl_mulai', '>=', $sixMonthsAgo)->get();
-        $depositoItems = DepositoH::with('persiapanCair')->where('tgl_mulai', '>=', $sixMonthsAgo)->get();
+        $depositoItems = DepositoH::with(['persiapanCair', 'tenor'])->where('tgl_mulai', '>=', $sixMonthsAgo)->get();
 
         $pinjamanTrend = $pinjamanItems->groupBy(function($item) {
             return Carbon::parse($item->tgl_pinjam)->format('Y-m');
@@ -64,6 +151,23 @@ class BungaController extends Controller
                 $p = $item->persiapanCair->last();
                 if ($p) {
                     $totalMonth += $p->bunga_bersih;
+                } else if ($item->status === 'aktif') {
+                    $pokok = (float) $item->nominal_awal;
+                    $bungaTahunan = (float) $item->bunga;
+                    
+                    $tenorHari = 30;
+                    if ($item->tenor) {
+                        $tenorHari = (int) $item->tenor->tenor_hari;
+                    } elseif ($item->tgl_mulai && $item->tgl_jatuh_tempo) {
+                        $tenorHari = (int) $item->tgl_mulai->diffInDays($item->tgl_jatuh_tempo);
+                    }
+                    
+                    $tahunJatuhTempo = $item->tgl_jatuh_tempo ? $item->tgl_jatuh_tempo->year : Carbon::now()->year;
+                    $isLeap = ($tahunJatuhTempo % 4 === 0 && $tahunJatuhTempo % 100 !== 0) || ($tahunJatuhTempo % 400 === 0);
+                    $pembagi = $isLeap ? 366 : 365;
+                    
+                    $bKotor = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
+                    $totalMonth += ($bKotor * 0.80);
                 }
             }
             $depositoTrend[$month] = $totalMonth;
@@ -82,7 +186,11 @@ class BungaController extends Controller
             $pengeluaranData[] = $depositoTrend[$monthKey] ?? 0;
         }
 
-        $data = compact('pinjamanTotal', 'gadaiTotal', 'depositoTotal', 'netMargin', 'labels', 'pemasukanData', 'pengeluaranData');
+        $data = compact(
+            'pinjamanTotal', 'gadaiTotal', 'depositoTotal', 'netMargin',
+            'realisasiPinjaman', 'realisasiGadai', 'realisasiDeposito', 'netRealisasi',
+            'labels', 'pemasukanData', 'pengeluaranData'
+        );
 
         return view('admin.bunga.index', $data);
     }
@@ -132,12 +240,16 @@ class BungaController extends Controller
             ->whereYear('tgl_bayar', $currentYear)
             ->get();
 
+        $bungaMingguan = 0;
         foreach ($angsuranMingguan as $angsuran) {
             $pinjaman = $angsuran->pinjaman;
-            if ($pinjaman && $pinjaman->lama_pinjam > 0) {
-                $bungaBulanIni += ($pinjaman->bunga_rp / $pinjaman->lama_pinjam);
+            // Mingguan: lama_pinjam dalam bulan, dikonversi ke minggu (x4)
+            $jumlahMinggu = $pinjaman && $pinjaman->lama_pinjam > 0 ? ($pinjaman->lama_pinjam * 4) : 0;
+            if ($jumlahMinggu > 0) {
+                $bungaMingguan += ($pinjaman->bunga_rp / $jumlahMinggu);
             }
         }
+        $bungaBulanIni += $bungaMingguan;
         
         $proyeksiBulanDepan = $totalBunga * 1.05; // Estimasi 5% growth
         
@@ -174,7 +286,7 @@ class BungaController extends Controller
 
     public function deposito()
     {
-        $depositoAktifList = DepositoH::with(['nasabah.user', 'persiapanCair'])->where('status', 'aktif')->get();
+        $depositoAktifList = DepositoH::with(['nasabah.user', 'persiapanCair', 'tenor'])->where('status', 'aktif')->get();
         $depositoAktif = $depositoAktifList->count();
         
         $jatuhTempoBulanIni = DepositoH::where('status', 'aktif')
@@ -184,14 +296,41 @@ class BungaController extends Controller
 
         $totalKotor = 0;
         $totalPajak = 0;
+        $totalEstimasiAkrual = 0; // Deposito aktif tanpa persiapanCair (fallback)
+        $totalSiapCair = 0;       // Deposito yang sudah masuk persiapanCair
         
         foreach($depositoAktifList as $depo) {
             // Ambil data bunga dari tabel persiapan cair
             $persiapan = $depo->persiapanCair->last();
             
-            $bungaKotor = $persiapan ? $persiapan->bunga_kotor : 0;
-            $pajak = $persiapan ? $persiapan->pajak : 0;
-            $bungaBersih = $persiapan ? $persiapan->bunga_bersih : 0;
+            if ($persiapan) {
+                $bungaKotor = $persiapan->bunga_kotor;
+                $pajak      = $persiapan->pajak;
+                $bungaBersih = $persiapan->bunga_bersih;
+                $totalSiapCair += $bungaBersih;
+                $depo->sumber_bunga = 'siap_cair';
+            } else {
+                // In-memory fallback untuk deposito aktif yang belum masuk persiapan
+                $pokok = (float) $depo->nominal_awal;
+                $bungaTahunan = (float) $depo->bunga;
+
+                $tenorHari = 30;
+                if ($depo->tenor) {
+                    $tenorHari = (int) $depo->tenor->tenor_hari;
+                } elseif ($depo->tgl_mulai && $depo->tgl_jatuh_tempo) {
+                    $tenorHari = (int) $depo->tgl_mulai->diffInDays($depo->tgl_jatuh_tempo);
+                }
+
+                $tahunJatuhTempo = $depo->tgl_jatuh_tempo ? $depo->tgl_jatuh_tempo->year : Carbon::now()->year;
+                $isLeap = ($tahunJatuhTempo % 4 === 0 && $tahunJatuhTempo % 100 !== 0) || ($tahunJatuhTempo % 400 === 0);
+                $pembagi = $isLeap ? 366 : 365;
+
+                $bungaKotor  = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
+                $pajak       = $bungaKotor * 0.20;
+                $bungaBersih = $bungaKotor - $pajak;
+                $totalEstimasiAkrual += $bungaBersih;
+                $depo->sumber_bunga = 'estimasi';
+            }
             
             $depo->bunga_kotor_rp = $bungaKotor;
             $depo->pajak_rp = $pajak;
@@ -241,7 +380,11 @@ class BungaController extends Controller
             $tenorData[] = $items->count();
         }
 
-        $data = compact('totalBersih', 'depositoAktif', 'totalPajak', 'jatuhTempoBulanIni', 'listDeposito', 'labels', 'kotorData', 'bersihData', 'tenorLabels', 'tenorData');
+        $data = compact(
+            'totalBersih', 'depositoAktif', 'totalPajak', 'jatuhTempoBulanIni',
+            'listDeposito', 'labels', 'kotorData', 'bersihData', 'tenorLabels', 'tenorData',
+            'totalEstimasiAkrual', 'totalSiapCair'
+        );
 
         return view('admin.bunga.deposito', $data);
     }
@@ -268,14 +411,19 @@ class BungaController extends Controller
             ->whereYear('created_at', $currentYear)
             ->get();
             
-        $pendapatanBulanIni = 0;
+        $pendapatanBulanIni  = 0;
+        $realisasiBungaMurni = 0; // dari tebus: selisih nominal - pokok gadai
+        $realisasiAdminInap  = 0; // dari perpanjang / biaya inap lainnya
         foreach ($payments as $payment) {
             if ($payment->jenis_pembayaran === 'tebus') {
                 $gadai = $payment->gadaiActive;
                 $bunga = $payment->nominal - ($gadai ? $gadai->nominal_deal : 0);
-                $pendapatanBulanIni += max(0, $bunga); 
+                $bunga = max(0, $bunga);
+                $pendapatanBulanIni  += $bunga;
+                $realisasiBungaMurni += $bunga;
             } else {
                 $pendapatanBulanIni += $payment->nominal;
+                $realisasiAdminInap += $payment->nominal;
             }
         }
         
@@ -321,7 +469,12 @@ class BungaController extends Controller
             $katData[] = $items->count();
         }
 
-        $data = compact('totalPendapatanProyeksi', 'pendapatanBulanIni', 'biayaJasa', 'biayaInap', 'gadaiAktif', 'listGadai', 'labels', 'jasaData', 'inapData', 'katLabels', 'katData');
+        $data = compact(
+            'totalPendapatanProyeksi', 'pendapatanBulanIni',
+            'realisasiBungaMurni', 'realisasiAdminInap',
+            'biayaJasa', 'biayaInap', 'gadaiAktif',
+            'listGadai', 'labels', 'jasaData', 'inapData', 'katLabels', 'katData'
+        );
 
         return view('admin.bunga.gadai', $data);
     }

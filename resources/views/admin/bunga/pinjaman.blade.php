@@ -21,12 +21,34 @@
             </div>
         </div>
         <div class="flex items-center gap-3">
-            <select class="text-sm border border-gray-200 rounded-xl px-4 py-2 text-gray-600 focus:outline-none focus:border-[#8b6f2f] bg-white shadow-sm">
-                <option>Bulan Ini</option>
-                <option>3 Bulan Terakhir</option>
-                <option>6 Bulan Terakhir</option>
-                <option>Tahun Ini</option>
-            </select>
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-50 border border-green-200 text-xs font-semibold text-green-700">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                Data Live
+            </span>
+            <span class="text-sm text-gray-500">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</span>
+        </div>
+    </div>
+</div>
+
+{{-- Summary Banner --}}
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1a8a5a] to-[#0f5f3d] p-6 mb-6 shadow-xl text-white">
+    <div class="absolute -right-8 -top-8 w-48 h-48 bg-white/5 rounded-full"></div>
+    <div class="absolute -right-4 bottom-0 w-64 h-32 bg-white/5 rounded-full"></div>
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-white/10">
+        <div class="space-y-1">
+            <p class="text-green-200 text-[10px] uppercase font-semibold tracking-wider">Total Bunga Portofolio Aktif</p>
+            <p class="text-2xl font-bold">Rp {{ number_format($totalBunga, 0, ',', '.') }}</p>
+            <p class="text-green-300 text-xs">{{ $pinjamanAktif }} pinjaman aktif berjalan</p>
+        </div>
+        <div class="space-y-1 pt-4 md:pt-0 md:pl-6">
+            <p class="text-green-200 text-[10px] uppercase font-semibold tracking-wider">Pendapatan Bunga Bulan Ini</p>
+            <p class="text-2xl font-bold text-yellow-300">Rp {{ number_format($bungaBulanIni, 0, ',', '.') }}</p>
+            <p class="text-green-300 text-xs">Realisasi angsuran diterima bulan ini</p>
+        </div>
+        <div class="space-y-1 pt-4 md:pt-0 md:pl-6">
+            <p class="text-green-200 text-[10px] uppercase font-semibold tracking-wider">Proyeksi Bulan Depan</p>
+            <p class="text-2xl font-bold text-cyan-300">Rp {{ number_format($proyeksiBulanDepan, 0, ',', '.') }}</p>
+            <p class="text-green-300 text-xs">Estimasi tren +5% dari portofolio aktif</p>
         </div>
     </div>
 </div>
@@ -87,7 +109,7 @@
         <div class="flex items-center justify-between mb-5">
             <div>
                 <h3 class="font-semibold text-gray-900">Tren Pendapatan Bunga Pinjaman</h3>
-                <p class="text-xs text-gray-400 mt-0.5">Bunga masuk per bulan</p>
+                <p class="text-xs text-gray-400 mt-0.5">Akumulasi bunga per bulan (6 bulan terakhir)</p>
             </div>
         </div>
         <canvas id="pinjamanTrendChart" height="130"></canvas>
@@ -163,7 +185,10 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-4 text-center text-gray-500">Belum ada data pinjaman aktif.</td>
+                    <td colspan="7" class="py-10 text-center text-gray-400">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Belum ada data pinjaman aktif.
+                    </td>
                 </tr>
                 @endforelse
             </tbody>

@@ -21,23 +21,51 @@
 </div>
 
 {{-- Net Cashflow Banner --}}
-<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#674c1d] to-[#a07840] p-6 mb-6 shadow-xl">
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#674c1d] to-[#a07840] p-6 mb-6 shadow-xl text-white">
     <div class="absolute -right-8 -top-8 w-48 h-48 bg-white/5 rounded-full"></div>
     <div class="absolute -right-4 bottom-0 w-64 h-32 bg-white/5 rounded-full"></div>
-    <div class="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <p class="text-amber-200 text-sm font-medium mb-1">Net Kas Bunga (Bulan Ini)</p>
-            <p class="text-4xl font-bold text-white">{{ $netMargin >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netMargin), 0, ',', '.') }}</p>
-            <p class="text-amber-300 text-sm mt-2">Pemasukan Rp {{ number_format($pinjamanTotal + $gadaiTotal, 0, ',', '.') }} &minus; Pengeluaran Rp {{ number_format($depositoTotal, 0, ',', '.') }}</p>
-        </div>
-        <div class="flex gap-4">
-            <div class="text-center bg-white/10 rounded-xl px-5 py-3">
-                <p class="text-amber-200 text-xs mb-1">Pemasukan</p>
-                <p class="text-white font-bold text-lg">Rp {{ number_format(($pinjamanTotal + $gadaiTotal), 0, ',', '.') }}</p>
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 gap-8 divide-y md:divide-y-0 md:divide-x divide-white/10">
+        {{-- Proyeksi Section --}}
+        <div class="space-y-4 pr-0 md:pr-8">
+            <div class="flex items-center justify-between">
+                <span class="text-amber-200 text-xs font-semibold uppercase tracking-wider bg-white/10 px-2 py-0.5 rounded">Proyeksi Portofolio Aktif</span>
+                <span class="text-xs text-amber-200">Estimasi Bunga Berjalan</span>
             </div>
-            <div class="text-center bg-white/10 rounded-xl px-5 py-3">
-                <p class="text-amber-200 text-xs mb-1">Pengeluaran</p>
-                <p class="text-white font-bold text-lg">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</p>
+            <div>
+                <p class="text-3xl font-bold">{{ $netMargin >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netMargin), 0, ',', '.') }}</p>
+                <p class="text-amber-300 text-xs mt-1">Pemasukan Rp {{ number_format($pinjamanTotal + $gadaiTotal, 0, ',', '.') }} &minus; Pengeluaran Rp {{ number_format($depositoTotal, 0, ',', '.') }}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-2">
+                <div class="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+                    <p class="text-amber-200 text-[10px] uppercase font-medium">Pemasukan</p>
+                    <p class="text-sm font-bold">Rp {{ number_format(($pinjamanTotal + $gadaiTotal), 0, ',', '.') }}</p>
+                </div>
+                <div class="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+                    <p class="text-amber-200 text-[10px] uppercase font-medium">Pengeluaran</p>
+                    <p class="text-sm font-bold">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Realisasi Section --}}
+        <div class="space-y-4 pt-4 md:pt-0 pl-0 md:pl-8">
+            <div class="flex items-center justify-between">
+                <span class="text-amber-200 text-xs font-semibold uppercase tracking-wider bg-green-500/20 px-2 py-0.5 rounded text-green-300">Realisasi Kas (Bulan Ini)</span>
+                <span class="text-xs text-amber-200">Arus Kas Riil Terbayar</span>
+            </div>
+            <div>
+                <p class="text-3xl font-bold text-green-300">{{ $netRealisasi >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netRealisasi), 0, ',', '.') }}</p>
+                <p class="text-amber-300 text-xs mt-1">Pemasukan Rp {{ number_format($realisasiPinjaman + $realisasiGadai, 0, ',', '.') }} &minus; Pengeluaran Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</p>
+            </div>
+            <div class="grid grid-cols-2 gap-3 mt-2">
+                <div class="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+                    <p class="text-amber-200 text-[10px] uppercase font-medium">Masuk (Riil)</p>
+                    <p class="text-sm font-bold text-green-300">Rp {{ number_format($realisasiPinjaman + $realisasiGadai, 0, ',', '.') }}</p>
+                </div>
+                <div class="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+                    <p class="text-amber-200 text-[10px] uppercase font-medium">Keluar (Riil)</p>
+                    <p class="text-sm font-bold text-red-300">Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -53,14 +81,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
                 </svg>
             </div>
-            <span class="flex items-center gap-1 text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
-                ▲ 12.5%
+            <span class="flex items-center gap-1 text-[10px] font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">
+                Bunga Pinjaman
             </span>
         </div>
-        <p class="text-xs text-gray-500 mb-1">Bunga Pinjaman</p>
-        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</p>
-        <p class="text-xs text-gray-400 mt-2">Dari seluruh pinjaman aktif</p>
-        <div class="mt-3 flex items-center text-xs text-[#674c1d] font-medium">
+        <div class="flex flex-col gap-2">
+            <div>
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Proyeksi Aktif</span>
+                <span class="text-xl font-bold text-gray-900">Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</span>
+            </div>
+            <div class="pt-1.5 border-t border-gray-100">
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Realisasi Bulan Ini</span>
+                <span class="text-sm font-bold text-green-600">Rp {{ number_format($realisasiPinjaman, 0, ',', '.') }}</span>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs text-[#674c1d] font-medium">
             Lihat Detail <svg class="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
         </div>
     </a>
@@ -73,14 +108,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                 </svg>
             </div>
-            <span class="flex items-center gap-1 text-xs font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
-                ▲ 5.8%
+            <span class="flex items-center gap-1 text-[10px] font-semibold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                Biaya Jasa Gadai
             </span>
         </div>
-        <p class="text-xs text-gray-500 mb-1">Biaya Gadai (Jasa + Inap)</p>
-        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</p>
-        <p class="text-xs text-gray-400 mt-2">Dari transaksi gadai</p>
-        <div class="mt-3 flex items-center text-xs text-[#674c1d] font-medium">
+        <div class="flex flex-col gap-2">
+            <div>
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Proyeksi Aktif</span>
+                <span class="text-xl font-bold text-gray-900">Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</span>
+            </div>
+            <div class="pt-1.5 border-t border-gray-100">
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Realisasi Bulan Ini</span>
+                <span class="text-sm font-bold text-green-600">Rp {{ number_format($realisasiGadai, 0, ',', '.') }}</span>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs text-[#674c1d] font-medium">
             Lihat Detail <svg class="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
         </div>
     </a>
@@ -93,14 +135,21 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/>
                 </svg>
             </div>
-            <span class="flex items-center gap-1 text-xs font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
-                Pengeluaran
+            <span class="flex items-center gap-1 text-[10px] font-semibold text-red-500 bg-red-50 px-2 py-0.5 rounded-full">
+                Bunga Deposito
             </span>
         </div>
-        <p class="text-xs text-gray-500 mb-1">Bunga Deposito (Dibayar)</p>
-        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</p>
-        <p class="text-xs text-gray-400 mt-2">Setelah dipotong pajak</p>
-        <div class="mt-3 flex items-center text-xs text-[#674c1d] font-medium">
+        <div class="flex flex-col gap-2">
+            <div>
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Proyeksi Bersih</span>
+                <span class="text-xl font-bold text-gray-900">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</span>
+            </div>
+            <div class="pt-1.5 border-t border-gray-100">
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Realisasi Bulan Ini</span>
+                <span class="text-sm font-bold text-red-500">Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</span>
+            </div>
+        </div>
+        <div class="mt-4 flex items-center text-xs text-[#674c1d] font-medium">
             Lihat Detail <svg class="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
         </div>
     </a>
@@ -113,19 +162,26 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
                 </svg>
             </div>
-            <span class="flex items-center gap-1 text-xs font-semibold text-[#674c1d] bg-[#674c1d]/10 px-2 py-0.5 rounded-full">
-                Net Margin
+            <span class="flex items-center gap-1 text-[10px] font-semibold text-[#674c1d] bg-[#674c1d]/10 px-2 py-0.5 rounded-full">
+                Margin Bersih
             </span>
         </div>
-        <p class="text-xs text-gray-500 mb-1">Margin Bersih Bunga</p>
         @php
             $totalPemasukanMargin = $pinjamanTotal + $gadaiTotal;
             $marginPersen = $totalPemasukanMargin > 0 ? ($netMargin / $totalPemasukanMargin) * 100 : 0;
+            
+            $totalRealisasiPemasukan = $realisasiPinjaman + $realisasiGadai;
+            $realisasiMarginPersen = $totalRealisasiPemasukan > 0 ? ($netRealisasi / $totalRealisasiPemasukan) * 100 : 0;
         @endphp
-        <p class="text-2xl font-bold text-[#674c1d]">{{ number_format($marginPersen, 2) }}%</p>
-        <p class="text-xs text-gray-500 mt-2">Dari total pendapatan bunga</p>
-        <div class="mt-3 w-full bg-gray-200 rounded-full h-1.5">
-            <div class="bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] h-1.5 rounded-full" style="width: {{ min(100, max(0, $marginPersen)) }}%"></div>
+        <div class="flex flex-col gap-2">
+            <div>
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Margin Proyeksi</span>
+                <span class="text-xl font-bold text-[#674c1d]">{{ number_format($marginPersen, 1) }}%</span>
+            </div>
+            <div class="pt-1.5 border-t border-gray-100">
+                <span class="text-[10px] text-gray-400 block uppercase font-semibold">Margin Realisasi</span>
+                <span class="text-sm font-bold text-gray-700">{{ number_format($realisasiMarginPersen, 1) }}%</span>
+            </div>
         </div>
     </div>
 </div>
@@ -177,17 +233,20 @@
 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
     <div class="flex items-center justify-between mb-5">
         <h3 class="font-semibold text-gray-900">Rekap Arus Kas Bunga — {{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</h3>
-        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md font-medium">Data Terkini</span>
+        <span class="text-xs text-green-600 bg-green-50 px-2 py-1 rounded-md font-medium">Perbandingan Proyeksi vs Realisasi</span>
     </div>
     <div class="overflow-x-auto">
         <table class="w-full text-sm">
             <thead>
-                <tr class="border-b border-gray-100">
-                    <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Sumber</th>
-                    <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Pemasukan</th>
-                    <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Pengeluaran</th>
-                    <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Net</th>
-                    <th class="pb-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Aksi</th>
+                <tr class="border-b border-gray-100 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <th class="pb-3 text-left">Sumber</th>
+                    <th class="pb-3 text-right">Pemasukan (Proyeksi)</th>
+                    <th class="pb-3 text-right text-green-600 bg-green-50/50">Pemasukan (Realisasi)</th>
+                    <th class="pb-3 text-right">Pengeluaran (Proyeksi)</th>
+                    <th class="pb-3 text-right text-red-500 bg-red-50/50">Pengeluaran (Realisasi)</th>
+                    <th class="pb-3 text-right">Net (Proyeksi)</th>
+                    <th class="pb-3 text-right font-bold text-gray-700 bg-amber-50/50">Net (Realisasi)</th>
+                    <th class="pb-3 text-center">Aksi</th>
                 </tr>
             </thead>
             <tbody class="divide-y divide-gray-50">
@@ -202,9 +261,12 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-3.5 text-right font-semibold text-green-600">Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-semibold text-gray-600">Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-green-600 bg-green-50/30">Rp {{ number_format($realisasiPinjaman, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-right text-gray-400">—</td>
-                    <td class="py-3.5 text-right font-bold text-green-600">+ Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right text-gray-400 bg-red-50/30">—</td>
+                    <td class="py-3.5 text-right font-semibold text-green-600">+ Rp {{ number_format($pinjamanTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-green-600 bg-amber-50/30">+ Rp {{ number_format($realisasiPinjaman, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-center">
                         <a href="{{ route('admin.bunga.pinjaman') }}" class="text-xs text-[#674c1d] hover:underline font-medium">Detail →</a>
                     </td>
@@ -220,9 +282,12 @@
                             </div>
                         </div>
                     </td>
-                    <td class="py-3.5 text-right font-semibold text-green-600">Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-semibold text-gray-600">Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-green-600 bg-green-50/30">Rp {{ number_format($realisasiGadai, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-right text-gray-400">—</td>
-                    <td class="py-3.5 text-right font-bold text-green-600">+ Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right text-gray-400 bg-red-50/30">—</td>
+                    <td class="py-3.5 text-right font-semibold text-green-600">+ Rp {{ number_format($gadaiTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-green-600 bg-amber-50/30">+ Rp {{ number_format($realisasiGadai, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-center">
                         <a href="{{ route('admin.bunga.gadai') }}" class="text-xs text-[#674c1d] hover:underline font-medium">Detail →</a>
                     </td>
@@ -239,17 +304,23 @@
                         </div>
                     </td>
                     <td class="py-3.5 text-right text-gray-400">—</td>
+                    <td class="py-3.5 text-right text-gray-400 bg-green-50/30">—</td>
                     <td class="py-3.5 text-right font-semibold text-red-500">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</td>
-                    <td class="py-3.5 text-right font-bold text-red-500">− Rp {{ number_format($depositoTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-red-500 bg-red-50/30">Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-semibold text-red-500">− Rp {{ number_format($depositoTotal, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-bold text-red-500 bg-amber-50/30">− Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-center">
                         <a href="{{ route('admin.bunga.deposito') }}" class="text-xs text-[#674c1d] hover:underline font-medium">Detail →</a>
                     </td>
                 </tr>
-                <tr class="bg-gradient-to-r from-[#674c1d]/5 to-transparent">
-                    <td class="py-4 font-bold text-gray-900 pl-2">TOTAL NET</td>
-                    <td class="py-4 text-right font-bold text-green-700">Rp {{ number_format($pinjamanTotal + $gadaiTotal, 0, ',', '.') }}</td>
-                    <td class="py-4 text-right font-bold text-red-500">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</td>
-                    <td class="py-4 text-right font-bold text-[#674c1d] text-base">{{ $netMargin >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netMargin), 0, ',', '.') }}</td>
+                <tr class="bg-gradient-to-r from-[#674c1d]/5 to-transparent font-bold">
+                    <td class="py-4 text-gray-900 pl-2">TOTAL NET</td>
+                    <td class="py-4 text-right text-gray-700">Rp {{ number_format($pinjamanTotal + $gadaiTotal, 0, ',', '.') }}</td>
+                    <td class="py-4 text-right text-green-700 bg-green-50/30">Rp {{ number_format($realisasiPinjaman + $realisasiGadai, 0, ',', '.') }}</td>
+                    <td class="py-4 text-right text-red-500">Rp {{ number_format($depositoTotal, 0, ',', '.') }}</td>
+                    <td class="py-4 text-right text-red-600 bg-red-50/30">Rp {{ number_format($realisasiDeposito, 0, ',', '.') }}</td>
+                    <td class="py-4 text-right text-[#674c1d] text-base">{{ $netMargin >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netMargin), 0, ',', '.') }}</td>
+                    <td class="py-4 text-right text-[#674c1d] text-base bg-amber-50/30">{{ $netRealisasi >= 0 ? '+' : '-' }} Rp {{ number_format(abs($netRealisasi), 0, ',', '.') }}</td>
                     <td></td>
                 </tr>
             </tbody>

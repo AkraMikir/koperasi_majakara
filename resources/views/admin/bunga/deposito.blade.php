@@ -20,13 +20,39 @@
                 <p class="text-sm text-gray-500 mt-1 ml-10">Analisis kewajiban bunga deposito yang dibayarkan ke nasabah</p>
             </div>
         </div>
-        <select class="text-sm border border-gray-200 rounded-xl px-4 py-2 text-gray-600 focus:outline-none focus:border-[#8b6f2f] bg-white shadow-sm">
-            <option>Bulan Ini</option>
-            <option>3 Bulan Terakhir</option>
-            <option>6 Bulan Terakhir</option>
-        </select>
+        <div class="flex items-center gap-3">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-red-50 border border-red-200 text-xs font-semibold text-red-700">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                Kewajiban
+            </span>
+            <span class="text-sm text-gray-500">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }}</span>
+        </div>
     </div>
 </div>
+
+{{-- Summary Banner --}}
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#b91c1c] to-[#7f1d1d] p-6 mb-6 shadow-xl text-white">
+    <div class="absolute -right-8 -top-8 w-48 h-48 bg-white/5 rounded-full"></div>
+    <div class="absolute -right-4 bottom-0 w-64 h-32 bg-white/5 rounded-full"></div>
+    <div class="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-white/10">
+        <div class="space-y-1">
+            <p class="text-red-200 text-[10px] uppercase font-semibold tracking-wider">Total Kewajiban Bersih</p>
+            <p class="text-2xl font-bold">Rp {{ number_format($totalBersih, 0, ',', '.') }}</p>
+            <p class="text-red-300 text-xs">Setelah pajak 20% ({{ $depositoAktif }} deposito)</p>
+        </div>
+        <div class="space-y-1 pt-4 md:pt-0 md:pl-6">
+            <p class="text-red-200 text-[10px] uppercase font-semibold tracking-wider">Siap Cair (H-7 Jatuh Tempo)</p>
+            <p class="text-2xl font-bold text-yellow-300">Rp {{ number_format($totalSiapCair, 0, ',', '.') }}</p>
+            <p class="text-red-300 text-xs">Sudah masuk persiapan pencairan</p>
+        </div>
+        <div class="space-y-1 pt-4 md:pt-0 md:pl-6">
+            <p class="text-red-200 text-[10px] uppercase font-semibold tracking-wider">Estimasi Akrual</p>
+            <p class="text-2xl font-bold text-orange-300">Rp {{ number_format($totalEstimasiAkrual, 0, ',', '.') }}</p>
+            <p class="text-red-300 text-xs">Perhitungan in-memory deposito aktif</p>
+        </div>
+    </div>
+</div>
+
 
 {{-- Alert Kewajiban --}}
 <div class="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6 flex items-start gap-3">
@@ -39,17 +65,42 @@
 
 {{-- KPI Cards --}}
 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-5 mb-8">
+    {{-- Total Bunga Bersih --}}
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
         <div class="flex items-center gap-3 mb-3">
             <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
                 <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <span class="text-xs text-gray-500 font-medium">Total Bunga Keluar</span>
+            <span class="text-xs text-gray-500 font-medium">Total Kewajiban Bersih</span>
         </div>
         <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalBersih, 0, ',', '.') }}</p>
         <div class="flex items-center gap-1.5 mt-2">
-            <span class="text-xs text-gray-400">Total kewajiban bunga bulan berjalan</span>
+            <span class="text-xs text-gray-400">Total estimasi + siap cair (setelah pajak)</span>
         </div>
+    </div>
+
+    {{-- Siap Cair (dari persiapanCair) --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-red-100 p-5 ring-1 ring-red-100">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            </div>
+            <span class="text-[10px] font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full">Siap Cair</span>
+        </div>
+        <p class="text-2xl font-bold text-red-700">Rp {{ number_format($totalSiapCair, 0, ',', '.') }}</p>
+        <p class="text-xs text-gray-400 mt-2">Bunga dari record persiapan cair</p>
+    </div>
+
+    {{-- Estimasi Akrual (fallback in-memory) --}}
+    <div class="bg-white rounded-2xl shadow-sm border border-amber-100 p-5 ring-1 ring-amber-100">
+        <div class="flex items-center justify-between gap-3 mb-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            </div>
+            <span class="text-[10px] font-semibold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">Estimasi Akrual</span>
+        </div>
+        <p class="text-2xl font-bold text-amber-700">Rp {{ number_format($totalEstimasiAkrual, 0, ',', '.') }}</p>
+        <p class="text-xs text-gray-400 mt-2">Bunga akrual deposito belum jatuh tempo H-7</p>
     </div>
 
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
@@ -61,28 +112,6 @@
         </div>
         <p class="text-2xl font-bold text-gray-900">{{ number_format($depositoAktif, 0, ',', '.') }}</p>
         <p class="text-xs text-gray-400 mt-2">Total nasabah deposito berjalan</p>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            </div>
-            <span class="text-xs text-gray-500 font-medium">Pajak Deposito (20%)</span>
-        </div>
-        <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($totalPajak, 0, ',', '.') }}</p>
-        <p class="text-xs text-gray-400 mt-2">Total pajak yang ditanggung nasabah</p>
-    </div>
-
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5">
-        <div class="flex items-center gap-3 mb-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
-                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            </div>
-            <span class="text-xs text-gray-500 font-medium">Jatuh Tempo Bulan Ini</span>
-        </div>
-        <p class="text-2xl font-bold text-gray-900">{{ number_format($jatuhTempoBulanIni, 0, ',', '.') }}</p>
-        <p class="text-xs text-amber-600 mt-2 font-medium">Deposito perlu perhatian</p>
     </div>
 </div>
 
@@ -135,9 +164,10 @@
                     <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nasabah</th>
                     <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Nominal</th>
                     <th class="pb-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Rate/Thn</th>
-                    <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Bunga Kotor/Bln</th>
+                    <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Bunga Kotor</th>
                     <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Pajak (20%)</th>
                     <th class="pb-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">Bunga Bersih</th>
+                    <th class="pb-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Sumber Data</th>
                     <th class="pb-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">Jatuh Tempo</th>
                 </tr>
             </thead>
@@ -147,9 +177,9 @@
                     <td class="py-3.5">
                         <div class="flex items-center gap-2.5">
                             <div class="w-8 h-8 rounded-full bg-gradient-to-br from-red-400 to-red-600 flex items-center justify-center text-white text-xs font-bold">
-                                {{ substr($row->nasabah->user->nama ?? 'U', 0, 1) }}
+                                {{ substr(optional(optional($row->nasabah)->user)->nama ?? 'U', 0, 1) }}
                             </div>
-                            <span class="font-medium text-gray-900">{{ $row->nasabah->user->nama ?? 'Unknown' }}</span>
+                            <span class="font-medium text-gray-900">{{ optional(optional($row->nasabah)->user)->nama ?? 'Unknown' }}</span>
                         </div>
                     </td>
                     <td class="py-3.5 text-right text-gray-700">Rp {{ number_format($row->nominal_awal ?? 0, 0, ',', '.') }}</td>
@@ -159,13 +189,23 @@
                     <td class="py-3.5 text-right text-gray-600">Rp {{ number_format($row->bunga_kotor_rp ?? 0, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-right text-orange-500 text-xs">Rp {{ number_format($row->pajak_rp ?? 0, 0, ',', '.') }}</td>
                     <td class="py-3.5 text-right font-semibold text-red-600">Rp {{ number_format($row->bunga_bersih_rp ?? 0, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-center">
+                        @if(($row->sumber_bunga ?? 'estimasi') === 'siap_cair')
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-green-50 text-green-700">Siap Cair</span>
+                        @else
+                            <span class="px-2 py-0.5 text-xs font-semibold rounded-full bg-amber-50 text-amber-700">Estimasi</span>
+                        @endif
+                    </td>
                     <td class="py-3.5 text-center text-xs text-gray-500">
                         {{ $row->tgl_jatuh_tempo ? \Carbon\Carbon::parse($row->tgl_jatuh_tempo)->translatedFormat('d M Y') : \Carbon\Carbon::parse($row->tgl_mulai)->addMonths(1)->translatedFormat('d M Y') }}
                     </td>
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="7" class="py-4 text-center text-gray-500">Belum ada data deposito aktif.</td>
+                    <td colspan="8" class="py-10 text-center text-gray-400">
+                        <svg class="w-10 h-10 mx-auto mb-2 text-gray-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                        Belum ada data deposito aktif.
+                    </td>
                 </tr>
                 @endforelse
             </tbody>

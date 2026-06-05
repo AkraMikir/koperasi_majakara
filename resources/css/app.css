@@ -15,6 +15,12 @@
     --color-majakara-dark-gold: #8b6f2f;
     --color-majakara-light-brown: #a67c52;
 
+    --color-primary: #674c1d;
+    --color-primary-light: #8b6f2f;
+    --color-primary-dark: #4a3514;
+    --color-accent: #d4af37;
+    --color-bg-light: #faf9f6;
+
     /* ─── Majakara Gradients ────────────────────────────────────────────────── */
     --background-image-gradient-gold: linear-gradient(135deg, #d4af37 0%, #8b6f2f 100%);
     --background-image-gradient-brown: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
