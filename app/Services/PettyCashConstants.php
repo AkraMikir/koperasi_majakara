@@ -27,6 +27,7 @@ class PettyCashConstants
     const REF_PINJAMAN_H   = 'tbl_pinjaman_h';
     const REF_PINJAMAN_D   = 'tbl_pengajuan_pembayaran_pinjaman';
     const REF_DEPOSITO_P   = 'tbl_pengajuan_deposito';
+    const REF_DEPOSITO_CAIR = 'tbl_pencairan_deposito';
     const REF_GADAI_P      = 'tbl_gadai_pengajuan';
     const REF_GADAI_A      = 'tbl_gadai_active';
 

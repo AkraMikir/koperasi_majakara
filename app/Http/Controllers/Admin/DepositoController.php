@@ -603,9 +603,30 @@ class DepositoController extends Controller
             // Ini MENGURANGI saldo Admin. Reimbursement dilakukan terpisah oleh Owner (Rule #3).
             PettyCashSaldo::buatMutasi(
                 $adminId, 'admin', -$nominal,
-                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF)',
-                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'other'
+                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' (TF ke Nasabah)',
+                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'deposito'
             );
+
+            // 🔥 Catat ke PettyCashTransaksiNasabah (pengeluaran ke nasabah - mencegah duplikasi)
+            $existingPctf = PettyCashTransaksiNasabah::where('ref_table', 'tbl_pencairan_deposito')
+                ->where('ref_id', (string) $pencairan->id)
+                ->first();
+            if (!$existingPctf) {
+                PettyCashTransaksiNasabah::create([
+                    'id'               => IdGenerator::generate('petty_cash_transaksi_nasabah', 'PC', 'DEP', 'TF'),
+                    'admin_id'         => $adminId,
+                    'nasabah_id'       => $pencairan->id_nasabah,
+                    'id_jns_transaksi' => PettyCashConstants::JNS_PNCR,
+                    'id_jns_via'       => PettyCashConstants::VIA_TF,
+                    'id_jns_fitur'     => PettyCashConstants::FITUR_DEPOSITO,
+                    'nominal'          => $nominal,
+                    'status'           => 'approved',
+                    'keterangan'       => 'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' → Rek Nasabah',
+                    'ref_table'        => 'tbl_pencairan_deposito',
+                    'ref_id'           => (string) $pencairan->id,
+                    'tgl_transaksi'    => now(),
+                ]);
+            }
 
             // 3. Record di trans_deposito
             TransDeposito::create([
@@ -855,9 +876,30 @@ class DepositoController extends Controller
             // Ini MENGURANGI saldo. TopUp dilakukan terpisah oleh Owner (Rule #3).
             PettyCashSaldo::buatMutasi(
                 $adminId, 'admin', -$nominal,
-                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' ke Tabungan',
-                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'other'
+                'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' → Tabungan Nasabah',
+                (string) $pencairan->id, 'tbl_pencairan_deposito', 'transfer', 'deposito'
             );
+
+            // 🔥 Catat ke PettyCashTransaksiNasabah (pengeluaran ke tabungan nasabah - mencegah duplikasi)
+            $existingPctab = PettyCashTransaksiNasabah::where('ref_table', 'tbl_pencairan_deposito')
+                ->where('ref_id', (string) $pencairan->id)
+                ->first();
+            if (!$existingPctab) {
+                PettyCashTransaksiNasabah::create([
+                    'id'               => IdGenerator::generate('petty_cash_transaksi_nasabah', 'PC', 'DEP', 'TB'),
+                    'admin_id'         => $adminId,
+                    'nasabah_id'       => $pencairan->id_nasabah,
+                    'id_jns_transaksi' => PettyCashConstants::JNS_PNCR,
+                    'id_jns_via'       => PettyCashConstants::VIA_TF,
+                    'id_jns_fitur'     => PettyCashConstants::FITUR_DEPOSITO,
+                    'nominal'          => $nominal,
+                    'status'           => 'approved',
+                    'keterangan'       => 'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' → Saldo Tabungan',
+                    'ref_table'        => 'tbl_pencairan_deposito',
+                    'ref_id'           => (string) $pencairan->id,
+                    'tgl_transaksi'    => now(),
+                ]);
+            }
 
             // 3. Record di trans_deposito
             TransDeposito::create([
@@ -1015,6 +1057,123 @@ class DepositoController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('pencairanPettyCashProses error', ['id' => $id, 'error' => $e->getMessage()]);
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * [Admin] Finalisasi pencairan deposito via Petty Cash Operator (Tunai ke Nasabah).
+     *
+     * @deprecated Tidak digunakan oleh route manapun.
+     *             Route `pencairan-petty-cash.serahkan` diarahkan ke
+     *             PettyCashController@pencairanDepositoCash (dengan sumber='deposito').
+     *             Method ini dipertahankan sebagai referensi fallback.
+     */
+    public function selesaikanPencairanPettyCash(Request $request, $id)
+    {
+        $this->checkDepositoPermission();
+
+        $request->validate([
+            'catatan' => 'nullable|string|max:500',
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $pencairan = PencairanDeposito::with(['deposito', 'nasabah'])->findOrFail($id);
+
+            if (!in_array($pencairan->status, ['pending', 'diproses'])) {
+                return back()->with('error', 'Pencairan tidak dalam status valid untuk diselesaikan.');
+            }
+
+            $nominal = (float) $pencairan->nominal_akhir;
+            $adminId = auth()->id();
+            $nomorDep = $pencairan->deposito->nomor_deposito;
+
+            // Cek saldo Admin (cash) mencukupi
+            $saldoCashAdmin = PettyCashSaldo::getSaldo($adminId, 'admin', 'cash');
+            if ($saldoCashAdmin < $nominal) {
+                return back()->with('error',
+                    'Saldo Cash Admin tidak mencukupi. Tersedia: Rp ' . number_format($saldoCashAdmin, 0, ',', '.') .
+                    ', Dibutuhkan: Rp ' . number_format($nominal, 0, ',', '.')
+                );
+            }
+
+            // 1. Potong saldo Admin (cash) — sumber deposito
+            PettyCashSaldo::buatMutasi(
+                $adminId, 'admin', -$nominal,
+                'Pencairan Deposito ' . $nomorDep . ' → Tunai ke Nasabah',
+                (string) $pencairan->id, 'tbl_pencairan_deposito', 'cash', 'deposito'
+            );
+
+            // 🔥 2. Catat ke PettyCashTransaksiNasabah (pengeluaran tunai ke nasabah - guard anti-duplikasi)
+            $existingPc = PettyCashTransaksiNasabah::where('ref_table', 'tbl_pencairan_deposito')
+                ->where('ref_id', (string) $pencairan->id)
+                ->first();
+            if (!$existingPc) {
+                PettyCashTransaksiNasabah::create([
+                    'id'               => IdGenerator::generate('petty_cash_transaksi_nasabah', 'PC', 'DEP', 'CS'),
+                    'admin_id'         => $adminId,
+                    'nasabah_id'       => $pencairan->id_nasabah,
+                    'id_jns_transaksi' => PettyCashConstants::JNS_PNCR,
+                    'id_jns_via'       => PettyCashConstants::VIA_CS,
+                    'id_jns_fitur'     => PettyCashConstants::FITUR_DEPOSITO,
+                    'nominal'          => $nominal,
+                    'status'           => 'approved',
+                    'keterangan'       => 'Pencairan Deposito ' . $nomorDep . ' → Tunai ke Nasabah',
+                    'ref_table'        => 'tbl_pencairan_deposito',
+                    'ref_id'           => (string) $pencairan->id,
+                    'tgl_transaksi'    => now(),
+                ]);
+            }
+
+            // 3. Record di trans_deposito
+            TransDeposito::create([
+                'deposito_id'   => $pencairan->deposito_id,
+                'jenis'         => 'pencairan',
+                'nominal'       => $nominal,
+                'keterangan'    => 'Pencairan Tunai (Petty Cash) ke Nasabah',
+                'tgl_transaksi' => now(),
+            ]);
+
+            // 4. Update status pencairan → selesai
+            $pencairan->update([
+                'status'      => 'selesai',
+                'approved_by' => $adminId,
+                'catatan'     => $request->catatan ?? 'Pencairan tunai dikonfirmasi Admin',
+            ]);
+
+            // 5. Update status deposito → dicairkan atau ditutup
+            $statusDep = $pencairan->is_cancel ? 'ditutup' : 'dicairkan';
+            $pencairan->deposito->update(['status' => $statusDep]);
+
+            // 6. Sinkronisasi persiapan cair
+            DepositoPersiapanCair::where('deposito_id', $pencairan->deposito_id)
+                ->update(['status' => 'selesai']);
+
+            DB::commit();
+
+            app(\App\Services\ActivityLogService::class)->logPencairanDeposito(
+                (string) $pencairan->deposito_id,
+                $nominal,
+                $pencairan->nasabah->user->nama ?? 'N/A'
+            );
+
+            NasabahNotification::notify(
+                $pencairan->id_nasabah, 'deposito',
+                'Deposito Dicairkan (Tunai)',
+                'Deposito No. ' . $nomorDep . ' senilai Rp ' .
+                    number_format($nominal, 0, ',', '.') . ' telah dicairkan secara tunai.',
+                route('nasabah.deposito.detail', $pencairan->deposito_id),
+                (string) $pencairan->deposito_id, 'pencairan_deposito'
+            );
+
+            return redirect()->route('admin.deposito.pencairan-tf.index')
+                ->with('success', 'Pencairan tunai deposito ' . $nomorDep . ' berhasil diselesaikan.');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('selesaikanPencairanPettyCash error', ['id' => $id, 'error' => $e->getMessage()]);
             return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
