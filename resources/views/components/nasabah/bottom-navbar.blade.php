@@ -38,6 +38,7 @@
     $nasabah = auth()->user() ? auth()->user()->nasabah : null;
     $bankInfo = $nasabah ? app(\App\Services\BankAccessService::class)->checkPremiumAccess($nasabah->id) : null;
     $isRestricted = $bankInfo && !$bankInfo['allowed'];
+    $isVerified = auth()->check() && auth()->user()->verified !== null;
 @endphp
 
 <nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(103,76,29,0.08)] z-50 transition-transform duration-300">
@@ -49,13 +50,24 @@
             @foreach($allNavItems as $item)
             @php 
                 $active = $navActive($item['key']); 
-                $isPremium = in_array($item['key'], ['pinjaman', 'deposito', 'gadai']);
-                $isLocked = $isPremium && $isRestricted;
+                $isRestrictedFeature = in_array($item['key'], ['tabungan', 'pinjaman', 'deposito', 'gadai']);
+                
+                $isLocked = false;
+                $lockReason = '';
+                if ($isRestrictedFeature) {
+                    if (!$isVerified) {
+                        $isLocked = true;
+                        $lockReason = 'Akun Anda belum diverifikasi oleh admin.';
+                    } elseif (in_array($item['key'], ['pinjaman', 'deposito', 'gadai']) && $isRestricted) {
+                        $isLocked = true;
+                        $lockReason = $bankInfo['reason'];
+                    }
+                }
             @endphp
             @if($isLocked)
             <div class="nav-item group relative z-10 flex flex-col items-center justify-end min-w-[48px] px-1 py-2 rounded-2xl text-gray-400 opacity-40 cursor-not-allowed"
                  data-nav-key="{{ $item['key'] }}"
-                 title="{{ $bankInfo['reason'] }}">
+                 title="{{ $lockReason }}">
                 <span class="flex items-center justify-center w-12 h-10 rounded-2xl relative">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $item['icon'] }}"></path></svg>
                     <!-- Small lock overlay -->
@@ -106,8 +118,19 @@
     @foreach($arcItems as $idx => $arcItem)
     @php 
         $pos = $arcPositions[$idx] ?? ['x' => 0, 'y' => -70];
-        $isPremium = in_array($arcItem['key'], ['pinjaman', 'deposito', 'gadai']);
-        $isLocked = $isPremium && $isRestricted;
+        $isRestrictedFeature = in_array($arcItem['key'], ['tabungan', 'pinjaman', 'deposito', 'gadai']);
+        
+        $isLocked = false;
+        $lockReason = '';
+        if ($isRestrictedFeature) {
+            if (!$isVerified) {
+                $isLocked = true;
+                $lockReason = 'Akun Anda belum diverifikasi oleh admin.';
+            } elseif (in_array($arcItem['key'], ['pinjaman', 'deposito', 'gadai']) && $isRestricted) {
+                $isLocked = true;
+                $lockReason = $bankInfo['reason'];
+            }
+        }
     @endphp
     @if($isLocked)
     <div class="arc-item absolute left-1/2 top-full flex items-center justify-center w-12 h-12 rounded-full bg-gray-300 text-gray-500 border-2 border-gray-400 opacity-40 cursor-not-allowed pointer-events-none"
@@ -115,7 +138,7 @@
        data-arc-x="{{ $pos['x'] ?? 0 }}"
        data-arc-y="{{ $pos['y'] ?? -70 }}"
        data-arc-delay="{{ $idx * 40 }}"
-       title="{{ $arcItem['label'] }} (Terkunci: {{ $bankInfo['reason'] }})">
+       title="{{ $arcItem['label'] }} (Terkunci: {{ $lockReason }})">
         <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="{{ $arcItem['icon'] }}"></path></svg>
         <span class="absolute -top-1 -right-1 bg-white rounded-full p-0.5 shadow-sm">
             <svg class="w-3 h-3 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path></svg>

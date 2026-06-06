@@ -21,9 +21,7 @@ class DatabaseSeeder extends Seeder
             // PinjamanSeeder::class,
             GadaiMasterInapKendaraanSeeder::class,
             PaketDepositoSeeder::class,
-            BankRekeningSeeder::class,
-            BiayaTransferSeeder::class,
-
+            MasterDataBankRegisSeeder::class,
         ]);
     }
 }

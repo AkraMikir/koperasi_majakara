@@ -311,6 +311,9 @@ class ActivityLogTest extends TestCase
         $this->actingAs($this->nasabah);
         app(ActivityLogService::class)->log('action_today', 'tabungan', 'desc');
 
+        // Force action_today created_at to be exactly now() in database to avoid timezone mismatch
+        ActivityLog::where('action', 'action_today')->update(['created_at' => now()]);
+
         // Buat log dengan tanggal kemarin menggunakan raw insert
         ActivityLog::create([
             'user_id'    => $this->nasabah->id,

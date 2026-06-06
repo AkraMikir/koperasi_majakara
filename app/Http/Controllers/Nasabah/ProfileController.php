@@ -58,6 +58,15 @@ class ProfileController extends Controller
         try {
             DB::beginTransaction();
 
+            // Get data lama dan data baru berdasarkan jenis_data
+            $jenisData = $request->jenis_data;
+            $dataLama = $this->getDataLama($nasabah, $jenisData);
+            $dataBaru = $this->getDataBaru($request, $jenisData);
+
+            if ($jenisData === 'kontak_darurat' && isset($dataBaru['no_telepon'])) {
+                $dataBaru['no_telepon'] = $this->normalizePhone($dataBaru['no_telepon']);
+            }
+
             // Validasi data baru berdasarkan jenis
             $jenisData = $request->jenis_data;
             $validationResult = $this->validateDataBaru($request, $jenisData);
@@ -69,9 +78,21 @@ class ProfileController extends Controller
                     ->withInput();
             }
 
-            // Get data lama dan data baru berdasarkan jenis_data
-            $dataLama = $this->getDataLama($nasabah, $jenisData);
-            $dataBaru = $this->getDataBaru($request, $jenisData);
+            // Upload file setelah validasi berhasil
+            if ($jenisData === 'kontak_darurat') {
+                if ($request->hasFile('foto_ktp_darurat')) {
+                    $path = $request->file('foto_ktp_darurat')->store('user/' . $user->id . '/dataori', 'public');
+                    $dataBaru['foto_ktp'] = $path;
+                } else {
+                    $dataBaru['foto_ktp'] = $nasabah->darurat->foto_ktp ?? '';
+                }
+                
+                // Fallback empty email to '-' for database compatibility
+                if (empty($dataBaru['email']) || $dataBaru['email'] === '-') {
+                    $dataBaru['email'] = '-';
+                }
+            }
+
 
             // Cek apakah ada pengajuan pending untuk jenis data yang sama
             $existingPending = PengajuanPerubahanData::where('id_nasabah', $nasabah->id)
@@ -241,6 +262,7 @@ class ProfileController extends Controller
                     'pekerjaan' => $darurat->pekerjaan ?? '',
                     'no_ktp' => $darurat->no_ktp ?? '',
                     'alamat' => $darurat->alamat ?? '',
+                    'foto_ktp' => $darurat->foto_ktp ?? '',
                 ] : [];
 
             default:
@@ -303,14 +325,17 @@ class ProfileController extends Controller
                 ];
 
             case 'kontak_darurat':
+                $nasabah = Auth::user()->nasabah;
+                $email = $request->input('email_darurat', '');
                 return [
                     'nama_lengkap' => $request->input('nama_lengkap_darurat', ''),
                     'hubungan_peminjam' => $request->input('hubungan_peminjam', ''),
                     'no_telepon' => $request->input('no_telepon_darurat', ''),
-                    'email' => $request->input('email_darurat', ''),
+                    'email' => !empty($email) ? trim($email) : null,
                     'pekerjaan' => $request->input('pekerjaan_darurat', ''),
                     'no_ktp' => $request->input('no_ktp_darurat', ''),
                     'alamat' => $request->input('alamat_darurat', ''),
+                    'foto_ktp' => $nasabah && $nasabah->darurat ? $nasabah->darurat->foto_ktp : '',
                 ];
 
             default:
@@ -376,24 +401,85 @@ class ProfileController extends Controller
                 break;
 
             case 'kontak_darurat':
+                $nasabah = Auth::user()->nasabah;
+                $daruratId = $nasabah && $nasabah->darurat ? $nasabah->darurat->id : null;
                 $rules = [
-                    'nama_lengkap' => 'required|string|max:255',
-                    'hubungan_peminjam' => 'nullable|string|max:255',
-                    'no_telepon' => 'required|string|max:20',
-                    'email' => 'nullable|email|max:255',
-                    'pekerjaan' => 'nullable|string|max:255',
-                    'no_ktp' => 'nullable|string|max:20',
-                    'alamat' => 'nullable|string',
+                    'nama_lengkap' => 'required|string|min:3|max:255',
+                    'hubungan_peminjam' => 'required|string|min:2|max:100',
+                    'no_telepon' => [
+                        'required',
+                        'string',
+                        'regex:/^[0-9]+$/',
+                        'min:10',
+                        'max:12',
+                        \Illuminate\Validation\Rule::unique('tbl_darurat', 'no_telepon')->ignore($daruratId),
+                    ],
+                    'email' => 'nullable|string|email|max:255',
+                    'pekerjaan' => 'required|string|min:3|max:100',
+                    'no_ktp' => [
+                        'required',
+                        'string',
+                        'digits:16',
+                        \Illuminate\Validation\Rule::unique('tbl_darurat', 'no_ktp')->ignore($daruratId),
+                    ],
+                    'alamat' => 'required|string|min:10',
                 ];
+                
+                if (request()->hasFile('foto_ktp_darurat')) {
+                    $data['foto_ktp_darurat'] = request()->file('foto_ktp_darurat');
+                    $rules['foto_ktp_darurat'] = 'nullable|image|mimes:jpeg,png,jpg|max:5120';
+                }
                 break;
         }
 
-        $validator = Validator::make($request->all(), $rules);
+        $messages = [];
+        if ($jenisData === 'kontak_darurat') {
+            $messages = [
+                'nama_lengkap.required' => 'Nama lengkap kontak darurat wajib diisi.',
+                'nama_lengkap.min' => 'Nama lengkap kontak darurat minimal 3 karakter.',
+                'hubungan_peminjam.required' => 'Hubungan wajib diisi.',
+                'hubungan_peminjam.min' => 'Hubungan minimal 2 karakter.',
+                'hubungan_peminjam.max' => 'Hubungan maksimal 100 karakter.',
+                'no_telepon.required' => 'Nomor telepon wajib diisi.',
+                'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka.',
+                'no_telepon.min' => 'Nomor telepon minimal 10 digit.',
+                'no_telepon.max' => 'Nomor telepon maksimal 12 digit.',
+                'no_telepon.unique' => 'Nomor telepon kontak darurat sudah terdaftar.',
+                'email.required' => 'Email wajib diisi.',
+                'email.email' => 'Format email tidak valid.',
+                'pekerjaan.required' => 'Pekerjaan wajib diisi.',
+                'pekerjaan.min' => 'Pekerjaan minimal 3 karakter.',
+                'pekerjaan.max' => 'Pekerjaan maksimal 100 karakter.',
+                'no_ktp.required' => 'NIK (No KTP) wajib diisi.',
+                'no_ktp.digits' => 'NIK harus tepat 16 digit angka.',
+                'no_ktp.unique' => 'NIK kontak darurat sudah terdaftar.',
+                'alamat.required' => 'Alamat wajib diisi.',
+                'alamat.min' => 'Alamat minimal 10 karakter.',
+                'foto_ktp_darurat.image' => 'File KTP harus berupa gambar.',
+                'foto_ktp_darurat.mimes' => 'Format file KTP harus jpeg, png, atau jpg.',
+                'foto_ktp_darurat.max' => 'Ukuran file KTP maksimal 5MB.',
+            ];
+        }
+
+        $validator = Validator::make($data, $rules, $messages);
 
         if ($validator->fails()) {
             return $validator->errors();
         }
 
         return true;
+    }
+
+    /**
+     * Normalize phone numbers (e.g. +62 to 0, strip non-digits)
+     */
+    private function normalizePhone($value)
+    {
+        if ($value === null || $value === '') return '';
+        $digits = preg_replace('/[^0-9]/', '', $value);
+        if (str_starts_with($digits, '62') && strlen($digits) > 10) {
+            return '0' . substr($digits, 2);
+        }
+        return $digits;
     }
 }

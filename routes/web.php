@@ -32,6 +32,7 @@ Route::get('/faq', [LandingPageController::class, 'faq'])->name('landing.faq');
 Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
 Route::post('/register', [RegisterController::class, 'register'])->name('register.submit');
 Route::post('/register/ocr', [RegisterController::class, 'processOcr'])->name('register.ocr');
+Route::post('/register/check-unique', [RegisterController::class, 'checkUnique'])->name('register.check-unique');
 
 Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
@@ -57,114 +58,117 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/gadai-aktif', [\App\Http\Controllers\Nasabah\GuideController::class, 'gadaiAktif'])->name('gadai-aktif');
     });
 
-    // PIN Management Routes (DEPRECATED - Moved to Setting)
-    Route::prefix('pin')->name('pin.')->group(function () {
-        Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
-        Route::post('/send-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'sendOtpLupaPin'])->name('send-otp-lupa');
-        Route::post('/resend-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'resendOtpLupaPin'])->name('resend-otp-lupa');
-        Route::post('/verify-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'verifyOtpLupaPin'])->name('verify-otp-lupa');
-        Route::get('/get-cooldown', [\App\Http\Controllers\Nasabah\PinController::class, 'getCooldown'])->name('get-cooldown');
-    });
-    
-    // Setting Routes (Security & Privacy)
-    Route::prefix('setting')->name('setting.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Nasabah\SettingController::class, 'index'])->name('index');
+    // Restricted Nasabah Routes (Require Account Verification)
+    Route::middleware('nasabah.verified')->group(function () {
+        // PIN Management Routes (DEPRECATED - Moved to Setting)
+        Route::prefix('pin')->name('pin.')->group(function () {
+            Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
+            Route::post('/send-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'sendOtpLupaPin'])->name('send-otp-lupa');
+            Route::post('/resend-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'resendOtpLupaPin'])->name('resend-otp-lupa');
+            Route::post('/verify-otp-lupa', [\App\Http\Controllers\Nasabah\PinController::class, 'verifyOtpLupaPin'])->name('verify-otp-lupa');
+            Route::get('/get-cooldown', [\App\Http\Controllers\Nasabah\PinController::class, 'getCooldown'])->name('get-cooldown');
+        });
         
-        // Password Management
-        Route::post('/change-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePassword'])->name('change-password');
-        Route::post('/send-otp-password-reset', [\App\Http\Controllers\Nasabah\SettingController::class, 'sendOtpPasswordReset'])->name('send-otp-password-reset');
-        Route::post('/verify-otp-reset-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'verifyOtpAndResetPassword'])->name('verify-otp-reset-password');
+        // Setting Routes (Security & Privacy)
+        Route::prefix('setting')->name('setting.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Nasabah\SettingController::class, 'index'])->name('index');
+            
+            // Password Management
+            Route::post('/change-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePassword'])->name('change-password');
+            Route::post('/send-otp-password-reset', [\App\Http\Controllers\Nasabah\SettingController::class, 'sendOtpPasswordReset'])->name('send-otp-password-reset');
+            Route::post('/verify-otp-reset-password', [\App\Http\Controllers\Nasabah\SettingController::class, 'verifyOtpAndResetPassword'])->name('verify-otp-reset-password');
+            
+            // PIN Management
+            Route::post('/change-pin', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePin'])->name('change-pin');
+            Route::get('/otp-cooldown', [\App\Http\Controllers\Nasabah\SettingController::class, 'getOtpCooldown'])->name('otp-cooldown');
+        });
         
-        // PIN Management
-        Route::post('/change-pin', [\App\Http\Controllers\Nasabah\SettingController::class, 'changePin'])->name('change-pin');
-        Route::get('/otp-cooldown', [\App\Http\Controllers\Nasabah\SettingController::class, 'getOtpCooldown'])->name('otp-cooldown');
-    });
-    
-    // Profile Update Routes
-    Route::prefix('profile')->name('profile.')->group(function () {
-        Route::post('/update-request', [\App\Http\Controllers\Nasabah\ProfileController::class, 'submitUpdateRequest'])->name('update-request');
-        Route::delete('/cancel-request/{id}', [\App\Http\Controllers\Nasabah\ProfileController::class, 'cancelUpdateRequest'])->name('cancel-request');
-    });
-    
-    // Tabungan Routes
-    Route::prefix('tabungan')->name('tabungan.')->group(function () {
-        Route::get('/', [TabunganController::class, 'index'])->name('index');
-        Route::get('/nabung-sekarang', [TabunganController::class, 'nabungSekarang'])->name('nabung-sekarang');
-        Route::get('/pengajuan-transfer', [TabunganController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
-        Route::post('/pengajuan-transfer', [TabunganController::class, 'submitSetoran'])->name('submit-setoran');
-        Route::get('/penarikan', [TabunganController::class, 'penarikanTabungan'])->name('penarikan');
-        Route::post('/penarikan', [TabunganController::class, 'submitPenarikan'])->name('submit-penarikan');
-        Route::get('/janji-temu', [TabunganController::class, 'janjiTemu'])->name('janji-temu');
-        Route::post('/janji-temu', [TabunganController::class, 'submitJanjiTemu'])->name('submit-janji-temu');
-        Route::post('/verify-pin', [TabunganController::class, 'verifyPin'])->name('verify-pin');
-        Route::get('/status-pengajuan-setor', [TabunganController::class, 'statusPengajuanSetor'])->name('status-pengajuan-setor');
-        Route::get('/status-janji-temu', [TabunganController::class, 'statusJanjiTemu'])->name('status-janji-temu');
-        Route::get('/status-pengajuan-tarik', [TabunganController::class, 'statusPengajuanTarik'])->name('status-pengajuan-tarik');
-        Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
-        Route::get('/pengajuan-tarik/{id}', [TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
-        Route::get('/transaksi/{id}', [TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
-        Route::get('/transaksi/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'transaksiTabungan'])->name('struk-transaksi');
-        Route::get('/janji-temu/{id}', [TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
-        Route::post('/janji-temu/{id}/cancel', [TabunganController::class, 'cancelJanjiTemu'])->name('cancel-janji-temu');
-        Route::post('/pengajuan-setor/{id}/cancel', [TabunganController::class, 'cancelPengajuanSetor'])->name('cancel-pengajuan-setor');
-        Route::post('/pengajuan-tarik/{id}/cancel', [TabunganController::class, 'cancelPengajuanTarik'])->name('cancel-pengajuan-tarik');
-    });
-    
-    // Pinjaman Routes
-    Route::prefix('pinjaman')->name('pinjaman.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'index'])->name('index');
-        Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
-        Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
-        Route::post('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPengajuanTransfer'])->name('submit-pengajuan-transfer');
-        Route::post('/simulasi-angsuran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'simulasiAngsuran'])->name('simulasi-angsuran');
-        Route::get('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'janjiTemuPinjaman'])->name('janji-temu');
-        Route::post('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPinjaman'])->name('submit-janji-temu');
-        Route::post('/verify-pin', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'verifyPin'])->name('verify-pin');
-        Route::get('/status-pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'statusPengajuan'])->name('status-pengajuan');
-        Route::get('/pengajuan/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
-        Route::get('/pinjaman-aktif', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
-        Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
-        Route::get('/angsuran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'angsuran'])->name('angsuran');
-        Route::get('/angsuran/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
-        Route::get('/pembayaran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pembayaran'])->name('pembayaran');
-        Route::post('/pembayaran/transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPembayaranTransfer'])->name('submit-pembayaran-transfer');
-        Route::post('/pembayaran/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPembayaran'])->name('submit-janji-temu-pembayaran');
-        Route::get('/status-pembayaran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'statusPembayaran'])->name('status-pembayaran');
-        Route::get('/pembayaran/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
-        Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
-        Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Nasabah\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
-        Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'angsuran'])->name('struk-angsuran');
-    });
-
-    // Struk Gadai
-    Route::get('/gadai/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'gadaiActive'])->name('struk-gadai');
-    Route::get('/deposito/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'depositoActive'])->name('struk-deposito');
-
-    // Deposito Routes
-    Route::prefix('deposito')->name('deposito.')->group(function () {
-        Route::get('/', [DepositoController::class, 'index'])->name('index');
-        Route::get('/riwayat', [DepositoController::class, 'riwayat'])->name('riwayat');
-        Route::get('/pengajuan', [DepositoController::class, 'pengajuan'])->name('pengajuan');
-        Route::post('/pengajuan', [DepositoController::class, 'submitPengajuan'])->name('submit-pengajuan');
-        Route::get('/pengajuan/{id}/status', [DepositoController::class, 'statusPengajuan'])->name('status-pengajuan');
-        Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
-        // Ajukan pencairan deposito
-        Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
-        // Ajukan cancel deposito
-        Route::post('/aktif/{id}/cancel', [DepositoController::class, 'ajukanCancel'])->name('ajukan-cancel');
-    });
-
-            // Gadai Baru Routes
-    Route::prefix('gadai_baru')->name('gadai_baru.')->group(function () {
-        Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
-        Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
-        Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');
-        Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
+        // Profile Update Routes
+        Route::prefix('profile')->name('profile.')->group(function () {
+            Route::post('/update-request', [\App\Http\Controllers\Nasabah\ProfileController::class, 'submitUpdateRequest'])->name('update-request');
+            Route::delete('/cancel-request/{id}', [\App\Http\Controllers\Nasabah\ProfileController::class, 'cancelUpdateRequest'])->name('cancel-request');
+        });
         
-        // Pengajuan Pembayaran/Perpanjangan
-        Route::get('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'createPengajuan'])->name('create-pengajuan');
-        Route::post('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'storePengajuan'])->name('store-pengajuan');
-        Route::get('/status-pengajuan', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'statusPengajuan'])->name('status-pengajuan');
+        // Tabungan Routes
+        Route::prefix('tabungan')->name('tabungan.')->group(function () {
+            Route::get('/', [TabunganController::class, 'index'])->name('index');
+            Route::get('/nabung-sekarang', [TabunganController::class, 'nabungSekarang'])->name('nabung-sekarang');
+            Route::get('/pengajuan-transfer', [TabunganController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
+            Route::post('/pengajuan-transfer', [TabunganController::class, 'submitSetoran'])->name('submit-setoran');
+            Route::get('/penarikan', [TabunganController::class, 'penarikanTabungan'])->name('penarikan');
+            Route::post('/penarikan', [TabunganController::class, 'submitPenarikan'])->name('submit-penarikan');
+            Route::get('/janji-temu', [TabunganController::class, 'janjiTemu'])->name('janji-temu');
+            Route::post('/janji-temu', [TabunganController::class, 'submitJanjiTemu'])->name('submit-janji-temu');
+            Route::post('/verify-pin', [TabunganController::class, 'verifyPin'])->name('verify-pin');
+            Route::get('/status-pengajuan-setor', [TabunganController::class, 'statusPengajuanSetor'])->name('status-pengajuan-setor');
+            Route::get('/status-janji-temu', [TabunganController::class, 'statusJanjiTemu'])->name('status-janji-temu');
+            Route::get('/status-pengajuan-tarik', [TabunganController::class, 'statusPengajuanTarik'])->name('status-pengajuan-tarik');
+            Route::get('/pengajuan-setor/{id}', [TabunganController::class, 'detailPengajuanSetor'])->name('detail-pengajuan-setor');
+            Route::get('/pengajuan-tarik/{id}', [TabunganController::class, 'detailPengajuanTarik'])->name('detail-pengajuan-tarik');
+            Route::get('/transaksi/{id}', [TabunganController::class, 'detailTransaksi'])->name('detail-transaksi');
+            Route::get('/transaksi/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'transaksiTabungan'])->name('struk-transaksi');
+            Route::get('/janji-temu/{id}', [TabunganController::class, 'detailJanjiTemu'])->name('detail-janji-temu');
+            Route::post('/janji-temu/{id}/cancel', [TabunganController::class, 'cancelJanjiTemu'])->name('cancel-janji-temu');
+            Route::post('/pengajuan-setor/{id}/cancel', [TabunganController::class, 'cancelPengajuanSetor'])->name('cancel-pengajuan-setor');
+            Route::post('/pengajuan-tarik/{id}/cancel', [TabunganController::class, 'cancelPengajuanTarik'])->name('cancel-pengajuan-tarik');
+        });
+        
+        // Pinjaman Routes
+        Route::prefix('pinjaman')->middleware('emergency_contact')->name('pinjaman.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'index'])->name('index');
+            Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
+            Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
+            Route::post('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPengajuanTransfer'])->name('submit-pengajuan-transfer');
+            Route::post('/simulasi-angsuran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'simulasiAngsuran'])->name('simulasi-angsuran');
+            Route::get('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'janjiTemuPinjaman'])->name('janji-temu');
+            Route::post('/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPinjaman'])->name('submit-janji-temu');
+            Route::post('/verify-pin', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'verifyPin'])->name('verify-pin');
+            Route::get('/status-pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'statusPengajuan'])->name('status-pengajuan');
+            Route::get('/pengajuan/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
+            Route::get('/pinjaman-aktif', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+            Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
+            Route::get('/angsuran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'angsuran'])->name('angsuran');
+            Route::get('/angsuran/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
+            Route::get('/pembayaran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pembayaran'])->name('pembayaran');
+            Route::post('/pembayaran/transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPembayaranTransfer'])->name('submit-pembayaran-transfer');
+            Route::post('/pembayaran/janji-temu', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitJanjiTemuPembayaran'])->name('submit-janji-temu-pembayaran');
+            Route::get('/status-pembayaran', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'statusPembayaran'])->name('status-pembayaran');
+            Route::get('/pembayaran/{id}', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
+            Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
+            Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Nasabah\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
+            Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'angsuran'])->name('struk-angsuran');
+        });
+
+        // Struk Gadai
+        Route::get('/gadai/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'gadaiActive'])->name('struk-gadai');
+        Route::get('/deposito/{id}/struk', [\App\Http\Controllers\Nasabah\StrukController::class, 'depositoActive'])->name('struk-deposito');
+
+        // Deposito Routes
+        Route::prefix('deposito')->name('deposito.')->group(function () {
+            Route::get('/', [DepositoController::class, 'index'])->name('index');
+            Route::get('/riwayat', [DepositoController::class, 'riwayat'])->name('riwayat');
+            Route::get('/pengajuan', [DepositoController::class, 'pengajuan'])->name('pengajuan');
+            Route::post('/pengajuan', [DepositoController::class, 'submitPengajuan'])->name('submit-pengajuan');
+            Route::get('/pengajuan/{id}/status', [DepositoController::class, 'statusPengajuan'])->name('status-pengajuan');
+            Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
+            // Ajukan pencairan deposito
+            Route::post('/aktif/{id}/cairkan', [DepositoController::class, 'ajukanCairkan'])->name('ajukan-cairkan');
+            // Ajukan cancel deposito
+            Route::post('/aktif/{id}/cancel', [DepositoController::class, 'ajukanCancel'])->name('ajukan-cancel');
+        });
+
+        // Gadai Baru Routes
+        Route::prefix('gadai_baru')->middleware('emergency_contact')->name('gadai_baru.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
+            Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
+            Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');
+            Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
+            
+            // Pengajuan Pembayaran/Perpanjangan
+            Route::get('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'createPengajuan'])->name('create-pengajuan');
+            Route::post('/pengajuan/{id}/{jenis}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'storePengajuan'])->name('store-pengajuan');
+            Route::get('/status-pengajuan', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'statusPengajuan'])->name('status-pengajuan');
+        });
     });
 });
 
@@ -560,6 +564,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
             Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
             Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
+            Route::post('/{id}/verify', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyNasabah'])->name('verify');
         });
     });
     

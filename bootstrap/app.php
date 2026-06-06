@@ -16,6 +16,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'admin' => \App\Http\Middleware\AdminMiddleware::class,
             'admin.utama' => \App\Http\Middleware\AdminUtamaMiddleware::class,
             'admin.permission' => \App\Http\Middleware\CheckAdminPermission::class,
+            'emergency_contact' => \App\Http\Middleware\EnsureEmergencyContactFilled::class,
+            'nasabah.verified' => \App\Http\Middleware\EnsureNasabahVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

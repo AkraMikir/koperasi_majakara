@@ -23,6 +23,7 @@ class Nasabah extends Model
         'alamat',
         'foto_ktp',
         'foto_kk',
+        'foto_selfie',
     ];
 
     protected $casts = [

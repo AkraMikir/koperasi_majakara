@@ -109,7 +109,11 @@
                         <td class="px-6 py-4 text-sm text-gray-700 font-mono">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</td>
                         <td class="px-6 py-4 text-sm text-gray-700 font-mono">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</td>
                         <td class="px-6 py-4">
-                            <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Aktif</span>
+                            @if($nasabah->user && $nasabah->user->verified)
+                                <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">Aktif & Terverifikasi</span>
+                            @else
+                                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs font-semibold">Belum Verifikasi</span>
+                            @endif
                         </td>
                         <td class="px-6 py-4 text-center">
                             <a href="{{ route('admin.nasabah.show', $nasabah->id) }}" class="inline-flex items-center gap-1 px-4 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm">

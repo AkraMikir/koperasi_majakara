@@ -139,8 +139,8 @@
                             <label class="flex items-start gap-3 p-4 border-2 border-gray-200 rounded-xl cursor-pointer">
                                 <input type="checkbox" name="sudah_setor_fisik" value="1" class="mt-0.5 text-[#674c1d] rounded" required>
                                 <div>
-                                    <p class="text-sm font-semibold text-gray-900">Sudah Disetor Fisik ke Kantor</p>
-                                    <p class="text-xs text-gray-500">Centang ini jika sudah menyerahkan fisik</p>
+                                    <p class="text-sm font-semibold text-gray-900">Sudah diserahkan ke Owner</p>
+                                    <p class="text-xs text-gray-500">Centang ini jika sudah menyerahkan ke owner</p>
                                 </div>
                             </label>
                         </div>
