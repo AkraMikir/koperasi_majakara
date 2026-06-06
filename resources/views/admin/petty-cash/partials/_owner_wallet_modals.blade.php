@@ -7,7 +7,7 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
-        <form action="{{ route('admin.petty-cash.owner-wallet.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
+        <form id="formDanaMasuk" action="{{ route('admin.petty-cash.owner-wallet.store') }}" method="POST" enctype="multipart/form-data" class="p-6 space-y-4">
             @csrf
             <input type="hidden" name="tipe" value="masuk">
             
@@ -16,16 +16,18 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Cash</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_cash" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-green-500 focus:border-green-500 transition-all font-semibold">
+                        <input type="text" name="nominal_cash" id="masuk_nominal_cash" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-green-500 focus:border-green-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Transfer</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_tf" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-green-500 focus:border-green-500 transition-all font-semibold">
+                        <input type="text" name="nominal_tf" id="masuk_nominal_tf" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-green-500 focus:border-green-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
             </div>
@@ -85,16 +87,18 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Cash</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_cash" id="keluar_nominal_cash" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 transition-all font-semibold">
+                        <input type="text" name="nominal_cash" id="keluar_nominal_cash" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Transfer</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_tf" id="keluar_nominal_tf" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 transition-all font-semibold">
+                        <input type="text" name="nominal_tf" id="keluar_nominal_tf" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-red-500 focus:border-red-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
             </div>
@@ -166,16 +170,18 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Cash</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_cash" id="withdraw_nominal_cash" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold">
+                        <input type="text" name="nominal_cash" id="withdraw_nominal_cash" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Transfer</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_tf" id="withdraw_nominal_tf" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold">
+                        <input type="text" name="nominal_tf" id="withdraw_nominal_tf" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-purple-500 focus:border-purple-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
             </div>
@@ -238,16 +244,18 @@
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Cash</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_cash" id="it_nominal_cash" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold">
+                        <input type="text" name="nominal_cash" id="it_nominal_cash" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Nominal Transfer</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                        <input type="number" name="nominal_tf" id="it_nominal_tf" placeholder="0" 
-                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold">
+                        <input type="text" name="nominal_tf" id="it_nominal_tf" placeholder="0" 
+                               class="w-full pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-xl focus:ring-amber-500 focus:border-amber-500 transition-all font-semibold"
+                               oninput="formatCurrency(this)">
                     </div>
                 </div>
             </div>
@@ -267,6 +275,12 @@
 </div>
 
 <script>
+function formatCurrency(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value) value = parseInt(value).toLocaleString('id-ID');
+    input.value = value;
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('formDanaKeluar');
     if (form) {
@@ -277,8 +291,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const submitBtn = form.querySelector('button[type="submit"]');
 
         function validate() {
-            const valCash = parseFloat(inputCash.value) || 0;
-            const valTf   = parseFloat(inputTf.value) || 0;
+            const valCash = parseFloat(inputCash.value.replace(/[^0-9]/g, '')) || 0;
+            const valTf   = parseFloat(inputTf.value.replace(/[^0-9]/g, '')) || 0;
             
             const isInvalid = (valCash > maxCash) || (valTf > maxTf);
             
@@ -314,8 +328,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const sumber = selectSumber.value;
             const bal = sourceBalances[sumber] || { total_cash: 0, total_tf: 0 };
             
-            const valCash = parseFloat(inputWDCash.value) || 0;
-            const valTf   = parseFloat(inputWDTf.value) || 0;
+            const valCash = parseFloat(inputWDCash.value.replace(/[^0-9]/g, '')) || 0;
+            const valTf   = parseFloat(inputWDTf.value.replace(/[^0-9]/g, '')) || 0;
             
             const isInvalid = (valCash > parseFloat(bal.total_cash)) || (valTf > parseFloat(bal.total_tf));
             
@@ -350,8 +364,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const asal = selectAsal.value;
             const bal = sourceBalances[asal] || { total_cash: 0, total_tf: 0 };
             
-            const valCash = parseFloat(inputITCash.value) || 0;
-            const valTf   = parseFloat(inputITTf.value) || 0;
+            const valCash = parseFloat(inputITCash.value.replace(/[^0-9]/g, '')) || 0;
+            const valTf   = parseFloat(inputITTf.value.replace(/[^0-9]/g, '')) || 0;
             
             const isInvalid = (valCash > parseFloat(bal.total_cash)) || (valTf > parseFloat(bal.total_tf));
             
@@ -369,5 +383,19 @@ document.addEventListener('DOMContentLoaded', function() {
         
         validateIT();
     }
+
+    // Clean formatting before submit for all forms in this page
+    ['formDanaMasuk', 'formDanaKeluar', 'formWithdraw', 'formInternalTransfer'].forEach(formId => {
+        const f = document.getElementById(formId);
+        if (f) {
+            f.addEventListener('submit', function() {
+                f.querySelectorAll('input[type="text"]').forEach(input => {
+                    if (input.name === 'nominal_cash' || input.name === 'nominal_tf') {
+                        input.value = input.value.replace(/[^0-9]/g, '');
+                    }
+                });
+            });
+        }
+    });
 });
 </script>

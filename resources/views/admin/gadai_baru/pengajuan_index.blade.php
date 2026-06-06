@@ -350,7 +350,7 @@
                 </div>
             </div>
 
-            <form id="formApprove" action="" method="POST" enctype="multipart/form-data" class="space-y-5" onsubmit="this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='Mengolah...';">
+            <form id="formApprove" action="" method="POST" enctype="multipart/form-data" class="space-y-5" onsubmit="let input = document.getElementById('extra_pinjaman_nominal'); if(input) { input.value = input.value.replace(/[^0-9]/g, ''); } this.querySelector('button[type=submit]').disabled=true; this.querySelector('button[type=submit]').innerHTML='Mengolah...';">
                 @csrf
                 <div>
                     <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Upload Bukti Administrasi (Opsional)</label>
@@ -381,9 +381,9 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Nominal Extra (Rp)</label>
-                            <input type="number" name="extra_pinjaman_nominal" id="extra_pinjaman_nominal" min="0" value="0"
+                            <input type="text" name="extra_pinjaman_nominal" id="extra_pinjaman_nominal" value="0"
                                 class="w-full px-5 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 transition-all text-sm font-bold text-gray-900"
-                                oninput="checkExtraReasonRequired()">
+                                oninput="formatCurrency(this); checkExtraReasonRequired();">
                         </div>
                         <div>
                             <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Alasan Extra</label>
@@ -452,6 +452,12 @@
 
 @push('scripts')
 <script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
     const pengajuanData = {
         @foreach($pengajuan as $item)
             "{{ $item->id }}": {
@@ -598,7 +604,7 @@
     }
 
     function checkExtraReasonRequired() {
-        const nominal = document.getElementById('extra_pinjaman_nominal').value;
+        const nominal = document.getElementById('extra_pinjaman_nominal').value.replace(/[^0-9]/g, '');
         const reasonInput = document.getElementById('extra_pinjaman_reason');
         if (parseFloat(nominal) > 0) {
             reasonInput.setAttribute('required', 'required');

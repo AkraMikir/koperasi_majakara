@@ -34,7 +34,7 @@
     @endif
 
     <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
-        <form action="{{ route('admin.master-data.inap-kendaraan.store') }}" method="POST" class="p-8 space-y-6">
+        <form action="{{ route('admin.master-data.inap-kendaraan.store') }}" method="POST" class="p-8 space-y-6" onsubmit="let input = document.getElementById('nominal_inap'); if(input) { input.value = input.value.replace(/[^0-9]/g, ''); }">
             @csrf
             
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -55,7 +55,7 @@
                         <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                             <span class="text-gray-400 font-bold text-sm">Rp</span>
                         </div>
-                        <input type="number" name="nominal_inap" id="nominal_inap" class="w-full pl-10 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('nominal_inap') }}" min="0" required placeholder="Contoh: 50000">
+                        <input type="text" name="nominal_inap" id="nominal_inap" class="w-full pl-10 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('nominal_inap') ? number_format(old('nominal_inap'), 0, ',', '.') : '' }}" required placeholder="Contoh: 50.000" oninput="formatCurrency(this)">
                     </div>
                 </div>
 
@@ -74,4 +74,13 @@
         </form>
     </div>
 </div>
+@push('scripts')
+<script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+</script>
+@endpush
 @endsection

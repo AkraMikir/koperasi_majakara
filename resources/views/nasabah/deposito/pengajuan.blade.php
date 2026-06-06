@@ -234,10 +234,9 @@
                     <h2 class="font-bold text-[#674c1d] text-sm mb-4">Jumlah Penempatan</h2>
                     <div class="relative mb-2">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Rp</span>
-                        <input type="number" name="nominal" id="nominal_input" placeholder="10.000.000" min="1000000"
-                            step="500000"
+                        <input type="text" name="nominal" id="nominal_input" placeholder="10.000.000"
                             class="w-full pl-12 pr-4 py-4 border-2 border-gray-200 rounded-xl text-lg font-bold text-gray-800 focus:outline-none focus:border-[#674c1d] transition-colors"
-                            oninput="updatePreview()">
+                            oninput="formatCurrency(this); updatePreview();">
                     </div>
                     <p class="text-xs text-gray-400 mb-4" id="min-nominal-helper">Pilih paket terlebih dahulu untuk melihat
                         batas minimum</p>
@@ -462,6 +461,14 @@
             let selectedPaketId = 0;
             let currentMinNominal = 1000000;
 
+            function formatCurrency(input) {
+                let value = input.value.replace(/[^0-9]/g, '');
+                if (value) {
+                    value = parseInt(value).toLocaleString('id-ID');
+                }
+                input.value = value;
+            }
+
             function selectPaketOption(id, bulan, rate, minNominal, el) {
                 selectedPaketId = id;
                 selectedTenorBulan = bulan;
@@ -473,16 +480,14 @@
                 document.querySelectorAll('.paket-option').forEach(e => e.classList.remove('selected', 'border-[#674c1d]', 'bg-gradient-to-r', 'from-[#fffbf0]', 'to-[#fef9e7]'));
                 el.classList.add('selected', 'border-[#674c1d]', 'bg-gradient-to-r', 'from-[#fffbf0]', 'to-[#fef9e7]');
 
-                // Update minimum nominal input rules
-                const nominalInput = document.getElementById('nominal_input');
-                nominalInput.min = minNominal;
-
                 // Update helper text
                 document.getElementById('min-nominal-helper').textContent = 'Minimum penempatan Rp ' + Math.round(minNominal).toLocaleString('id-ID');
 
                 // Auto-set nominal to min if current is lower or empty
-                if (!nominalInput.value || parseFloat(nominalInput.value) < minNominal) {
-                    nominalInput.value = minNominal;
+                const nominalInput = document.getElementById('nominal_input');
+                let rawVal = parseFloat(nominalInput.value.replace(/[^0-9]/g, '')) || 0;
+                if (!nominalInput.value || rawVal < minNominal) {
+                    nominalInput.value = Math.round(minNominal).toLocaleString('id-ID');
                 }
 
                 updatePreview();
@@ -499,7 +504,14 @@
                         goToStep(2);
                     }
                 @endif
-                                                });
+
+                document.getElementById('form-pengajuan').addEventListener('submit', function() {
+                    const nominalInput = document.getElementById('nominal_input');
+                    if (nominalInput) {
+                        nominalInput.value = nominalInput.value.replace(/[^0-9]/g, '');
+                    }
+                });
+            });
 
             function goToStep(step) {
                 // Validasi
@@ -508,7 +520,7 @@
                     return;
                 }
                 if (step === 3) {
-                    const nominal = parseFloat(document.getElementById('nominal_input').value);
+                    const nominal = parseFloat(document.getElementById('nominal_input').value.replace(/[^0-9]/g, '')) || 0;
                     if (!nominal || nominal < currentMinNominal) {
                         alert('Minimal penempatan untuk paket ini adalah Rp ' + Math.round(currentMinNominal).toLocaleString('id-ID'));
                         return;
@@ -561,12 +573,12 @@
             }
 
             function setNominal(val) {
-                document.getElementById('nominal_input').value = val;
+                document.getElementById('nominal_input').value = Math.round(val).toLocaleString('id-ID');
                 updatePreview();
             }
 
             function updatePreview() {
-                const nominal = parseFloat(document.getElementById('nominal_input').value) || 0;
+                const nominal = parseFloat(document.getElementById('nominal_input').value.replace(/[^0-9]/g, '')) || 0;
                 const cont = document.getElementById('estimasi-container');
                 if (nominal < currentMinNominal || !selectedTenorBulan) { cont.classList.add('hidden'); return; }
                 cont.classList.remove('hidden');

@@ -33,7 +33,7 @@
 
         <div class="bg-white rounded-3xl shadow-xl shadow-gray-200/50 border border-gray-100 overflow-hidden">
             <form action="{{ route('admin.master-data.item-gadai.update', $data->id) }}" method="POST"
-                enctype="multipart/form-data" class="p-8">
+                enctype="multipart/form-data" class="p-8" onsubmit="['nominal_real', 'nominal_low', 'nominal_high', 'nominal_inap'].forEach(id => { let input = document.getElementById(id); if(input) input.value = input.value.replace(/[^0-9]/g, ''); });">
                 @csrf
                 @method('PUT')
 
@@ -104,9 +104,9 @@
                         <label for="nominal_real"
                             class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Harga Real
                             (OLX/Pasar) <span class="text-red-500">*</span></label>
-                        <input type="number" name="nominal_real" id="nominal_real"
+                        <input type="text" name="nominal_real" id="nominal_real"
                             class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700"
-                            value="{{ old('nominal_real') ?? $data->nominal_real }}" min="0" required>
+                            value="{{ old('nominal_real') ? number_format(old('nominal_real'), 0, ',', '.') : ($data->nominal_real ? number_format($data->nominal_real, 0, ',', '.') : '') }}" required oninput="formatCurrency(this)">
                     </div>
 
                     <div>
@@ -131,9 +131,9 @@
                             <label for="nominal_low"
                                 class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal
                                 Taksir Min (Auto % Min)</label>
-                            <input type="number" name="nominal_low" id="nominal_low"
+                            <input type="text" name="nominal_low" id="nominal_low"
                                 class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm"
-                                value="{{ old('nominal_low') ?? $data->nominal_low }}" readonly>
+                                value="{{ old('nominal_low') ? number_format(old('nominal_low'), 0, ',', '.') : ($data->nominal_low ? number_format($data->nominal_low, 0, ',', '.') : '') }}" readonly>
                         </div>
                         <div>
                             <label for="bunga_low"
@@ -149,9 +149,9 @@
                             <label for="nominal_high"
                                 class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal
                                 Taksir Max (Auto % Max)</label>
-                            <input type="number" name="nominal_high" id="nominal_high"
+                            <input type="text" name="nominal_high" id="nominal_high"
                                 class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm"
-                                value="{{ old('nominal_high') ?? $data->nominal_high }}" readonly>
+                                value="{{ old('nominal_high') ? number_format(old('nominal_high'), 0, ',', '.') : ($data->nominal_high ? number_format($data->nominal_high, 0, ',', '.') : '') }}" readonly>
                         </div>
                         <div>
                             <label for="bunga_high"
@@ -191,9 +191,9 @@
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <span class="text-emerald-500 font-bold text-xs">Rp</span>
                                 </div>
-                                <input type="number" name="nominal_inap" id="nominal_inap"
+                                <input type="text" name="nominal_inap" id="nominal_inap"
                                     class="w-full pl-8 px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm"
-                                    value="{{ old('nominal_inap', $data->nominal_inap) }}" min="0">
+                                    value="{{ old('nominal_inap') ? number_format(old('nominal_inap'), 0, ',', '.') : ($data->nominal_inap ? number_format($data->nominal_inap, 0, ',', '.') : '0') }}" oninput="formatCurrency(this)">
                             </div>
                             <p class="text-[9px] text-emerald-400 mt-1 italic">Isi jika kategori adalah Kendaraan
                                 (Motor/Mobil). Untuk Emas/Elektronik biasanya menggunakan % dari Kategori.</p>
@@ -231,6 +231,12 @@
     </div>
 
     <script>
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value) value = parseInt(value).toLocaleString('id-ID');
+            input.value = value;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const nominalRealInput = document.getElementById('nominal_real');
             const bungaLowInput = document.getElementById('bunga_low');
@@ -239,12 +245,15 @@
             const nominalHighInput = document.getElementById('nominal_high');
 
             function calculateNominal() {
-                const real = parseFloat(nominalRealInput.value) || 0;
+                const real = parseFloat(nominalRealInput.value.replace(/[^0-9]/g, '')) || 0;
                 const bLow = parseFloat(bungaLowInput.value) || 0;
                 const bHigh = parseFloat(bungaHighInput.value) || 0;
 
-                nominalLowInput.value = Math.round(real * (bLow / 100));
-                nominalHighInput.value = Math.round(real * (bHigh / 100));
+                const lowVal = Math.round(real * (bLow / 100));
+                const highVal = Math.round(real * (bHigh / 100));
+
+                nominalLowInput.value = lowVal ? lowVal.toLocaleString('id-ID') : '';
+                nominalHighInput.value = highVal ? highVal.toLocaleString('id-ID') : '';
             }
 
             nominalRealInput.addEventListener('input', calculateNominal);
@@ -288,7 +297,7 @@
                         const price = parseFloat(selectedPreset.value);
                         refInap.textContent = "Rp " + new Intl.NumberFormat('id-ID').format(price);
                     } else {
-                        const nominalVal = parseFloat(nominalInapInput.value) || 0;
+                        const nominalVal = parseFloat(nominalInapInput.value.replace(/[^0-9]/g, '')) || 0;
                         refInap.textContent = "Rp " + new Intl.NumberFormat('id-ID').format(nominalVal);
                     }
                 } else {
@@ -316,6 +325,7 @@
                 const selectedOpt = inapPresetSelect.options[inapPresetSelect.selectedIndex];
                 if (selectedOpt && selectedOpt.value !== "") {
                     nominalInapInput.value = selectedOpt.value;
+                    formatCurrency(nominalInapInput);
                     const desc = selectedOpt.getAttribute('data-keterangan');
                     if (desc) {
                         inapPresetDesc.textContent = "Keterangan preset: " + desc;

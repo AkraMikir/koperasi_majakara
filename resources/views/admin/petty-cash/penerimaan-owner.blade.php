@@ -217,8 +217,7 @@
                         </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
-                            <input type="number" name="nominal_tf" id="input_tf" oninput="calculateTotal()"
-                                   max="0"
+                            <input type="text" name="nominal_tf" id="input_tf" oninput="formatCurrency(this); calculateTotal()"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
@@ -230,8 +229,7 @@
                         </label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-gray-500 font-black text-xs">RP</div>
-                            <input type="number" name="nominal_cash" id="input_cash" oninput="calculateTotal()"
-                                   max="0"
+                            <input type="text" name="nominal_cash" id="input_cash" oninput="formatCurrency(this); calculateTotal()"
                                    class="block w-full pl-12 pr-4 py-4 text-lg font-black text-gray-900 border-gray-300 rounded-[1.25rem] focus:ring-4 focus:ring-[#674c1d]/10 focus:border-[#674c1d] transition-all bg-gray-50/50"
                                    placeholder="0">
                         </div>
@@ -382,9 +380,15 @@
         document.body.style.overflow = 'auto';
     }
 
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
     function calculateTotal() {
-        const tf = parseInt(document.getElementById('input_tf').value) || 0;
-        const cash = parseInt(document.getElementById('input_cash').value) || 0;
+        const tf = parseInt(document.getElementById('input_tf').value.replace(/[^0-9]/g, '')) || 0;
+        const cash = parseInt(document.getElementById('input_cash').value.replace(/[^0-9]/g, '')) || 0;
         const total = tf + cash;
         document.getElementById('display_total').innerText = 'Rp ' + total.toLocaleString('id-ID');
     }
@@ -400,15 +404,18 @@
         const labelMaxCash = document.getElementById('label_max_cash');
         const labelMaxTf = document.getElementById('label_max_tf');
         
-        inputCash.max = maxCash;
-        inputTf.max = maxTf;
-        
         labelMaxCash.innerText = 'Max: ' + maxCash.toLocaleString('id-ID');
         labelMaxTf.innerText = 'Max: ' + maxTf.toLocaleString('id-ID');
         
         // Reset values if they exceed new max
-        if (parseFloat(inputCash.value) > maxCash) inputCash.value = maxCash;
-        if (parseFloat(inputTf.value) > maxTf) inputTf.value = maxTf;
+        const valCash = parseFloat(inputCash.value.replace(/[^0-9]/g, '')) || 0;
+        const valTf = parseFloat(inputTf.value.replace(/[^0-9]/g, '')) || 0;
+        if (valCash > maxCash) {
+            inputCash.value = maxCash.toLocaleString('id-ID');
+        }
+        if (valTf > maxTf) {
+            inputTf.value = maxTf.toLocaleString('id-ID');
+        }
         
         calculateTotal();
     }
@@ -421,6 +428,11 @@
 
     // Anti Double Submit
     document.getElementById('formKirimDana').addEventListener('submit', function(e) {
+        const inputTf = document.getElementById('input_tf');
+        const inputCash = document.getElementById('input_cash');
+        inputTf.value = inputTf.value.replace(/[^0-9]/g, '');
+        inputCash.value = inputCash.value.replace(/[^0-9]/g, '');
+
         const btn = this.querySelector('button[type="submit"]');
         if (btn.disabled) {
             e.preventDefault();

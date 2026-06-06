@@ -37,7 +37,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Minimum *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                        <input type="number" name="min_nominal" value="{{ old('min_nominal', $data->min_nominal) }}" required min="0"
+                        <input type="text" name="min_nominal" id="min_nominal" value="{{ old('min_nominal', $data->min_nominal) ? number_format(old('min_nominal', $data->min_nominal), 0, ',', '.') : '' }}" required oninput="formatCurrency(this)"
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 outline-none">
                     </div>
                 </div>
@@ -46,7 +46,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Maksimum *</label>
                     <div class="relative">
                         <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
-                        <input type="number" name="max_nominal" value="{{ old('max_nominal', $data->max_nominal) }}" required min="0"
+                        <input type="text" name="max_nominal" id="max_nominal" value="{{ old('max_nominal', $data->max_nominal) ? number_format(old('max_nominal', $data->max_nominal), 0, ',', '.') : '' }}" required oninput="formatCurrency(this)"
                             class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#d4af37] focus:ring-2 focus:ring-[#d4af37]/20 outline-none">
                     </div>
                 </div>
@@ -82,3 +82,20 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
+    document.querySelector('form').addEventListener('submit', function(e) {
+        const minNominal = document.getElementById('min_nominal');
+        const maxNominal = document.getElementById('max_nominal');
+        if (minNominal) minNominal.value = minNominal.value.replace(/[^0-9]/g, '');
+        if (maxNominal) maxNominal.value = maxNominal.value.replace(/[^0-9]/g, '');
+    });
+</script>
+@endpush

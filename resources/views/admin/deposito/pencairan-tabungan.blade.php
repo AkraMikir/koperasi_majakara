@@ -217,13 +217,13 @@
                                 </div>
                                 @endif
 
-                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.finish', $p->id) }}" enctype="multipart/form-data">
+                                <form method="POST" action="{{ route('admin.deposito.pencairan-tabungan.finish', $p->id) }}" enctype="multipart/form-data" id="form-finish-{{ $p->id }}">
                                     @csrf
                                     <div class="mb-4">
                                         <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Nominal Akhir</label>
                                         <div class="relative">
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm font-bold">Rp</span>
-                                            <input type="number" id="nominal_akhir_{{ $p->id }}" name="nominal_akhir" value="{{ round($p->nominal_akhir) }}" oninput="checkPettyCash({{ $p->id }})"
+                                            <input type="text" id="nominal_akhir_{{ $p->id }}" name="nominal_akhir" value="{{ round($p->nominal_akhir) }}" oninput="formatCurrency(this); checkPettyCash({{ $p->id }})"
                                                 class="w-full border border-gray-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-bold text-[#674c1d] outline-none">
                                         </div>
                                     </div>
@@ -268,6 +268,12 @@
 <script>
     const adminSaldoTransfer = {{ $adminSaldoTransfer ?? 0 }};
 
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
     function checkPettyCash(id) {
         const inputNominal = document.getElementById('nominal_akhir_' + id);
         const warningPetty = document.getElementById('warning-petty-' + id);
@@ -276,7 +282,8 @@
 
         if (!inputNominal) return;
 
-        const nominal = parseFloat(inputNominal.value) || 0;
+        const rawVal = inputNominal.value.replace(/[^0-9]/g, '');
+        const nominal = parseFloat(rawVal) || 0;
         const isInsufficient = (adminSaldoTransfer < nominal);
 
         if (badgePetty) {
@@ -309,9 +316,23 @@
     document.addEventListener('DOMContentLoaded', function() {
         @foreach($pencairans as $p)
             @if($p->status === 'pending' || $p->status === 'diproses')
+                const input = document.getElementById('nominal_akhir_{{ $p->id }}');
+                if (input) {
+                    formatCurrency(input);
+                }
                 checkPettyCash({{ $p->id }});
             @endif
         @endforeach
+    });
+
+    document.querySelectorAll('[id^="form-finish-"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            const id = this.id.replace('form-finish-', '');
+            const input = document.getElementById('nominal_akhir_' + id);
+            if (input) {
+                input.value = input.value.replace(/[^0-9]/g, '');
+            }
+        });
     });
 </script>
 @endsection

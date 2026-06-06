@@ -19,7 +19,7 @@
 
     <!-- Form Section -->
     <div class="bg-white rounded-2xl border border-gray-100 shadow-xs overflow-hidden">
-        <form action="{{ route('admin.deposito.paket.update', $paket->id) }}" method="POST" class="p-6 md:p-8 space-y-6">
+        <form action="{{ route('admin.deposito.paket.update', $paket->id) }}" method="POST" id="deposito-paket-form" class="p-6 md:p-8 space-y-6">
             @csrf
             @method('PUT')
 
@@ -76,10 +76,11 @@
                     <label for="minimal_nominal" class="block text-sm font-medium text-gray-700 mb-2">Minimal Nominal <span class="text-red-500">*</span></label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-500 font-medium">Rp</div>
-                        <input type="number" name="minimal_nominal" id="minimal_nominal" required min="0"
+                        <input type="text" name="minimal_nominal" id="minimal_nominal" required
                             value="{{ old('minimal_nominal', $paket->minimal_nominal) }}"
                             class="w-full rounded-xl border-gray-300 focus:border-[#8b6f2f] focus:ring focus:ring-[#8b6f2f]/20 transition-all pl-12"
-                            placeholder="Contoh: 1000000">
+                            placeholder="Contoh: 1.000.000"
+                            oninput="formatCurrency(this)">
                     </div>
                     @error('minimal_nominal')
                         <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -91,10 +92,11 @@
                     <label for="maksimal_nominal" class="block text-sm font-medium text-gray-700 mb-2">Maksimal Nominal (Opsional)</label>
                     <div class="relative">
                         <div class="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none text-gray-500 font-medium">Rp</div>
-                        <input type="number" name="maksimal_nominal" id="maksimal_nominal" min="0"
+                        <input type="text" name="maksimal_nominal" id="maksimal_nominal"
                             value="{{ old('maksimal_nominal', $paket->maksimal_nominal) }}"
                             class="w-full rounded-xl border-gray-300 focus:border-[#8b6f2f] focus:ring focus:ring-[#8b6f2f]/20 transition-all pl-12"
-                            placeholder="Kosongkan jika tidak ada batas">
+                            placeholder="Kosongkan jika tidak ada batas"
+                            oninput="formatCurrency(this)">
                     </div>
                     @error('maksimal_nominal')
                         <p class="mt-1.5 text-sm text-red-600">{{ $message }}</p>
@@ -163,3 +165,32 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
+    // Format fields initially if there is old/pre-filled value
+    document.addEventListener('DOMContentLoaded', function() {
+        ['minimal_nominal', 'maksimal_nominal'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input && input.value) {
+                formatCurrency(input);
+            }
+        });
+    });
+
+    document.getElementById('deposito-paket-form').addEventListener('submit', function(e) {
+        ['minimal_nominal', 'maksimal_nominal'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) {
+                input.value = input.value.replace(/[^0-9]/g, '');
+            }
+        });
+    });
+</script>
+@endpush

@@ -78,7 +78,7 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nominal Transfer</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                            <input type="number" name="nominal_akhir" value="{{ round($estimasiCair) }}"
+                            <input type="text" name="nominal_akhir" value="{{ round($estimasiCair) }}" oninput="formatCurrency(this)"
                                 class="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 font-bold text-lg text-[#674c1d] outline-none">
                         </div>
                     </div>
@@ -121,7 +121,7 @@
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Nominal Transfer</label>
                         <div class="relative">
                             <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">Rp</span>
-                            <input type="number" name="nominal_akhir" value="{{ $isManual ? round($pencairan->nominal_akhir) : round($estimasiCair) }}"
+                            <input type="text" name="nominal_akhir" value="{{ $isManual ? round($pencairan->nominal_akhir) : round($estimasiCair) }}" oninput="formatCurrency(this)"
                                 class="w-full border border-gray-200 rounded-xl pl-12 pr-4 py-3 font-bold text-lg text-[#674c1d] outline-none">
                         </div>
                     </div>
@@ -178,6 +178,12 @@
         const adminSaldoTransfer = {{ $adminSaldoTransfer ?? 0 }};
         const biayaTransferData = @json($biayaTransfer ?? []);
 
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value) value = parseInt(value).toLocaleString('id-ID');
+            input.value = value;
+        }
+
         function calculateBiaya() {
             const dropdown = document.getElementById('bank_pengirim');
             if (!dropdown) return;
@@ -218,7 +224,7 @@
             const btnSubmit = document.querySelector('form[action$="/finish"] button[type="submit"]');
             
             const inputNominal = document.querySelector('input[name="nominal_akhir"]');
-            const nominalAkhir = inputNominal ? parseFloat(inputNominal.value) || 0 : 0;
+            const nominalAkhir = inputNominal ? parseFloat(inputNominal.value.replace(/[^0-9]/g, '')) || 0 : 0;
 
             const isInsufficientTabungan = (saldoTabunganNasabah < biayaAdmin);
             const isInsufficientPetty = (adminSaldoTransfer < nominalAkhir);
@@ -263,12 +269,28 @@
 
         // Run initially
         document.addEventListener('DOMContentLoaded', function() {
+            // Format existing values
+            document.querySelectorAll('input[name="nominal_akhir"]').forEach(input => {
+                if (input.value) {
+                    formatCurrency(input);
+                }
+            });
+
             calculateBiaya();
             
-            const inputNominal = document.querySelector('input[name="nominal_akhir"]');
-            if (inputNominal) {
-                inputNominal.addEventListener('input', calculateBiaya);
-            }
+            document.querySelectorAll('input[name="nominal_akhir"]').forEach(input => {
+                input.addEventListener('input', calculateBiaya);
+            });
+        });
+
+        // Strip formatting on submit
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                const inputNominal = form.querySelector('input[name="nominal_akhir"]');
+                if (inputNominal) {
+                    inputNominal.value = inputNominal.value.replace(/[^0-9]/g, '');
+                }
+            });
         });
     </script>
 @endsection
