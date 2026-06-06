@@ -45,8 +45,8 @@
                 </div>
 
                 <div>
-                    <label for="jenis_kendaraan" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Jenis Kendaraan <span class="text-red-500">*</span></label>
-                    <input type="text" name="jenis_kendaraan" id="jenis_kendaraan" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('jenis_kendaraan') }}" required placeholder="Contoh: motor matic, mobil sedan">
+                    <label for="jenis_kendaraan" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Volume <span class="text-red-500">*</span></label>
+                    <input type="text" name="jenis_kendaraan" id="jenis_kendaraan" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" value="{{ old('jenis_kendaraan') }}" required placeholder="Contoh: 100cc - 150cc">
                 </div>
 
                 <div class="md:col-span-2">
@@ -59,10 +59,6 @@
                     </div>
                 </div>
 
-                <div class="md:col-span-2">
-                    <label for="keterangan" class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Keterangan</label>
-                    <textarea name="keterangan" id="keterangan" rows="4" class="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#674c1d] focus:border-transparent transition-all font-bold text-gray-700" placeholder="Contoh: motor sport 250cc, mobil premium SUV">{{ old('keterangan') }}</textarea>
-                </div>
             </div>
 
             <div class="flex justify-end items-center gap-3 pt-6 border-t border-gray-100">

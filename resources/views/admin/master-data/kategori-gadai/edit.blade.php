@@ -89,9 +89,8 @@
                         <thead>
                             <tr class="bg-amber-100/40 border-b border-amber-100">
                                 <th class="px-4 py-3 text-xs font-bold text-amber-800 uppercase">Golongan</th>
-                                <th class="px-4 py-3 text-xs font-bold text-amber-800 uppercase">Jenis Kendaraan</th>
+                                <th class="px-4 py-3 text-xs font-bold text-amber-800 uppercase">Volume</th>
                                 <th class="px-4 py-3 text-xs font-bold text-amber-800 uppercase">Tarif Inap</th>
-                                <th class="px-4 py-3 text-xs font-bold text-amber-800 uppercase">Keterangan / Kategori Fisik</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-amber-100/50">
@@ -109,9 +108,6 @@
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">Rp</span>
                                             <input type="number" name="inap[{{ $inap->id }}][nominal_inap]" value="{{ (int)$inap->nominal_inap }}" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white font-black focus:ring-[#674c1d] focus:border-transparent transition-all text-emerald-600" min="0" required>
                                         </div>
-                                    </td>
-                                    <td class="px-4 py-3 align-middle">
-                                        <input type="text" name="inap[{{ $inap->id }}][keterangan]" value="{{ $inap->keterangan }}" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:ring-[#674c1d] focus:border-transparent transition-all text-gray-600">
                                     </td>
                                 </tr>
                             @endforeach

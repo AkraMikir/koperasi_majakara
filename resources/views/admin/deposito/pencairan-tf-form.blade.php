@@ -128,14 +128,9 @@
 
                     <div class="mb-5">
                         <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Pilih Bank Koperasi (Pengirim) *</label>
-                        <select name="bank_pengirim" id="bank_pengirim" required onchange="calculateBiaya()"
-                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d]/20 outline-none bg-white">
-                            <option value="">-- Pilih Bank --</option>
-                            <option value="BCA" selected>BCA (Bank Utama)</option>
-                            <option value="BNI">BNI</option>
-                            <option value="Mandiri">Mandiri</option>
-                            <option value="BRI">BRI</option>
-                        </select>
+                        <input type="text" value="BCA (Bank Utama)" disabled 
+                            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 text-gray-500 cursor-not-allowed outline-none font-bold">
+                        <input type="hidden" name="bank_pengirim" id="bank_pengirim" value="BCA">
                     </div>
 
                     <!-- Container Biaya Admin -->

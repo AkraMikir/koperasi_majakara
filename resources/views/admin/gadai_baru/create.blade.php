@@ -105,7 +105,7 @@
                                     required>
                                     <option value="">Pilih Kategori</option>
                                     @foreach($kategoriList as $k)
-                                        <option value="{{ $k->id }}" data-kode="{{ $k->kode_kategori }}">{{ $k->nama_kategori }}</option>
+                                        <option value="{{ $k->id }}" data-kode="{{ $k->kode_kategori }}" data-jasa="{{ $k->rate_jasa }}" data-inap="{{ $k->rate_inap_persen }}">{{ $k->nama_kategori }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -161,6 +161,22 @@
                             </div>
 
                             <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Bunga Jasa (%) <span
+                                        class="text-red-500">*</span></label>
+                                <input type="number" step="0.01" name="rate_jasa" id="rate_jasa"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
+                                    required placeholder="0.00">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Bunga Inap (%) <span
+                                        class="text-red-500">*</span></label>
+                                <input type="number" step="0.01" name="rate_inap_persen" id="rate_inap_persen"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
+                                    required placeholder="0.00">
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Slot Storage <span
                                         class="text-red-500">*</span></label>
                                 <select name="slot_kode" id="slot_kode"
@@ -173,7 +189,7 @@
                     </div>
 
                     {{-- Bagian 3: Upload Bukti --}}
-                    <div class="space-y-4">
+                    <div class="space-y-6">
                         <div class="flex items-center gap-2 pb-2 border-b border-gray-100">
                             <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -185,44 +201,84 @@
                             <h3 class="text-lg font-bold text-gray-800">Bukti Foto</h3>
                         </div>
 
-                        <div>
-                            <div class="flex items-center justify-between mb-2">
-                                <label class="block text-sm font-bold text-gray-700">Upload Foto Bukti <span
-                                        class="text-red-500">*</span></label>
-                                <button type="button" id="add_file_btn"
-                                    class="flex items-center gap-1 px-3 py-1.5 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg text-xs font-bold transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M12 4v16m8-8H4"></path>
-                                    </svg>
-                                    Tambah File
-                                </button>
-                            </div>
-
-                            <div id="file_upload_container" class="space-y-3">
-                                <div class="flex items-center gap-2 file-input-group">
-                                    <input type="file" name="foto_bukti[]" class="block w-full text-sm text-gray-500
-                                        file:mr-4 file:py-2.5 file:px-4
-                                        file:rounded-xl file:border-0
-                                        file:text-sm file:font-semibold
-                                        file:bg-emerald-50 file:text-emerald-700
-                                        hover:file:bg-emerald-100 transition-colors
-                                        border border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm p-1" required accept="image/*">
-                                    <button type="button"
-                                        class="w-11 h-11 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100 hover:bg-red-100 transition-colors cursor-not-allowed opacity-50"
-                                        disabled>
-                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                                            </path>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            {{-- Foto Barang --}}
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-bold text-gray-700">Foto Barang / Kendaraan <span class="text-red-500">*</span></label>
+                                    <button type="button" id="add_foto_barang_btn"
+                                        class="flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg text-xs font-bold transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                                         </svg>
+                                        Tambah
                                     </button>
+                                </div>
+                                <div id="foto_barang_container" class="space-y-3">
+                                    <div class="flex items-center gap-2 file-input-group">
+                                        <input type="file" name="foto_barang[]" class="block w-full text-sm text-gray-500
+                                            file:mr-2 file:py-1.5 file:px-3
+                                            file:rounded-xl file:border-0
+                                            file:text-xs file:font-semibold
+                                            file:bg-emerald-50 file:text-emerald-700
+                                            hover:file:bg-emerald-100 transition-colors
+                                            border border-white/60 shadow-sm rounded-xl bg-white/50 p-1" required accept="image/*">
+                                    </div>
                                 </div>
                             </div>
 
-                            <p class="text-xs text-gray-500 mt-2">Format yang didukung: JPG, JPEG, PNG. Maksimal 2MB per
-                                file. Harap fotokan barang dari berbagai sisi beserta dokumen kelengkapannya.</p>
+                            {{-- Foto Transaksi --}}
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-bold text-gray-700">Foto Transaksi <span class="text-red-500">*</span></label>
+                                    <button type="button" id="add_foto_transaksi_btn"
+                                        class="flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg text-xs font-bold transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Tambah
+                                    </button>
+                                </div>
+                                <div id="foto_transaksi_container" class="space-y-3">
+                                    <div class="flex items-center gap-2 file-input-group">
+                                        <input type="file" name="foto_transaksi[]" class="block w-full text-sm text-gray-500
+                                            file:mr-2 file:py-1.5 file:px-3
+                                            file:rounded-xl file:border-0
+                                            file:text-xs file:font-semibold
+                                            file:bg-emerald-50 file:text-emerald-700
+                                            hover:file:bg-emerald-100 transition-colors
+                                            border border-white/60 shadow-sm rounded-xl bg-white/50 p-1" required accept="image/*">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Foto Administrasi --}}
+                            <div class="space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <label class="block text-sm font-bold text-gray-700">Foto Administrasi <span class="text-red-500">*</span></label>
+                                    <button type="button" id="add_foto_administrasi_btn"
+                                        class="flex items-center gap-1 px-2.5 py-1 bg-emerald-100 text-emerald-700 hover:bg-emerald-200 rounded-lg text-xs font-bold transition-colors">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Tambah
+                                    </button>
+                                </div>
+                                <div id="foto_administrasi_container" class="space-y-3">
+                                    <div class="flex items-center gap-2 file-input-group">
+                                        <input type="file" name="foto_administrasi[]" class="block w-full text-sm text-gray-500
+                                            file:mr-2 file:py-1.5 file:px-3
+                                            file:rounded-xl file:border-0
+                                            file:text-xs file:font-semibold
+                                            file:bg-emerald-50 file:text-emerald-700
+                                            hover:file:bg-emerald-100 transition-colors
+                                            border border-white/60 shadow-sm rounded-xl bg-white/50 p-1" required accept="image/*">
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <p class="text-xs text-gray-500">Format yang didukung: JPG, JPEG, PNG. Maksimal 2MB per file. Harap pisahkan foto sesuai dengan masing-masing kategori di atas.</p>
                     </div>
 
                     <!-- Verification & Petty Cash Summary (Dynamic) -->
@@ -330,6 +386,11 @@
                 const val = this.value;
                 const selectedOpt = this.options[this.selectedIndex];
                 const kode = selectedOpt.dataset.kode;
+                const jasa = selectedOpt.dataset.jasa || '0.00';
+                const inap = selectedOpt.dataset.inap || '0.00';
+
+                document.getElementById('rate_jasa').value = jasa;
+                document.getElementById('rate_inap_persen').value = inap;
                 
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
@@ -398,31 +459,37 @@
             });
 
             // Dynamic File Upload Logic
-            const addFileBtn = document.getElementById('add_file_btn');
-            const container = document.getElementById('file_upload_container');
+            function setupDynamicUpload(btnId, containerId, inputName) {
+                const btn = document.getElementById(btnId);
+                const container = document.getElementById(containerId);
+                if (!btn || !container) return;
 
-            addFileBtn.addEventListener('click', function () {
-                const row = document.createElement('div');
-                row.className = 'flex items-center gap-2 file-input-group';
-                row.innerHTML = `
-                <input type="file" name="foto_bukti[]" class="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2.5 file:px-4
-                    file:rounded-xl file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-emerald-50 file:text-emerald-700
-                    hover:file:bg-emerald-100 transition-colors
-                    border border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm p-1" required accept="image/*">
-                <button type="button" class="w-11 h-11 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100 hover:bg-red-100 transition-colors remove-file-btn">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                </button>
-            `;
-                container.appendChild(row);
+                btn.addEventListener('click', function () {
+                    const row = document.createElement('div');
+                    row.className = 'flex items-center gap-2 file-input-group';
+                    row.innerHTML = `
+                        <input type="file" name="${inputName}" class="block w-full text-sm text-gray-500
+                            file:mr-2 file:py-1.5 file:px-3
+                            file:rounded-xl file:border-0
+                            file:text-xs file:font-semibold
+                            file:bg-emerald-50 file:text-emerald-700
+                            hover:file:bg-emerald-100 transition-colors
+                            border border-white/60 shadow-sm rounded-xl bg-white/50 p-1" required accept="image/*">
+                        <button type="button" class="w-11 h-11 flex items-center justify-center bg-red-50 text-red-500 rounded-xl border border-red-100 hover:bg-red-100 transition-colors remove-file-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                    `;
+                    container.appendChild(row);
 
-                // Attach event to remove button
-                row.querySelector('.remove-file-btn').addEventListener('click', function () {
-                    row.remove();
+                    row.querySelector('.remove-file-btn').addEventListener('click', function () {
+                        row.remove();
+                    });
                 });
-            });
+            }
+
+            setupDynamicUpload('add_foto_barang_btn', 'foto_barang_container', 'foto_barang[]');
+            setupDynamicUpload('add_foto_transaksi_btn', 'foto_transaksi_container', 'foto_transaksi[]');
+            setupDynamicUpload('add_foto_administrasi_btn', 'foto_administrasi_container', 'foto_administrasi[]');
 
             // Balance and Transfer Fee checking logic
             const adminSaldoCash = {{ $adminSaldoCash ?? 0 }};

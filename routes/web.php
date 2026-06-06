@@ -304,7 +304,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Item Gadai Baru
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
-            Route::middleware('admin.permission:crud-master-data')->group(function () {
+            Route::middleware('admin.permission:crud-item-gadai')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
@@ -433,7 +433,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Item Gadai
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
-            Route::middleware('admin.permission:crud-master-data')->group(function () {
+            Route::middleware('admin.permission:crud-item-gadai')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');

@@ -152,6 +152,15 @@ class AdminPermissionService
     }
 
     /**
+     * Check if user can CRUD Item Gadai
+     * Admin Utama: YES | Admin Operasional: YES
+     */
+    public function canCrudItemGadai(?User $user): bool
+    {
+        return $this->isAdmin($user);
+    }
+
+    /**
      * Check if user can view Laporan Keuangan
      * Admin Utama: YES | Admin Operasional: YES
      */

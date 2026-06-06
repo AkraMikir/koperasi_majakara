@@ -56,7 +56,6 @@ class MasterKategoriGadaiController extends Controller
                     $inapRecord->update([
                         'jenis_kendaraan' => $fields['jenis_kendaraan'],
                         'nominal_inap' => $fields['nominal_inap'],
-                        'keterangan' => $fields['keterangan'] ?? null,
                     ]);
                 }
             }

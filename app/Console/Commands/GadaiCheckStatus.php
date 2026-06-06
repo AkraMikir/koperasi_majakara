@@ -51,8 +51,9 @@ class GadaiCheckStatus extends Command
                     // Jika ada nominal inap khusus di item (biasanya Kendaraan)
                     $inap = $gadai->item->nominal_inap;
                 } else {
-                    // Gunakan persentase dari kategori (biasanya Emas/Elektronik)
-                    $inap = ($gadai->nominal_deal * $gadai->kategori->rate_inap_persen) / 100;
+                    // Gunakan persentase custom atau dari kategori (biasanya Emas/Elektronik)
+                    $rateInap = $gadai->rate_inap_persen ?? $gadai->kategori->rate_inap_persen;
+                    $inap = ($gadai->nominal_deal * $rateInap) / 100;
                 }
 
                 $gadai->update([

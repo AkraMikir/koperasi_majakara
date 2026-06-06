@@ -234,23 +234,59 @@
         <div class="space-y-6">
             {{-- Foto Media --}}
             <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
-                <div class="p-6 relative z-10">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Media Fisik Barang</h3>
-                <div class="grid grid-cols-2 gap-3">
-                    @forelse($gadai->files as $file)
-                        <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-[1.25rem] overflow-hidden border-2 border-white shadow-sm bg-gray-50">
-                            <img src="{{ asset('storage/' . $file->path_file) }}" alt="Foto" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                            </div>
-                        </a>
-                    @empty
-                        <div class="col-span-2 py-8 flex flex-col items-center justify-center border-2 border-dashed border-gray-200/60 rounded-[1.25rem] bg-gray-50/50">
-                            <svg class="w-8 h-8 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                            <span class="text-xs font-medium text-gray-400">Belum ada foto.</span>
+                <div class="p-6 relative z-10 space-y-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Media Fisik & Dokumen</h3>
+                    
+                    {{-- Foto Barang --}}
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Foto Barang / Kendaraan</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            @forelse($gadai->files->where('tipe_foto', 'barang') as $file)
+                                <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-[1.25rem] overflow-hidden border-2 border-white shadow-sm bg-gray-50">
+                                    <img src="{{ asset('storage/' . $file->path_file) }}" alt="Foto Barang" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="col-span-2 py-4 text-center text-xs font-medium text-gray-400 bg-gray-50/50 rounded-xl">Tidak ada foto barang</div>
+                            @endforelse
                         </div>
-                    @endforelse
-                </div>
+                    </div>
+
+                    {{-- Foto Transaksi --}}
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Foto Transaksi</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            @forelse($gadai->files->where('tipe_foto', 'penyerahan') as $file)
+                                <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-[1.25rem] overflow-hidden border-2 border-white shadow-sm bg-gray-50">
+                                    <img src="{{ asset('storage/' . $file->path_file) }}" alt="Foto Transaksi" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="col-span-2 py-4 text-center text-xs font-medium text-gray-400 bg-gray-50/50 rounded-xl">Tidak ada foto transaksi</div>
+                            @endforelse
+                        </div>
+                    </div>
+
+                    {{-- Foto Administrasi --}}
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Foto Administrasi</h4>
+                        <div class="grid grid-cols-2 gap-3">
+                            @forelse($gadai->files->where('tipe_foto', 'lainnya') as $file)
+                                <a href="{{ asset('storage/' . $file->path_file) }}" target="_blank" class="group relative block aspect-square rounded-[1.25rem] overflow-hidden border-2 border-white shadow-sm bg-gray-50">
+                                    <img src="{{ asset('storage/' . $file->path_file) }}" alt="Foto Administrasi" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </div>
+                                </a>
+                            @empty
+                                <div class="col-span-2 py-4 text-center text-xs font-medium text-gray-400 bg-gray-50/50 rounded-xl">Tidak ada foto administrasi</div>
+                            @endforelse
+                        </div>
+                    </div>
                 </div>
             </div>
 

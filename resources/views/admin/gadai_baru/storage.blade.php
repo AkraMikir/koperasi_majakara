@@ -93,23 +93,25 @@
             <div class="h-3 rounded-full bg-gradient-to-r from-[#674c1d] to-[#d4af37] transition-all duration-700" style="width: {{ $fillPct }}%"></div>
         </div>
     </div>
-    @endif
-
-    {{-- ===== LEGEND ===== --}}
+     {{-- ===== LEGEND ===== --}}
     <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/60 shadow-xl">
         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Keterangan Warna Slot</p>
         <div class="flex flex-wrap gap-4">
             <div class="flex items-center gap-2">
                 <div class="w-8 h-8 rounded-lg bg-emerald-50 border-2 border-dashed border-emerald-300"></div>
-                <span class="text-xs font-bold text-gray-600">Kosong & Tersedia</span>
+                <span class="text-xs font-bold text-gray-600">Kosong (Hijau)</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-red-50 border-2 border-red-300"></div>
-                <span class="text-xs font-bold text-gray-600">Terisi (Gadai Aktif / Tenggang)</span>
+                <div class="w-8 h-8 rounded-lg bg-amber-50 border-2 border-amber-300"></div>
+                <span class="text-xs font-bold text-gray-600">Terisi (Kuning)</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-amber-50 border-2 border-amber-400"></div>
-                <span class="text-xs font-bold text-gray-600">Hangus — Siap Dilelang</span>
+                <div class="w-8 h-8 rounded-lg bg-red-50 border-2 border-red-400"></div>
+                <span class="text-xs font-bold text-gray-600">Hangus (Merah)</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="w-8 h-8 rounded-lg bg-gray-100 border-2 border-gray-300"></div>
+                <span class="text-xs font-bold text-gray-600">Siap Diambil / Lunas (Abu-abu)</span>
             </div>
         </div>
     </div>
@@ -123,30 +125,46 @@
                     <div class="flex gap-3">
                         @foreach($koloms as $slot)
                             @if($slot->is_occupied)
-                                @php $isExpired = $slot->gadai_status === 'expired_final'; @endphp
-                                <div class="w-40 h-44 {{ $isExpired ? 'bg-amber-50 border-2 border-amber-400 hover:border-amber-500' : 'bg-red-50 border-2 border-red-300 hover:border-red-400' }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
+                                @php 
+                                    $isExpired = $slot->gadai_status === 'expired_final'; 
+                                    $isLunas = $slot->gadai_status === 'lunas';
+                                    
+                                    if ($isExpired) {
+                                        $cardClass = 'bg-red-50 border-2 border-red-400 hover:border-red-500';
+                                        $textClass = 'text-red-900';
+                                        $badgeClass = 'bg-red-200 text-red-900';
+                                        $statusText = 'Hangus';
+                                    } elseif ($isLunas) {
+                                        $cardClass = 'bg-gray-100 border-2 border-gray-300 hover:border-gray-400';
+                                        $textClass = 'text-gray-900';
+                                        $badgeClass = 'bg-gray-200 text-gray-700';
+                                        $statusText = 'Siap Diambil';
+                                    } else {
+                                        $cardClass = 'bg-amber-50 border-2 border-amber-300 hover:border-amber-400';
+                                        $textClass = 'text-amber-900';
+                                        $badgeClass = 'bg-amber-100 text-amber-700';
+                                        $statusText = 'Terisi';
+                                    }
+                                @endphp
+                                <div class="w-40 h-44 {{ $cardClass }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
                                      x-data="{}" 
                                      title="{{ $slot->nasabah_nama }} — {{ $slot->item_nama }}">
-                                    <div class="flex justify-between items-start">
-                                        <div class="font-mono font-black text-sm {{ $isExpired ? 'text-amber-900' : 'text-red-900' }}">{{ $slot->kode_slot }}</div>
-                                        @if($isExpired)
-                                            <span class="px-1.5 py-0.5 bg-amber-200 text-amber-900 text-[9px] font-black rounded uppercase tracking-wide">Hangus</span>
-                                        @else
-                                            <span class="px-1.5 py-0.5 bg-red-100 text-red-700 text-[9px] font-black rounded uppercase tracking-wide">Terisi</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
-                                        <div class="text-xs {{ $isExpired ? 'text-amber-900' : 'text-red-900' }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
-                                        <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
-                                    </div>
-                                    @if($isExpired)
-                                        <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
-                                            class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
-                                            🔨 Kosongkan & Lelang
-                                        </button>
-                                    @else
-                                        <div class="w-full py-1.5 bg-red-100/80 text-red-500 text-[10px] font-bold rounded-lg text-center uppercase tracking-wide">Aktif Tersimpan</div>
-                                    @endif
+                                     <div class="flex justify-between items-start">
+                                         <div class="font-mono font-black text-sm {{ $textClass }}">{{ $slot->kode_slot }}</div>
+                                         <span class="px-1.5 py-0.5 {{ $badgeClass }} text-[9px] font-black rounded uppercase tracking-wide">{{ $statusText }}</span>
+                                     </div>
+                                     <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
+                                         <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
+                                         <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
+                                     </div>
+                                     @if($isExpired)
+                                         <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                             class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
+                                             🔨 Kosongkan & Lelang
+                                         </button>
+                                     @else
+                                         <div class="w-full py-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-lg text-center uppercase tracking-wide">{{ $statusText }} Tersimpan</div>
+                                     @endif
                                 </div>
                             @else
                                 <div class="w-40 h-44 bg-emerald-50/60 border-2 border-dashed border-emerald-300 rounded-xl p-3 flex flex-col justify-between hover:bg-emerald-50 hover:border-emerald-400 transition-colors group">

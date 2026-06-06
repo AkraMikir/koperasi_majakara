@@ -99,14 +99,15 @@ class AdminPengajuanGadaiController extends Controller
                 $newTenggang = $newJatuhTempo->copy()->addDays($gadai->kategori->masa_tenggang_hari)->endOfDay();
 
                 // Recalculate interest and inap for the next period
-                $rateJasa = $gadai->kategori->rate_jasa;
+                $rateJasa = $gadai->rate_jasa ?? $gadai->kategori->rate_jasa;
                 $newBiayaJasa = ($gadai->nominal_deal * $rateJasa) / 100;
 
                 $newBiayaInap = 0;
                 if ($gadai->item->nominal_inap > 0) {
                     $newBiayaInap = $gadai->item->nominal_inap;
                 } else {
-                    $newBiayaInap = ($gadai->nominal_deal * $gadai->kategori->rate_inap_persen) / 100;
+                    $rateInap = $gadai->rate_inap_persen ?? $gadai->kategori->rate_inap_persen;
+                    $newBiayaInap = ($gadai->nominal_deal * $rateInap) / 100;
                 }
 
                 $gadai->update([

@@ -12,55 +12,28 @@ class GadaiMasterInapKendaraanSeeder extends Seeder
      */
     public function run(): void
     {
+        $motorA = DB::table('tbl_gadai_master_item')->where('head_1', 'Motor Kelas A')->first();
+        $mobilB = DB::table('tbl_gadai_master_item')->where('head_1', 'Mobil Kelas B')->first();
+
+        DB::table('tbl_gadai_master_inap_kendaraan')->truncate();
+
         DB::table('tbl_gadai_master_inap_kendaraan')->insert([
             [
                 'golongan' => 'A',
-                'jenis_kendaraan' => 'motor',
+                'jenis_kendaraan' => '< 150 cc',
                 'nominal_inap' => 50000.00,
-                'keterangan' => 'motor matic dll',
+                'keterangan' => json_encode($motorA ? [$motorA->id] : []),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'golongan' => 'B',
-                'jenis_kendaraan' => 'mobil',
+                'jenis_kendaraan' => '>= 150 cc',
                 'nominal_inap' => 100000.00,
-                'keterangan' => 'mobil keluarga, sedan dll',
+                'keterangan' => json_encode($mobilB ? [$mobilB->id] : []),
                 'created_at' => now(),
                 'updated_at' => now(),
-            ],
-            [
-                'golongan' => 'C',
-                'jenis_kendaraan' => 'kendaraan C',
-                'nominal_inap' => 150000.00,
-                'keterangan' => 'kelas C',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'golongan' => 'D',
-                'jenis_kendaraan' => 'kendaraan D',
-                'nominal_inap' => 200000.00,
-                'keterangan' => 'kelas D',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'golongan' => 'E',
-                'jenis_kendaraan' => 'kendaraan E',
-                'nominal_inap' => 250000.00,
-                'keterangan' => 'kelas E',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
-            [
-                'golongan' => 'F',
-                'jenis_kendaraan' => 'kendaraan F',
-                'nominal_inap' => 300000.00,
-                'keterangan' => 'kelas F',
-                'created_at' => now(),
-                'updated_at' => now(),
-            ],
+            ]
         ]);
     }
 }

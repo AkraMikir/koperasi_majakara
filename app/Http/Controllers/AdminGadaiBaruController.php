@@ -84,8 +84,15 @@ class AdminGadaiBaruController extends Controller
             'lokasi_id' => 'required|exists:jns_lokasi_perusahaan,id',
             'slot_kode' => 'required|string',
             'nominal_deal' => 'required|numeric|min:1',
+            'rate_jasa' => 'required|numeric|min:0',
+            'rate_inap_persen' => 'required|numeric|min:0',
             'metode_pencairan' => 'required|in:cash,transfer',
-            'foto_bukti.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'foto_barang' => 'required|array|min:1',
+            'foto_barang.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_transaksi' => 'required|array|min:1',
+            'foto_transaksi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_administrasi' => 'required|array|min:1',
+            'foto_administrasi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         $item = GadaiMasterItem::findOrFail($request->item_id);
@@ -95,8 +102,8 @@ class AdminGadaiBaruController extends Controller
 
         $kategori = GadaiMasterKategori::findOrFail($request->kategori_id);
         
-        // Calculate Fees
-        $rateJasa = $kategori->rate_jasa;
+        // Calculate Fees using custom inputs
+        $rateJasa = $request->rate_jasa;
         $biayaJasa = ($request->nominal_deal * $rateJasa) / 100;
 
         // Calculate Biaya Inap upfront (flat for vehicles, percentage for gold/electronics)
@@ -104,7 +111,7 @@ class AdminGadaiBaruController extends Controller
         if ($item->nominal_inap > 0) {
             $biayaInap = $item->nominal_inap;
         } else {
-            $biayaInap = ($request->nominal_deal * $kategori->rate_inap_persen) / 100;
+            $biayaInap = ($request->nominal_deal * $request->rate_inap_persen) / 100;
         }
         
         // Petty Cash Check & Mutasi (Uang keluar dari Admin ke Nasabah dari Modal Awal)
@@ -131,7 +138,9 @@ class AdminGadaiBaruController extends Controller
                 'slot_kode' => $slotData->kode_slot,
                 'slot_table' => $kategori->kode_kategori,
                 'nominal_deal' => $request->nominal_deal,
+                'rate_jasa' => $request->rate_jasa,
                 'biaya_jasa' => $biayaJasa,
+                'rate_inap_persen' => $request->rate_inap_persen,
                 'denda_aktif' => 0,
                 'biaya_inap' => $biayaInap,
                 'tgl_mulai' => $tglMulai,
@@ -160,14 +169,38 @@ class AdminGadaiBaruController extends Controller
                 'catatan' => 'Gadai baru dibuat. Slot: ' . $slotData->kode_slot
             ]);
 
-            // Upload Files
-            if ($request->hasFile('foto_bukti')) {
-                foreach ($request->file('foto_bukti') as $file) {
+            // Upload Foto Barang
+            if ($request->hasFile('foto_barang')) {
+                foreach ($request->file('foto_barang') as $file) {
                     $path = $file->store('gadai_files', 'public');
                     GadaiFile::create([
                         'gadai_active_id' => $gadai->id,
                         'path_file' => $path,
                         'tipe_foto' => 'barang'
+                    ]);
+                }
+            }
+
+            // Upload Foto Transaksi
+            if ($request->hasFile('foto_transaksi')) {
+                foreach ($request->file('foto_transaksi') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'penyerahan'
+                    ]);
+                }
+            }
+
+            // Upload Foto Administrasi
+            if ($request->hasFile('foto_administrasi')) {
+                foreach ($request->file('foto_administrasi') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'lainnya'
                     ]);
                 }
             }

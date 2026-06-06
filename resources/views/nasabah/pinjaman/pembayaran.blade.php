@@ -112,6 +112,17 @@
 
 
             @if($selectedAngsuran)
+                @if($hasPendingPayment)
+                <div class="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start">
+                    <svg class="w-5 h-5 text-amber-600 mr-2 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                    </svg>
+                    <div>
+                        <p class="text-amber-800 text-sm font-semibold">Pengajuan Pembayaran Sedang Diproses</p>
+                        <p class="text-amber-700 text-xs mt-1">Anda sudah mengirimkan pengajuan pembayaran untuk angsuran ini yang sedang menunggu verifikasi oleh admin. Anda tidak dapat melakukan pembayaran baru sebelum pengajuan tersebut disetujui atau ditolak.</p>
+                    </div>
+                </div>
+                @endif
                 <!-- Informasi Angsuran -->
                 <div
                     class="mb-6 p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
@@ -182,12 +193,22 @@
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                                 <input type="text" name="nominal_display" id="nominal-transfer" required
-                                    class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                    @if($isSecondPayment)
+                                        value="{{ number_format($sisaKewajiban, 0, ',', '.') }}"
+                                        readonly
+                                        class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
+                                    @else
+                                        class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                    @endif
                                     placeholder="Masukkan nominal pembayaran">
-                                <input type="hidden" name="nominal" id="nominal-transfer-raw">
+                                <input type="hidden" name="nominal" id="nominal-transfer-raw" @if($isSecondPayment) value="{{ (int)$sisaKewajiban }}" @endif>
                             </div>
                             <p class="text-xs text-gray-500 mt-2">
-                                Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                                @if($isSecondPayment)
+                                    <span class="text-amber-600 font-semibold">Pembayaran ke-2 (Pelunasan): Harus membayar sisa tagihan sebesar Rp {{ number_format($sisaKewajiban, 0, ',', '.') }}</span>
+                                @else
+                                    Minimal pembayaran ke-1 (20%): Rp {{ number_format($minFirstPayment, 0, ',', '.') }} | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                                @endif
                             </p>
                         </div>
 
@@ -238,8 +259,7 @@
                                 placeholder="Tambahkan keterangan jika diperlukan"></textarea>
                         </div>
 
-                        <button type="button" onclick="showPinModal('transfer')"
-                            class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                        <button type="button" @if($hasPendingPayment) disabled class="w-full bg-gray-300 text-gray-500 font-semibold py-3 rounded-xl cursor-not-allowed" @else onclick="showPinModal('transfer')" class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all" @endif>
                             Ajukan Pembayaran
                         </button>
                     </form>
@@ -261,12 +281,22 @@
                             <div class="relative">
                                 <span class="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">Rp</span>
                                 <input type="text" name="nominal_display" id="nominal-cash" required
-                                    class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                    @if($isSecondPayment)
+                                        value="{{ number_format($sisaKewajiban, 0, ',', '.') }}"
+                                        readonly
+                                        class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl bg-gray-100 text-gray-500 cursor-not-allowed transition-all"
+                                    @else
+                                        class="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#8b6f2f] focus:ring-2 focus:ring-[#8b6f2f]/20 transition-all"
+                                    @endif
                                     placeholder="Masukkan nominal pembayaran">
-                                <input type="hidden" name="nominal" id="nominal-cash-raw">
+                                <input type="hidden" name="nominal" id="nominal-cash-raw" @if($isSecondPayment) value="{{ (int)$sisaKewajiban }}" @endif>
                             </div>
                             <p class="text-xs text-gray-500 mt-2">
-                                Minimal: Rp 1 | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                                @if($isSecondPayment)
+                                    <span class="text-amber-600 font-semibold">Pembayaran ke-2 (Pelunasan): Harus membayar sisa tagihan sebesar Rp {{ number_format($sisaKewajiban, 0, ',', '.') }}</span>
+                                @else
+                                    Minimal pembayaran ke-1 (20%): Rp {{ number_format($minFirstPayment, 0, ',', '.') }} | Maksimal: Rp {{ number_format($totalBayar, 0, ',', '.') }}
+                                @endif
                             </p>
                         </div>
 
@@ -306,8 +336,7 @@
                                 placeholder="Tambahkan keterangan jika diperlukan"></textarea>
                         </div>
 
-                        <button type="button" onclick="showPinModal('cash')"
-                            class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                        <button type="button" @if($hasPendingPayment) disabled class="w-full bg-gray-300 text-gray-500 font-semibold py-3 rounded-xl cursor-not-allowed" @else onclick="showPinModal('cash')" class="w-full bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all" @endif>
                             Ajukan Janji Temu
                         </button>
                     </form>
@@ -366,7 +395,7 @@ const maxNominal = Number("{{ $totalBayar ?? 0 }}");
 const nominalTransfer = document.getElementById('nominal-transfer');
 const nominalTransferRaw = document.getElementById('nominal-transfer-raw');
 
-if (nominalTransfer) {
+if (nominalTransfer && !nominalTransfer.hasAttribute('readonly')) {
     nominalTransfer.addEventListener('input', function(e) {
         let value = this.value.replace(/[^0-9]/g, '');
         if (value) {
@@ -391,7 +420,7 @@ if (nominalTransfer) {
 const nominalCash = document.getElementById('nominal-cash');
 const nominalCashRaw = document.getElementById('nominal-cash-raw');
 
-if (nominalCash) {
+if (nominalCash && !nominalCash.hasAttribute('readonly')) {
     nominalCash.addEventListener('input', function(e) {
         let value = this.value.replace(/[^0-9]/g, '');
         if (value) {
@@ -502,8 +531,27 @@ function showPinModal(formType) {
         return;
     }
 
-    if (nominal > maxNominal) {
-        alert('Nominal pembayaran maksimal Rp ' + maxNominal.toLocaleString('id-ID'));
+    const isFirstPayment = {{ $isFirstPayment ? 'true' : 'false' }};
+    const isSecondPayment = {{ $isSecondPayment ? 'true' : 'false' }};
+    const minFirstPayment = parseFloat("{{ $minFirstPayment }}") || 0;
+    const sisaKewajiban = parseFloat("{{ $sisaKewajiban }}") || 0;
+
+    if (isFirstPayment) {
+        if (nominal < minFirstPayment) {
+            alert('Pembayaran pertama minimal harus 20% dari jumlah tagihan (minimal Rp ' + minFirstPayment.toLocaleString('id-ID') + ')');
+            return;
+        }
+        if (nominal > sisaKewajiban) {
+            alert('Nominal pembayaran maksimal Rp ' + sisaKewajiban.toLocaleString('id-ID'));
+            return;
+        }
+    } else if (isSecondPayment) {
+        if (Math.abs(nominal - sisaKewajiban) > 1) {
+            alert('Pembayaran kedua harus berupa pelunasan sisa tagihan secara penuh sebesar Rp ' + sisaKewajiban.toLocaleString('id-ID'));
+            return;
+        }
+    } else {
+        alert('Batas maksimal pembayaran angsuran ini (2 kali) telah tercapai.');
         return;
     }
 
