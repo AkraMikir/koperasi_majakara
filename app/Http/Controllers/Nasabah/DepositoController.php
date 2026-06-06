@@ -14,6 +14,7 @@ use App\Models\PengajuanTabungan;
 use App\Models\PaketDeposito;
 use App\Models\JnsBank;
 use App\Models\KategoriDeposito;
+use App\Models\MasterDendaDeposito;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -263,7 +264,13 @@ class DepositoController extends Controller
             ->with(['tenor', 'bungaHarian', 'transDeposito', 'pencairan'])
             ->findOrFail($id);
 
-        return view('nasabah.deposito.detail', compact('deposito'));
+        // Data denda untuk tampilan pembatalan
+        $dendaAktif = MasterDendaDeposito::getDendaAktif();
+        $dendaPersen = $dendaAktif ? (float) $dendaAktif->denda_persen : 0;
+        $nominalDenda = $deposito->nominal_awal * ($dendaPersen / 100);
+        $nominalSetelahDenda = $deposito->nominal_awal - $nominalDenda;
+
+        return view('nasabah.deposito.detail', compact('deposito', 'dendaPersen', 'nominalDenda', 'nominalSetelahDenda'));
     }
 
     /**
@@ -337,17 +344,25 @@ class DepositoController extends Controller
             return back()->with('error', 'Permintaan pencairan/pembatalan sudah diajukan sebelumnya dan masih dalam proses.');
         }
 
+        // Hitung denda pembatalan dini
+        $dendaAktif = MasterDendaDeposito::getDendaAktif();
+        $dendaPersen = $dendaAktif ? (float) $dendaAktif->denda_persen : 0;
+        $nominalDenda = $deposito->nominal_awal * ($dendaPersen / 100);
+        $nominalAkhir = $deposito->nominal_awal - $nominalDenda;
+
         // Buat record pencairan dengan flag is_cancel = true
         PencairanDeposito::create([
             'deposito_id'     => $deposito->id,
             'id_nasabah'      => $nasabah->id,
             'jenis_pencairan' => $request->jenis_pencairan,
             'metode_pencairan'=> $request->jenis_pencairan, // compat
-            'nominal_akhir'   => $deposito->nominal_awal, // hanya pokok kembali
+            'nominal_akhir'   => $nominalAkhir,
+            'nominal_denda'   => $nominalDenda,
             'status'          => 'pending',
             'is_cancel'       => true,
             'catatan'         => 'Pengajuan pembatalan deposito oleh nasabah via ' .
-                ($request->jenis_pencairan === 'rek_nasabah' ? 'Transfer ke Rekening Bank' : 'Saldo Tabungan') . '.',
+                ($request->jenis_pencairan === 'rek_nasabah' ? 'Transfer ke Rekening Bank' : 'Saldo Tabungan') .
+                ($nominalDenda > 0 ? '. Denda ' . $dendaPersen . '% = Rp ' . number_format($nominalDenda, 0, ',', '.') : '') . '.',
         ]);
 
         return back()->with('success', 'Permintaan pembatalan deposito berhasil diajukan. Admin kami akan segera memproses pengembalian dana.');

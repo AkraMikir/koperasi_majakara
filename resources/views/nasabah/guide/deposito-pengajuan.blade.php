@@ -196,7 +196,7 @@
             <ul class="text-sm text-amber-900/90 space-y-1.5">
                 <li>• <strong>Minimal nominal</strong> deposito adalah <strong>Rp 1.000.000</strong>.</li>
                 <li>• <strong>Pajak bunga 20%</strong> dipotong otomatis — estimasi "bunga bersih" sudah memperhitungkan ini.</li>
-                <li>• Dana <strong>tidak bisa ditarik</strong> sebelum jatuh tempo kecuali mengajukan pembatalan (bunga tidak diberikan).</li>
+                <li>• Penarikan deposito sebelum jatuh tempo dikenakan <strong>denda sebesar 0,25%</strong> dari nominal awal. Bunga juga <strong>tidak akan diberikan</strong>.</li>
                 <li>• Pengajuan membutuhkan <strong>persetujuan admin</strong>. Pastikan saldo tabungan mencukupi.</li>
             </ul>
         </div>

@@ -353,6 +353,20 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             });
         });
         
+        // Denda Deposito
+        Route::prefix('denda-deposito')->name('denda-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoIndex'])->name('index');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoToggleStatus'])->name('toggle-status');
+            });
+        });
+        
         // Suku Bunga Tabungan
         Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');

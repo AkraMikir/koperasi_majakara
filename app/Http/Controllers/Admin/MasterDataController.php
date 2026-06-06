@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
+use App\Models\MasterDendaDeposito;
 use App\Models\SukuBunga;
 use App\Models\JnsTenorDeposito;
 use App\Models\SukuBungaDeposito;
@@ -51,6 +52,7 @@ class MasterDataController extends Controller
             'total_admin_operasional' => AdminOperasional::where('status', 'aktif')->count(),
             'total_rekening_perusahaan' => JnsBank::count(),
             'total_inap_kendaraan' => \App\Models\GadaiMasterInapKendaraan::count(),
+            'total_denda_deposito' => MasterDendaDeposito::where('status_aktif', true)->count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -192,6 +194,75 @@ class MasterDataController extends Controller
     {
         $this->checkCrudPermission();
         $data = MasterDendaPinjaman::findOrFail($id);
+        $data->status_aktif = !$data->status_aktif;
+        $data->save();
+
+        return redirect()->back()->with('success', 'Status berhasil diubah');
+    }
+
+    // ==================== MASTER DENDA DEPOSITO ====================
+    
+    public function dendaDepositoIndex()
+    {
+        $data = MasterDendaDeposito::paginate(15);
+        return view('admin.master-data.denda-deposito.index', compact('data'));
+    }
+
+    public function dendaDepositoCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.denda-deposito.create');
+    }
+
+    public function dendaDepositoStore(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'denda_persen' => 'required|numeric|min:0|max:100',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        MasterDendaDeposito::create($request->all());
+
+        return redirect()->route('admin.master-data.denda-deposito.index')
+            ->with('success', 'Data berhasil ditambahkan');
+    }
+
+    public function dendaDepositoEdit($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDendaDeposito::findOrFail($id);
+        return view('admin.master-data.denda-deposito.edit', compact('data'));
+    }
+
+    public function dendaDepositoUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'denda_persen' => 'required|numeric|min:0|max:100',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        $data = MasterDendaDeposito::findOrFail($id);
+        $data->update($request->all());
+
+        return redirect()->route('admin.master-data.denda-deposito.index')
+            ->with('success', 'Data berhasil diupdate');
+    }
+
+    public function dendaDepositoDestroy($id)
+    {
+        $data = MasterDendaDeposito::findOrFail($id);
+        $data->delete();
+
+        return redirect()->route('admin.master-data.denda-deposito.index')
+            ->with('success', 'Data berhasil dihapus');
+    }
+
+    public function dendaDepositoToggleStatus($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDendaDeposito::findOrFail($id);
         $data->status_aktif = !$data->status_aktif;
         $data->save();
 
