@@ -40,7 +40,7 @@ class NasabahGadaiBaruController extends Controller
             
             $gadaiAktif = GadaiActive::with(['kategori', 'item', 'lokasi'])
                 ->where('nasabah_id', $nasabahId)
-                ->whereIn('status', ['active', 'grace_period'])
+                ->whereIn('status', ['active', 'grace_period', 'lunas'])
                 ->orderBy('created_at', 'desc')
                 ->get();
 
@@ -60,7 +60,7 @@ class NasabahGadaiBaruController extends Controller
 
             $gadaiSelesai = GadaiActive::with(['kategori', 'item'])
                 ->where('nasabah_id', $nasabahId)
-                ->whereNotIn('status', ['active', 'grace_period'])
+                ->whereNotIn('status', ['active', 'grace_period', 'lunas'])
                 ->orderBy('updated_at', 'desc')
                 ->take(5)
                 ->get();
@@ -118,13 +118,13 @@ class NasabahGadaiBaruController extends Controller
         
         $gadaiAktif = GadaiActive::with(['kategori', 'item', 'lokasi'])
             ->where('nasabah_id', $nasabah->id)
-            ->whereIn('status', ['active', 'grace_period'])
+            ->whereIn('status', ['active', 'grace_period', 'lunas'])
             ->orderBy('created_at', 'desc')
             ->get();
             
         $gadaiSelesai = GadaiActive::with(['kategori', 'item', 'lokasi'])
             ->where('nasabah_id', $nasabah->id)
-            ->whereNotIn('status', ['active', 'grace_period'])
+            ->whereNotIn('status', ['active', 'grace_period', 'lunas'])
             ->orderBy('created_at', 'desc')
             ->get();
 

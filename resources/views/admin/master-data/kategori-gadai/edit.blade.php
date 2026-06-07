@@ -61,7 +61,7 @@
 
             <div class="border-t border-gray-100 pt-8">
                 <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-6">Kebijakan Waktu & Perpanjangan</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Masa Gadai (Hari)</label>
                         <input type="number" name="masa_gadai_hari" value="{{ old('masa_gadai_hari', $data->masa_gadai_hari) }}" class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]" required>
@@ -73,6 +73,10 @@
                     <div>
                         <label class="block text-sm font-bold text-gray-700 mb-2">Max Perpanjangan (Kali)</label>
                         <input type="number" name="max_extend_default" value="{{ old('max_extend_default', $data->max_extend_default) }}" class="w-full border-gray-200 rounded-xl bg-gray-50 focus:ring-[#674c1d] focus:border-[#674c1d]" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-amber-700 mb-2">Batas Ambil (Hari)</label>
+                        <input type="number" name="countdown_ambil_hari" value="{{ old('countdown_ambil_hari', $data->countdown_ambil_hari) }}" class="w-full border-amber-200 rounded-xl bg-amber-50/10 focus:ring-amber-500 focus:border-amber-500 font-bold" required>
                     </div>
                 </div>
             </div>

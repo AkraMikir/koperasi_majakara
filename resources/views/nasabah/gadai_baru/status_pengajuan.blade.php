@@ -37,6 +37,7 @@
                             <span class="px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest {{ $item->status == 'pending' ? 'bg-amber-200 text-amber-800' : ($item->status == 'approved' ? 'bg-emerald-200 text-emerald-800' : 'bg-red-200 text-red-800') }}">
                                 {{ $item->status }}
                             </span>
+                            {{-- 
                             @if($item->status == 'approved')
                             <a href="{{ route('nasabah.struk-gadai', $item->gadai_active_id) }}" target="_blank"
                                class="px-2 py-0.5 bg-amber-600 hover:bg-amber-700 text-white text-[9px] font-black rounded-lg transition-colors flex items-center gap-1">
@@ -46,6 +47,7 @@
                                 Struk
                             </a>
                             @endif
+                            --}}
                             <p class="text-[10px] text-gray-500">{{ $item->created_at->format('d M Y H:i') }}</p>
                         </div>
                     </div>

@@ -92,7 +92,6 @@
         <div class="w-full bg-gray-100 rounded-full h-3 overflow-hidden">
             <div class="h-3 rounded-full bg-gradient-to-r from-[#674c1d] to-[#d4af37] transition-all duration-700" style="width: {{ $fillPct }}%"></div>
         </div>
-    </div>
      {{-- ===== LEGEND ===== --}}
     <div class="bg-white/80 backdrop-blur-xl rounded-3xl p-4 border border-white/60 shadow-xl">
         <p class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Keterangan Warna Slot</p>
@@ -110,10 +109,11 @@
                 <span class="text-xs font-bold text-gray-600">Hangus (Merah)</span>
             </div>
             <div class="flex items-center gap-2">
-                <div class="w-8 h-8 rounded-lg bg-gray-100 border-2 border-gray-300"></div>
-                <span class="text-xs font-bold text-gray-600">Siap Diambil / Lunas (Abu-abu)</span>
+                <div class="w-8 h-8 rounded-lg bg-amber-50 border-2 border-dashed border-[#d4af37] animate-pulse"></div>
+                <span class="text-xs font-bold text-gray-600">Siap Diambil / Lunas (Kuning Emas)</span>
             </div>
         </div>
+    </div>
     </div>
 
     {{-- ===== GRID STORAGE ===== --}}
@@ -135,9 +135,9 @@
                                         $badgeClass = 'bg-red-200 text-red-900';
                                         $statusText = 'Hangus';
                                     } elseif ($isLunas) {
-                                        $cardClass = 'bg-gray-100 border-2 border-gray-300 hover:border-gray-400';
-                                        $textClass = 'text-gray-900';
-                                        $badgeClass = 'bg-gray-200 text-gray-700';
+                                        $cardClass = 'bg-amber-50 border-2 border-dashed border-[#d4af37] hover:border-amber-500 animate-pulse';
+                                        $textClass = 'text-[#674c1d]';
+                                        $badgeClass = 'bg-[#674c1d] text-white';
                                         $statusText = 'Siap Diambil';
                                     } else {
                                         $cardClass = 'bg-amber-50 border-2 border-amber-300 hover:border-amber-400';
@@ -145,27 +145,43 @@
                                         $badgeClass = 'bg-amber-100 text-amber-700';
                                         $statusText = 'Terisi';
                                     }
-                                @endphp
-                                <div class="w-40 h-44 {{ $cardClass }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
-                                     x-data="{}" 
-                                     title="{{ $slot->nasabah_nama }} — {{ $slot->item_nama }}">
-                                     <div class="flex justify-between items-start">
-                                         <div class="font-mono font-black text-sm {{ $textClass }}">{{ $slot->kode_slot }}</div>
-                                         <span class="px-1.5 py-0.5 {{ $badgeClass }} text-[9px] font-black rounded uppercase tracking-wide">{{ $statusText }}</span>
-                                     </div>
-                                     <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
-                                         <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
-                                         <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
-                                     </div>
-                                     @if($isExpired)
-                                         <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
-                                             class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
-                                             🔨 Kosongkan & Lelang
-                                         </button>
-                                     @else
-                                         <div class="w-full py-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-lg text-center uppercase tracking-wide">{{ $statusText }} Tersimpan</div>
-                                     @endif
-                                </div>
+                                 @endphp
+                                 <div class="w-40 h-44 {{ $cardClass }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
+                                      x-data="{}" 
+                                      title="{{ $slot->nasabah_nama }} — {{ $slot->item_nama }}">
+                                      <div class="flex justify-between items-start">
+                                          <div class="font-mono font-black text-sm {{ $textClass }}">{{ $slot->kode_slot }}</div>
+                                          <span class="px-1.5 py-0.5 {{ $badgeClass }} text-[9px] font-black rounded uppercase tracking-wide">{{ $statusText }}</span>
+                                      </div>
+                                      <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
+                                          <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
+                                          <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
+                                          @if($isLunas && $slot->tgl_ambil_limit)
+                                              @php
+                                                  $limit = \Carbon\Carbon::parse($slot->tgl_ambil_limit);
+                                                  $now = now();
+                                                  $diffHours = $now->diffInHours($limit, false);
+                                                  $diffDays = $now->diffInDays($limit, false);
+                                              @endphp
+                                              <div class="text-[9px] text-red-500 font-black mt-1">
+                                                  ⏱️ Sisa: {{ $diffDays > 0 ? $diffDays.' H' : ($diffHours > 0 ? $diffHours.' Jam' : 'Segera Hangus!') }}
+                                              </div>
+                                          @endif
+                                      </div>
+                                      @if($isExpired)
+                                          <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                              class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
+                                              🔨 Kosongkan & Lelang
+                                          </button>
+                                      @elseif($isLunas)
+                                          <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                              class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
+                                              📦 Serahkan Barang
+                                          </button>
+                                      @else
+                                          <div class="w-full py-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-lg text-center uppercase tracking-wide">{{ $statusText }} Tersimpan</div>
+                                      @endif
+                                 </div>
                             @else
                                 <div class="w-40 h-44 bg-emerald-50/60 border-2 border-dashed border-emerald-300 rounded-xl p-3 flex flex-col justify-between hover:bg-emerald-50 hover:border-emerald-400 transition-colors group">
                                     <div class="font-mono font-black text-sm text-emerald-700">{{ $slot->kode_slot }}</div>
@@ -284,6 +300,109 @@
     </div>
 </div>
 
+{{-- ===== MODAL AMBIL BARANG (LUNAS) ===== --}}
+<div id="ambilModal" class="fixed inset-0 z-50 overflow-y-auto hidden" role="dialog" aria-modal="true">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-black/60 backdrop-blur-sm" onclick="closeAmbilModal()"></div>
+        <div class="relative bg-white/95 backdrop-blur-2xl rounded-3xl shadow-2xl border border-white/60 max-w-lg w-full overflow-hidden z-10 animate-in fade-in zoom-in duration-300">
+            <form id="ambilForm" action="" method="POST" enctype="multipart/form-data">
+                @csrf
+                {{-- Modal Header --}}
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-6 py-5 flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl">📦</div>
+                        <div>
+                            <h3 class="text-lg font-black text-white">Serahkan Barang ke Nasabah</h3>
+                            <p class="text-white/70 text-xs">Penyerahan barang gadai yang telah lunas</p>
+                        </div>
+                    </div>
+                    <button type="button" onclick="closeAmbilModal()" class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                </div>
+
+                <div class="p-6 space-y-5">
+                    {{-- Info --}}
+                    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
+                        <span class="text-xl shrink-0 mt-0.5">ℹ️</span>
+                        <div>
+                            <p class="text-xs font-black text-emerald-900 uppercase tracking-wider mb-1">Konfirmasi Serah Terima</p>
+                            <p class="text-xs text-emerald-700 font-medium leading-relaxed">Pastikan nasabah telah menandatangani bukti penyerahan barang di toko fisik sebelum memproses pengambilan barang ini.</p>
+                        </div>
+                    </div>
+
+                    {{-- Slot Info --}}
+                    <div class="grid grid-cols-2 gap-4 bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider">Kode Slot</p>
+                            <p id="ambil_slot_kode" class="text-sm font-extrabold text-gray-900 mt-0.5 font-mono">-</p>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider">Nama Barang</p>
+                            <p id="ambil_item_nama" class="text-sm font-extrabold text-gray-900 mt-0.5">-</p>
+                        </div>
+                        <div class="col-span-2 pt-3 border-t border-gray-200">
+                            <p class="text-[10px] text-gray-400 font-black uppercase tracking-wider">Nama Nasabah</p>
+                            <p id="ambil_nasabah_nama" class="text-sm font-semibold text-gray-700 mt-0.5">-</p>
+                        </div>
+                    </div>
+
+                    {{-- Struk Hilang Checkbox & Payment Method --}}
+                    <div class="bg-amber-50/50 border border-amber-200/60 rounded-2xl p-4 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" name="struk_hilang" id="struk_hilang" value="1" 
+                                   class="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                   onchange="toggleDendaSection(this.checked)">
+                            <label for="struk_hilang" class="text-xs font-black text-gray-700 uppercase tracking-wider cursor-pointer">
+                                Struk Kehilangan / Hilang (Denda Rp {{ number_format($settings->extra_nilai_kehilangan ?? 0, 0, ',', '.') }})
+                            </label>
+                        </div>
+                        
+                        <div id="denda_payment_section" class="hidden space-y-2 pt-2 border-t border-amber-200/40">
+                            <label class="block text-xs font-black text-gray-700 uppercase tracking-wider">Metode Pembayaran Denda <span class="text-red-500">*</span></label>
+                            <div class="grid grid-cols-2 gap-3">
+                                <label class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="radio" name="metode_denda" value="cash" checked class="text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span class="text-xs font-bold text-gray-700">Tunai (Cash)</span>
+                                </label>
+                                <label class="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input type="radio" name="metode_denda" value="transfer" class="text-emerald-600 focus:ring-emerald-500 border-gray-300">
+                                    <span class="text-xs font-bold text-gray-700">Transfer Bank</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Upload Foto --}}
+                    <div>
+                        <label class="block text-xs font-black text-gray-700 uppercase tracking-wider mb-2">Unggah Foto Bukti Penyerahan/Serah Terima <span class="text-red-500">*</span></label>
+                        <div class="relative border-2 border-dashed border-gray-200 hover:border-emerald-400 rounded-2xl p-5 transition-all bg-gray-50/50 cursor-pointer">
+                            <input type="file" name="foto_bukti[]" multiple required class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="previewAmbilImages(event)">
+                            <div class="text-center space-y-1.5">
+                                <svg class="mx-auto h-10 w-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                <p class="text-xs text-gray-500 font-semibold">Klik atau seret foto bukti di sini</p>
+                                <p class="text-[10px] text-gray-400">JPEG, PNG (Maks. 2MB per foto)</p>
+                            </div>
+                        </div>
+                        <div id="ambil_image_preview_container" class="flex flex-wrap gap-2 pt-3"></div>
+                    </div>
+                </div>
+
+                <div class="bg-white/50 backdrop-blur-md px-6 py-4 flex gap-3 justify-end rounded-b-3xl border-t border-gray-100">
+                    <button type="button" onclick="closeAmbilModal()"
+                        class="px-5 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-sm font-bold rounded-xl transition-all">
+                        Batal
+                    </button>
+                    <button type="submit"
+                        class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-wide">
+                        📦 Konfirmasi Penyerahan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
     function openEmptyAuctionModal(gadaiId, slotKode, nasabahNama, itemNama) {
         document.getElementById('modal_gadai_id').value = gadaiId;
@@ -301,6 +420,49 @@
     }
     function previewImages(event) {
         const container = document.getElementById('image_preview_container');
+        container.innerHTML = '';
+        Array.from(event.target.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const div = document.createElement('div');
+                div.className = 'relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shadow-sm';
+                div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function openAmbilModal(gadaiId, slotKode, nasabahNama, itemNama) {
+        const form = document.getElementById('ambilForm');
+        form.action = `/admin/gadai_baru/${gadaiId}/ambil`;
+        document.getElementById('ambil_slot_kode').textContent = slotKode;
+        document.getElementById('ambil_nasabah_nama').textContent = nasabahNama;
+        document.getElementById('ambil_item_nama').textContent = itemNama;
+        const modal = document.getElementById('ambilModal');
+        modal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeAmbilModal() {
+        document.getElementById('ambilModal').classList.add('hidden');
+        document.body.style.overflow = '';
+        document.getElementById('ambil_image_preview_container').innerHTML = '';
+        const checkbox = document.getElementById('struk_hilang');
+        if (checkbox) checkbox.checked = false;
+        toggleDendaSection(false);
+    }
+    function toggleDendaSection(isChecked) {
+        const dendaSection = document.getElementById('denda_payment_section');
+        if (dendaSection) {
+            if (isChecked) {
+                dendaSection.classList.remove('hidden');
+            } else {
+                dendaSection.classList.add('hidden');
+            }
+        }
+    }
+    function previewAmbilImages(event) {
+        const container = document.getElementById('ambil_image_preview_container');
         container.innerHTML = '';
         Array.from(event.target.files).forEach(file => {
             const reader = new FileReader();

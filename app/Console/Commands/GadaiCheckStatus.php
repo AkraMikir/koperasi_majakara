@@ -104,6 +104,31 @@ class GadaiCheckStatus extends Command
             }
         }
 
+        // 3. Cek Lunas -> Expired Final (Batas Waktu Pengambilan Habis)
+        $lunasGadais = GadaiActive::where('status', 'lunas')
+            ->whereNotNull('tgl_ambil_limit')
+            ->where('tgl_ambil_limit', '<', $now)
+            ->get();
+
+        foreach ($lunasGadais as $gadai) {
+            DB::beginTransaction();
+            try {
+                $gadai->update(['status' => 'expired_final']);
+
+                GadaiHistory::create([
+                    'gadai_active_id' => $gadai->id,
+                    'aksi' => 'expired',
+                    'catatan' => 'Batas waktu pengambilan barang lunas telah habis. Status diubah menjadi Hangus (Siap Dilelang).'
+                ]);
+
+                DB::commit();
+                $this->info("Gadai ID {$gadai->id} hangus karena batas waktu pengambilan habis.");
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $this->error("Gagal update Gadai ID {$gadai->id}: " . $e->getMessage());
+            }
+        }
+
         $this->info('Pengecekan selesai.');
     }
 }

@@ -55,8 +55,8 @@
             </div>
         @else
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                @foreach($gadaiAktif as $gadai)
                 @php
+                    $isLunas = $gadai->status == 'lunas';
                     $isTenggang = $gadai->status == 'grace_period';
                     $today = now()->startOfDay();
                     $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
@@ -80,9 +80,13 @@
                         return "{$sisa} hari";
                     };
                 @endphp
-                <div class="bg-white rounded-3xl shadow-md border {{ $isTenggang ? 'border-red-200' : 'border-gray-100' }} relative overflow-hidden group hover:shadow-xl transition-all duration-300">
+                <div class="bg-white rounded-3xl shadow-md border {{ $isLunas ? 'border-emerald-200' : ($isTenggang ? 'border-red-200' : 'border-gray-100') }} relative overflow-hidden group hover:shadow-xl transition-all duration-300">
                     {{-- Urgency ribbon --}}
-                    @if($isTenggang)
+                    @if($isLunas)
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase animate-pulse">
+                        🎉 Pelunasan Disetujui &mdash; Silakan Ambil Barang di Toko
+                    </div>
+                    @elseif($isTenggang)
                     <div class="bg-red-600 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase">
                         ⚠ MASA TENGGANG &mdash; {{ $sisaHari >= 0 ? $formatSisa($sisaHari) : '0 hari' }} TERSISA
                     </div>
@@ -109,8 +113,8 @@
                                     <p class="text-[10px] text-gray-400 mt-1 italic">{{ $gadai->item->head_2 }}</p>
                                 @endif
                             </div>
-                            <span class="{{ $isTenggang ? 'bg-red-600 shadow-red-200' : 'bg-[#674c1d] shadow-amber-200' }} text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shrink-0">
-                                {{ $isTenggang ? 'TENGGANG' : 'AKTIF' }}
+                            <span class="{{ $isLunas ? 'bg-emerald-600 shadow-emerald-200' : ($isTenggang ? 'bg-red-600 shadow-red-200' : 'bg-[#674c1d] shadow-amber-200') }} text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shrink-0 animate-pulse">
+                                {{ $isLunas ? 'SIAP DIAMBIL' : ($isTenggang ? 'TENGGANG' : 'AKTIF') }}
                             </span>
                         </div>
 
@@ -121,11 +125,42 @@
                                 <p class="font-black text-gray-900 text-base tracking-tight">Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</p>
                             </div>
                             <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{{ $isTenggang ? 'Batas Tenggang' : 'Jatuh Tempo' }}</p>
-                                <p class="font-black {{ $isTenggang ? 'text-red-600' : 'text-gray-900' }} text-base tracking-tight">{{ ($isTenggang ? $gadai->tgl_tenggang : $gadai->tgl_jatuh_tempo)->format('d M Y') }}</p>
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                                    {{ $isLunas ? 'Batas Pengambilan' : ($isTenggang ? 'Batas Tenggang' : 'Jatuh Tempo') }}
+                                </p>
+                                <p class="font-black {{ $isLunas ? 'text-emerald-600' : ($isTenggang ? 'text-red-600' : 'text-gray-900') }} text-base tracking-tight">
+                                    {{ ($isLunas ? $gadai->tgl_ambil_limit : ($isTenggang ? $gadai->tgl_tenggang : $gadai->tgl_jatuh_tempo))->format('d M Y') }}
+                                </p>
                             </div>
                         </div>
 
+                        @if($isLunas)
+                        {{-- Countdown JS Display --}}
+                        <div class="mb-5 bg-amber-50 border border-amber-200 rounded-2xl p-3 text-center">
+                            <p class="text-[9px] font-black text-amber-800 uppercase tracking-widest mb-1">⏱️ Sisa Waktu Pengambilan</p>
+                            <p class="text-sm font-black text-amber-950 tracking-tight" id="countdown-{{ $gadai->id }}">-- H -- M -- S</p>
+                            <script>
+                                (function() {
+                                    const limitTime = new Date("{{ $gadai->tgl_ambil_limit->toIso8601String() }}").getTime();
+                                    const timerId = setInterval(function() {
+                                        const now = new Date().getTime();
+                                        const distance = limitTime - now;
+                                        if (distance < 0) {
+                                            clearInterval(timerId);
+                                            document.getElementById("countdown-{{ $gadai->id }}").innerHTML = "HANGUS / SELESAI";
+                                            return;
+                                        }
+                                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                                        document.getElementById("countdown-{{ $gadai->id }}").innerHTML = 
+                                            (days > 0 ? days + " Hari " : "") + hours + " Jam " + minutes + " Menit " + seconds + " Detik";
+                                    }, 1000);
+                                })();
+                            </script>
+                        </div>
+                        @else
                         {{-- Progress timeline --}}
                         <div class="mb-5">
                             <div class="flex justify-between text-[9px] font-bold text-gray-400 mb-1.5">
@@ -137,7 +172,13 @@
                                 <div class="h-2.5 rounded-full bg-gradient-to-r {{ $progressColor }} transition-all duration-700" style="width: {{ min(100, $progressPct) }}%"></div>
                             </div>
                         </div>
+                        @endif
 
+                        @if($isLunas)
+                        <div class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-md">
+                            Ambil di Cabang (Bawa KTP)
+                        </div>
+                        @else
                         {{-- CTA Buttons --}}
                         <div class="grid grid-cols-2 gap-3">
                             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
@@ -157,6 +198,7 @@
                             </div>
                             @endif
                         </div>
+                        @endif
                     </div>
                 </div>
                 @endforeach
