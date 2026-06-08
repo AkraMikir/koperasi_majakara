@@ -11,7 +11,7 @@ return new class extends Migration
     {
         Schema::create('jns_fitur', function (Blueprint $table) {
             $table->id();
-            $table->char('kode', 1)->unique();
+            $table->string('kode', 5)->unique();
             $table->string('nama', 50);
             $table->text('deskripsi')->nullable();
             $table->boolean('is_active')->default(true);
@@ -20,7 +20,7 @@ return new class extends Migration
 
         Schema::create('jns_via', function (Blueprint $table) {
             $table->id();
-            $table->char('kode', 2)->unique();
+            $table->string('kode', 5)->unique();
             $table->string('nama', 50);
             $table->text('deskripsi')->nullable();
             $table->boolean('is_active')->default(true);
