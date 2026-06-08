@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             GadaiMasterInapKendaraanSeeder::class,
             PaketDepositoSeeder::class,
             MasterDataBankRegisSeeder::class,
+            PettyCashSeeder::class,
         ]);
     }
 }

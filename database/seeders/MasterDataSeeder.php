@@ -51,34 +51,47 @@ class MasterDataSeeder extends Seeder
         // 3. V2 Master Tables
         DB::table('jns_fitur')->truncate();
         DB::table('jns_fitur')->insert([
-            ['kode' => 'T', 'nama' => 'Tabungan', 'deskripsi' => 'Fitur tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'P', 'nama' => 'Pinjaman', 'deskripsi' => 'Fitur pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'D', 'nama' => 'Deposito', 'deskripsi' => 'Fitur deposito', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'G', 'nama' => 'Gadai', 'deskripsi' => 'Fitur gadai', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'T', 'nama' => 'Tabungan', 'deskripsi' => 'Tabungan. ID: ddmmyyyy[SEQ(4)]TTFSTR/TCSSTR. Petty Cash Ref: PCTN/PC.', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'P', 'nama' => 'Pinjaman', 'deskripsi' => 'Pinjaman. ID: ddmmyyyy[SEQ(4)]PTFPNJ. Petty Cash Ref: PCTN/PC.', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'D', 'nama' => 'Deposito', 'deskripsi' => 'Deposito. No Rek: DP+yymmdd+[SEQ(4)]. Petty Cash Ref: PCP.', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'G', 'nama' => 'Gadai', 'deskripsi' => 'Gadai. ID: Auto-increment Integer. Petty Cash Ref: PCTN/PC.', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            // Petty Cash & Owner
+            ['kode' => 'PCOW', 'nama' => 'Petty Cash Owner', 'deskripsi' => 'Transaksi Owner Wallet', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PCTN', 'nama' => 'Petty Cash Transaksi Nasabah', 'deskripsi' => 'Transaksi Petty Cash Kasir & Nasabah', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PCP', 'nama' => 'Petty Cash Penerimaan', 'deskripsi' => 'Dana Drop dari Owner ke Admin', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PCS', 'nama' => 'Petty Cash Setoran Kantor', 'deskripsi' => 'Setoran Kasir ke Owner', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('jns_via')->truncate();
         DB::table('jns_via')->insert([
-            ['kode' => 'TF', 'nama' => 'Transfer', 'deskripsi' => 'Via transfer bank', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'CS', 'nama' => 'Cash', 'deskripsi' => 'Via tunai/cash', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TF', 'nama' => 'Transfer', 'deskripsi' => 'Via Transfer Bank (ID Via: TF)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'CS', 'nama' => 'Cash', 'deskripsi' => 'Via Tunai/Cash (ID Via: CS/TN)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            // Petty Cash & Owner Via
+            ['kode' => 'OW', 'nama' => 'Owner Wallet', 'deskripsi' => 'Dompet Rekening Utama Owner', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'AD', 'nama' => 'Admin Petty Cash', 'deskripsi' => 'Kas Pegangan Admin/Operator', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         DB::table('jns_transaksi')->truncate();
         DB::table('jns_transaksi')->insert([
             // Tabungan
-            ['kode' => 'STR', 'nama' => 'Setoran', 'deskripsi' => 'Setoran tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'PNR', 'nama' => 'Penarikan', 'deskripsi' => 'Penarikan tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'TRKT', 'nama' => 'Transaksi Tabungan', 'deskripsi' => 'Transaksi umum tabungan', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'STR', 'nama' => 'Setoran', 'deskripsi' => 'Setoran (ID Transaksi: STR/PCS/KRM/PCR)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNR', 'nama' => 'Penarikan', 'deskripsi' => 'Penarikan (ID Transaksi: PNR)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TRKT', 'nama' => 'Transaksi Tabungan', 'deskripsi' => 'Transaksi Tabungan (ID Transaksi: TRKT/TR)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             
             // Pinjaman
-            ['kode' => 'PNJ', 'nama' => 'Pengajuan', 'deskripsi' => 'Pengajuan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'PMB', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran angsuran pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'PNCR', 'nama' => 'Pencairan', 'deskripsi' => 'Pencairan pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'DPNJM', 'nama' => 'Data Pinjaman', 'deskripsi' => 'Data pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
-            ['kode' => 'TPNJM', 'nama' => 'Tempo Pinjaman', 'deskripsi' => 'Tempo/jatuh tempo pinjaman', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNJ', 'nama' => 'Pengajuan', 'deskripsi' => 'Pengajuan Pinjaman (ID Transaksi: PNJ)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PMB', 'nama' => 'Pembayaran', 'deskripsi' => 'Pembayaran Angsuran Pinjaman (ID Transaksi: PMB/LUNAS)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'PNCR', 'nama' => 'Pencairan', 'deskripsi' => 'Pencairan Pinjaman (ID Transaksi: PNCR)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'DPNJM', 'nama' => 'Data Pinjaman', 'deskripsi' => 'Data Pinjaman (ID Transaksi: DPNJM)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'TPNJM', 'nama' => 'Tempo Pinjaman', 'deskripsi' => 'Tempo Pinjaman (ID Transaksi: TPNJM)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
             
             // Universal
-            ['kode' => 'JNJT', 'nama' => 'Janji Temu', 'deskripsi' => 'Janji temu untuk transaksi', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'JNJT', 'nama' => 'Janji Temu', 'deskripsi' => 'Janji Temu (ID Transaksi: JNJT)', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+
+            // Petty Cash & Owner Transaksi
+            ['kode' => 'TR', 'nama' => 'Transaksi Saldo', 'deskripsi' => 'Mutasi/Jurnal Kas Masuk-Keluar', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'KRM', 'nama' => 'Kirim Dana', 'deskripsi' => 'Kirim Petty Cash ke Operator', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
+            ['kode' => 'WD', 'nama' => 'Withdrawal', 'deskripsi' => 'Penarikan Kas oleh Owner', 'is_active' => 1, 'created_at' => now(), 'updated_at' => now()],
         ]);
 
         // 4. Tenor Deposito
