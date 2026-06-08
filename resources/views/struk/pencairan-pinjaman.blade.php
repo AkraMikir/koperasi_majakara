@@ -5,14 +5,14 @@
     <title>Struk Pencairan Pinjaman - {{ $pinjaman->id ?? '-' }}</title>
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
+        body { font-family: 'Courier', monospace; font-size: 14px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
         .underline { text-decoration: underline; }
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
         .table-row td { vertical-align: top; }
-        .label { font-weight: bold; width: 45%; }
+        .label {font-size: 12px; width: 25%; font-weight: 100;}
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -24,6 +24,7 @@
         .nominal-table td { padding: 2px 0; }
         .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
         .approver { margin-top: 10px; font-size: 10px; }
+        .id-kecil{font-size:12px}
     </style>
 </head>
 @php
@@ -50,28 +51,28 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">ID Pinjaman</td>
-            <td>: {{ $pinjaman->id }}</td>
+            <td class="label">ID </td>
+            <td class="id-kecil">: {{ $pinjaman->id }}</td>
         </tr>
         <tr>
-            <td class="label">Tanggal Pencairan</td>
-            <td>: {{ $tglCair ? $tglCair->format('d-m-Y H:i') : '-' }}</td>
+            <td class="label">Tanggal</td>
+            <td class="id-kecil">: {{ $tglCair ? $tglCair->format('d-m-Y H:i') : '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Nama Anggota</td>
-            <td>: {{ $pinjaman->nasabah->user->nama ?? 'N/A' }}</td>
+            <td class="label">Anggota</td>
+            <td class="id-kecil">: {{ $pinjaman->nasabah->user->nama ?? 'N/A' }}</td>
         </tr>
         <tr>
             <td class="label">Tenor</td>
-            <td>: {{ $pinjaman->lama_pinjam ?? $pinjaman->pengajuan->durasi ?? '-' }} bulan</td>
+            <td class="id-kecil">: {{ $pinjaman->lama_pinjam ?? $pinjaman->pengajuan->durasi ?? '-' }} bulan</td>
         </tr>
         <tr>
-            <td class="label">Angsuran per Bulan</td>
-            <td>: Rp {{ number_format($pinjaman->ags_bulan ?? 0, 0, ',', '.') }}</td>
+            <td class="label">Angsuran</td>
+            <td class="id-kecil">: Rp {{ number_format($pinjaman->ags_bulan ?? 0, 0, ',', '.') }}</td>
         </tr>
         <tr>
             <td class="label">Metode</td>
-            <td>: {{ $pinjaman->pengajuan->jenis_pencairan ? ucfirst(str_replace('_', ' ', $pinjaman->pengajuan->jenis_pencairan)) : '-' }}</td>
+            <td class="id-kecil">: {{ $pinjaman->pengajuan->jenis_pencairan ? ucfirst(str_replace('_', ' ', $pinjaman->pengajuan->jenis_pencairan)) : '-' }}</td>
         </tr>
     </table>
     
@@ -79,8 +80,8 @@
     
     <table class="table-row">
         <tr>
-            <td class="bold">NOMINAL PINJAMAN</td>
-            <td class="bold text-right">: Rp {{ number_format($pinjaman->jumlah_pinjam ?? 0, 0, ',', '.') }}</td>
+            <td class="bold label">NOMINAL</td>
+            <td class="bold id-kecil">: Rp {{ number_format($pinjaman->jumlah_pinjam ?? 0, 0, ',', '.') }}</td>
         </tr>
     </table>
     

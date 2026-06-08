@@ -12,7 +12,7 @@
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
         .table-row td { vertical-align: top; }
-        .label { font-weight: bold; width: 45%; }
+        .label { font-weight: normal; width: 25%; font-size: 12px; }
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -24,6 +24,7 @@
         .nominal-table td { padding: 2px 0; }
         .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
         .approver { margin-top: 10px; font-size: 10px; }
+        .id-kecil{font-size:11px}
     </style>
 </head>
 @php
@@ -51,24 +52,24 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">ID Pinjaman</td>
-            <td>: {{ $pinjaman->id ?? '-' }}</td>
+            <td class="label">ID </td>
+            <td class="id-kecil">: {{ $pinjaman->id ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Angsuran Ke</td>
-            <td>: {{ $angsuran->no_urut ?? '-' }}</td>
+            <td class="label">Angsuran </td>
+            <td class="id-kecil">: {{ $angsuran->no_urut ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Nama Anggota</td>
-            <td>: {{ $nasabah->user->nama ?? 'N/A' }}</td>
+            <td class="label">Nama</td>
+            <td class="id-kecil">: {{ $nasabah->user->nama ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td class="label">Tanggal Bayar</td>
-            <td>: {{ isset($angsuran->tgl_bayar) ? $angsuran->tgl_bayar->format('d-m-Y H:i') : '-' }}</td>
+            <td class="label">Tanggal</td>
+            <td class="id-kecil">: {{ isset($angsuran->tgl_bayar) ? $angsuran->tgl_bayar->format('d-m-Y H:i') : '-' }}</td>
         </tr>
         <tr>
             <td class="label">Status</td>
-            <td>: Angsuran ke-{{ $angsuran->no_urut ?? '-' }}</td>
+            <td class="id-kecil">: {{ $angsuran->pinjaman->lunas}}</td>
         </tr>
     </table>
     
