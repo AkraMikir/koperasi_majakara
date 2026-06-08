@@ -19,9 +19,9 @@
             </a>
             <form action="{{ route('admin.gadai_baru.storage') }}" method="GET">
                 <select name="kategori" class="border-gray-200 rounded-xl focus:ring-[#674c1d] focus:border-[#674c1d] text-sm font-medium bg-white shadow-sm" onchange="this.form.submit()">
-                    <option value="electronic" {{ $kategori == 'electronic' ? 'selected' : '' }}>📱 Elektronik</option>
-                    <option value="vehicle" {{ $kategori == 'vehicle' ? 'selected' : '' }}>🚗 Kendaraan</option>
-                    <option value="gold" {{ $kategori == 'gold' ? 'selected' : '' }}>💰 Emas</option>
+                    <option value="electronic" {{ $kategori == 'electronic' ? 'selected' : '' }}>Elektronik</option>
+                    <option value="vehicle" {{ $kategori == 'vehicle' ? 'selected' : '' }}>Kendaraan</option>
+                    <option value="gold" {{ $kategori == 'gold' ? 'selected' : '' }}>Emas</option>
                 </select>
             </form>
         </div>
@@ -115,6 +115,7 @@
         </div>
     </div>
     </div>
+    @endif
 
     {{-- ===== GRID STORAGE ===== --}}
     <div class="bg-white/80 backdrop-blur-xl border border-white/60 rounded-3xl shadow-xl p-6 overflow-x-auto">
@@ -160,23 +161,23 @@
                                               @php
                                                   $limit = \Carbon\Carbon::parse($slot->tgl_ambil_limit);
                                                   $now = now();
-                                                  $diffHours = $now->diffInHours($limit, false);
-                                                  $diffDays = $now->diffInDays($limit, false);
+                                                  $diffHours = (int) $now->diffInHours($limit, false);
+                                                  $diffDays = (int) $now->diffInDays($limit, false);
                                               @endphp
                                               <div class="text-[9px] text-red-500 font-black mt-1">
-                                                  ⏱️ Sisa: {{ $diffDays > 0 ? $diffDays.' H' : ($diffHours > 0 ? $diffHours.' Jam' : 'Segera Hangus!') }}
+                                                  Sisa: {{ $diffDays > 0 ? $diffDays.' Hari' : ($diffHours > 0 ? $diffHours.' Jam' : 'Segera Hangus!') }}
                                               </div>
                                           @endif
                                       </div>
                                       @if($isExpired)
                                           <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
-                                              🔨 Kosongkan & Lelang
+                                              Kosongkan & Lelang
                                           </button>
                                       @elseif($isLunas)
                                           <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
-                                              📦 Serahkan Barang
+                                              Serahkan Barang
                                           </button>
                                       @else
                                           <div class="w-full py-1.5 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-lg text-center uppercase tracking-wide">{{ $statusText }} Tersimpan</div>
@@ -224,7 +225,7 @@
                 {{-- Modal Header --}}
                 <div class="bg-gradient-to-r from-[#674c1d] to-[#d4af37] px-6 py-5 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl">🔨</div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl"></div>
                         <div>
                             <h3 class="text-lg font-black text-white">Kosongkan Slot untuk Lelang</h3>
                             <p class="text-white/70 text-xs">Barang hangus akan dipindah ke proses lelang</p>
@@ -238,7 +239,7 @@
                 <div class="p-6 space-y-5">
                     {{-- Warning --}}
                     <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-start gap-3">
-                        <span class="text-xl shrink-0 mt-0.5">⚠️</span>
+                        <span class="text-xl shrink-0 mt-0.5"></span>
                         <div>
                             <p class="text-xs font-black text-amber-900 uppercase tracking-wider mb-1">Perhatian!</p>
                             <p class="text-xs text-amber-700 font-medium leading-relaxed">Barang pada slot ini berstatus <strong class="underline">hangus</strong>. Konfirmasi ini akan mengosongkan slot dan mengubah status barang menjadi <strong>Sudah Dilelang</strong>.</p>
@@ -292,7 +293,7 @@
                     <button type="submit"
                         class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#d4af37] hover:from-[#5a4118] hover:to-[#b3952f] active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-xl shadow-[#674c1d]/20 uppercase tracking-wide"
                         onsubmit="this.disabled=true;this.textContent='Memproses...'">
-                        🔨 Konfirmasi & Proses Lelang
+                        Konfirmasi & Proses Lelang
                     </button>
                 </div>
             </form>
@@ -310,7 +311,7 @@
                 {{-- Modal Header --}}
                 <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-6 py-5 flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl">📦</div>
+                        <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center text-white text-xl"></div>
                         <div>
                             <h3 class="text-lg font-black text-white">Serahkan Barang ke Nasabah</h3>
                             <p class="text-white/70 text-xs">Penyerahan barang gadai yang telah lunas</p>
@@ -324,7 +325,7 @@
                 <div class="p-6 space-y-5">
                     {{-- Info --}}
                     <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-start gap-3">
-                        <span class="text-xl shrink-0 mt-0.5">ℹ️</span>
+                        <span class="text-xl shrink-0 mt-0.5"></span>
                         <div>
                             <p class="text-xs font-black text-emerald-900 uppercase tracking-wider mb-1">Konfirmasi Serah Terima</p>
                             <p class="text-xs text-emerald-700 font-medium leading-relaxed">Pastikan nasabah telah menandatangani bukti penyerahan barang di toko fisik sebelum memproses pengambilan barang ini.</p>
@@ -395,7 +396,7 @@
                     </button>
                     <button type="submit"
                         class="px-6 py-2.5 bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-700 hover:to-teal-600 active:scale-95 text-white text-sm font-black rounded-xl transition-all shadow-xl shadow-emerald-600/20 uppercase tracking-wide">
-                        📦 Konfirmasi Penyerahan
+                        Konfirmasi Penyerahan
                     </button>
                 </div>
             </form>

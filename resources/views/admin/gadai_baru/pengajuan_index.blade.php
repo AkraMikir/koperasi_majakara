@@ -185,7 +185,7 @@
                                 @if($item->metode == 'cash')
                                     <span class="text-[10px] text-gray-500 flex items-center gap-1 font-medium">
                                         <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                                        {{ $item->tgl_janji_temu->format('d M, H:i') }}
+                                        {{ $item->tgl_janji_temu ? $item->tgl_janji_temu->format('d M, H:i') : '-' }}
                                     </span>
                                 @else
                                     <div class="flex flex-wrap gap-1 mt-0.5">
@@ -300,6 +300,14 @@
                         <p class="text-xs text-gray-700 italic leading-relaxed" id="detail-keterangan">-</p>
                     </div>
 
+                    {{-- Container Cetak Struk Terpadu --}}
+                    <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100 hidden" id="detail-struk-container">
+                        <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Daftar Cetak Struk</h4>
+                        <div class="space-y-2 text-xs" id="detail-struk-buttons-list">
+                            <!-- Populated dynamically via JS -->
+                        </div>
+                    </div>
+
                     <div class="p-4 bg-gray-50 rounded-2xl border border-gray-100" id="detail-foto-section">
                         <h4 class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-3">Foto Lampiran / Bukti Transfer</h4>
                         <div class="grid grid-cols-3 gap-2" id="detail-foto-grid">
@@ -314,6 +322,7 @@
                     class="flex-1 px-6 py-3.5 bg-gray-100 text-gray-500 font-bold rounded-2xl hover:bg-gray-200 transition-all active:scale-95 text-center text-sm">
                     Tutup
                 </button>
+                {{-- 
                 <a id="detail-struk-btn" href="#" target="_blank"
                     class="hidden flex-1 px-6 py-3.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-2xl transition-all active:scale-95 text-center text-sm flex items-center justify-center gap-1.5 shadow-xl shadow-amber-100">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,6 +330,7 @@
                     </svg>
                     Download Struk
                 </a>
+                --}}
                 <div class="flex gap-2 flex-2" id="detail-action-buttons">
                     <button type="button" id="detail-reject-btn"
                         class="flex-1 px-6 py-3.5 bg-red-50 text-red-600 font-bold rounded-2xl hover:bg-red-600 hover:text-white transition-all active:scale-95 text-center text-sm">
@@ -472,6 +482,14 @@
                 nominal: "Rp {{ number_format($item->nominal, 0, ',', '.') }}",
                 janjiTemu: "{{ $item->tgl_janji_temu ? $item->tgl_janji_temu->format('d M Y, H:i') : '-' }}",
                 keterangan: "{{ $item->keterangan ? addslashes(str_replace(array("\r", "\n"), ' ', $item->keterangan)) : 'Tidak ada keterangan dari nasabah.' }}",
+                gadaiStatus: "{{ $item->gadaiActive->status }}",
+                lunasCashApproved: {{ $item->gadaiActive->pengajuans->where('jenis_pengajuan', 'lunas')->where('metode', 'cash')->where('status', 'approved')->isNotEmpty() ? 'true' : 'false' }},
+                lunasTfId: {!! json_encode($item->gadaiActive->pengajuans->where('jenis_pengajuan', 'lunas')->where('metode', 'transfer')->where('status', 'approved')->first()?->id ?? null) !!},
+                perpanjangans: [
+                    @foreach($item->gadaiActive->pengajuans->where('jenis_pengajuan', 'perpanjang')->where('status', 'approved') as $p)
+                        { id: {{ $p->id }} },
+                    @endforeach
+                ],
                 photos: [
                     @if($item->files->count() > 0)
                         @foreach($item->files as $file)
@@ -524,21 +542,136 @@
             photoSection.classList.add('hidden');
         }
 
+        // Render Struk Buttons
+        const strukList = document.getElementById('detail-struk-buttons-list');
+        const strukContainer = document.getElementById('detail-struk-container');
+        strukList.innerHTML = '';
+        
+        if (data.status === 'approved') {
+            strukContainer.classList.remove('hidden');
+            
+            // 1. Awal (selalu ada)
+            strukList.innerHTML += `
+                <div class="mb-2">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">1. Struk Gadai Awal</p>
+                    <div class="grid grid-cols-1 gap-1.5">
+                        <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/awal" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                            <span>Struk Detail Gadai</span>
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                        <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/syarat" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                            <span>Syarat & Ketentuan</span>
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                        <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/loker" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                            <span>Struk Label Loker</span>
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                    </div>
+                </div>
+            `;
+            
+            // 2. Perpanjangan
+            let perpanjanganHtml = '';
+            if (data.perpanjangans && data.perpanjangans.length > 0) {
+                data.perpanjangans.forEach((p, idx) => {
+                    perpanjanganHtml += `
+                        <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/perpanjangan/${p.id}" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                            <span>Struk Perpanjangan Ke-${idx + 1}</span>
+                            <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        </a>
+                    `;
+                });
+            } else {
+                perpanjanganHtml = `
+                    <button disabled class="w-full flex items-center justify-between px-2.5 py-1.5 bg-gray-50/50 border border-gray-100 rounded-lg text-gray-400 cursor-not-allowed text-[11px]">
+                        <span>Belum ada perpanjangan</span>
+                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </button>
+                `;
+            }
+            strukList.innerHTML += `
+                <div class="mb-2 pt-2 border-t border-gray-100">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">2. Struk Perpanjangan</p>
+                    <div class="grid grid-cols-1 gap-1.5">${perpanjanganHtml}</div>
+                </div>
+            `;
+            
+            // 3. Pelunasan Cash
+            let cashHtml = '';
+            if (data.lunasCashApproved && data.gadaiStatus === 'returned') {
+                cashHtml = `
+                    <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/selesai-cash" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                        <span>Struk Lunas & Pengembalian</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
+                `;
+            } else {
+                cashHtml = `
+                    <button disabled class="w-full flex items-center justify-between px-2.5 py-1.5 bg-gray-50/50 border border-gray-100 rounded-lg text-gray-400 cursor-not-allowed text-[11px]">
+                        <span>Struk Pelunasan Cash</span>
+                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </button>
+                `;
+            }
+            strukList.innerHTML += `
+                <div class="mb-2 pt-2 border-t border-gray-100">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">3. Struk Selesai Cash</p>
+                    <div class="grid grid-cols-1 gap-1.5">${cashHtml}</div>
+                </div>
+            `;
+            
+            // 4. Pelunasan TF & Pengembalian
+            let tfPaymentHtml = '';
+            if (data.lunasTfId) {
+                tfPaymentHtml = `
+                    <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/selesai-tf/${data.lunasTfId}" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                        <span>Struk Payment Lunas TF</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
+                `;
+            } else {
+                tfPaymentHtml = `
+                    <button disabled class="w-full flex items-center justify-between px-2.5 py-1.5 bg-gray-50/50 border border-gray-100 rounded-lg text-gray-400 cursor-not-allowed text-[11px]">
+                        <span>Struk Payment Lunas TF</span>
+                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </button>
+                `;
+            }
+            
+            let tfReleaseHtml = '';
+            if (data.gadaiStatus === 'returned') {
+                tfReleaseHtml = `
+                    <a href="/admin/gadai_baru/struk-detail/${data.gadaiActiveId}/pengembalian" target="_blank" class="flex items-center justify-between px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors font-bold text-[11px]">
+                        <span>Struk Serah Terima Barang</span>
+                        <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </a>
+                `;
+            } else {
+                tfReleaseHtml = `
+                    <button disabled class="w-full flex items-center justify-between px-2.5 py-1.5 bg-gray-50/50 border border-gray-100 rounded-lg text-gray-400 cursor-not-allowed text-[11px]">
+                        <span>Struk Serah Terima Barang</span>
+                        <svg class="w-3.5 h-3.5 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                    </button>
+                `;
+            }
+            strukList.innerHTML += `
+                <div class="mb-2 pt-2 border-t border-gray-100">
+                    <p class="text-[9px] text-gray-400 font-bold uppercase tracking-wider mb-1">4. Struk Selesai TF & Pengembalian</p>
+                    <div class="grid grid-cols-1 gap-1.5">${tfPaymentHtml} ${tfReleaseHtml}</div>
+                </div>
+            `;
+        } else {
+            strukContainer.classList.add('hidden');
+        }
+
         // Hide/show action buttons based on status
         const actionButtons = document.getElementById('detail-action-buttons');
-        const strukBtn = document.getElementById('detail-struk-btn');
         
         if (data.status !== 'pending') {
             actionButtons.classList.add('hidden');
-            if (data.status === 'approved') {
-                strukBtn.classList.remove('hidden');
-                strukBtn.href = "{{ route('admin.struk-gadai', ':id') }}".replace(':id', data.gadaiActiveId);
-            } else {
-                strukBtn.classList.add('hidden');
-            }
         } else {
             actionButtons.classList.remove('hidden');
-            strukBtn.classList.add('hidden');
             // Bind actions to buttons inside detail modal
             document.getElementById('detail-approve-btn').onclick = function() {
                 closeDetailsModal();

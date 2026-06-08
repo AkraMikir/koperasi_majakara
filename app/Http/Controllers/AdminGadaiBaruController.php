@@ -247,7 +247,7 @@ class AdminGadaiBaruController extends Controller
 
     public function detail($id)
     {
-        $gadai = GadaiActive::with(['nasabah.user', 'kategori', 'item', 'lokasi', 'files', 'history', 'paymentLogs'])->findOrFail($id);
+        $gadai = GadaiActive::with(['nasabah.user', 'kategori', 'item', 'lokasi', 'files', 'history', 'paymentLogs', 'pengajuans'])->findOrFail($id);
         return view('admin.gadai_baru.detail', compact('gadai'));
     }
 

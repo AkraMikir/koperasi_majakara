@@ -37,20 +37,20 @@
     <div class="flex flex-col">
         {{-- ===== GADAI AKTIF ===== --}}
         <div class="order-{{ $gadaiAktif->isEmpty() ? '2' : '1' }}">
-            @if($gadaiAktif->isNotEmpty())
             <div class="mx-4 mb-8">
                 <div class="flex items-center justify-between mb-4">
                     <h2 class="text-xl font-black text-gray-900 tracking-tight font-display">Gadai Aktif Saya</h2>
                     <span class="px-3 py-1 bg-amber-100 text-[#674c1d] text-[10px] font-black rounded-full border border-amber-200">{{ $gadaiAktif->count() }} Aktif</span>
                 </div>
+                @if($gadaiAktif->isEmpty())
                 <div>
                     <p class="text-gray-500 font-bold">Tidak ada gadai aktif.</p>
                     <p class="text-xs text-gray-400 mt-1">Pilih kategori di bawah untuk pengajuan baru.</p>
                 </div>
-            </div>
-        @else
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                @php
+                @else
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    @foreach($gadaiAktif as $gadai)
+                    @php
                     $isLunas = $gadai->status == 'lunas';
                     $isTenggang = $gadai->status == 'grace_period';
                     $today = now()->startOfDay();
@@ -199,6 +199,7 @@
                 @endforeach
             </div>
             @endif
+            </div>
         </div>
 
         {{-- ===== AJUKAN GADAI BARU ===== --}}

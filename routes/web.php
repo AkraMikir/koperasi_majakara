@@ -683,6 +683,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/{id}/lunas', [\App\Http\Controllers\GadaiBaruActionController::class, 'lunas'])->name('lunas');
         Route::post('/{id}/lelang', [\App\Http\Controllers\GadaiBaruActionController::class, 'lelang'])->name('lelang');
 
+        // Struk Gadai Detail Routes
+        Route::prefix('struk-detail')->name('struk-detail.')->group(function () {
+            Route::get('/{id}/awal', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwal'])->name('awal');
+            Route::get('/{id}/syarat', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSyarat'])->name('syarat');
+            Route::get('/{id}/loker', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiLoker'])->name('loker');
+            Route::get('/{id}/perpanjangan/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPerpanjangan'])->name('perpanjangan');
+            Route::get('/{id}/selesai-cash', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSelesaiCash'])->name('selesai-cash');
+            Route::get('/{id}/selesai-tf/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSelesaiTf'])->name('selesai-tf');
+            Route::get('/{id}/pengembalian', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPengembalian'])->name('pengembalian');
+        });
+
         // Pengajuan Nasabah (Antrean Verifikasi)
         Route::get('/pengajuan/list', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'index'])->name('pengajuan.index');
         Route::post('/pengajuan/{id}/approve', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'approve'])->name('pengajuan.approve');

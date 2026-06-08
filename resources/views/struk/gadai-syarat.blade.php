@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Struk Angsuran - {{ $angsuran->id ?? '-' }}</title>
+    <title>Syarat & Ketentuan Gadai - {{ $gadai->slot_kode }}</title>
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
@@ -26,67 +26,32 @@
         .approver { margin-top: 10px; font-size: 10px; }
     </style>
 </head>
-@php
-    $strukSettings = \App\Models\SettingsStruk::getSettings();
-    $pinjaman = $angsuran->pinjaman ?? null;
-    $nasabah = $pinjaman->nasabah ?? null;
-@endphp
 <body>
-    <!-- HEADER -->
     <div class="header">
         <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
-            {{ $strukSettings->nama_koperasi }}
+            {{ $settings->nama_koperasi }}
         </div>
         <div class="center" style="font-size: 10px;">
-            {{ $strukSettings->alamat_koperasi }}<br>
-            Telp: {{ $strukSettings->no_telp }}
+            {{ $settings->alamat_koperasi }}<br>
+            Telp: {{ $settings->no_telp }}
         </div>
     </div>
     
     <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
-        STRUK BUKTI BAYAR ANGSURAN
+        SYARAT & KETENTUAN GADAI
     </div>
     
     <div class="dashed"></div>
     
-    <table class="table-row">
-        <tr>
-            <td class="label">ID Pinjaman</td>
-            <td>: {{ $pinjaman->id ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Angsuran Ke</td>
-            <td>: {{ $angsuran->no_urut ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Nama Anggota</td>
-            <td>: {{ $nasabah->user->nama ?? 'N/A' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tanggal Bayar</td>
-            <td>: {{ isset($angsuran->tgl_bayar) ? $angsuran->tgl_bayar->format('d-m-Y H:i') : '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Status</td>
-            <td>: Angsuran ke-{{ $angsuran->no_urut ?? '-' }}</td>
-        </tr>
-    </table>
+    <div class="syarat">
+        {{ $settings->syarat_ketentuan_gadai }}
+    </div>
     
     <div class="dashed"></div>
     
-    <table class="table-row">
-        <tr>
-            <td class="bold">NOMINAL</td>
-            <td class="bold text-right">: Rp {{ number_format($angsuran->jumlah_terbayar ?? $angsuran->jumlah_tagihan ?? 0, 0, ',', '.') }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <!-- FOOTER -->
     <div class="footer center">
-        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
+        <div>{{ $settings->nama_pt }}</div>
+        <div class="bold" style="margin-top: 4px;">Harap Simpan Lembar Ini</div>
     </div>
 </body>
 </html>

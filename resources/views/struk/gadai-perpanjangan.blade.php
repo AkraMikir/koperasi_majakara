@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Struk Angsuran - {{ $angsuran->id ?? '-' }}</title>
+    <title>Struk Perpanjangan Gadai - {{ $gadai->slot_kode }}</title>
         <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
@@ -26,67 +26,79 @@
         .approver { margin-top: 10px; font-size: 10px; }
     </style>
 </head>
-@php
-    $strukSettings = \App\Models\SettingsStruk::getSettings();
-    $pinjaman = $angsuran->pinjaman ?? null;
-    $nasabah = $pinjaman->nasabah ?? null;
-@endphp
 <body>
-    <!-- HEADER -->
     <div class="header">
         <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
-            {{ $strukSettings->nama_koperasi }}
+            {{ $settings->nama_koperasi }}
         </div>
         <div class="center" style="font-size: 10px;">
-            {{ $strukSettings->alamat_koperasi }}<br>
-            Telp: {{ $strukSettings->no_telp }}
+            {{ $settings->alamat_koperasi }}<br>
+            Telp: {{ $settings->no_telp }}
         </div>
     </div>
     
     <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
-        STRUK BUKTI BAYAR ANGSURAN
+        STRUK PERPANJANGAN GADAI
     </div>
     
+    <table style="font-size: 10px; margin-bottom: 4px; width: 100%;">
+        <tr>
+            <td>No. Struk: {{ $no_struk }}</td>
+            <td style="text-align: right;">Tanggal: {{ $tanggal_cetak }}</td>
+        </tr>
+    </table>
+    
     <div class="dashed"></div>
     
     <table class="table-row">
-        <tr>
-            <td class="label">ID Pinjaman</td>
-            <td>: {{ $pinjaman->id ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Angsuran Ke</td>
-            <td>: {{ $angsuran->no_urut ?? '-' }}</td>
-        </tr>
         <tr>
             <td class="label">Nama Anggota</td>
-            <td>: {{ $nasabah->user->nama ?? 'N/A' }}</td>
+            <td>: {{ $gadai->nasabah->user->nama ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Tanggal Bayar</td>
-            <td>: {{ isset($angsuran->tgl_bayar) ? $angsuran->tgl_bayar->format('d-m-Y H:i') : '-' }}</td>
+            <td class="label">No. Anggota</td>
+            <td>: {{ $gadai->nasabah->id ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Status</td>
-            <td>: Angsuran ke-{{ $angsuran->no_urut ?? '-' }}</td>
+            <td class="label">Slot Kode</td>
+            <td>: <span class="bold">{{ $gadai->slot_kode }}</span></td>
+        </tr>
+        <tr>
+            <td class="label">Perpanjangan Ke</td>
+            <td>: {{ $gadai->jumlah_perpanjangan }}</td>
         </tr>
     </table>
     
     <div class="dashed"></div>
     
-    <table class="table-row">
+    <div class="center bold" style="margin-bottom: 2px;">
+        DETAIL PEMBAYARAN
+    </div>
+    
+    <table>
         <tr>
-            <td class="bold">NOMINAL</td>
-            <td class="bold text-right">: Rp {{ number_format($angsuran->jumlah_terbayar ?? $angsuran->jumlah_tagihan ?? 0, 0, ',', '.') }}</td>
+            <td class="label">Biaya Perpanjangan</td>
+            <td class="text-right">: Rp {{ number_format($pengajuan->nominal, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td class="label">Metode Bayar</td>
+            <td class="text-right">: {{ strtoupper($pengajuan->metode) }}</td>
+        </tr>
+        <tr>
+            <td class="label">Status Pembayaran</td>
+            <td class="text-right">: SUKSES / APPROVED</td>
+        </tr>
+        <tr>
+            <td class="label">Jatuh Tempo Baru</td>
+            <td class="text-right">: {{ \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->format('d/m/Y') }}</td>
         </tr>
     </table>
     
     <div class="dashed"></div>
     
-    <!-- FOOTER -->
     <div class="footer center">
-        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
+        <div>{{ $settings->nama_pt }}</div>
+        <div class="bold" style="margin-top: 4px;">Terima Kasih</div>
     </div>
 </body>
 </html>

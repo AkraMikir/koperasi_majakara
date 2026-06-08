@@ -90,4 +90,9 @@ class GadaiActive extends Model
     {
         return $this->hasMany(GadaiPaymentLog::class, 'gadai_active_id');
     }
+
+    public function pengajuans()
+    {
+        return $this->hasMany(GadaiPengajuan::class, 'gadai_active_id');
+    }
 }
