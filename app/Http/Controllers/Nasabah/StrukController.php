@@ -46,7 +46,7 @@ class StrukController extends Controller
         $hasLogo = is_file($logoPath);
 
         $pdf = Pdf::loadView('struk.tabungan', compact('transaksi', 'hasLogo', 'logoPath'));
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait');
         $filename = 'Struk-Tabungan-' . $transaksi->id . '.pdf';
         return $pdf->download($filename);
     }
@@ -75,7 +75,7 @@ class StrukController extends Controller
         }
 
         $pdf = Pdf::loadView('struk.pembayaran-pinjaman', compact('pengajuan', 'angsuran'));
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait');
         $filename = 'Struk-Pembayaran-' . $pengajuan->id . '.pdf';
         return $pdf->download($filename);
     }
@@ -95,7 +95,7 @@ class StrukController extends Controller
             ->findOrFail($id);
 
         $pdf = Pdf::loadView('struk.pencairan-pinjaman', compact('pinjaman'));
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait');
         $filename = 'Struk-Pencairan-' . $pinjaman->id . '.pdf';
         return $pdf->download($filename);
     }
@@ -118,7 +118,7 @@ class StrukController extends Controller
         }
 
         $pdf = Pdf::loadView('struk.angsuran', compact('angsuran', 'jenis'));
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait');
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait');
         $filename = 'Struk-Angsuran-' . $id . '.pdf';
         return $pdf->download($filename);
     }
@@ -151,7 +151,7 @@ class StrukController extends Controller
         ];
         
         $pdf = Pdf::loadView('struk.gadai', $data);
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // Thermal size
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait'); // Thermal size
         return $pdf->download('Struk-Gadai-' . $gadai->slot_kode . '.pdf');
     }
 
@@ -183,7 +183,7 @@ class StrukController extends Controller
         ];
         
         $pdf = Pdf::loadView('struk.deposito', $data);
-        $pdf->setPaper([0, 0, 226.77, 841.89], 'portrait'); // Thermal size
+        $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait'); // Thermal size
         return $pdf->download('Struk-Deposito-' . $deposito->nomor_deposito . '.pdf');
     }
 }

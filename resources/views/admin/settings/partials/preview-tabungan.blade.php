@@ -1,38 +1,64 @@
-<div class="bg-amber-50/40 p-4 border border-dashed border-gray-300 rounded-lg max-w-[280px] mx-auto text-xs font-mono text-gray-800 shadow-sm relative">
+<div class="bg-white p-2 border border-gray-300 rounded-lg max-w-[240px] mx-auto text-[12px] font-mono text-black shadow-md relative leading-[1.5]">
     <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full text-[9px] font-sans font-bold uppercase tracking-wider">Tabungan Struk</div>
     
-    <div class="text-center pb-2 border-b border-gray-400 mt-2">
-        <div class="font-bold text-sm tracking-wide">{{ $settings->nama_koperasi }}</div>
-        <div class="text-[10px] text-gray-600 leading-tight">{{ $settings->alamat_koperasi }}</div>
-        <div class="text-[10px] text-gray-600">Telp: {{ $settings->no_telp }}</div>
-        <div class="font-bold uppercase tracking-wider mt-2 border-t border-dashed border-gray-300 pt-2 text-[11px]">
-            STRUK TRANSAKSI TABUNGAN
-        </div>
-        <div class="text-[10px] text-gray-600">{{ $data['jenis_trans'] }}</div>
+    <!-- HEADER -->
+    <div class="text-center mt-2">
+        <div class="font-bold text-[14px] underline mb-[2px]">{{ $settings->nama_koperasi }}</div>
+        <div class="text-[10px] leading-tight">{{ $settings->alamat_koperasi }}</div>
+        <div class="text-[10px]">Telp: {{ $settings->no_telp }}</div>
     </div>
     
-    <div class="py-3 space-y-1">
-        <div class="flex justify-between"><span>No. Struk</span><span class="font-semibold">{{ $data['no_struk'] }}</span></div>
-        <div class="flex justify-between"><span>Waktu</span><span>{{ $data['tanggal'] }}</span></div>
-        <div class="flex justify-between"><span>Nasabah</span><span class="font-semibold">{{ $data['nama_anggota'] }}</span></div>
-        <div class="flex justify-between"><span>Jenis</span><span>{{ $data['jenis_trans'] }}</span></div>
-        <div class="border-t border-dashed border-gray-300 my-2 pt-2"></div>
-        <div class="flex justify-between text-sm font-bold">
-            <span>Nominal</span>
-            <span>Rp {{ number_format($data['nominal'], 0, ',', '.') }}</span>
-        </div>
-        <div class="flex justify-between text-[10px] text-gray-500">
-            <span>Saldo Awal</span>
-            <span>Rp {{ number_format($data['saldo_sebelum'], 0, ',', '.') }}</span>
-        </div>
-        <div class="flex justify-between text-[10px] text-gray-500">
-            <span>Saldo Akhir</span>
-            <span>Rp {{ number_format($data['saldo_sekarang'], 0, ',', '.') }}</span>
-        </div>
+    <div class="text-center font-bold mt-2 text-[13px] mb-[9px]">
+        STRUK TRANSAKSI TABUNGAN
     </div>
     
-    <div class="text-center pt-2 border-t border-gray-400 text-[10px] text-gray-500 mt-2 leading-tight">
-        Dicetak dari {{ $settings->nama_pt }}<br>
-        Terima kasih atas kepercayaan Anda
+    <div class="text-center font-bold text-[11px] uppercase">
+        {{ $data['jenis_trans'] === 'NABUNG' ? 'SETORAN' : 'PENARIKAN' }}
+    </div>
+
+    <div class="border-t border-dashed border-black my-[9px]"></div>
+    
+    <table class="w-full border-collapse">
+        <tr class="align-top">
+            <td class="font-bold w-[45%]">ID Transaksi</td>
+            <td>: {{ $data['no_struk'] }}</td>
+        </tr>
+        <tr class="align-top">
+            <td class="font-bold">Tanggal & Waktu</td>
+            <td>: {{ $data['tanggal'] }}</td>
+        </tr>
+        <tr class="align-top">
+            <td class="font-bold">Nama Anggota</td>
+            <td>: {{ $data['nama_anggota'] }}</td>
+        </tr>
+        <tr class="align-top">
+            <td class="font-bold">NIK</td>
+            <td>: 320101XXXXXXXXXX</td>
+        </tr>
+        <tr class="align-top">
+            <td class="font-bold">Jenis Transaksi</td>
+            <td>: {{ $data['jenis_trans'] === 'NABUNG' ? 'Setoran' : 'Penarikan' }}</td>
+        </tr>
+        <tr class="align-top">
+            <td class="font-bold">Via</td>
+            <td>: Cash</td>
+        </tr>
+    </table>
+    
+    <div class="border-t border-dashed border-black my-[9px]"></div>
+    
+    <table class="w-full border-collapse">
+        <tr class="align-top">
+            <td class="font-bold">NOMINAL</td>
+            <td class="font-bold text-right">: Rp {{ number_format($data['nominal'], 0, ',', '.') }}</td>
+        </tr>
+    </table>
+
+    <div class="border-t border-dashed border-black my-[9px]"></div>
+    
+    <!-- FOOTER -->
+    <div class="text-center text-[10px] mt-3">
+        <div>Dicetak : {{ $data['tanggal'] }}</div>
+        <div class="font-bold mt-1">Dicetak dari {{ $settings->nama_pt }}</div>
     </div>
 </div>

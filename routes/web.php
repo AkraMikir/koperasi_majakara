@@ -543,11 +543,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerMajuHari'])->name('maju-hari');
         });
 
-        // Debugger Deposito (Testing Time Travel) - ONLY Admin Utama
         Route::prefix('deposito-debugger')->name('deposito-debugger.')->middleware('admin.utama')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerIndex'])->name('index');
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerMajuHari'])->name('maju-hari');
         });
+
+        // Jns Fitur, Via, Transaksi View
+        Route::get('/fitur', [\App\Http\Controllers\Admin\MasterDataController::class, 'fiturIndex'])->name('fitur.index');
+        Route::get('/via', [\App\Http\Controllers\Admin\MasterDataController::class, 'viaIndex'])->name('via.index');
+        Route::get('/transaksi', [\App\Http\Controllers\Admin\MasterDataController::class, 'transaksiIndex'])->name('transaksi.index');
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
@@ -678,6 +682,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/{id}/perpanjang', [\App\Http\Controllers\GadaiBaruActionController::class, 'perpanjang'])->name('perpanjang');
         Route::post('/{id}/lunas', [\App\Http\Controllers\GadaiBaruActionController::class, 'lunas'])->name('lunas');
         Route::post('/{id}/lelang', [\App\Http\Controllers\GadaiBaruActionController::class, 'lelang'])->name('lelang');
+
+        // Struk Gadai Detail Routes
+        Route::prefix('struk-detail')->name('struk-detail.')->group(function () {
+            Route::get('/{id}/awal', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwal'])->name('awal');
+            Route::get('/{id}/syarat', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSyarat'])->name('syarat');
+            Route::get('/{id}/loker', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiLoker'])->name('loker');
+            Route::get('/{id}/perpanjangan/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPerpanjangan'])->name('perpanjangan');
+            Route::get('/{id}/selesai-cash', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSelesaiCash'])->name('selesai-cash');
+            Route::get('/{id}/selesai-tf/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSelesaiTf'])->name('selesai-tf');
+            Route::get('/{id}/pengembalian', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPengembalian'])->name('pengembalian');
+        });
 
         // Pengajuan Nasabah (Antrean Verifikasi)
         Route::get('/pengajuan/list', [\App\Http\Controllers\Admin\AdminPengajuanGadaiController::class, 'index'])->name('pengajuan.index');

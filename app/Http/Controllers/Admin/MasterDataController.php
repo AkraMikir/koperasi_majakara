@@ -1025,4 +1025,24 @@ class MasterDataController extends Controller
             ->with('success', "Berhasil memundurkan tanggal deposito sebanyak $days hari dan mengecek jatuh tempo!")
             ->with('output', $output);
     }
+
+    // ==================== JNS FITUR, VIA, & TRANSAKSI VIEW ====================
+
+    public function fiturIndex()
+    {
+        $data = DB::table('jns_fitur')->paginate(15);
+        return view('admin.master-data.fitur.index', compact('data'));
+    }
+
+    public function viaIndex()
+    {
+        $data = DB::table('jns_via')->paginate(15);
+        return view('admin.master-data.via.index', compact('data'));
+    }
+
+    public function transaksiIndex()
+    {
+        $data = DB::table('jns_transaksi')->paginate(15);
+        return view('admin.master-data.transaksi.index', compact('data'));
+    }
 }

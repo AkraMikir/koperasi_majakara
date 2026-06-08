@@ -2,37 +2,99 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Struk Pembayaran Angsuran</title>
-    <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 10px; margin: 8px; line-height: 1.3; }
+    <title>Struk Pembayaran Angsuran - {{ $pengajuan->id ?? '-' }}</title>
+        <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
-        .mt { margin-top: 6px; }
-        .mb { margin-bottom: 4px; }
-        hr { border: none; border-top: 1px solid #333; margin: 6px 0; }
+        .underline { text-decoration: underline; }
+        .dashed { border-top: 1px dashed #000; margin: 9px 0; }
+        .table-row { width: 100%; margin-bottom: 3px; }
+        .table-row td { vertical-align: top; }
+        .label { font-weight: bold; width: 45%; }
+        .header { margin-bottom: 12px; }
+        .footer { margin-top: 12px; font-size: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        td { padding: 1px 0; }
+        .text-right { text-align: right; }
+        .signature-box { width: 100%; margin-top: 20px; }
+        .signature-box td { text-align: center; font-size: 10px; height: 55px; vertical-align: bottom; }
+        .syarat { font-size: 10px; margin-top: 6px; text-align: justify; line-height: 1.2; white-space: pre-line; }
+        .nominal-table td { padding: 2px 0; }
+        .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
+        .approver { margin-top: 10px; font-size: 10px; }
     </style>
 </head>
 @php
     $strukSettings = \App\Models\SettingsStruk::getSettings();
 @endphp
 <body>
-    <div class="center bold mb">{{ $strukSettings->nama_koperasi }}</div>
-    <div class="center text-[8px] leading-tight" style="font-size: 8px; color: #555;">{{ $strukSettings->alamat_koperasi }}</div>
-    <div class="center text-[8px]" style="font-size: 8px; color: #555; margin-bottom: 4px;">Telp: {{ $strukSettings->no_telp }}</div>
-    <div class="center mb bold">STRUK PEMBAYARAN ANGSURAN</div>
-    <hr>
-    <div class="mt">ID Pengajuan : {{ $pengajuan->id }}</div>
-    <div>Tanggal Pembayaran : {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</div>
-    <div class="mt">Nama : {{ $pengajuan->nasabah->user->nama ?? 'N/A' }}</div>
-    <div>ID Pinjaman : {{ $pengajuan->pinjaman->id ?? '-' }}</div>
-    @if($angsuran)
-    <div>Angsuran ke : {{ $angsuran->no_urut ?? '-' }}</div>
-    @endif
-    <div class="mt bold">Nominal : Rp {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</div>
-    <div>Metode : {{ $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-' }}</div>
-    <div class="mt">Status : Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</div>
-    <hr>
-    <div class="center mt">Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-    <div class="center">Dicetak dari {{ $strukSettings->nama_pt }}</div>
+    <!-- HEADER -->
+    <div class="header">
+        <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
+            {{ $strukSettings->nama_koperasi }}
+        </div>
+        <div class="center" style="font-size: 10px;">
+            {{ $strukSettings->alamat_koperasi }}<br>
+            Telp: {{ $strukSettings->no_telp }}
+        </div>
+    </div>
+    
+    <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
+        STRUK PEMBAYARAN ANGSURAN
+    </div>
+    
+    <div class="dashed"></div>
+    
+    <table class="table-row">
+        <tr>
+            <td class="label">ID Pengajuan</td>
+            <td>: {{ $pengajuan->id }}</td>
+        </tr>
+        <tr>
+            <td class="label">ID Pinjaman</td>
+            <td>: {{ $pengajuan->pinjaman->id ?? '-' }}</td>
+        </tr>
+        @if($angsuran)
+        <tr>
+            <td class="label">Angsuran Ke</td>
+            <td>: {{ $angsuran->no_urut ?? '-' }}</td>
+        </tr>
+        @endif
+        <tr>
+            <td class="label">Nama Anggota</td>
+            <td>: {{ $pengajuan->nasabah->user->nama ?? 'N/A' }}</td>
+        </tr>
+        <tr>
+            <td class="label">Tanggal Bayar</td>
+            <td>: {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</td>
+        </tr>
+        <tr>
+            <td class="label">Metode</td>
+            <td>: {{ $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-' }}</td>
+        </tr>
+        <tr>
+            <td class="label">Status</td>
+            <td>: Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</td>
+        </tr>
+    </table>
+    
+    <div class="dashed"></div>
+    
+    <table class="table-row">
+        <tr>
+            <td class="bold">NOMINAL</td>
+            <td class="bold text-right">: Rp {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</td>
+        </tr>
+    </table>
+    
+    <div class="dashed"></div>
+    
+    <!-- FOOTER -->
+    <div class="footer center">
+        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
+        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
+    </div>
 </body>
 </html>

@@ -19,7 +19,7 @@ class AdminPengajuanGadaiController extends Controller
     {
         $status = $request->query('status', 'pending');
         
-        $query = GadaiPengajuan::with(['nasabah.user', 'gadaiActive.item', 'gadaiActive.kategori', 'files']);
+        $query = GadaiPengajuan::with(['nasabah.user', 'gadaiActive.item', 'gadaiActive.kategori', 'gadaiActive.pengajuans', 'files']);
         
         if ($status !== 'all') {
             $query->where('status', $status);

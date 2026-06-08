@@ -34,6 +34,7 @@
                     <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-black rounded-lg">{{ strtoupper($gadai->status) }}</span>
                 @endif
             </div>
+            {{-- 
             @if($gadai->status == 'active')
             <a href="{{ route('admin.struk-gadai', $gadai->id) }}" 
                 class="flex items-center gap-2 px-4 py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold rounded-xl transition-colors shadow-sm text-sm">
@@ -43,6 +44,7 @@
                 Download Struk
             </a>
             @endif
+            --}}
             <a href="{{ route('admin.gadai_baru.index') }}" 
                 class="flex items-center gap-2 px-4 py-2.5 bg-white/80 backdrop-blur-md text-gray-700 border border-white/60 font-medium rounded-xl hover:bg-white transition-colors shadow-sm">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -232,6 +234,108 @@
 
         {{-- KOLOM 3: Aksi & Media --}}
         <div class="space-y-6">
+            {{-- ===== DAFTAR STRUK TRANSAKSI ===== --}}
+            <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
+                <div class="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-amber-400 to-amber-600"></div>
+                <div class="p-6">
+                    <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-4">Daftar Struk Transaksi</h3>
+                    <div class="space-y-4">
+                        {{-- 1. Struk Gadai Awal --}}
+                        <div class="space-y-2">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">1. Struk Gadai Awal</p>
+                            <div class="grid grid-cols-1 gap-2">
+                                <a href="{{ route('admin.gadai_baru.struk-detail.awal', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Struk Detail Gadai</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                                <a href="{{ route('admin.gadai_baru.struk-detail.syarat', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Syarat & Ketentuan</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                                <a href="{{ route('admin.gadai_baru.struk-detail.loker', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Struk Label Loker</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- 2. Struk Perpanjangan --}}
+                        <div class="space-y-2 pt-2 border-t border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">2. Struk Perpanjangan</p>
+                            @php
+                                $perpanjanganLogs = $gadai->pengajuans->where('jenis_pengajuan', 'perpanjang')->where('status', 'approved');
+                            @endphp
+                            <div class="grid grid-cols-1 gap-2">
+                                @forelse($perpanjanganLogs as $p)
+                                    <a href="{{ route('admin.gadai_baru.struk-detail.perpanjangan', ['id' => $gadai->id, 'pengajuan_id' => $p->id]) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                        <span>Struk Perpanjangan Ke-{{ $loop->iteration }}</span>
+                                        <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                    </a>
+                                @empty
+                                    <button disabled class="w-full flex items-center justify-between px-3 py-2 bg-gray-50/50 border border-gray-100 rounded-xl text-xs font-medium text-gray-400 cursor-not-allowed">
+                                        <span>Belum ada perpanjangan</span>
+                                        <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                    </button>
+                                @endforelse
+                            </div>
+                        </div>
+
+                        {{-- 3. Struk Selesai Cash --}}
+                        <div class="space-y-2 pt-2 border-t border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">3. Struk Selesai Cash</p>
+                            @php
+                                $lunasCash = $gadai->pengajuans->where('jenis_pengajuan', 'lunas')->where('metode', 'cash')->where('status', 'approved')->first();
+                            @endphp
+                            @if($lunasCash && $gadai->status === 'returned')
+                                <a href="{{ route('admin.gadai_baru.struk-detail.selesai-cash', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Struk Lunas & Pengembalian</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                            @else
+                                <button disabled class="w-full flex items-center justify-between px-3 py-2 bg-gray-50/50 border border-gray-100 rounded-xl text-xs font-medium text-gray-400 cursor-not-allowed" title="Aktif hanya jika transaksi lunas dan menggunakan metode cash">
+                                    <span>Struk Pelunasan Cash</span>
+                                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                </button>
+                            @endif
+                        </div>
+
+                        {{-- 4. Struk Selesai TF & Pengembalian --}}
+                        <div class="space-y-2 pt-2 border-t border-gray-100">
+                            <p class="text-[10px] font-black text-gray-400 uppercase tracking-wider">4. Struk Selesai TF & Pengembalian</p>
+                            @php
+                                $lunasTf = $gadai->pengajuans->where('jenis_pengajuan', 'lunas')->where('metode', 'transfer')->where('status', 'approved')->first();
+                            @endphp
+                            
+                            {{-- Struk Payment TF --}}
+                            @if($lunasTf)
+                                <a href="{{ route('admin.gadai_baru.struk-detail.selesai-tf', ['id' => $gadai->id, 'pengajuan_id' => $lunasTf->id]) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Struk Payment Lunas TF</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                            @else
+                                <button disabled class="w-full flex items-center justify-between px-3 py-2 bg-gray-50/50 border border-gray-100 rounded-xl text-xs font-medium text-gray-400 cursor-not-allowed">
+                                    <span>Struk Payment Lunas TF</span>
+                                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                </button>
+                            @endif
+
+                            {{-- Struk Pengembalian Barang --}}
+                            @if(in_array($gadai->status, ['returned']))
+                                <a href="{{ route('admin.gadai_baru.struk-detail.pengembalian', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
+                                    <span>Struk Serah Terima Barang</span>
+                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                            @else
+                                <button disabled class="w-full flex items-center justify-between px-3 py-2 bg-gray-50/50 border border-gray-100 rounded-xl text-xs font-medium text-gray-400 cursor-not-allowed" title="Aktif hanya jika barang sudah diserahkan/diambil">
+                                    <span>Struk Serah Terima Barang</span>
+                                    <svg class="w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path></svg>
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Foto Media --}}
             <div class="bg-white/80 backdrop-blur-xl rounded-[1.5rem] shadow-xl shadow-gray-200/40 border border-white/60 overflow-hidden relative">
                 <div class="p-6 relative z-10 space-y-6">
