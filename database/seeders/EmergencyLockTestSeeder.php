@@ -82,6 +82,6 @@ class EmergencyLockTestSeeder extends Seeder
             'nama_bank' => 'BCA',
         ]);
 
-        // Note: We explicitly do NOT create the Darurat record here.
+        // Note: We explicitly do NOT create the Darurat record here.f
     }
 }
