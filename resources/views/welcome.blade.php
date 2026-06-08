@@ -53,22 +53,6 @@
         color: transparent;
     }
 
-    .text-primary {
-        color: #674c1d;
-    }
-
-    .bg-primary {
-        background-color: #674c1d;
-    }
-
-    .border-primary {
-        border-color: #674c1d;
-    }
-
-    .hover-primary:hover {
-        background-color: #674c1d;
-        color: white;
-    }
 
     .card-hover {
         transition: all 0.3s ease;

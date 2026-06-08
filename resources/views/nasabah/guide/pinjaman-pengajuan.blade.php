@@ -118,7 +118,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Nominal pinjaman (Rp)</label>
-                    <input type="text" id="guideSimulasiNominal" placeholder="Contoh: 5000000" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value="5000000">
+                    <input type="text" id="guideSimulasiNominal" placeholder="Contoh: 5.000.000" class="w-full px-4 py-2 border border-gray-300 rounded-xl focus:ring-2 focus:ring-amber-500 focus:border-amber-500" value="5.000.000" oninput="formatCurrency(this)">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Durasi (bulan)</label>
@@ -154,6 +154,48 @@
             <p id="guideSimulasiError" class="mt-3 text-sm text-red-600 hidden"></p>
         </div>
 
+        {{-- Ketentuan Biaya Transfer Pencairan --}}
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-amber-800 font-display mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Biaya Transfer Pencairan Pinjaman
+            </h2>
+            <div class="space-y-4 text-sm text-gray-600">
+                <p>
+                    Apabila pengajuan pinjaman Anda disetujui dan dicairkan oleh Admin Koperasi melalui metode <strong>Transfer Bank</strong>, sistem akan menerapkan kebijakan berikut:
+                </p>
+                <div class="bg-amber-50/60 rounded-xl p-4 border border-amber-200">
+                    <ul class="space-y-2 text-xs text-amber-900/90 list-disc pl-4">
+                        <li>
+                            <strong>Biaya Transfer Pengiriman</strong>: Admin akan memilih bank pengirim dari pihak koperasi. Jika bank pengirim berbeda dengan bank rekening Anda, biaya transfer bank akan dihitung otomatis oleh sistem.
+                        </li>
+                        <li>
+                            <strong>Potongan Saldo Tabungan</strong>: Biaya transfer pencairan tersebut <strong>tidak memotong nominal pinjaman</strong> yang Anda terima, melainkan akan <strong>didebet langsung dari saldo Tabungan Utama</strong> Anda di koperasi ketika admin melakukan pencairan.
+                        </li>
+                        <li>
+                            <strong>Penting</strong>: Pastikan saldo rekening Tabungan Anda di koperasi mencukupi untuk menutupi biaya transfer ini saat pencairan disetujui oleh admin.
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-100 mt-6 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <span class="text-sm text-gray-500">Pantau proses pengajuan pinjaman Anda secara berkala.</span>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('nasabah.pinjaman.status-pengajuan') }}" 
+                       class="px-4 py-2 text-sm font-semibold text-amber-700 bg-amber-100 rounded-xl hover:bg-amber-200 transition-colors">
+                        Pantau Status Pengajuan
+                    </a>
+                    <a href="{{ route('nasabah.pinjaman.index') }}" 
+                       class="px-4 py-2 text-sm font-semibold text-gray-700 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+                        Dashboard Pinjaman
+                    </a>
+                </div>
+            </div>
+        </div>
+
         {{-- Contoh tampilan & CTA --}}
         <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
             <h2 class="text-lg font-bold text-amber-800 font-display mb-2">Contoh tampilan halaman pengajuan</h2>
@@ -178,6 +220,12 @@
 
 @push('scripts')
 <script>
+function formatCurrency(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value) value = parseInt(value).toLocaleString('id-ID');
+    input.value = value;
+}
+
 (function() {
     var btn = document.getElementById('guideSimulasiBtn');
     var nominalInput = document.getElementById('guideSimulasiNominal');

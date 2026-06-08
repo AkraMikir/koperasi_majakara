@@ -203,9 +203,9 @@
                     <label class="text-xs font-semibold text-gray-700 block mb-1">Jumlah Penempatan</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm font-medium">Rp</span>
-                        <input type="number" id="sim_nominal" placeholder="1.000.000" min="1000000" step="500000"
+                        <input type="text" id="sim_nominal" placeholder="1.000.000"
                             class="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/10"
-                            oninput="hitungSimulasi()">
+                            oninput="formatCurrency(this); hitungSimulasi()">
                     </div>
                     <p class="text-xs text-gray-400 mt-1">Minimal Rp 1.000.000</p>
                 </div>
@@ -513,6 +513,12 @@
 let selectedTenorBulan = 0;
 let selectedRate = 0;
 
+function formatCurrency(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value) value = parseInt(value).toLocaleString('id-ID');
+    input.value = value;
+}
+
 function selectTenor(bulan, rate, el) {
     selectedTenorBulan = bulan;
     selectedRate = rate;
@@ -528,7 +534,8 @@ function selectTenor(bulan, rate, el) {
 }
 
 function hitungSimulasi() {
-    const nominal = parseFloat(document.getElementById('sim_nominal').value) || 0;
+    const nominalVal = document.getElementById('sim_nominal').value.replace(/[^0-9]/g, '');
+    const nominal = parseFloat(nominalVal) || 0;
     if (nominal <= 0 || selectedTenorBulan <= 0) {
         document.getElementById('sim_result').classList.add('hidden');
         return;

@@ -17,6 +17,7 @@ class PencairanDeposito extends Model
         'id_nasabah',
         'jenis_pencairan',   // rek_nasabah | saldo_tabungan | petty_cash_operator
         'nominal_akhir',
+        'nominal_denda',
         'metode_pencairan',  // (legacy, keep for compat)
         'foto_bukti_tf',
         'status',            // pending | diproses | selesai | ditolak
@@ -28,10 +29,11 @@ class PencairanDeposito extends Model
     ];
 
     protected $casts = [
-        'nominal_akhir' => 'decimal:2',
-        'is_cancel'     => 'boolean',
-        'created_at'    => 'datetime',
-        'updated_at'    => 'datetime',
+        'nominal_akhir'  => 'decimal:2',
+        'nominal_denda'  => 'decimal:2',
+        'is_cancel'      => 'boolean',
+        'created_at'     => 'datetime',
+        'updated_at'     => 'datetime',
         'biaya_transfer' => 'decimal:2',
     ];
 

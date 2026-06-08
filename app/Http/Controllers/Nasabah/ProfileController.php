@@ -68,7 +68,8 @@ class ProfileController extends Controller
             }
 
             // Validasi data baru berdasarkan jenis
-            $validationResult = $this->validateDataBaru($dataBaru, $jenisData);
+            $jenisData = $request->jenis_data;
+            $validationResult = $this->validateDataBaru($request, $jenisData);
             if ($validationResult !== true) {
                 DB::rollBack();
                 return redirect()->back()
@@ -91,6 +92,7 @@ class ProfileController extends Controller
                     $dataBaru['email'] = '-';
                 }
             }
+
 
             // Cek apakah ada pengajuan pending untuk jenis data yang sama
             $existingPending = PengajuanPerubahanData::where('id_nasabah', $nasabah->id)
@@ -205,6 +207,7 @@ class ProfileController extends Controller
         switch ($jenisData) {
             case 'data_user':
                 return [
+                    'foto' => $nasabah->user->foto ?? '',
                     'nama' => $nasabah->user->nama ?? '',
                     'email' => $nasabah->user->email ?? '',
                     'nomor_hp' => $nasabah->user->nomor_hp ?? '',
@@ -274,11 +277,16 @@ class ProfileController extends Controller
     {
         switch ($jenisData) {
             case 'data_user':
-                return [
+                $newData = [
                     'nama' => $request->input('nama', ''),
                     'email' => $request->input('email', ''),
                     'nomor_hp' => $request->input('nomor_hp', ''),
                 ];
+                if ($request->hasFile('foto')) {
+                    $path = $request->file('foto')->store('nasabah/foto', 'public');
+                    $newData['foto'] = $path;
+                }
+                return $newData;
 
             case 'data_pribadi':
                 return [
@@ -338,13 +346,14 @@ class ProfileController extends Controller
     /**
      * Validasi data baru berdasarkan jenis data
      */
-    private function validateDataBaru($data, $jenisData)
+    private function validateDataBaru($request, $jenisData)
     {
         $rules = [];
 
         switch ($jenisData) {
             case 'data_user':
                 $rules = [
+                    'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
                     'nama' => 'required|string|max:255',
                     'email' => 'required|email|max:255',
                     'nomor_hp' => 'required|string|max:20',

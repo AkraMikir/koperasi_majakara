@@ -397,8 +397,15 @@
             </div>
             <div class="p-4">
                 <p class="text-xs text-gray-500 mb-4">
-                    Anda dapat membatalkan deposito sebelum jatuh tempo. Namun, <strong class="text-red-600">Anda tidak akan menerima bunga</strong> dan hanya nominal pokok sebesar <strong>Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}</strong> yang akan dikembalikan.
+                    Anda dapat membatalkan deposito sebelum jatuh tempo. Namun, <strong class="text-red-600">Anda tidak akan menerima bunga</strong> dan dikenakan <strong class="text-red-600">denda sebesar {{ $dendaPersen }}%</strong> dari nominal awal.
                 </p>
+                @if($nominalDenda > 0)
+                <div class="bg-red-50 border border-red-100 rounded-xl p-3 mb-4 text-xs space-y-1">
+                    <div class="flex justify-between"><span class="text-gray-600">Nominal Awal</span><span class="font-bold text-gray-900">Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}</span></div>
+                    <div class="flex justify-between"><span class="text-red-600">Denda {{ $dendaPersen }}%</span><span class="font-bold text-red-600">- Rp {{ number_format($nominalDenda, 0, ',', '.') }}</span></div>
+                    <div class="border-t border-red-200 pt-1 flex justify-between"><span class="text-gray-700 font-semibold">Yang Dikembalikan</span><span class="font-black text-green-700">Rp {{ number_format($nominalSetelahDenda, 0, ',', '.') }}</span></div>
+                </div>
+                @endif
                 <button type="button" onclick="openCancelModal()"
                     class="w-full bg-red-50 text-red-600 border border-red-200 py-3 rounded-xl text-sm font-bold hover:bg-red-100 transition shadow-sm">
                     Ajukan Pembatalan Deposito
@@ -426,11 +433,24 @@
                 <div class="bg-red-50 border border-red-100 rounded-xl p-4 mb-5 text-left text-xs text-red-800 leading-relaxed font-semibold">
                     <p class="font-bold">Peringatan Penting:</p>
                     <p class="mt-1 text-red-700 font-normal">
-                        Jika Anda membatalkan deposito sebelum jatuh tempo, Anda <strong class="text-red-900 font-bold">TIDAK AKAN</strong> menerima bunga. 
-                        Hanya nominal pokok yang akan dikembalikan:
+                        Jika Anda membatalkan deposito sebelum jatuh tempo, Anda <strong class="text-red-900 font-bold">TIDAK AKAN</strong> menerima bunga 
+                        dan dikenakan denda sebesar <strong>{{ $dendaPersen }}%</strong> dari nominal awal.
                     </p>
-                    <div class="mt-2 text-center py-2 bg-white rounded-lg border border-red-200">
-                        <span class="text-lg font-black text-red-700">Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}</span>
+                    <div class="mt-3 space-y-1.5 text-xs">
+                        <div class="flex justify-between bg-white/60 rounded-lg px-3 py-1.5">
+                            <span class="text-gray-600">Nominal Pokok</span>
+                            <span class="font-bold text-gray-900">Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}</span>
+                        </div>
+                        @if($nominalDenda > 0)
+                        <div class="flex justify-between bg-white/60 rounded-lg px-3 py-1.5">
+                            <span class="text-red-600">Denda {{ $dendaPersen }}%</span>
+                            <span class="font-bold text-red-600">- Rp {{ number_format($nominalDenda, 0, ',', '.') }}</span>
+                        </div>
+                        @endif
+                        <div class="border-t border-red-200 pt-1.5 flex justify-between">
+                            <span class="text-gray-700 font-semibold">Dana Dikembalikan</span>
+                            <span class="text-lg font-black text-red-700">Rp {{ number_format($nominalSetelahDenda, 0, ',', '.') }}</span>
+                        </div>
                     </div>
                 </div>
 

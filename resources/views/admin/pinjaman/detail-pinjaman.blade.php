@@ -234,8 +234,7 @@
                 class="hidden fixed inset-0 bg-gray-600/50 backdrop-blur-sm z-50 flex items-center justify-center">
                 <div class="bg-white rounded-2xl p-6 max-w-md w-full mx-4">
                     <h3 class="text-xl font-bold text-gray-900 mb-4">Pelunasan Dipercepat</h3>
-                    <form method="POST" action="{{ route('admin.pinjaman.pelunasan-dipercepat', $pinjaman->id) }}"
-                        onsubmit="return confirm('Apakah Anda yakin ingin melakukan pelunasan dipercepat?')"
+                    <form id="pelunasanForm" method="POST" action="{{ route('admin.pinjaman.pelunasan-dipercepat', $pinjaman->id) }}"
                         enctype="multipart/form-data">
                         @csrf
                         @php
@@ -290,9 +289,9 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Potongan (Opsional,
                                         Rp)</label>
-                                    <input type="number" name="potongan" step="0.01" min="0" max="{{ $totalBayar }}"
+                                    <input type="text" name="potongan" id="potongan"
                                         class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
-                                        placeholder="0.00" value="0">
+                                        placeholder="0" value="0" oninput="formatCurrency(this)">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Keterangan
@@ -331,6 +330,23 @@ function showPelunasanModal() {
 function hidePelunasanModal() {
     document.getElementById('pelunasanModal').classList.add('hidden');
 }
+
+function formatCurrency(input) {
+    let value = input.value.replace(/[^0-9]/g, '');
+    if (value) value = parseInt(value).toLocaleString('id-ID');
+    input.value = value;
+}
+
+document.getElementById('pelunasanForm').addEventListener('submit', function(e) {
+    if (!confirm('Apakah Anda yakin ingin melakukan pelunasan dipercepat?')) {
+        e.preventDefault();
+        return false;
+    }
+    const input = document.getElementById('potongan');
+    if (input) {
+        input.value = input.value.replace(/[^0-9]/g, '');
+    }
+});
 </script>
 @endif
 @endcanPelunasanDipercepat

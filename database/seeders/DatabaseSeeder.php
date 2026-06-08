@@ -13,12 +13,12 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             MasterDataSeeder::class,
-            GadaiSeeder::class,
+            // GadaiSeeder::class,
             GadaiBaruSeeder::class,
             UserSeeder::class,
             NasabahSeeder::class,
             JnsLokasiPerusahaanSeeder::class,
-            PinjamanSeeder::class,
+            // PinjamanSeeder::class,
             GadaiMasterInapKendaraanSeeder::class,
             PaketDepositoSeeder::class,
             MasterDataBankRegisSeeder::class,

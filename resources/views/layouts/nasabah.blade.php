@@ -34,13 +34,6 @@
             background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
         }
         
-        .text-primary {
-            color: #674c1d;
-        }
-        
-        .bg-primary {
-            background-color: #674c1d;
-        }
     </style>
     
     @stack('styles')

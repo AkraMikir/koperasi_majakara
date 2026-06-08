@@ -32,22 +32,6 @@
             background: linear-gradient(135deg, #674c1d 0%, #8b6f2f 100%);
         }
         
-        .text-primary {
-            color: #674c1d;
-        }
-        
-        .bg-primary {
-            background-color: #674c1d;
-        }
-        
-        .bg-primary-dark {
-            background-color: #4a3514;
-        }
-        
-        .border-primary {
-            border-color: #674c1d;
-        }
-        
         .card-hover {
             transition: all 0.3s ease;
         }

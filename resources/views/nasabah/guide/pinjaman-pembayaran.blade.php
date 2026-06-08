@@ -76,6 +76,80 @@
             </a>
         </div>
 
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
+            <h2 class="text-lg font-bold text-amber-800 font-display mb-6 flex items-center gap-2">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89M9 11l3 3L22 4"></path>
+                </svg>
+                Siklus Hidup Pinjaman
+            </h2>
+            
+            <div class="relative">
+                <!-- Line background for desktop -->
+                <div class="hidden md:block absolute left-8 right-8 top-1/2 h-0.5 bg-amber-100 -translate-y-1/2 z-0"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative z-10">
+                    <!-- Step 1: Pengajuan -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex md:flex-col items-center md:text-center gap-4 md:gap-3 transition-all hover:shadow-md hover:border-amber-200">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-lg flex-shrink-0">
+                            1
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">Pengajuan</h4>
+                            <p class="text-xs text-gray-500 mt-1">Mengajukan nominal & tenor secara online melalui menu Pengajuan Pinjaman.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Persetujuan -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex md:flex-col items-center md:text-center gap-4 md:gap-3 transition-all hover:shadow-md hover:border-amber-200">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-lg flex-shrink-0">
+                            2
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">Persetujuan</h4>
+                            <p class="text-xs text-gray-500 mt-1">Verifikasi berkas, kelayakan kredit, dan jaminan oleh admin koperasi.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Pencairan -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex md:flex-col items-center md:text-center gap-4 md:gap-3 transition-all hover:shadow-md hover:border-amber-200">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-lg flex-shrink-0">
+                            3
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">Pencairan</h4>
+                            <p class="text-xs text-gray-500 mt-1">Dana cair ke rekening Anda. Biaya transfer didebet langsung dari Tabungan Utama.</p>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Pembayaran -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex md:flex-col items-center md:text-center gap-4 md:gap-3 transition-all hover:shadow-md hover:border-amber-200">
+                        <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-lg flex-shrink-0">
+                            4
+                        </div>
+                        <div>
+                            <h4 class="font-bold text-gray-900 text-sm">Pembayaran</h4>
+                            <p class="text-xs text-gray-500 mt-1">Bayar angsuran bulanan sebelum jatuh tempo agar terhindar dari denda.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-100 mt-6 pt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <span class="text-sm text-gray-500">Pintasan navigasi cepat untuk melihat detail dan status pinjaman:</span>
+                <div class="flex flex-wrap gap-2">
+                    <a href="{{ route('nasabah.pinjaman.status-pengajuan') }}" class="px-4 py-2 text-sm font-semibold text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 border border-amber-200/50 transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                        Status Pengajuan
+                    </a>
+                    <a href="{{ route('nasabah.pinjaman.angsuran') }}" class="px-4 py-2 text-sm font-semibold text-amber-700 bg-amber-50 rounded-xl hover:bg-amber-100 border border-amber-200/50 transition-colors flex items-center gap-1.5">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                        Jadwal Angsuran
+                    </a>
+                </div>
+            </div>
+        </div>
+
         <div class="rounded-2xl bg-amber-50 border border-amber-200/80 p-5">
             <h3 class="font-bold text-amber-900 mb-2">Tips</h3>
             <ul class="text-sm text-amber-900/90 space-y-1">

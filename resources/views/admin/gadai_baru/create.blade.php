@@ -38,7 +38,7 @@
             <div class="p-8">
                 <form action="{{ route('admin.gadai_baru.store') }}" method="POST" enctype="multipart/form-data"
                     class="space-y-8"
-                    onsubmit="document.getElementById('btnSubmit').disabled=true; document.getElementById('btnSubmit').innerHTML='Memproses...';">
+                    onsubmit="let input = document.getElementById('nominal_deal'); if(input) { input.value = input.value.replace(/[^0-9]/g, ''); } document.getElementById('btnSubmit').disabled=true; document.getElementById('btnSubmit').innerHTML='Memproses...';">
                     @csrf
 
                     {{-- Bagian 1: Data Nasabah & Lokasi --}}
@@ -135,9 +135,9 @@
                                     <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                         <span class="text-gray-500 font-medium">Rp</span>
                                     </div>
-                                    <input type="number" name="nominal_deal" id="nominal_deal"
+                                    <input type="text" name="nominal_deal" id="nominal_deal"
                                         class="w-full pl-10 border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
-                                        required placeholder="0">
+                                        required placeholder="0" oninput="formatCurrency(this)">
                                 </div>
                                 <p id="error_nominal"
                                     class="text-xs text-red-500 font-bold mt-2 hidden flex items-center gap-1">
@@ -368,6 +368,12 @@
     </div>
 
     <script>
+        function formatCurrency(input) {
+            let value = input.value.replace(/[^0-9]/g, '');
+            if (value) value = parseInt(value).toLocaleString('id-ID');
+            input.value = value;
+        }
+
         document.addEventListener('DOMContentLoaded', function () {
             const katSelect = document.getElementById('kategori_id');
             const itemSelect = document.getElementById('item_id');
@@ -443,7 +449,7 @@
                 if (!itemSelect.value) return;
                 const selectedOpt = itemSelect.options[itemSelect.selectedIndex];
                 const max = parseFloat(selectedOpt.dataset.max);
-                const inputVal = parseFloat(this.value);
+                const inputVal = parseFloat(this.value.replace(/[^0-9]/g, '')) || 0;
 
                 if (inputVal > max) {
                     errorNominal.classList.remove('hidden');
@@ -501,7 +507,7 @@
             
             function validateBalances() {
                 const metode = selectMetode.value;
-                const dealNominal = parseFloat(nominalInput.value) || 0;
+                const dealNominal = parseFloat(nominalInput.value.replace(/[^0-9]/g, '')) || 0;
                 
                 const selectedNasabahOpt = selectNasabah.options[selectNasabah.selectedIndex];
                 const bankNasabah = selectedNasabahOpt ? selectedNasabahOpt.dataset.bank || '' : '';

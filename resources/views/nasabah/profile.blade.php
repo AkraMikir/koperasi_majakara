@@ -449,7 +449,7 @@
                     </div>
                     <h3 class="text-xl font-bold text-white" id="editModalTitle">Edit Data</h3>
                 </div>
-                <button onclick="closeEditModal()" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
+                <button onclick="closeEditModal()" type="button" class="text-white hover:bg-white/20 rounded-lg p-2 transition-colors">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
@@ -457,11 +457,14 @@
             </div>
         </div>
 
-        <form id="editProfileForm" class="p-6">
+        <form id="editProfileForm" action="{{ route('nasabah.profile.update-request') }}" method="POST" enctype="multipart/form-data" class="p-6">
+            @csrf
             <input type="hidden" id="edit_jenis_data" name="jenis_data" value="">
             
-            <!-- Form fields will be injected here by JavaScript -->
-            <div id="editFormFields"></div>
+            <!-- Step 1: Data Input -->
+            <div id="step1">
+                <!-- Form fields will be injected here by JavaScript -->
+                <div id="editFormFields"></div>
 
             <div class="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl" id="approvalNoteContainer">
                 <div class="flex gap-3">
@@ -474,19 +477,17 @@
                 </div>
             </div>
 
-            <div class="mt-6 flex gap-3">
-                <button type="button" onclick="closeEditModal()" 
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="button" onclick="submitEditForm()" 
-                        class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
-                    Lanjutkan
-                </button>
+                <div class="mt-6 flex gap-3">
+                    <button type="button" onclick="closeEditModal()" 
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                        Batal
+                    </button>
+                    <button type="button" onclick="goToStep2()" 
+                            class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
+                        Lanjutkan
+                    </button>
+                </div>
             </div>
-        </form>
-    </div>
-</div>
 
 <!-- Modal PIN Verification untuk Edit Profile -->
 <div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[1000] flex items-center justify-center p-4">
@@ -506,33 +507,32 @@
             <input type="hidden" id="pin_jenis_data" name="jenis_data" value="">
             <div id="pinFormFields"></div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">
-                        PIN <span class="text-red-500">*</span>
-                    </label>
-                    <input type="password" name="pin" id="pin_verification" maxlength="6" 
-                           class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
-                           placeholder="••••••" required>
-                    <p class="text-xs text-gray-500 mt-1">Masukkan PIN 6 digit Anda</p>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2 text-center">
+                            PIN <span class="text-red-500">*</span>
+                        </label>
+                        <input type="password" name="pin" id="pin_verification" maxlength="6" 
+                               class="w-full max-w-xs mx-auto block px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-center text-2xl font-bold tracking-widest"
+                               placeholder="••••••">
+                        <p class="text-xs text-gray-500 mt-2 text-center">Masukkan PIN 6 digit Anda</p>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mt-6 flex gap-3">
-                <button type="button" onclick="closePinVerificationModal()" 
-                        class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
-                    Batal
-                </button>
-                <button type="submit" 
-                        class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
-                    Ajukan Perubahan
-                </button>
+                <div class="mt-8 flex gap-3">
+                    <button type="button" onclick="goToStep1()" 
+                            class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-xl font-semibold hover:bg-gray-50 transition-colors">
+                        Kembali
+                    </button>
+                    <button type="submit" id="submitBtn"
+                            class="flex-1 px-6 py-3 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-semibold hover:from-[#8b6f2f] hover:to-[#674c1d] transition-all shadow-md hover:shadow-lg">
+                        Ajukan Perubahan
+                    </button>
+                </div>
             </div>
         </form>
     </div>
 </div>
-
-<!-- Modals PIN Telah Dipindahkan ke Halaman Setting -->
 
 <!-- ==================== EDIT PROFILE FUNCTIONS ====================-->
 <script>
@@ -605,6 +605,12 @@ function openEditModal(jenisData) {
     const formFields = document.getElementById('editFormFields');
     const jenisDataInput = document.getElementById('edit_jenis_data');
     
+    // Reset form to step 1
+    goToStep1();
+    
+    // Reset form inputs (including file)
+    document.getElementById('editProfileForm').reset();
+    
     const template = formTemplates[jenisData];
     if (!template) {
         alert('Template tidak ditemukan');
@@ -651,9 +657,9 @@ function openEditModal(jenisData) {
         html += `<label class="block text-sm font-semibold text-gray-700 mb-2">${field.label}${requiredAsterisk}</label>`;
         
         if (field.type === 'textarea') {
-            html += `<textarea name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" rows="3">${field.value}</textarea>`;
+            html += `<textarea name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" rows="3" required>${field.value}</textarea>`;
         } else if (field.type === 'select') {
-            html += `<select name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
+            html += `<select name="${field.name}" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]" required>`;
             html += `<option value="">Pilih ${field.label}</option>`;
             field.options.forEach(opt => {
                 const selected = opt.value === field.value ? 'selected' : '';
@@ -680,6 +686,34 @@ function openEditModal(jenisData) {
     document.body.style.overflow = 'hidden';
 }
 
+function previewImage(input, previewId, iconId) {
+    const preview = document.getElementById(previewId);
+    const icon = document.getElementById(iconId);
+    
+    if (input.files && input.files[0]) {
+        // Validate file size (max 2MB)
+        if (input.files[0].size > 2 * 1024 * 1024) {
+            alert('Ukuran file maksimal 2MB');
+            input.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            preview.src = e.target.result;
+            preview.classList.remove('hidden');
+            icon.classList.add('hidden');
+        }
+        
+        reader.readAsDataURL(input.files[0]);
+    } else {
+        preview.src = '#';
+        preview.classList.add('hidden');
+        icon.classList.remove('hidden');
+    }
+}
+
 // Close edit modal
 function closeEditModal() {
     const modal = document.getElementById('modalEditProfile');
@@ -687,9 +721,8 @@ function closeEditModal() {
     document.body.style.overflow = 'auto';
 }
 
-// Submit edit form (lanjut ke PIN verification)
-function submitEditForm() {
-    const jenisData = document.getElementById('edit_jenis_data').value;
+function goToStep2() {
+    // Validate required fields in step 1
     const form = document.getElementById('editProfileForm');
     
     // Transfer data ke PIN modal
@@ -750,14 +783,17 @@ function openPinVerificationModal() {
     modal.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
     document.getElementById('pin_verification').focus();
+    document.getElementById('pin_verification').setAttribute('required', 'required');
 }
 
-// Close PIN verification modal
-function closePinVerificationModal() {
-    const modal = document.getElementById('modalPinVerification');
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-    document.getElementById('pin_verification').value = '';
+function goToStep1() {
+    document.getElementById('step2').classList.add('hidden');
+    document.getElementById('step1').classList.remove('hidden');
+    
+    const jenisData = document.getElementById('edit_jenis_data').value;
+    const template = formTemplates[jenisData];
+    document.getElementById('editModalTitle').textContent = template ? template.title : 'Edit Data';
+    document.getElementById('pin_verification').removeAttribute('required');
 }
 
 // PIN input: only numbers

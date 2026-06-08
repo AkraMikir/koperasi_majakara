@@ -53,6 +53,9 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         Route::get('/tabungan-penarikan', [\App\Http\Controllers\Nasabah\GuideController::class, 'tabunganPenarikan'])->name('tabungan-penarikan');
         Route::get('/pinjaman-pengajuan', [\App\Http\Controllers\Nasabah\GuideController::class, 'pinjamanPengajuan'])->name('pinjaman-pengajuan');
         Route::get('/pinjaman-pembayaran', [\App\Http\Controllers\Nasabah\GuideController::class, 'pinjamanPembayaran'])->name('pinjaman-pembayaran');
+        Route::get('/deposito-pengajuan', [\App\Http\Controllers\Nasabah\GuideController::class, 'depositoPengajuan'])->name('deposito-pengajuan');
+        Route::get('/gadai-pengajuan', [\App\Http\Controllers\Nasabah\GuideController::class, 'gadaiPengajuan'])->name('gadai-pengajuan');
+        Route::get('/gadai-aktif', [\App\Http\Controllers\Nasabah\GuideController::class, 'gadaiAktif'])->name('gadai-aktif');
     });
 
     // Restricted Nasabah Routes (Require Account Verification)
@@ -354,6 +357,20 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             });
         });
         
+        // Denda Deposito
+        Route::prefix('denda-deposito')->name('denda-deposito.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoIndex'])->name('index');
+            
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'dendaDepositoToggleStatus'])->name('toggle-status');
+            });
+        });
+        
         // Suku Bunga Tabungan
         Route::prefix('suku-bunga-tabungan')->name('suku-bunga-tabungan.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'sukuBungaTabunganIndex'])->name('index');
@@ -481,7 +498,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferIndex'])->name('index');
             
-            Route::middleware('admin.permission:crud-master-data')->group(function () {
+            Route::middleware('admin.permission:crud-biaya-transfer')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');
@@ -593,6 +610,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/setoran-approval/{id}', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalDetail'])->name('setoran-approval.detail');
         Route::post('/setoran-approval/{id}/approve', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalApprove'])->name('setoran-approval.approve');
         Route::post('/setoran-approval/{id}/reject', [\App\Http\Controllers\Admin\PettyCashController::class, 'setoranApprovalReject'])->name('setoran-approval.reject');
+    });
+
+    // ── Dashboard Bunga (Analisis Bunga - Admin Utama & Operasional) ──
+    Route::prefix('bunga')->name('bunga.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\BungaController::class, 'index'])->name('index');
+        Route::get('/pinjaman', [\App\Http\Controllers\Admin\BungaController::class, 'pinjaman'])->name('pinjaman');
+        Route::get('/deposito', [\App\Http\Controllers\Admin\BungaController::class, 'deposito'])->name('deposito');
+        Route::get('/gadai', [\App\Http\Controllers\Admin\BungaController::class, 'gadai'])->name('gadai');
     });
 
     // ── Deposito ──

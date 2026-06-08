@@ -114,11 +114,11 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Setor Cash (Rp)</label>
-                                <input type="number" name="manual_cash" value="0" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d]" min="0">
+                                <input type="text" name="manual_cash" value="0" oninput="formatCurrency(this)" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d]">
                             </div>
                             <div>
                                 <label class="block text-sm font-semibold text-gray-700 mb-2">Setor Transfer (Rp)</label>
-                                <input type="number" name="manual_tf" value="0" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d]" min="0">
+                                <input type="text" name="manual_tf" value="0" oninput="formatCurrency(this)" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-[#674c1d]">
                             </div>
                         </div>
                         <p class="text-xs text-gray-500 mt-2">Masukkan nominal manual jika tidak ada data potongan atau ingin menyetor sisa saldo saku.</p>
@@ -195,6 +195,12 @@
 
 @push('scripts')
 <script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+
     function switchTab(tab) {
         document.getElementById('tipe_setoran').value = tab;
         
@@ -259,6 +265,11 @@
         const formSetor = document.getElementById('form-setor');
         if (formSetor) {
             formSetor.addEventListener('submit', function(e) {
+                const manualCash = this.querySelector('input[name="manual_cash"]');
+                const manualTf = this.querySelector('input[name="manual_tf"]');
+                if (manualCash) manualCash.value = manualCash.value.replace(/[^0-9]/g, '');
+                if (manualTf) manualTf.value = manualTf.value.replace(/[^0-9]/g, '');
+
                 const fileInput = this.querySelector('input[name="foto_setoran"]');
                 if (fileInput && fileInput.files && fileInput.files[0]) {
                     if (fileInput.files[0].size > 5 * 1024 * 1024) {

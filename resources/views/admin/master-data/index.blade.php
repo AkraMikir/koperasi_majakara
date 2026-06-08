@@ -178,6 +178,33 @@
                 </div>
             </a>
 
+            {{-- Denda Deposito --}}
+            <a href="{{ route('admin.master-data.denda-deposito.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-red-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">
+                            {{ $stats['total_denda_deposito'] }} aktif
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-red-600 transition-colors">Denda Deposito</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Atur persentase denda pembatalan deposito sebelum jatuh tempo.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-red-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+
             {{-- Deposito Debugger (hanya tampil untuk Admin Utama) --}}
             @isAdminUtama
             <a href="{{ route('admin.master-data.deposito-debugger.index') }}"

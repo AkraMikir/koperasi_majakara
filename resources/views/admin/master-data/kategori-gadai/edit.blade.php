@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <form action="{{ route('admin.master-data.kategori-gadai.update', $data->id) }}" method="POST" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <form action="{{ route('admin.master-data.kategori-gadai.update', $data->id) }}" method="POST" class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden" onsubmit="document.querySelectorAll('.formatted-rupiah').forEach(input => { input.value = input.value.replace(/[^0-9]/g, ''); });">
         @csrf
         @method('PUT')
         
@@ -110,7 +110,7 @@
                                     <td class="px-4 py-3 align-middle">
                                         <div class="relative">
                                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 font-bold text-xs">Rp</span>
-                                            <input type="number" name="inap[{{ $inap->id }}][nominal_inap]" value="{{ (int)$inap->nominal_inap }}" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white font-black focus:ring-[#674c1d] focus:border-transparent transition-all text-emerald-600" min="0" required>
+                                            <input type="text" name="inap[{{ $inap->id }}][nominal_inap]" value="{{ number_format($inap->nominal_inap, 0, ',', '.') }}" class="w-full pl-8 pr-3 py-2 border border-gray-200 rounded-lg text-sm bg-white font-black focus:ring-[#674c1d] focus:border-transparent transition-all text-emerald-600 formatted-rupiah" required oninput="formatCurrency(this)">
                                         </div>
                                     </td>
                                 </tr>
@@ -130,4 +130,12 @@
         </div>
     </form>
 </div>
+
+<script>
+    function formatCurrency(input) {
+        let value = input.value.replace(/[^0-9]/g, '');
+        if (value) value = parseInt(value).toLocaleString('id-ID');
+        input.value = value;
+    }
+</script>
 @endsection

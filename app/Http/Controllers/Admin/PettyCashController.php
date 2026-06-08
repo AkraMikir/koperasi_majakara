@@ -1046,12 +1046,12 @@ class PettyCashController extends Controller
                 'keterangan_admin' => $request->keterangan_admin,
             ]);
 
-            // Tambah saldo Admin (tunai yang diterima dari Owner)
+            // Tambah saldo Admin (tunai yang diterima dari Owner) — sumber='deposito' untuk audit trail
             if ($penerimaan->nominal_cash > 0) {
                 PettyCashSaldo::buatMutasi(
                     Auth::id(), 'admin', (float) $penerimaan->nominal_cash,
                     "Terima Dana Deposito dari Owner untuk Pencairan Tunai",
-                    $penerimaan->id, 'petty_cash_penerimaan', 'cash'
+                    $penerimaan->id, 'petty_cash_penerimaan', 'cash', 'deposito'
                 );
             }
 
@@ -1104,11 +1104,11 @@ class PettyCashController extends Controller
 
             $nominal = (float) $pencairan->nominal_akhir;
 
-            // Validasi saldo Admin mencukupi (MODAL AWAL)
-            if (!PettyCashSaldo::validatePenarikan(Auth::id(), $nominal, 'cash', 'other')) {
-                $saldoAdmin = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'other');
+            // Validasi saldo Admin (bucket deposito) mencukupi
+            if (!PettyCashSaldo::validatePenarikan(Auth::id(), $nominal, 'cash', 'deposito')) {
+                $saldoAdmin = PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'deposito');
                 return back()->with('error',
-                    'Saldo CASH MODAL AWAL Anda tidak mencukupi. Saldo: Rp ' . number_format($saldoAdmin, 0, ',', '.') .
+                    'Saldo CASH Dana Deposito Anda tidak mencukupi. Saldo: Rp ' . number_format($saldoAdmin, 0, ',', '.') .
                     ', Dibutuhkan: Rp ' . number_format($nominal, 0, ',', '.')
                 );
             }
@@ -1138,11 +1138,11 @@ class PettyCashController extends Controller
                 'tgl_transaksi'    => now(),
             ]);
 
-            // Kurangi saldo Admin (tunai keluar ke nasabah) - Gunakan MODAL AWAL
+            // Kurangi saldo Admin (tunai keluar ke nasabah) — sumber='deposito' konsisten dengan penerimaan
             PettyCashSaldo::buatMutasi(
                 Auth::id(), 'admin', -$nominal,
                 'Pencairan Deposito ' . $pencairan->deposito->nomor_deposito . ' - Tunai ke Nasabah',
-                $pctnId, 'petty_cash_transaksi_nasabah', 'cash', 'other'
+                $pctnId, 'petty_cash_transaksi_nasabah', 'cash', 'deposito'
             );
 
             // Catat di TransDeposito

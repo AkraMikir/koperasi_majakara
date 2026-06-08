@@ -121,7 +121,11 @@
                                         @if(($request->data_lama[$key] ?? '') != $value)
                                         <div class="text-sm">
                                             <span class="text-gray-600">{{ ucwords(str_replace('_', ' ', $key)) }}:</span>
-                                            <span class="font-semibold text-[#674c1d] ml-1">{{ $value }}</span>
+                                            @if($key === 'foto')
+                                                <span class="font-semibold text-[#674c1d] ml-1 italic">Lihat Preview Foto</span>
+                                            @else
+                                                <span class="font-semibold text-[#674c1d] ml-1">{{ $value }}</span>
+                                            @endif
                                         </div>
                                         @endif
                                     @endforeach
@@ -219,21 +223,37 @@
                                             <!-- Data Lama -->
                                             <div class="p-4 bg-red-50/50">
                                                 <p class="text-xs text-gray-600 mb-1 font-medium uppercase">Data Lama</p>
-                                                <p class="text-gray-700 {{ $hasChange ? 'line-through opacity-60' : '' }}">
-                                                    {{ $dataLama }}
-                                                </p>
+                                                <div class="text-gray-700 {{ $hasChange && $key !== 'foto' ? 'line-through opacity-60' : '' }}">
+                                                    @if($key === 'foto')
+                                                        @if($dataLama && $dataLama !== '-')
+                                                            <img src="{{ Storage::url($dataLama) }}" alt="Foto Lama" class="w-24 h-24 object-cover rounded-lg border border-gray-300 mt-2">
+                                                        @else
+                                                            <span class="italic text-gray-500">Tidak ada foto</span>
+                                                        @endif
+                                                    @else
+                                                        {{ $dataLama }}
+                                                    @endif
+                                                </div>
                                             </div>
                                             <!-- Data Baru -->
                                             <div class="p-4 bg-green-50/50">
                                                 <p class="text-xs text-gray-600 mb-1 font-medium uppercase">Data Baru</p>
-                                                <p class="font-semibold text-[#674c1d]">
-                                                    {{ $value ?? '-' }}
-                                                    @if($hasChange)
+                                                <div class="font-semibold text-[#674c1d]">
+                                                    @if($key === 'foto')
+                                                        @if($value && $value !== '-')
+                                                            <img src="{{ Storage::url($value) }}" alt="Foto Baru" class="w-24 h-24 object-cover rounded-lg border border-green-300 shadow-sm mt-2">
+                                                        @else
+                                                            <span class="italic text-gray-500">Tidak ada foto</span>
+                                                        @endif
+                                                    @else
+                                                        {{ $value ?? '-' }}
+                                                    @endif
+                                                    @if($hasChange && $key !== 'foto')
                                                         <svg class="w-4 h-4 inline ml-1 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                                                         </svg>
                                                     @endif
-                                                </p>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
