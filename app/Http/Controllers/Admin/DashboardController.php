@@ -14,6 +14,7 @@ use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
+use App\Models\TempoGadai;
 use App\Models\TransDeposito;
 use App\Models\TransGadai;
 use Illuminate\Http\Request;
@@ -47,6 +48,54 @@ class DashboardController extends Controller
             'pengajuan_pending' => $this->getTotalPengajuanPending(),
             'pendapatan_bulan' => $this->getPendapatanBulanIni(),
         ];
+
+        // Stats modul breakdown
+        $totalTabunganNasabah = \App\Models\Nasabah::whereHas('transTabungan')->count();
+        $pinjamanTerlambatCount = TempoPinjamanB::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->count();
+        $gadaiJatuhTempoCount = GadaiH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->count();
+        $depositoJatuhTempoCount = DepositoH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->count();
+
+        $stats_modul = [
+            'tabungan_saldo'     => $stats['total_tabungan'] ?? 0,
+            'tabungan_nasabah'   => $totalTabunganNasabah,
+            'pinjaman_count'     => $stats['pinjaman_aktif'] ?? 0,
+            'pinjaman_total'     => $stats['total_pinjaman'] ?? 0,
+            'pinjaman_terlambat' => $pinjamanTerlambatCount,
+            'deposito_count'     => $stats['deposito_aktif'] ?? 0,
+            'deposito_total'     => $stats['total_deposito'] ?? 0,
+            'deposito_jatuh'     => $depositoJatuhTempoCount,
+            'gadai_count'        => $stats['gadai_aktif'] ?? 0,
+            'gadai_total'        => $stats['total_gadai'] ?? 0,
+            'gadai_jatuh'        => $gadaiJatuhTempoCount,
+        ];
+
+        // Jatuh tempo data
+        $jatuh_tempo_gadai = GadaiH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->with('nasabah.user')
+            ->orderBy('tgl_jatuh_tempo')
+            ->take(5)
+            ->get();
+
+        $angsuran_terlambat = TempoPinjamanB::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->with('pinjaman.nasabah.user')
+            ->orderBy('tgl_jatuh_tempo')
+            ->take(5)
+            ->get();
+
+        $jatuh_tempo_deposito = DepositoH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->with('nasabah.user')
+            ->orderBy('tgl_jatuh_tempo')
+            ->take(5)
+            ->get();
 
         // Pengajuan pending dengan Eager Loading
         $pengajuan_pending = $this->getPengajuanPending();
@@ -143,7 +192,16 @@ class DashboardController extends Controller
             'keluar' => $dataKeluar,
         ];
 
-        return view('admin.dashboard', compact('stats', 'pengajuan_pending', 'aktivitas_terkini', 'grafik_likuiditas'));
+        return view('admin.dashboard', compact(
+            'stats',
+            'pengajuan_pending',
+            'aktivitas_terkini',
+            'grafik_likuiditas',
+            'stats_modul',
+            'jatuh_tempo_gadai',
+            'angsuran_terlambat',
+            'jatuh_tempo_deposito'
+        ));
     }
 
     private function getTotalPengajuanPending()
