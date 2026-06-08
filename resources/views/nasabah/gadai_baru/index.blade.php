@@ -43,114 +43,160 @@
                     <h2 class="text-xl font-black text-gray-900 tracking-tight font-display">Gadai Aktif Saya</h2>
                     <span class="px-3 py-1 bg-amber-100 text-[#674c1d] text-[10px] font-black rounded-full border border-amber-200">{{ $gadaiAktif->count() }} Aktif</span>
                 </div>
+                <div>
+                    <p class="text-gray-500 font-bold">Tidak ada gadai aktif.</p>
+                    <p class="text-xs text-gray-400 mt-1">Pilih kategori di bawah untuk pengajuan baru.</p>
+                </div>
+            </div>
+        @else
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                @php
+                    $isLunas = $gadai->status == 'lunas';
+                    $isTenggang = $gadai->status == 'grace_period';
+                    $today = now()->startOfDay();
+                    $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
+                    $tenggang   = \Carbon\Carbon::parse($gadai->tgl_tenggang)->startOfDay();
+                    $sisaHari   = (int) ($isTenggang ? $today->diffInDays($tenggang, false) : $today->diffInDays($jatuhTempo, false));
+                    $totalTagihan   = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0);
+                    $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
+                    // Progress bar
+                    $mulai = \Carbon\Carbon::parse($gadai->tgl_mulai)->startOfDay();
+                    $totalDays = max(1, (int) $mulai->diffInDays($jatuhTempo));
+                    $elapsedDays = min($totalDays, (int) $mulai->diffInDays($today));
+                    $progressPct = round(($elapsedDays / $totalDays) * 100);
+                    $progressColor = $progressPct >= 90 ? 'from-red-500 to-red-600' : ($progressPct >= 70 ? 'from-amber-400 to-amber-500' : 'from-emerald-400 to-emerald-500');
+                    // Format helper
+                    $formatSisa = function($hari) {
+                        $abs = abs((int) $hari);
+                        $bulan = (int) floor($abs / 30);
+                        $sisa  = $abs % 30;
+                        if ($bulan > 0 && $sisa > 0) return "{$bulan} bulan {$sisa} hari";
+                        if ($bulan > 0) return "{$bulan} bulan";
+                        return "{$sisa} hari";
+                    };
+                @endphp
+                <div class="bg-white rounded-3xl shadow-md border {{ $isLunas ? 'border-emerald-200' : ($isTenggang ? 'border-red-200' : 'border-gray-100') }} relative overflow-hidden group hover:shadow-xl transition-all duration-300">
+                    {{-- Urgency ribbon --}}
+                    @if($isLunas)
+                    <div class="bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase animate-pulse">
+                        🎉 Pelunasan Disetujui &mdash; Silakan Ambil Barang di Toko
+                    </div>
+                    @elseif($isTenggang)
+                    <div class="bg-red-600 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase">
+                        ⚠ MASA TENGGANG &mdash; {{ $sisaHari >= 0 ? $formatSisa($sisaHari) : '0 hari' }} TERSISA
+                    </div>
+                    @elseif($sisaHari <= 7 && $sisaHari >= 0)
+                    <div class="bg-amber-500 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase">
+                        ⚡ Jatuh tempo dalam {{ $formatSisa($sisaHari) }} &mdash; segera tindak lanjuti
+                    </div>
+                    @endif
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                    @foreach($gadaiAktif as $gadai)
-                    @php
-                        $isTenggang = $gadai->status == 'grace_period';
-                        $today = now()->startOfDay();
-                        $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
-                        $tenggang   = \Carbon\Carbon::parse($gadai->tgl_tenggang)->startOfDay();
-                        $sisaHari   = (int) ($isTenggang ? $today->diffInDays($tenggang, false) : $today->diffInDays($jatuhTempo, false));
-                        $totalTagihan   = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0);
-                        $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
-                        // Progress bar
-                        $mulai = \Carbon\Carbon::parse($gadai->tgl_mulai)->startOfDay();
-                        $totalDays = max(1, (int) $mulai->diffInDays($jatuhTempo));
-                        $elapsedDays = min($totalDays, (int) $mulai->diffInDays($today));
-                        $progressPct = round(($elapsedDays / $totalDays) * 100);
-                        $progressColor = $progressPct >= 90 ? 'from-red-500 to-red-600' : ($progressPct >= 70 ? 'from-amber-400 to-amber-500' : 'from-emerald-400 to-emerald-500');
-                        // Format helper
-                        $formatSisa = function($hari) {
-                            $abs = abs((int) $hari);
-                            $bulan = (int) floor($abs / 30);
-                            $sisa  = $abs % 30;
-                            if ($bulan > 0 && $sisa > 0) return "{$bulan} bulan {$sisa} hari";
-                            if ($bulan > 0) return "{$bulan} bulan";
-                            return "{$sisa} hari";
-                        };
-                    @endphp
-                    <div class="bg-white rounded-3xl shadow-md border {{ $isTenggang ? 'border-red-200' : 'border-gray-100' }} relative overflow-hidden group hover:shadow-xl transition-all duration-300">
-                        {{-- Urgency ribbon --}}
-                        @if($isTenggang)
-                        <div class="bg-red-600 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase">
-                            ⚠ MASA TENGGANG &mdash; {{ $sisaHari >= 0 ? $formatSisa($sisaHari) : '0 hari' }} TERSISA
+                    <div class="p-6">
+                        {{-- Header card --}}
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $gadai->kategori->nama_kategori }}</span>
+                                    <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                                    <span class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest font-mono">{{ $gadai->slot_kode }}</span>
+                                </div>
+                                <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="group/t flex items-center gap-1.5">
+                                    <h3 class="font-black text-gray-900 text-lg leading-tight group-hover/t:text-[#674c1d] transition-colors">{{ $gadai->item->head_1 ?? $gadai->item->nama_item }}</h3>
+                                    <svg class="w-4 h-4 text-gray-400 group-hover/t:text-[#674c1d] group-hover/t:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                </a>
+                                @if($gadai->item->head_2)
+                                    <p class="text-[10px] text-gray-400 mt-1 italic">{{ $gadai->item->head_2 }}</p>
+                                @endif
+                            </div>
+                            <span class="{{ $isLunas ? 'bg-emerald-600 shadow-emerald-200' : ($isTenggang ? 'bg-red-600 shadow-red-200' : 'bg-[#674c1d] shadow-amber-200') }} text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shrink-0 animate-pulse">
+                                {{ $isLunas ? 'SIAP DIAMBIL' : ($isTenggang ? 'TENGGANG' : 'AKTIF') }}
+                            </span>
                         </div>
-                        @elseif($sisaHari <= 7 && $sisaHari >= 0)
-                        <div class="bg-amber-500 text-white text-[10px] font-black text-center py-1.5 tracking-widest uppercase">
-                            ⚡ Jatuh tempo dalam {{ $formatSisa($sisaHari) }} &mdash; segera tindak lanjuti
+
+                        {{-- Stats --}}
+                        <div class="grid grid-cols-2 gap-3 mb-4">
+                            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Nilai Gadai</p>
+                                <p class="font-black text-gray-900 text-base tracking-tight">Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</p>
+                            </div>
+                            <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
+                                <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">
+                                    {{ $isLunas ? 'Batas Pengambilan' : ($isTenggang ? 'Batas Tenggang' : 'Jatuh Tempo') }}
+                                </p>
+                                <p class="font-black {{ $isLunas ? 'text-emerald-600' : ($isTenggang ? 'text-red-600' : 'text-gray-900') }} text-base tracking-tight">
+                                    {{ ($isLunas ? $gadai->tgl_ambil_limit : ($isTenggang ? $gadai->tgl_tenggang : $gadai->tgl_jatuh_tempo))->format('d M Y') }}
+                                </p>
+                            </div>
+                        </div>
+
+                        @if($isLunas)
+                        {{-- Countdown JS Display --}}
+                        <div class="mb-5 bg-amber-50 border border-amber-200 rounded-2xl p-3 text-center">
+                            <p class="text-[9px] font-black text-amber-800 uppercase tracking-widest mb-1">⏱️ Sisa Waktu Pengambilan</p>
+                            <p class="text-sm font-black text-amber-950 tracking-tight" id="countdown-{{ $gadai->id }}">-- H -- M -- S</p>
+                            <script>
+                                (function() {
+                                    const limitTime = new Date("{{ $gadai->tgl_ambil_limit->toIso8601String() }}").getTime();
+                                    const timerId = setInterval(function() {
+                                        const now = new Date().getTime();
+                                        const distance = limitTime - now;
+                                        if (distance < 0) {
+                                            clearInterval(timerId);
+                                            document.getElementById("countdown-{{ $gadai->id }}").innerHTML = "HANGUS / SELESAI";
+                                            return;
+                                        }
+                                        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                                        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                                        document.getElementById("countdown-{{ $gadai->id }}").innerHTML = 
+                                            (days > 0 ? days + " Hari " : "") + hours + " Jam " + minutes + " Menit " + seconds + " Detik";
+                                    }, 1000);
+                                })();
+                            </script>
+                        </div>
+                        @else
+                        {{-- Progress timeline --}}
+                        <div class="mb-5">
+                            <div class="flex justify-between text-[9px] font-bold text-gray-400 mb-1.5">
+                                <span>{{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d M Y') }}</span>
+                                <span class="{{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
+                                <span>{{ $jatuhTempo->format('d M Y') }}</span>
+                            </div>
+                            <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                                <div class="h-2.5 rounded-full bg-gradient-to-r {{ $progressColor }} transition-all duration-700" style="width: {{ min(100, $progressPct) }}%"></div>
+                            </div>
                         </div>
                         @endif
 
-                        <div class="p-6">
-                            {{-- Header card --}}
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <div class="flex items-center gap-2 mb-1">
-                                        <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $gadai->kategori->nama_kategori }}</span>
-                                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
-                                        <span class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest font-mono">{{ $gadai->slot_kode }}</span>
-                                    </div>
-                                    <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="group/t flex items-center gap-1.5">
-                                        <h3 class="font-black text-gray-900 text-lg leading-tight group-hover/t:text-[#674c1d] transition-colors">{{ $gadai->item->head_1 ?? $gadai->item->nama_item }}</h3>
-                                        <svg class="w-4 h-4 text-gray-400 group-hover/t:text-[#674c1d] group-hover/t:translate-x-0.5 transition-all shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                    </a>
-                                    @if($gadai->item->head_2)
-                                        <p class="text-[10px] text-gray-400 mt-1 italic">{{ $gadai->item->head_2 }}</p>
-                                    @endif
-                                </div>
-                                <span class="{{ $isTenggang ? 'bg-red-600 shadow-red-200' : 'bg-[#674c1d] shadow-amber-200' }} text-white text-[9px] font-black px-3 py-1 rounded-full shadow-lg shrink-0">
-                                    {{ $isTenggang ? 'TENGGANG' : 'AKTIF' }}
-                                </span>
-                            </div>
-
-                            {{-- Stats --}}
-                            <div class="grid grid-cols-2 gap-3 mb-4">
-                                <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">Nilai Gadai</p>
-                                    <p class="font-black text-gray-900 text-base tracking-tight">Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</p>
-                                </div>
-                                <div class="bg-gray-50 rounded-2xl p-3 border border-gray-100">
-                                    <p class="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-0.5">{{ $isTenggang ? 'Batas Tenggang' : 'Jatuh Tempo' }}</p>
-                                    <p class="font-black {{ $isTenggang ? 'text-red-600' : 'text-gray-900' }} text-base tracking-tight">{{ ($isTenggang ? $gadai->tgl_tenggang : $gadai->tgl_jatuh_tempo)->format('d M Y') }}</p>
-                                </div>
-                            </div>
-
-                            {{-- Progress timeline --}}
-                            <div class="mb-5">
-                                <div class="flex justify-between text-[9px] font-bold text-gray-400 mb-1.5">
-                                    <span>{{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d M Y') }}</span>
-                                    <span class="{{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
-                                    <span>{{ $jatuhTempo->format('d M Y') }}</span>
-                                </div>
-                                <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
-                                    <div class="h-2.5 rounded-full bg-gradient-to-r {{ $progressColor }} transition-all duration-700" style="width: {{ min(100, $progressPct) }}%"></div>
-                                </div>
-                            </div>
-
-                            {{-- CTA Buttons --}}
-                            <div class="grid grid-cols-2 gap-3">
-                                <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
-                                   class="flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                    Tebus
-                                </a>
-                                @if($gadai->jumlah_perpanjangan < $gadai->kategori->max_extend_default)
-                                <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'perpanjang']) }}"
-                                   class="flex items-center justify-center gap-2 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    Perpanjang
-                                </a>
-                                @else
-                                <div class="flex flex-col items-center justify-center py-3.5 bg-gray-100 border border-gray-200 rounded-2xl opacity-60 cursor-not-allowed">
-                                    <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">Batas Maks. Perpanjangan</span>
-                                </div>
-                                @endif
-                            </div>
+                        @if($isLunas)
+                        <div class="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-500 text-white text-center font-black rounded-2xl text-xs uppercase tracking-widest shadow-md">
+                            Ambil di Cabang (Bawa KTP)
                         </div>
+                        @else
+                        {{-- CTA Buttons --}}
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
+                               class="flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                Tebus
+                            </a>
+                            @if($gadai->jumlah_perpanjangan < $gadai->kategori->max_extend_default)
+                            <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'perpanjang']) }}"
+                               class="flex items-center justify-center gap-2 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                Perpanjang
+                            </a>
+                            @else
+                            <div class="flex flex-col items-center justify-center py-3.5 bg-gray-100 border border-gray-200 rounded-2xl opacity-60 cursor-not-allowed">
+                                <span class="text-[10px] font-black text-gray-500 uppercase tracking-widest text-center">Batas Maks. Perpanjangan</span>
+                            </div>
+                            @endif
+                        </div>
+                        @endif
                     </div>
-                    @endforeach
                 </div>
+                @endforeach
             </div>
             @endif
         </div>

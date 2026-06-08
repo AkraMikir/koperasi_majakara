@@ -77,14 +77,9 @@
                 <label for="bank_pengirim" class="font-weight-bold">
                     <i class="fas fa-university"></i> Bank Pengirim (Koperasi) <span class="text-danger">*</span>
                 </label>
-                <select name="bank_pengirim" id="bank_pengirim" class="form-control" required onchange="calculateBiaya()">
-                    <option value="">-- Pilih Bank --</option>
-                    <option value="BCA" selected>BCA</option>
-                    <option value="BNI">BNI</option>
-                    <option value="Mandiri">Mandiri</option>
-                    <option value="BRI">BRI</option>
-                </select>
-                <small class="form-text text-muted">Bank utama koperasi (default: BCA)</small>
+                <input type="text" value="BCA" disabled class="form-control bg-light text-muted cursor-not-allowed font-weight-bold">
+                <input type="hidden" name="bank_pengirim" id="bank_pengirim" value="BCA">
+                <small class="form-text text-muted">Bank utama koperasi (selalu BCA)</small>
             </div>
 
             {{-- Upload Bukti TF --}}

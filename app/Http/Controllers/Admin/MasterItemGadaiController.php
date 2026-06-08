@@ -15,8 +15,8 @@ class MasterItemGadaiController extends Controller
      */
     protected function checkCrudPermission()
     {
-        if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData(auth()->user())) {
-            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengelola Master Data.');
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudItemGadai(auth()->user())) {
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama dan Admin Operasional yang dapat mengelola Item Gadai.');
         }
     }
 

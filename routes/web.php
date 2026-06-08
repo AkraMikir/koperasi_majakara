@@ -307,7 +307,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Item Gadai Baru
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
-            Route::middleware('admin.permission:crud-master-data')->group(function () {
+            Route::middleware('admin.permission:crud-item-gadai')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
@@ -450,7 +450,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Item Gadai
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
-            Route::middleware('admin.permission:crud-master-data')->group(function () {
+            Route::middleware('admin.permission:crud-item-gadai')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'create'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'store'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'edit'])->name('edit');
@@ -674,6 +674,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/create', [\App\Http\Controllers\AdminGadaiBaruController::class, 'create'])->name('create');
         Route::post('/store', [\App\Http\Controllers\AdminGadaiBaruController::class, 'store'])->name('store');
         Route::get('/{id}', [\App\Http\Controllers\AdminGadaiBaruController::class, 'detail'])->name('detail');
+        Route::post('/{id}/ambil', [\App\Http\Controllers\AdminGadaiBaruController::class, 'ambilBarang'])->name('ambil');
         Route::post('/{id}/perpanjang', [\App\Http\Controllers\GadaiBaruActionController::class, 'perpanjang'])->name('perpanjang');
         Route::post('/{id}/lunas', [\App\Http\Controllers\GadaiBaruActionController::class, 'lunas'])->name('lunas');
         Route::post('/{id}/lelang', [\App\Http\Controllers\GadaiBaruActionController::class, 'lelang'])->name('lelang');

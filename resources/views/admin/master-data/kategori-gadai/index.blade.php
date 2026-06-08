@@ -71,6 +71,7 @@
                         <td class="px-6 py-4 text-center">
                             <p class="text-sm font-medium text-gray-700">{{ $kat->masa_gadai_hari }} Hari</p>
                             <p class="text-[10px] text-gray-400">+{{ $kat->masa_tenggang_hari }} Hari Tenggang</p>
+                            <p class="text-[10px] text-amber-600 font-bold mt-0.5">Batas Ambil: {{ $kat->countdown_ambil_hari }} Hari</p>
                         </td>
                         <td class="px-6 py-4 text-right">
                             @isAdminUtama

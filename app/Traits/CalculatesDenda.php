@@ -76,6 +76,49 @@ trait CalculatesDenda
     }
 
     /**
+     * Cek apakah ini pembayaran pertama (belum ada nominal terbayar).
+     */
+    public function isFirstPayment()
+    {
+        return ($this->jumlah_terbayar ?? 0) == 0;
+    }
+
+    /**
+     * Cek apakah ini pembayaran kedua (sudah ada pembayaran sebagian tetapi belum lunas).
+     */
+    public function isSecondPayment()
+    {
+        return ($this->jumlah_terbayar ?? 0) > 0 && $this->status_bayar !== 'lunas';
+    }
+
+    /**
+     * Hitung batas minimum untuk pembayaran pertama (20% dari jumlah tagihan).
+     */
+    public function getMinFirstPayment()
+    {
+        return 0.20 * $this->jumlah_tagihan;
+    }
+
+    /**
+     * Hitung total sisa kewajiban untuk pelunasan (jumlah_tagihan + denda - jumlah_terbayar).
+     */
+    public function getSisaKewajiban()
+    {
+        $dendaBerjalan = $this->hitungDenda();
+        return max(0, ($this->jumlah_tagihan + $dendaBerjalan) - ($this->jumlah_terbayar ?? 0));
+    }
+
+    /**
+     * Cek apakah ada pengajuan pembayaran pending untuk angsuran ini.
+     */
+    public function hasPendingPayment()
+    {
+        return \App\Models\PengajuanPembayaranPinjaman::where('tempo_id', $this->id)
+            ->where('status', '1')
+            ->exists();
+    }
+
+    /**
      * Catat pembayaran dan update status serta denda secara otomatis.
      * Centralized logic to prevent duplication in controllers.
      */

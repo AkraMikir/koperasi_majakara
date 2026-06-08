@@ -73,6 +73,7 @@
                                     </span>
                                 @endif
                             </span>
+                            {{-- 
                             @if($item->status == 'approved')
                             <a href="{{ route('nasabah.struk-gadai', $item->gadai_active_id) }}" target="_blank"
                                class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white text-[10px] font-black rounded-lg transition-colors flex items-center justify-center gap-1.5 shadow-sm mt-1 sm:mt-0 w-full sm:w-max">
@@ -82,6 +83,8 @@
                                 Cetak Struk
                             </a>
                             @endif
+                            --}}
+                            <p class="text-[10px] text-gray-500">{{ $item->created_at->format('d M Y H:i') }}</p>
                         </div>
                     </div>
                     

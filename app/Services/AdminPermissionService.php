@@ -152,10 +152,10 @@ class AdminPermissionService
     }
 
     /**
-     * Check if user can CRUD Biaya Transfer Master Data
+     * Check if user can CRUD Item Gadai
      * Admin Utama: YES | Admin Operasional: YES
      */
-    public function canCrudBiayaTransfer(?User $user): bool
+    public function canCrudItemGadai(?User $user): bool
     {
         return $this->isAdmin($user);
     }

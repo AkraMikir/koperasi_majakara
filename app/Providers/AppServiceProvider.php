@@ -111,9 +111,9 @@ class AppServiceProvider extends ServiceProvider
             return auth()->check() && app(AdminPermissionService::class)->canCrudMasterData(auth()->user());
         });
 
-        // Check if user can CRUD Biaya Transfer Master Data
-        Blade::if('canCrudBiayaTransfer', function () {
-            return auth()->check() && app(AdminPermissionService::class)->canCrudBiayaTransfer(auth()->user());
+        // Check if user can CRUD Item Gadai
+        Blade::if('canCrudItemGadai', function () {
+            return auth()->check() && app(AdminPermissionService::class)->canCrudItemGadai(auth()->user());
         });
 
         // Check if user can manage Nasabah (approve changes, reset PIN)

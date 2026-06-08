@@ -168,7 +168,7 @@
                                     <option value="">-- Ambil dari Master Data Inap Kendaraan --</option>
                                     @foreach($inapKendaraans as $preset)
                                         <option value="{{ (int) $preset->nominal_inap }}"
-                                            data-keterangan="{{ $preset->keterangan }}">Golongan {{ $preset->golongan }} -
+                                            data-keterangan="{{ is_array($preset->keterangan) ? json_encode($preset->keterangan) : $preset->keterangan }}">Golongan {{ $preset->golongan }} -
                                             {{ $preset->jenis_kendaraan }} (Rp
                                             {{ number_format($preset->nominal_inap, 0, ',', '.') }})</option>
                                     @endforeach

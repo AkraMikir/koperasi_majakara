@@ -179,15 +179,9 @@
                     <!-- Bank Pengirim (Koperasi) -->
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-2">Bank Pengirim (Koperasi)</label>
-                        <select name="bank_pengirim" id="bank_pengirim" required 
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] outline-none"
-                            onchange="calculateBiaya()">
-                            <option value="">Pilih Bank</option>
-                            <option value="BCA">BCA</option>
-                            <option value="BNI">BNI</option>
-                            <option value="Mandiri">Mandiri</option>
-                            <option value="BRI">BRI</option>
-                        </select>
+                        <input type="text" value="BCA (Bank Utama)" disabled 
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-500 cursor-not-allowed outline-none">
+                        <input type="hidden" name="bank_pengirim" id="bank_pengirim" value="BCA">
                     </div>
 
                     <!-- Biaya Admin (Auto Calculate) - ditanggung nasabah -->
@@ -336,6 +330,11 @@
     function hideRejectModal() {
         document.getElementById('rejectModal').classList.add('hidden');
     }
+
+    // Auto calculate on load
+    document.addEventListener('DOMContentLoaded', function() {
+        calculateBiaya();
+    });
 </script>
 @endpush
 @endsection

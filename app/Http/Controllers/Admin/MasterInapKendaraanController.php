@@ -27,7 +27,10 @@ class MasterInapKendaraanController extends Controller
     public function create()
     {
         $this->checkCrudPermission();
-        return view('admin.master-data.inap-kendaraan.create');
+        $items = \App\Models\GadaiMasterItem::whereHas('kategori', function($q) {
+            $q->where('kode_kategori', 'vehicle');
+        })->get();
+        return view('admin.master-data.inap-kendaraan.create', compact('items'));
     }
 
     public function store(Request $request)
@@ -37,11 +40,10 @@ class MasterInapKendaraanController extends Controller
             'golongan' => 'required|string|max:10|unique:tbl_gadai_master_inap_kendaraan,golongan',
             'jenis_kendaraan' => 'required|string|max:255',
             'nominal_inap' => 'required|numeric|min:0',
-            'keterangan' => 'nullable|string|max:500',
         ], [
             'golongan.required' => 'Golongan wajib diisi.',
             'golongan.unique' => 'Golongan sudah terdaftar.',
-            'jenis_kendaraan.required' => 'Jenis kendaraan wajib diisi.',
+            'jenis_kendaraan.required' => 'Volume wajib diisi.',
             'nominal_inap.required' => 'Nominal inap wajib diisi.',
         ]);
 
@@ -65,11 +67,10 @@ class MasterInapKendaraanController extends Controller
             'golongan' => 'required|string|max:10|unique:tbl_gadai_master_inap_kendaraan,golongan,' . $id,
             'jenis_kendaraan' => 'required|string|max:255',
             'nominal_inap' => 'required|numeric|min:0',
-            'keterangan' => 'nullable|string|max:500',
         ], [
             'golongan.required' => 'Golongan wajib diisi.',
             'golongan.unique' => 'Golongan sudah terdaftar.',
-            'jenis_kendaraan.required' => 'Jenis kendaraan wajib diisi.',
+            'jenis_kendaraan.required' => 'Volume wajib diisi.',
             'nominal_inap.required' => 'Nominal inap wajib diisi.',
         ]);
 

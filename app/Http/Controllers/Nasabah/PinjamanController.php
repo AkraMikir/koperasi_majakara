@@ -939,6 +939,11 @@ class PinjamanController extends Controller
         $totalBayar = 0;
         $isTelat = false;
         $hariTelat = 0;
+        $isFirstPayment = true;
+        $isSecondPayment = false;
+        $minFirstPayment = 0;
+        $sisaKewajiban = 0;
+        $hasPendingPayment = false;
 
         if ($selectedAngsuran && $selectedPinjaman) {
             // Set relasi pinjaman agar hitungDenda() bisa mengakses data pinjaman
@@ -954,6 +959,12 @@ class PinjamanController extends Controller
             $hariTelat = $selectedAngsuran->hitungHariTelat();
 
             $totalBayar = $sisaTagihan + $dendaAngsuran;
+
+            $isFirstPayment = $selectedAngsuran->isFirstPayment();
+            $isSecondPayment = $selectedAngsuran->isSecondPayment();
+            $minFirstPayment = $selectedAngsuran->getMinFirstPayment();
+            $sisaKewajiban = $selectedAngsuran->getSisaKewajiban();
+            $hasPendingPayment = $selectedAngsuran->hasPendingPayment();
         }
 
         // Get lokasi untuk janji temu
@@ -975,6 +986,11 @@ class PinjamanController extends Controller
             'totalBayar'      => $totalBayar,
             'isTelat'         => $isTelat,
             'hariTelat'       => $hariTelat,
+            'isFirstPayment'  => $isFirstPayment,
+            'isSecondPayment' => $isSecondPayment,
+            'minFirstPayment' => $minFirstPayment,
+            'sisaKewajiban'   => $sisaKewajiban,
+            'hasPendingPayment' => $hasPendingPayment,
         ]);
     }
 
@@ -1017,6 +1033,59 @@ class PinjamanController extends Controller
         $pinjaman = PinjamanH::where('id', $request->pinjaman_id)
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
+
+        // Get the specific installment (tempo) record
+        if ($request->jenis_tempo === 'bulanan') {
+            $tempo = TempoPinjamanB::where('id', $request->tempo_id)->where('pinjaman_id', $pinjaman->id)->firstOrFail();
+        } else {
+            $tempo = TempoPinjamanM::where('id', $request->tempo_id)->where('pinjaman_id', $pinjaman->id)->firstOrFail();
+        }
+
+        // Set relasi pinjaman agar hitungDenda() bekerja
+        $tempo->setRelation('pinjaman', $pinjaman);
+
+        // Cek status lunas
+        if ($tempo->status_bayar === 'lunas') {
+            return redirect()->back()
+                ->with('error', 'Angsuran ini sudah lunas.')
+                ->withInput($request->except('pin'));
+        }
+
+        // Cek apakah ada pembayaran pending untuk angsuran ini
+        if ($tempo->hasPendingPayment()) {
+            return redirect()->back()
+                ->with('error', 'Ada pengajuan pembayaran yang sedang menunggu persetujuan admin untuk angsuran ini.')
+                ->withInput($request->except('pin'));
+        }
+
+        // Validasi aturan nominal angsuran ke-1 dan ke-2
+        $nominalPay = (float) $request->nominal;
+        if ($tempo->isFirstPayment()) {
+            $minPay = $tempo->getMinFirstPayment();
+            $maxPay = $tempo->getSisaKewajiban();
+
+            if ($nominalPay < $minPay) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran pertama minimal harus 20% dari jumlah tagihan (minimal Rp ' . number_format($minPay, 0, ',', '.') . ')')
+                    ->withInput($request->except('pin'));
+            }
+            if ($nominalPay > $maxPay) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran tidak boleh melebihi sisa tagihan (maksimal Rp ' . number_format($maxPay, 0, ',', '.') . ')')
+                    ->withInput($request->except('pin'));
+            }
+        } elseif ($tempo->isSecondPayment()) {
+            $exactPay = $tempo->getSisaKewajiban();
+            if (abs($nominalPay - $exactPay) > 1) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran kedua harus berupa pelunasan sisa tagihan secara penuh sebesar Rp ' . number_format($exactPay, 0, ',', '.'))
+                    ->withInput($request->except('pin'));
+            }
+        } else {
+            return redirect()->back()
+                ->with('error', 'Batas maksimal pembayaran angsuran ini (2 kali) telah tercapai.')
+                ->withInput($request->except('pin'));
+        }
 
         // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
         $recentDuplicate = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
@@ -1127,6 +1196,59 @@ class PinjamanController extends Controller
         $pinjaman = PinjamanH::where('id', $request->pinjaman_id)
             ->where('id_anggota', $idAnggota)
             ->firstOrFail();
+
+        // Get the specific installment (tempo) record
+        if ($request->jenis_tempo === 'bulanan') {
+            $tempo = TempoPinjamanB::where('id', $request->tempo_id)->where('pinjaman_id', $pinjaman->id)->firstOrFail();
+        } else {
+            $tempo = TempoPinjamanM::where('id', $request->tempo_id)->where('pinjaman_id', $pinjaman->id)->firstOrFail();
+        }
+
+        // Set relasi pinjaman agar hitungDenda() bekerja
+        $tempo->setRelation('pinjaman', $pinjaman);
+
+        // Cek status lunas
+        if ($tempo->status_bayar === 'lunas') {
+            return redirect()->back()
+                ->with('error', 'Angsuran ini sudah lunas.')
+                ->withInput($request->except('pin'));
+        }
+
+        // Cek apakah ada pembayaran pending untuk angsuran ini
+        if ($tempo->hasPendingPayment()) {
+            return redirect()->back()
+                ->with('error', 'Ada pengajuan pembayaran yang sedang menunggu persetujuan admin untuk angsuran ini.')
+                ->withInput($request->except('pin'));
+        }
+
+        // Validasi aturan nominal angsuran ke-1 dan ke-2
+        $nominalPay = (float) $request->nominal;
+        if ($tempo->isFirstPayment()) {
+            $minPay = $tempo->getMinFirstPayment();
+            $maxPay = $tempo->getSisaKewajiban();
+
+            if ($nominalPay < $minPay) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran pertama minimal harus 20% dari jumlah tagihan (minimal Rp ' . number_format($minPay, 0, ',', '.') . ')')
+                    ->withInput($request->except('pin'));
+            }
+            if ($nominalPay > $maxPay) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran tidak boleh melebihi sisa tagihan (maksimal Rp ' . number_format($maxPay, 0, ',', '.') . ')')
+                    ->withInput($request->except('pin'));
+            }
+        } elseif ($tempo->isSecondPayment()) {
+            $exactPay = $tempo->getSisaKewajiban();
+            if (abs($nominalPay - $exactPay) > 1) {
+                return redirect()->back()
+                    ->with('error', 'Pembayaran kedua harus berupa pelunasan sisa tagihan secara penuh sebesar Rp ' . number_format($exactPay, 0, ',', '.'))
+                    ->withInput($request->except('pin'));
+            }
+        } else {
+            return redirect()->back()
+                ->with('error', 'Batas maksimal pembayaran angsuran ini (2 kali) telah tercapai.')
+                ->withInput($request->except('pin'));
+        }
 
         // 🛡️ Server-side guard: cegah duplikasi dalam 30 detik
         $recentDuplicate = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)

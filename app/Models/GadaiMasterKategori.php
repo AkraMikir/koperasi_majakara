@@ -19,7 +19,8 @@ class GadaiMasterKategori extends Model
         'rate_inap_persen',
         'max_extend_default',
         'masa_gadai_hari',
-        'masa_tenggang_hari'
+        'masa_tenggang_hari',
+        'countdown_ambil_hari'
     ];
 
     public function items()

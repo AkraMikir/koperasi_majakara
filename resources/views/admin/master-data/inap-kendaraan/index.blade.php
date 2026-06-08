@@ -41,9 +41,9 @@
                     <tr class="bg-gray-50/50 border-b border-gray-100">
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">No</th>
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Golongan</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Jenis Kendaraan</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Volume</th>
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-right">Biaya Inap</th>
-                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Keterangan</th>
+                        <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest">Contoh Item</th>
                         @canCrudMasterData
                         <th class="px-6 py-4 text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Aksi</th>
                         @endcanCrudMasterData
@@ -62,7 +62,7 @@
                         <td class="px-6 py-4 text-right">
                             <span class="text-sm font-black text-gray-900">Rp {{ number_format($item->nominal_inap, 0, ',', '.') }}</span>
                         </td>
-                        <td class="px-6 py-4 text-xs text-gray-500 italic">{{ $item->keterangan ?? '-' }}</td>
+                        <td class="px-6 py-4 text-xs text-gray-500 italic">{{ $item->contoh_item }}</td>
                         @canCrudMasterData
                         <td class="px-6 py-4">
                             <div class="flex justify-center items-center gap-2">

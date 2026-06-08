@@ -26,44 +26,44 @@ class GadaiTestSeeder extends Seeder
 
         $data = [
             [
-                'label' => 'Jatuh Tempo 1 Hari Lagi',
+                'label' => 'Terisi - Aktif',
                 'slot_kode' => 'EL-0101',
                 'nominal' => 1000000,
-                'jatuh_tempo' => $now->copy()->addDays(1)->endOfDay(),
-                'tenggang' => $now->copy()->addDays(1)->addDays(15)->endOfDay(),
+                'jatuh_tempo' => $now->copy()->addDays(10)->endOfDay(),
+                'tenggang' => $now->copy()->addDays(25)->endOfDay(),
                 'status' => 'active'
             ],
             [
-                'label' => 'Jatuh Tempo 2 Hari Lagi',
+                'label' => 'Terisi - Tenggang (Kuning)',
                 'slot_kode' => 'EL-0102',
                 'nominal' => 2000000,
-                'jatuh_tempo' => $now->copy()->addDays(2)->endOfDay(),
-                'tenggang' => $now->copy()->addDays(2)->addDays(15)->endOfDay(),
-                'status' => 'active'
+                'jatuh_tempo' => $now->copy()->subDays(2)->endOfDay(),
+                'tenggang' => $now->copy()->addDays(13)->endOfDay(),
+                'status' => 'grace_period'
             ],
             [
-                'label' => 'Jatuh Tempo 3 Hari Lagi',
+                'label' => 'Hangus - Siap Lelang (Merah)',
                 'slot_kode' => 'EL-0103',
                 'nominal' => 3000000,
-                'jatuh_tempo' => $now->copy()->addDays(3)->endOfDay(),
-                'tenggang' => $now->copy()->addDays(3)->addDays(15)->endOfDay(),
-                'status' => 'active'
+                'jatuh_tempo' => $now->copy()->subDays(20)->endOfDay(),
+                'tenggang' => $now->copy()->subDays(5)->endOfDay(),
+                'status' => 'expired_final'
             ],
             [
-                'label' => 'Jatuh Tempo 4 Hari Lagi',
+                'label' => 'Lunas - Siap Diambil (Abu-abu)',
                 'slot_kode' => 'EL-0104',
                 'nominal' => 4000000,
-                'jatuh_tempo' => $now->copy()->addDays(4)->endOfDay(),
-                'tenggang' => $now->copy()->addDays(4)->addDays(15)->endOfDay(),
-                'status' => 'active'
+                'jatuh_tempo' => $now->copy()->subDays(5)->endOfDay(),
+                'tenggang' => $now->copy()->addDays(10)->endOfDay(),
+                'status' => 'lunas'
             ],
             [
-                'label' => 'Jatuh Tempo 5 Hari Lagi',
+                'label' => 'Diperpanjang (Kuning)',
                 'slot_kode' => 'EL-0105',
                 'nominal' => 5000000,
-                'jatuh_tempo' => $now->copy()->addDays(5)->endOfDay(),
-                'tenggang' => $now->copy()->addDays(5)->addDays(15)->endOfDay(),
-                'status' => 'active'
+                'jatuh_tempo' => $now->copy()->addDays(15)->endOfDay(),
+                'tenggang' => $now->copy()->addDays(30)->endOfDay(),
+                'status' => 'extended'
             ],
         ];
 
@@ -74,7 +74,7 @@ class GadaiTestSeeder extends Seeder
                 'item_id' => $itemId,
                 'lokasi_id' => $lokasiId,
                 'slot_kode' => $d['slot_kode'],
-                'slot_table' => 'electronic', // Defaulting to electronic for test
+                'slot_table' => 'electronic',
                 'nominal_deal' => $d['nominal'],
                 'biaya_jasa' => $d['nominal'] * 0.05,
                 'tgl_mulai' => $now->copy()->subDays(30),
@@ -82,7 +82,7 @@ class GadaiTestSeeder extends Seeder
                 'tgl_tenggang' => $d['tenggang'],
                 'status' => $d['status'],
                 'admin_id' => $adminId,
-                'denda_aktif' => $d['status'] == 'grace_period' ? ($d['nominal'] * 0.02) : 0,
+                'denda_aktif' => 0,
                 'biaya_inap' => 0
             ]);
 

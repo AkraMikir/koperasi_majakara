@@ -99,14 +99,15 @@ class AdminPengajuanGadaiController extends Controller
                 $newTenggang = $newJatuhTempo->copy()->addDays($gadai->kategori->masa_tenggang_hari)->endOfDay();
 
                 // Recalculate interest and inap for the next period
-                $rateJasa = $gadai->kategori->rate_jasa;
+                $rateJasa = $gadai->rate_jasa ?? $gadai->kategori->rate_jasa;
                 $newBiayaJasa = ($gadai->nominal_deal * $rateJasa) / 100;
 
                 $newBiayaInap = 0;
                 if ($gadai->item->nominal_inap > 0) {
                     $newBiayaInap = $gadai->item->nominal_inap;
                 } else {
-                    $newBiayaInap = ($gadai->nominal_deal * $gadai->kategori->rate_inap_persen) / 100;
+                    $rateInap = $gadai->rate_inap_persen ?? $gadai->kategori->rate_inap_persen;
+                    $newBiayaInap = ($gadai->nominal_deal * $rateInap) / 100;
                 }
 
                 $gadai->update([
@@ -125,7 +126,7 @@ class AdminPengajuanGadaiController extends Controller
                     'catatan' => 'Perpanjangan ke-' . $gadai->jumlah_perpanjangan . ' (Approved from Pengajuan #' . $pengajuan->id . ')'
                 ]);
             } else if ($pengajuan->jenis_pengajuan == 'lunas') {
-                $gadaiUpdateData = ['status' => 'lunas'];
+                $gadaiUpdateData = [];
                 
                 // Handle Extra Pinjaman for LUNAS
                 if ($request->filled('extra_pinjaman_nominal') && $request->extra_pinjaman_nominal > 0) {
@@ -149,27 +150,49 @@ class AdminPengajuanGadaiController extends Controller
                         'gadai'
                     );
                 }
-                
-                $gadai->update($gadaiUpdateData);
 
-                // Free the slot
-                $gridTable = $this->getGridTableName($gadai->slot_table);
-                DB::table($gridTable)
-                    ->where('kode_slot', $gadai->slot_kode)
-                    ->update(['is_occupied' => false, 'active_gadai_id' => null]);
+                if ($pengajuan->metode === 'cash') {
+                    // Cash: Langsung lunas & ambil barang (status returned)
+                    $gadaiUpdateData['status'] = 'returned';
+                    $gadai->update($gadaiUpdateData);
 
-                GadaiSlotLog::create([
-                    'slot_kode' => $gadai->slot_kode,
-                    'kategori' => $gadai->slot_table,
-                    'aksi' => 'empty',
-                    'gadai_active_id' => $gadai->id
-                ]);
+                    // Free the slot
+                    $gridTable = $this->getGridTableName($gadai->slot_table);
+                    DB::table($gridTable)
+                        ->where('kode_slot', $gadai->slot_kode)
+                        ->update(['is_occupied' => false, 'active_gadai_id' => null]);
 
-                GadaiHistory::create([
-                    'gadai_active_id' => $gadai->id,
-                    'aksi' => 'lunas',
-                    'catatan' => 'Gadai telah dilunasi (Approved from Pengajuan #' . $pengajuan->id . ')'
-                ]);
+                    GadaiSlotLog::create([
+                        'slot_kode' => $gadai->slot_kode,
+                        'kategori' => $gadai->slot_table,
+                        'aksi' => 'empty',
+                        'gadai_active_id' => $gadai->id
+                    ]);
+
+                    GadaiHistory::create([
+                        'gadai_active_id' => $gadai->id,
+                        'aksi' => 'lunas',
+                        'catatan' => 'Gadai telah dilunasi via Cash (Approved from Pengajuan #' . $pengajuan->id . ')'
+                    ]);
+
+                    GadaiHistory::create([
+                        'gadai_active_id' => $gadai->id,
+                        'aksi' => 'return',
+                        'catatan' => 'Barang langsung diambil (Lunas Cash)'
+                    ]);
+                } else {
+                    // Transfer: Lunas tapi barang belum diambil (countdown aktif)
+                    $gadaiUpdateData['status'] = 'lunas';
+                    $countdownHari = $gadai->kategori->countdown_ambil_hari ?? 14;
+                    $gadaiUpdateData['tgl_ambil_limit'] = now()->addDays($countdownHari)->endOfDay();
+                    $gadai->update($gadaiUpdateData);
+
+                    GadaiHistory::create([
+                        'gadai_active_id' => $gadai->id,
+                        'aksi' => 'lunas',
+                        'catatan' => 'Gadai telah dilunasi via Transfer. Batas pengambilan barang set s/d ' . $gadaiUpdateData['tgl_ambil_limit']->format('d M Y H:i') . ' (Approved from Pengajuan #' . $pengajuan->id . ')'
+                    ]);
+                }
             }
 
             // 3. Log Payment

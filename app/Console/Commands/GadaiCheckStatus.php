@@ -51,8 +51,9 @@ class GadaiCheckStatus extends Command
                     // Jika ada nominal inap khusus di item (biasanya Kendaraan)
                     $inap = $gadai->item->nominal_inap;
                 } else {
-                    // Gunakan persentase dari kategori (biasanya Emas/Elektronik)
-                    $inap = ($gadai->nominal_deal * $gadai->kategori->rate_inap_persen) / 100;
+                    // Gunakan persentase custom atau dari kategori (biasanya Emas/Elektronik)
+                    $rateInap = $gadai->rate_inap_persen ?? $gadai->kategori->rate_inap_persen;
+                    $inap = ($gadai->nominal_deal * $rateInap) / 100;
                 }
 
                 $gadai->update([
@@ -97,6 +98,31 @@ class GadaiCheckStatus extends Command
                 
                 DB::commit();
                 $this->info("Gadai ID {$gadai->id} hangus (expired_final).");
+            } catch (\Exception $e) {
+                DB::rollBack();
+                $this->error("Gagal update Gadai ID {$gadai->id}: " . $e->getMessage());
+            }
+        }
+
+        // 3. Cek Lunas -> Expired Final (Batas Waktu Pengambilan Habis)
+        $lunasGadais = GadaiActive::where('status', 'lunas')
+            ->whereNotNull('tgl_ambil_limit')
+            ->where('tgl_ambil_limit', '<', $now)
+            ->get();
+
+        foreach ($lunasGadais as $gadai) {
+            DB::beginTransaction();
+            try {
+                $gadai->update(['status' => 'expired_final']);
+
+                GadaiHistory::create([
+                    'gadai_active_id' => $gadai->id,
+                    'aksi' => 'expired',
+                    'catatan' => 'Batas waktu pengambilan barang lunas telah habis. Status diubah menjadi Hangus (Siap Dilelang).'
+                ]);
+
+                DB::commit();
+                $this->info("Gadai ID {$gadai->id} hangus karena batas waktu pengambilan habis.");
             } catch (\Exception $e) {
                 DB::rollBack();
                 $this->error("Gagal update Gadai ID {$gadai->id}: " . $e->getMessage());

@@ -17,4 +17,11 @@ class GadaiMasterInapKendaraan extends Model
         'nominal_inap',
         'keterangan'
     ];
+
+    public function getContohItemAttribute()
+    {
+        return GadaiMasterItem::where('nominal_inap', $this->nominal_inap)
+            ->pluck('head_1')
+            ->join(', ') ?: '-';
+    }
 }

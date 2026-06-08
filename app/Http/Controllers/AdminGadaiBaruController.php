@@ -84,8 +84,15 @@ class AdminGadaiBaruController extends Controller
             'lokasi_id' => 'required|exists:jns_lokasi_perusahaan,id',
             'slot_kode' => 'required|string',
             'nominal_deal' => 'required|numeric|min:1',
+            'rate_jasa' => 'required|numeric|min:0',
+            'rate_inap_persen' => 'required|numeric|min:0',
             'metode_pencairan' => 'required|in:cash,transfer',
-            'foto_bukti.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'foto_barang' => 'required|array|min:1',
+            'foto_barang.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_transaksi' => 'required|array|min:1',
+            'foto_transaksi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'foto_administrasi' => 'required|array|min:1',
+            'foto_administrasi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
         ]);
 
         $item = GadaiMasterItem::findOrFail($request->item_id);
@@ -95,8 +102,8 @@ class AdminGadaiBaruController extends Controller
 
         $kategori = GadaiMasterKategori::findOrFail($request->kategori_id);
         
-        // Calculate Fees
-        $rateJasa = $kategori->rate_jasa;
+        // Calculate Fees using custom inputs
+        $rateJasa = $request->rate_jasa;
         $biayaJasa = ($request->nominal_deal * $rateJasa) / 100;
 
         // Calculate Biaya Inap upfront (flat for vehicles, percentage for gold/electronics)
@@ -104,7 +111,7 @@ class AdminGadaiBaruController extends Controller
         if ($item->nominal_inap > 0) {
             $biayaInap = $item->nominal_inap;
         } else {
-            $biayaInap = ($request->nominal_deal * $kategori->rate_inap_persen) / 100;
+            $biayaInap = ($request->nominal_deal * $request->rate_inap_persen) / 100;
         }
         
         // Petty Cash Check & Mutasi (Uang keluar dari Admin ke Nasabah dari Modal Awal)
@@ -131,7 +138,9 @@ class AdminGadaiBaruController extends Controller
                 'slot_kode' => $slotData->kode_slot,
                 'slot_table' => $kategori->kode_kategori,
                 'nominal_deal' => $request->nominal_deal,
+                'rate_jasa' => $request->rate_jasa,
                 'biaya_jasa' => $biayaJasa,
+                'rate_inap_persen' => $request->rate_inap_persen,
                 'denda_aktif' => 0,
                 'biaya_inap' => $biayaInap,
                 'tgl_mulai' => $tglMulai,
@@ -160,14 +169,38 @@ class AdminGadaiBaruController extends Controller
                 'catatan' => 'Gadai baru dibuat. Slot: ' . $slotData->kode_slot
             ]);
 
-            // Upload Files
-            if ($request->hasFile('foto_bukti')) {
-                foreach ($request->file('foto_bukti') as $file) {
+            // Upload Foto Barang
+            if ($request->hasFile('foto_barang')) {
+                foreach ($request->file('foto_barang') as $file) {
                     $path = $file->store('gadai_files', 'public');
                     GadaiFile::create([
                         'gadai_active_id' => $gadai->id,
                         'path_file' => $path,
                         'tipe_foto' => 'barang'
+                    ]);
+                }
+            }
+
+            // Upload Foto Transaksi
+            if ($request->hasFile('foto_transaksi')) {
+                foreach ($request->file('foto_transaksi') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'penyerahan'
+                    ]);
+                }
+            }
+
+            // Upload Foto Administrasi
+            if ($request->hasFile('foto_administrasi')) {
+                foreach ($request->file('foto_administrasi') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'lainnya'
                     ]);
                 }
             }
@@ -276,15 +309,17 @@ class AdminGadaiBaruController extends Controller
                 'users.nama as nasabah_nama', 
                 'tbl_gadai_master_item.head_1 as item_nama', 
                 'tbl_gadai_active.status as gadai_status', 
-                'tbl_gadai_active.id as active_gadai_id'
+                'tbl_gadai_active.id as active_gadai_id',
+                'tbl_gadai_active.tgl_ambil_limit'
             )
             ->orderBy('baris', 'desc')
             ->orderBy('kolom', 'asc')
             ->get();
             
         $groupedGrid = $grid->groupBy('baris');
+        $settings = \App\Models\SettingsStruk::getSettings();
 
-        return view('admin.gadai_baru.storage', compact('groupedGrid', 'kategori'));
+        return view('admin.gadai_baru.storage', compact('groupedGrid', 'kategori', 'settings'));
     }
 
     public function emptyAuction(Request $request)
@@ -359,6 +394,155 @@ class AdminGadaiBaruController extends Controller
 
             DB::commit();
             return back()->with('success', 'Barang pada slot ' . $gadai->slot_kode . ' berhasil diambil untuk dilelang dan kapasitas slot telah dikosongkan!');
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    public function ambilBarang(Request $request, $id)
+    {
+        $request->validate([
+            'foto_bukti' => 'required|array|min:1',
+            'foto_bukti.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'struk_hilang' => 'nullable|boolean',
+            'metode_denda' => 'nullable|required_if:struk_hilang,1|in:cash,transfer'
+        ], [
+            'foto_bukti.required' => 'Wajib melampirkan minimal 1 foto bukti pengambilan/penyerahan.',
+            'foto_bukti.min' => 'Wajib melampirkan minimal 1 foto bukti pengambilan/penyerahan.',
+            'foto_bukti.*.image' => 'File bukti harus berupa foto/gambar.',
+            'foto_bukti.*.max' => 'Ukuran foto maksimal adalah 2MB.',
+            'metode_denda.required_if' => 'Pilih metode pembayaran denda jika struk hilang.'
+        ]);
+
+        $gadai = GadaiActive::findOrFail($id);
+
+        if ($gadai->status !== 'lunas') {
+            return back()->with('error', 'Barang gadai ini belum berstatus lunas atau sudah diambil.');
+        }
+
+        $strukHilang = $request->boolean('struk_hilang');
+        $dendaAmount = 0;
+        if ($strukHilang) {
+            $settings = \App\Models\SettingsStruk::getSettings();
+            $dendaAmount = (float)($settings->extra_nilai_kehilangan ?? 0);
+        }
+
+        DB::beginTransaction();
+        try {
+            // 1. Update Grid Slot (Set occupied to false, active_gadai_id to null)
+            $table = $this->getGridTableName($gadai->slot_table);
+
+            DB::table($table)->where('kode_slot', $gadai->slot_kode)->update([
+                'is_occupied' => false,
+                'active_gadai_id' => null
+            ]);
+
+            // 2. Create record for GadaiSlotLog (empty)
+            GadaiSlotLog::create([
+                'slot_kode' => $gadai->slot_kode,
+                'kategori' => $gadai->slot_table,
+                'aksi' => 'empty',
+                'gadai_active_id' => $gadai->id
+            ]);
+
+            // 3. Update Gadai Active status to 'returned'
+            $gadaiUpdateData = [
+                'status' => 'returned'
+            ];
+
+            if ($strukHilang && $dendaAmount > 0) {
+                $gadaiUpdateData['extra_pinjaman_nominal'] = $dendaAmount;
+                $gadaiUpdateData['extra_pinjaman_reason'] = 'Kehilangan Struk';
+                $gadaiUpdateData['extra_pinjaman_admin_id'] = Auth::id();
+                $gadaiUpdateData['extra_pinjaman_set_at'] = now();
+            }
+
+            $gadai->update($gadaiUpdateData);
+
+            // 4. Create History
+            GadaiHistory::create([
+                'gadai_active_id' => $gadai->id,
+                'aksi' => 'return',
+                'catatan' => 'Barang gadai telah diserahkan/diambil oleh nasabah.' . ($strukHilang ? ' (Denda Kehilangan Struk Rp ' . number_format($dendaAmount, 0, ',', '.') . ')' : '')
+            ]);
+
+            // 5. Save proof photos to tbl_gadai_files
+            if ($request->hasFile('foto_bukti')) {
+                foreach ($request->file('foto_bukti') as $file) {
+                    $path = $file->store('gadai_files', 'public');
+                    \App\Models\GadaiFile::create([
+                        'gadai_active_id' => $gadai->id,
+                        'path_file' => $path,
+                        'tipe_foto' => 'penyerahan'
+                    ]);
+                }
+            }
+
+            // 6. Process Denda Transaction and Petty Cash Mutation if any
+            if ($strukHilang && $dendaAmount > 0) {
+                $adminId = Auth::id();
+                $metodeDenda = $request->input('metode_denda', 'cash');
+
+                if ($metodeDenda === 'transfer') {
+                    $owner = \App\Models\User::where('role', 'admin_utama')->first();
+                    if ($owner) {
+                        $ownerTransId = \App\Helpers\IdGenerator::generate('petty_cash_owner_transaksi', 'PCOW', 'OW', 'TR');
+                        \App\Models\PettyCashOwnerTransaksi::create([
+                            'id'           => $ownerTransId,
+                            'user_id'      => $owner->id,
+                            'tipe'         => 'terima_setoran',
+                            'sumber'       => \App\Services\PettyCashConstants::SUMBER_GADAI,
+                            'nominal_cash' => 0,
+                            'nominal_tf'   => $dendaAmount,
+                            'keterangan'   => "Denda Kehilangan Struk Gadai: " . ($gadai->nasabah->user->nama ?? '-') . " (#{$gadai->id})",
+                            'ref_table'    => 'tbl_gadai_active',
+                            'ref_id'       => $gadai->id,
+                        ]);
+
+                        \App\Models\PettyCashSaldo::buatMutasi(
+                            $owner->id, 
+                            'owner', 
+                            $dendaAmount,
+                            "Denda Kehilangan Struk Gadai (#{$gadai->id})",
+                            $gadai->id, 
+                            'tbl_gadai_active', 
+                            'transfer', 
+                            'gadai'
+                        );
+                    }
+                } else {
+                    PettyCashSaldo::buatMutasi(
+                        $adminId,
+                        'admin',
+                        $dendaAmount,
+                        'Denda Kehilangan Struk Gadai ' . $gadai->slot_kode . ' (via cash)',
+                        $gadai->id,
+                        'tbl_gadai_active',
+                        'cash',
+                        'gadai'
+                    );
+                }
+
+                \App\Models\PettyCashTransaksiNasabah::create([
+                    'id' => \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'PCTN', 'AD', 'TR'),
+                    'admin_id' => $adminId,
+                    'nasabah_id' => $gadai->nasabah_id,
+                    'id_jns_transaksi' => \App\Services\PettyCashConstants::JNS_PMB,
+                    'id_jns_via' => ($metodeDenda === 'transfer') ? \App\Services\PettyCashConstants::VIA_TF : \App\Services\PettyCashConstants::VIA_CS,
+                    'id_jns_fitur' => \App\Services\PettyCashConstants::FITUR_GADAI,
+                    'nominal' => $dendaAmount,
+                    'status' => 'approved',
+                    'keterangan' => 'Denda Kehilangan Struk Gadai ' . $gadai->slot_kode,
+                    'ref_table' => 'tbl_gadai_active',
+                    'ref_id' => $gadai->id,
+                    'tgl_transaksi' => now()
+                ]);
+            }
+
+            DB::commit();
+            return back()->with('success', 'Barang pada slot ' . $gadai->slot_kode . ' berhasil diserahkan ke nasabah' . ($strukHilang ? ' dengan denda kehilangan struk' : '') . ' dan slot telah dikosongkan!');
 
         } catch (\Exception $e) {
             DB::rollBack();

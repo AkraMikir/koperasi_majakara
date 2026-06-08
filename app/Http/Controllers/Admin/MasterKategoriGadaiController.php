@@ -42,6 +42,7 @@ class MasterKategoriGadaiController extends Controller
             'masa_gadai_hari' => 'required|integer|min:1',
             'masa_tenggang_hari' => 'required|integer|min:1',
             'max_extend_default' => 'required|integer|min:0',
+            'countdown_ambil_hari' => 'required|integer|min:1',
         ]);
 
         $data = GadaiMasterKategori::findOrFail($id);
@@ -56,7 +57,6 @@ class MasterKategoriGadaiController extends Controller
                     $inapRecord->update([
                         'jenis_kendaraan' => $fields['jenis_kendaraan'],
                         'nominal_inap' => $fields['nominal_inap'],
-                        'keterangan' => $fields['keterangan'] ?? null,
                     ]);
                 }
             }

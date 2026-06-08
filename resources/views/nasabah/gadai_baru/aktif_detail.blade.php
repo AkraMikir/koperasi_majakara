@@ -37,6 +37,7 @@
                     Kembali
                 </a>
                 <div class="flex gap-2">
+                    {{-- 
                     <a href="{{ route('nasabah.struk-gadai', $gadai->id) }}" 
                        class="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full border border-white/30 hover:bg-white/30 flex items-center gap-1">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,6 +45,7 @@
                         </svg>
                         Download Struk
                     </a>
+                    --}}
                     <span class="px-3 py-1 bg-white/20 text-white text-[10px] font-black rounded-full font-mono border border-white/30">{{ $gadai->slot_kode }}</span>
                 </div>
             </div>
@@ -62,10 +64,38 @@
             </div>
 
             {{-- Countdown --}}
-            @if(!$isLunas && !$isHangus)
-            <div class="mt-6 bg-white/10 rounded-3xl p-5 backdrop-blur-md border border-white/30 shadow-inner">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="text-white/90 text-[10px] font-black uppercase tracking-widest drop-shadow-sm">
+            @if($isLunas && $gadai->tgl_ambil_limit)
+            <div class="mt-4 bg-amber-500/25 rounded-2xl px-4 py-3 backdrop-blur-sm border border-amber-500/30">
+                <div class="flex items-center justify-between">
+                    <span class="text-white text-[10px] font-black uppercase tracking-widest">⚠️ Batas Waktu Pengambilan</span>
+                    <span class="text-white font-black text-sm" id="detail-countdown">-- H -- M -- S</span>
+                </div>
+                <p class="text-white/85 text-[10px] font-bold mt-1.5 leading-relaxed">Barang wajib diambil sebelum tanggal {{ $gadai->tgl_ambil_limit->format('d M Y H:i') }}. Jika melebihi batas waktu, barang akan dinyatakan hangus secara hukum.</p>
+                <script>
+                    (function() {
+                        const limitTime = new Date("{{ $gadai->tgl_ambil_limit->toIso8601String() }}").getTime();
+                        const timerId = setInterval(function() {
+                            const now = new Date().getTime();
+                            const distance = limitTime - now;
+                            if (distance < 0) {
+                                clearInterval(timerId);
+                                document.getElementById("detail-countdown").innerHTML = "HANGUS";
+                                return;
+                            }
+                            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                            document.getElementById("detail-countdown").innerHTML = 
+                                (days > 0 ? days + " Hari " : "") + hours + " Jam " + minutes + " Menit " + seconds + " Detik";
+                        }, 1000);
+                    })();
+                </script>
+            </div>
+            @elseif(!$isLunas && !$isHangus)
+            <div class="mt-4 bg-white/15 rounded-2xl px-4 py-3 backdrop-blur-sm border border-white/20">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white/80 text-[10px] font-black uppercase tracking-widest">
                         @if($isTenggang) Sisa Masa Tenggang @else Sisa Waktu Gadai @endif
                     </span>
                     @if($sisaHari >= 0)
