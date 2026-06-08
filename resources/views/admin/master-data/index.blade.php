@@ -480,5 +480,97 @@
         </div>
     </div>
 
+    {{-- ===== GRUP 5: KODE & IDENTIFIKASI ID ===== --}}
+    <div class="space-y-4">
+        <div class="flex items-center gap-3 border-l-4 border-majakara-brown pl-3">
+            <h2 class="text-lg font-bold text-gray-900 font-display">Master Kode & Identifikasi ID</h2>
+            <span class="w-1.5 h-1.5 bg-gray-300 rounded-full"></span>
+            <p class="text-xs text-gray-500 font-medium">Referensi pembentukan ID transaksi dan prefix sistem</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            {{-- Jenis Fitur --}}
+            <a href="{{ route('admin.master-data.fitur.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-majakara-brown/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-majakara-brown to-majakara-dark-gold rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-majakara-gold/10 text-majakara-brown rounded-lg text-xs font-bold border border-majakara-gold/20">
+                            Referensi Fitur
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-majakara-brown transition-colors">Jenis Fitur</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Kode klasifikasi utama domain bisnis (Tabungan, Pinjaman, Deposito, Gadai, Petty Cash).</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-majakara-brown group-hover:underline flex items-center gap-1">
+                        Lihat Data
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+
+            {{-- Jenis Via --}}
+            <a href="{{ route('admin.master-data.via.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-majakara-brown/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-majakara-brown to-majakara-dark-gold rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-majakara-gold/10 text-majakara-brown rounded-lg text-xs font-bold border border-majakara-gold/20">
+                            Referensi Channel
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-majakara-brown transition-colors">Jenis Via</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Kode identifikasi saluran/metode transaksi (Transfer, Cash, Owner Wallet, Admin Petty Cash).</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-majakara-brown group-hover:underline flex items-center gap-1">
+                        Lihat Data
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+
+            {{-- Jenis Transaksi --}}
+            <a href="{{ route('admin.master-data.transaksi.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-majakara-brown/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-majakara-brown to-majakara-dark-gold rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-majakara-gold/10 text-majakara-brown rounded-lg text-xs font-bold border border-majakara-gold/20">
+                            Referensi Mutasi
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-majakara-brown transition-colors">Jenis Transaksi</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Kode aksi mutasi/jurnal keuangan (Setoran, Penarikan, Pembayaran, Kirim Dana, dll).</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-majakara-brown group-hover:underline flex items-center gap-1">
+                        Lihat Data
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+        </div>
+    </div>
+
 </div>
 @endsection

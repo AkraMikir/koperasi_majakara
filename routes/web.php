@@ -526,11 +526,15 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'pinjamanDebuggerMajuHari'])->name('maju-hari');
         });
 
-        // Debugger Deposito (Testing Time Travel) - ONLY Admin Utama
         Route::prefix('deposito-debugger')->name('deposito-debugger.')->middleware('admin.utama')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerIndex'])->name('index');
             Route::post('/maju-hari', [\App\Http\Controllers\Admin\MasterDataController::class, 'depositoDebuggerMajuHari'])->name('maju-hari');
         });
+
+        // Jns Fitur, Via, Transaksi View
+        Route::get('/fitur', [\App\Http\Controllers\Admin\MasterDataController::class, 'fiturIndex'])->name('fitur.index');
+        Route::get('/via', [\App\Http\Controllers\Admin\MasterDataController::class, 'viaIndex'])->name('via.index');
+        Route::get('/transaksi', [\App\Http\Controllers\Admin\MasterDataController::class, 'transaksiIndex'])->name('transaksi.index');
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
