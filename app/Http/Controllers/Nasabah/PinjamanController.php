@@ -695,8 +695,8 @@ class PinjamanController extends Controller
 
         // Get angsuran berdasarkan jenis
         $angsuran = $pinjaman->jenis === 'bulanan'
-            ? $pinjaman->tempoBulanan()->orderBy('no_urut')->get()
-            : $pinjaman->tempoMingguan()->orderBy('no_urut')->get();
+            ? $pinjaman->tempoBulanan->sortBy('no_urut')
+            : $pinjaman->tempoMingguan->sortBy('no_urut');
 
         // Hitung denda per angsuran (berjalan jika telat & belum bayar) dan total denda
         $totalDenda = 0;

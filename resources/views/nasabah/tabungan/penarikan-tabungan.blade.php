@@ -171,8 +171,8 @@
                         <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Bank <span class="text-red-500">*</span></label>
                         <select name="nama_bank" id="nama_bank" class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                             <option value="">Pilih Bank</option>
-                            @foreach(['BCA', 'BNI', 'Mandiri', 'BRI', 'CIMB Niaga', 'Permata', 'Bank Lainnya'] as $bank)
-                                <option value="{{ $bank }}" {{ $defaultBank == $bank ? 'selected' : '' }}>{{ $bank }}</option>
+                            @foreach($banks as $bank)
+                                <option value="{{ $bank->bank }}" {{ $defaultBank == $bank->bank ? 'selected' : '' }}>{{ $bank->bank }}</option>
                             @endforeach
                         </select>
                         @if($rekeningNasabah && $rekeningNasabah->nama_bank)

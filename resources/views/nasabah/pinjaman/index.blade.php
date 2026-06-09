@@ -28,7 +28,18 @@
                         <h2 class="text-3xl md:text-4xl font-bold text-white font-display">
                             Rp {{ number_format($totalPinjamanAktif ?? 0, 0, ',', '.') }}
                         </h2>
-                        <p class="text-white/90 text-sm mt-1">Sisa Pembayaran: <span class="font-semibold">Rp {{ number_format($sisaPinjaman ?? 0, 0, ',', '.') }}</span></p>
+                        @php
+                            $totalDenda = 0;
+                            foreach ($pinjamanAktif ?? [] as $pinjaman) {
+                                $angsuran = $pinjaman->jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
+                                foreach ($angsuran as $item) {
+                                    $item->setRelation('pinjaman', $pinjaman);
+                                    $totalDenda += $item->hitungDenda();
+                                }
+                            }
+                            $sisaPinjamanTotal = ($sisaPinjaman ?? 0) + $totalDenda;
+                        @endphp
+                        <p class="text-white/90 text-sm mt-1">Sisa Pembayaran: <span class="font-semibold">Rp {{ number_format($sisaPinjamanTotal, 0, ',', '.') }}</span></p>
                     </div>
                     <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

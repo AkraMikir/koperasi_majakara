@@ -101,16 +101,19 @@
                                     </thead>
                                     <tbody>
                                         @foreach($tempos as $t)
-                                        @php $isTelat = $t->tgl_jatuh_tempo < now() && $t->status_bayar !== 'lunas'; @endphp
+                                        @php 
+                                            $isTelat = $t->tgl_jatuh_tempo < now() && $t->status_bayar !== 'lunas'; 
+                                            $computedDenda = $t->hitungDenda();
+                                        @endphp
                                         <tr class="{{ $isTelat ? 'bg-red-100 border-l-4 border-red-500' : 'border-t border-[#8b6f2f]/10 hover:bg-amber-50/50' }} transition-colors align-middle">
                                             <td class="px-3 py-2 text-center align-middle font-medium {{ $isTelat ? 'text-red-800' : 'text-gray-700' }}">#{{ $t->no_urut }}</td>
                                             <td class="px-3 py-2 align-middle {{ $isTelat ? 'text-red-800 font-medium' : 'text-gray-600' }}">{{ $t->tgl_jatuh_tempo->format('d M Y') }}@if($isTelat) <span class="text-red-600 text-[10px] ml-1">(Telat)</span>@endif</td>
                                             <td class="px-3 py-2 text-right align-middle font-semibold {{ $isTelat ? 'text-red-800' : 'text-[#674c1d]' }}">Rp {{ number_format($t->jumlah_tagihan, 0, ',', '.') }}</td>
                                             <td class="px-3 py-2 text-right align-middle font-semibold text-red-600">
-                                                {{ $t->denda > 0 ? '+ Rp ' . number_format($t->denda, 0, ',', '.') : '-' }}
+                                                {{ $computedDenda > 0 ? '+ Rp ' . number_format($computedDenda, 0, ',', '.') : '-' }}
                                             </td>
                                             <td class="px-3 py-2 text-right align-middle font-bold text-[#674c1d]">
-                                                Rp {{ number_format($t->jumlah_tagihan + $t->denda, 0, ',', '.') }}
+                                                Rp {{ number_format($t->jumlah_tagihan + $computedDenda, 0, ',', '.') }}
                                             </td>
                                         </tr>
                                         @endforeach

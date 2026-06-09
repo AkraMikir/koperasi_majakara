@@ -29,16 +29,16 @@
     <div class="flex flex-wrap items-center justify-between gap-4 bg-white/60 backdrop-blur-md rounded-2xl p-4 border border-white/60 shadow-sm">
         <div class="flex flex-wrap gap-2">
             <a href="?status=pending" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'pending' ? 'bg-amber-600 text-white border-amber-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
-                Menunggu ({{ \App\Models\GadaiPengajuan::where('status', 'pending')->count() }})
+                Menunggu ({{ $gadaiCounts['pending'] }})
             </a>
             <a href="?status=approved" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'approved' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
-                Disetujui ({{ \App\Models\GadaiPengajuan::where('status', 'approved')->count() }})
+                Disetujui ({{ $gadaiCounts['approved'] }})
             </a>
             <a href="?status=rejected" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'rejected' ? 'bg-red-600 text-white border-red-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
-                Ditolak ({{ \App\Models\GadaiPengajuan::where('status', 'rejected')->count() }})
+                Ditolak ({{ $gadaiCounts['rejected'] }})
             </a>
             <a href="?status=all" class="px-4 py-2 text-xs font-bold rounded-xl border transition-all duration-200 shadow-sm {{ $status === 'all' ? 'bg-gray-800 text-white border-gray-800' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50' }}">
-                Semua ({{ \App\Models\GadaiPengajuan::count() }})
+                Semua ({{ $gadaiCounts['all'] }})
             </a>
         </div>
     </div>
@@ -57,7 +57,7 @@
                             </div>
                             <div>
                                 <div class="font-bold text-gray-900 leading-tight">{{ $item->nasabah->user->nama }}</div>
-                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->item->nama_item }}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->item->head_1 }}</div>
                             </div>
                         </div>
                         <div class="flex flex-col items-end gap-1">
@@ -148,7 +148,7 @@
                                 </div>
                                 <div>
                                     <div class="font-bold text-gray-900 leading-none mb-1">{{ $item->nasabah->user->nama }}</div>
-                                    <div class="text-[11px] text-gray-500">{{ $item->gadaiActive->item->nama_item }} • <span class="font-mono bg-gray-100 px-1 rounded">{{ $item->gadaiActive->slot_kode }}/{{ $item->gadaiActive->slot_table }}</span></div>
+                                    <div class="text-[11px] text-gray-500">{{ $item->gadaiActive->item->head_1 }} • <span class="font-mono bg-gray-100 px-1 rounded">{{ $item->gadaiActive->slot_kode }}/{{ $item->gadaiActive->slot_table }}</span></div>
                                 </div>
                             </div>
                         </td>
@@ -475,8 +475,8 @@
                 gadaiActiveId: {{ $item->gadai_active_id }},
                 status: "{{ $item->status }}",
                 nasabahName: "{{ addslashes($item->nasabah->user->nama) }}",
-                barangName: "{{ addslashes($item->gadaiActive->item->nama_item) }}",
-                slotCode: "{{ $item->gadaiActive->slot_code }} / {{ $item->gadaiActive->slot_table }}",
+                barangName: "{{ addslashes($item->gadaiActive->item->head_1) }}",
+                slotCode: "{{ $item->gadaiActive->slot_kode }} / {{ $item->gadaiActive->slot_table }}",
                 jenis: "{{ strtoupper($item->jenis_pengajuan) }}",
                 metode: "{{ strtoupper($item->metode) }}",
                 nominal: "Rp {{ number_format($item->nominal, 0, ',', '.') }}",

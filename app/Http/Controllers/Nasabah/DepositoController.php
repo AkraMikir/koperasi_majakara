@@ -66,11 +66,18 @@ class DepositoController extends Controller
                 ->get();
         }
 
+        $now = now();
+        $isLeap = (($now->year % 4 === 0 && $now->year % 100 !== 0) || ($now->year % 400 === 0));
+        $pembagiHari = $isLeap ? 366 : 365;
+        $pajakRate = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+
         return view('nasabah.deposito.index', compact(
             'pakets',
             'jenisDeposito',
             'depositoAktif',
-            'riwayatPengajuan'
+            'riwayatPengajuan',
+            'pembagiHari',
+            'pajakRate'
         ));
     }
 
@@ -152,11 +159,18 @@ class DepositoController extends Controller
         // Daftar Bank untuk Info Rekening
         $banks = JnsBank::where('status', 'aktif')->get();
 
+        $now = now();
+        $isLeap = (($now->year % 4 === 0 && $now->year % 100 !== 0) || ($now->year % 400 === 0));
+        $pembagiHari = $isLeap ? 366 : 365;
+        $pajakRate = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+
         return view('nasabah.deposito.pengajuan', compact(
             'pakets',
             'jenisDeposito',
             'saldoTabungan',
-            'banks'
+            'banks',
+            'pembagiHari',
+            'pajakRate'
         ));
     }
 
@@ -270,7 +284,12 @@ class DepositoController extends Controller
         $nominalDenda = $deposito->nominal_awal * ($dendaPersen / 100);
         $nominalSetelahDenda = $deposito->nominal_awal - $nominalDenda;
 
-        return view('nasabah.deposito.detail', compact('deposito', 'dendaPersen', 'nominalDenda', 'nominalSetelahDenda'));
+        $tglJatuhTempo = $deposito->tgl_jatuh_tempo ?? now();
+        $isLeap = (($tglJatuhTempo->year % 4 === 0 && $tglJatuhTempo->year % 100 !== 0) || ($tglJatuhTempo->year % 400 === 0));
+        $pembagiHari = $isLeap ? 366 : 365;
+        $pajakRate = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+
+        return view('nasabah.deposito.detail', compact('deposito', 'dendaPersen', 'nominalDenda', 'nominalSetelahDenda', 'pembagiHari', 'pajakRate'));
     }
 
     /**
@@ -286,13 +305,14 @@ class DepositoController extends Controller
         $deposito = DepositoH::where('id_nasabah', $nasabah->id)
             ->with('tenor')->findOrFail($id);
 
-        // Hitung nominal akhir: pokok + bunga bersih (setelah pajak 20%)
+        // Hitung nominal akhir: pokok + bunga bersih
         $tglJatuhTempo = $deposito->tgl_jatuh_tempo;
         $isLeap = $tglJatuhTempo ? (($tglJatuhTempo->year % 4 === 0 && $tglJatuhTempo->year % 100 !== 0) || ($tglJatuhTempo->year % 400 === 0)) : false;
         $pembagi = $isLeap ? 366 : 365;
         
-        $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor->tenor_hari ?? 30) / $pembagi);
-        $pajak       = $bungaKotor * 0.10;
+        $pajakRate   = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+        $bungaKotor  = $deposito->nominal_awal * $deposito->bunga * (($deposito->tenor?->tenor_hari ?? 30) / $pembagi);
+        $pajak       = $bungaKotor * $pajakRate;
         $nominalAkhir = $deposito->nominal_awal + $bungaKotor - $pajak;
 
         // Cek apakah sudah ada request yang pending

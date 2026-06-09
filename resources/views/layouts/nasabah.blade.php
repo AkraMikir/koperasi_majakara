@@ -88,6 +88,20 @@
         // Update immediately and then every second
         updateTime();
         setInterval(updateTime, 1000);
+
+        // ─── GLOBAL DEBOUNCE UNTUK FILTER / SEARCH ────────────────────────────────
+        let searchTimeout = null;
+        document.addEventListener('input', function (e) {
+            if (e.target.name === 'search' || e.target.classList.contains('debounce-search')) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function () {
+                    let form = e.target.closest('form');
+                    if (form) {
+                        form.requestSubmit();
+                    }
+                }, 500); // 500ms delay
+            }
+        });
     </script>
 </body>
 </html>

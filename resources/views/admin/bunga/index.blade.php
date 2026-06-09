@@ -195,11 +195,6 @@
                 <h3 class="font-semibold text-gray-900">Tren Arus Kas Bunga</h3>
                 <p class="text-xs text-gray-400 mt-0.5">6 bulan terakhir (Pemasukan vs Pengeluaran)</p>
             </div>
-            <select class="text-xs border border-gray-200 rounded-lg px-3 py-1.5 text-gray-600 focus:outline-none focus:border-[#8b6f2f]">
-                <option>6 Bulan</option>
-                <option>12 Bulan</option>
-                <option>Tahun Ini</option>
-            </select>
         </div>
         <canvas id="trendBungaChart" height="120"></canvas>
     </div>
@@ -330,7 +325,9 @@
 @endsection
 
 @push('scripts')
+@once
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+@endonce
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Trend Chart

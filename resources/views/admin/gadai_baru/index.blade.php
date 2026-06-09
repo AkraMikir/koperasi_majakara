@@ -32,13 +32,15 @@
 
     {{-- ===== STAT SUMMARY CARDS ===== --}}
     @php
-        $statAktif      = $gadiList->where('status', 'active')->count();
-        $statTenggang   = $gadiList->where('status', 'grace_period')->count();
-        $statHangus     = $gadiList->where('status', 'expired_final')->count();
-        $statLunas      = $gadiList->where('status', 'lunas')->count();
-        $totalAll       = $gadiList->count();
+        $statAktif      = $globalStats['active'] ?? 0;
+        $statTenggang   = $globalStats['grace_period'] ?? 0;
+        $statHangus     = $globalStats['expired_final'] ?? 0;
+        $statLunas      = $globalStats['lunas'] ?? 0;
+        $statReturned   = $globalStats['returned'] ?? 0;
+        $statAuctioned  = $globalStats['auctioned'] ?? 0;
+        $totalAll       = array_sum($globalStats);
     @endphp
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
         <x-admin.stats-card 
             title="Aktif" 
             value="{{ $statAktif }}" 
@@ -77,6 +79,26 @@
             iconHoverColor="group-hover:text-emerald-700"
             iconHoverBorder="group-hover:border-emerald-200">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+        </x-admin.stats-card>
+
+        <x-admin.stats-card 
+            title="Telah Diambil" 
+            value="{{ $statReturned }}" 
+            iconBg="bg-indigo-50"
+            iconColor="text-indigo-600"
+            iconHoverColor="group-hover:text-indigo-700"
+            iconHoverBorder="group-hover:border-indigo-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+        </x-admin.stats-card>
+
+        <x-admin.stats-card 
+            title="Dilelang" 
+            value="{{ $statAuctioned }}" 
+            iconBg="bg-purple-50"
+            iconColor="text-purple-600"
+            iconHoverColor="group-hover:text-purple-700"
+            iconHoverBorder="group-hover:border-purple-200">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z"/></svg>
         </x-admin.stats-card>
     </div>
 
@@ -279,6 +301,14 @@
                 </tbody>
             </table>
 
+            @if($hasMore)
+            <div class="text-center py-6 border-t border-gray-100 hidden md:block" id="load-more-container-desktop">
+                <button type="button" onclick="loadMore()" class="px-6 py-2.5 bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium rounded-xl transition-colors shadow-sm text-sm border border-gray-200" id="btn-load-more-desktop">
+                    Muat Lebih Banyak
+                </button>
+            </div>
+            @endif
+
             <!-- Card View for Mobile -->
             <div class="md:hidden divide-y divide-gray-100">
                 @forelse($gadiList as $gadai)
@@ -410,7 +440,108 @@
                 </div>
                 @endforelse
             </div>
+            @if($hasMore)
+            <div class="text-center py-6 border-t border-gray-100 md:hidden" id="load-more-container-mobile">
+                <button type="button" onclick="loadMore()" class="px-6 py-2.5 bg-gray-50 text-gray-600 hover:bg-gray-100 font-medium rounded-xl transition-colors shadow-sm text-sm border border-gray-200" id="btn-load-more-mobile">
+                    Muat Lebih Banyak
+                </button>
+            </div>
+            @endif
         </div>
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    let currentPage = {{ $page }};
+    let isLoading = false;
+
+    async function loadMore() {
+        if (isLoading) return;
+        isLoading = true;
+        
+        const btnDesktop = document.getElementById('btn-load-more-desktop');
+        const btnMobile = document.getElementById('btn-load-more-mobile');
+        
+        if(btnDesktop) btnDesktop.innerText = 'Memuat...';
+        if(btnMobile) btnMobile.innerText = 'Memuat...';
+
+        try {
+            currentPage++;
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', currentPage);
+
+            const response = await fetch(url.toString(), {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'text/html'
+                }
+            });
+            const html = await response.text();
+            
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            // Desktop Table Append
+            const newTableRows = doc.querySelectorAll('table tbody tr');
+            const tbody = document.querySelector('table tbody');
+            if (newTableRows.length > 0 && tbody) {
+                // If it's empty state row, we might need to remove it first, but typically length > 0 handles it
+                if(tbody.querySelector('td[colspan]')) {
+                    tbody.innerHTML = '';
+                }
+                newTableRows.forEach(row => tbody.appendChild(row.cloneNode(true)));
+            }
+
+            // Mobile Cards Append
+            const newCards = doc.querySelectorAll('.md\\:hidden.divide-y > div:not([id^="load-more"])');
+            const mobileContainer = document.querySelector('.md\\:hidden.divide-y');
+            if (newCards.length > 0 && mobileContainer) {
+                if(mobileContainer.querySelector('.p-0')) {
+                    mobileContainer.innerHTML = '';
+                }
+                newCards.forEach(card => {
+                    // avoid appending the empty state or load more wrapper
+                    if(card.classList.contains('p-4') && card.classList.contains('hover:brightness-95')) {
+                        mobileContainer.appendChild(card.cloneNode(true));
+                    }
+                });
+            }
+
+            // Update Load More buttons
+            const newHasMore = doc.getElementById('load-more-container-desktop') !== null;
+            if (!newHasMore) {
+                const contDesktop = document.getElementById('load-more-container-desktop');
+                const contMobile = document.getElementById('load-more-container-mobile');
+                if(contDesktop) contDesktop.remove();
+                if(contMobile) contMobile.remove();
+            }
+
+        } catch (error) {
+            console.error('Error loading more:', error);
+            alert('Gagal memuat data.');
+        } finally {
+            isLoading = false;
+            if(btnDesktop) btnDesktop.innerText = 'Muat Lebih Banyak';
+            if(btnMobile) btnMobile.innerText = 'Muat Lebih Banyak';
+        }
+    }
+
+    // Infinite scroll observer
+    const observer = new IntersectionObserver((entries) => {
+        if (entries[0].isIntersecting) {
+            loadMore();
+        }
+    }, { rootMargin: '100px' });
+
+    // Try observing load more containers for infinite scroll
+    setTimeout(() => {
+        const desktopContainer = document.getElementById('load-more-container-desktop');
+        const mobileContainer = document.getElementById('load-more-container-mobile');
+        if (desktopContainer && getComputedStyle(desktopContainer).display !== 'none') observer.observe(desktopContainer);
+        if (mobileContainer && getComputedStyle(mobileContainer).display !== 'none') observer.observe(mobileContainer);
+    }, 1000);
+
+</script>
+@endpush

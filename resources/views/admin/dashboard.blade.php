@@ -31,9 +31,6 @@
     </div>
 
     @php
-        $totalAset = ($stats['total_tabungan'] ?? 0) + ($stats['total_deposito'] ?? 0);
-        $totalPenyaluran = ($stats['total_pinjaman'] ?? 0) + ($stats['total_gadai'] ?? 0);
-
         if (!function_exists('formatIndonesianDuration')) {
             function formatIndonesianDuration($date) {
                 if (!$date) return '-';
@@ -316,7 +313,7 @@
             <div class="flex flex-wrap items-center gap-1.5 p-1 bg-gray-50 rounded-2xl border border-gray-100 self-start xl:self-auto">
                 <button @click="activeTab = 'pending'" :class="activeTab === 'pending' ? 'bg-white text-majakara-brown shadow-xs border-gray-200' : 'text-gray-500 hover:text-gray-900 border-transparent'" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all border flex items-center gap-2 cursor-pointer">
                     <span>Antrean Pengajuan</span>
-                    <span class="px-2 py-0.5 bg-red-100 text-red-600 rounded-md text-[9px] font-black">{{ count($pengajuan_pending) }}</span>
+                    <span class="px-2 py-0.5 bg-red-100 text-red-600 rounded-md text-[9px] font-black">{{ $stats['pengajuan_pending'] ?? 0 }}</span>
                 </button>
                 <button @click="activeTab = 'overdue'" :class="activeTab === 'overdue' ? 'bg-white text-majakara-brown shadow-xs border-gray-200' : 'text-gray-500 hover:text-gray-900 border-transparent'" class="px-4 py-2.5 text-xs font-bold rounded-xl transition-all border flex items-center gap-2 cursor-pointer">
                     <span>Kredit Terlambat</span>

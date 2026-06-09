@@ -169,12 +169,16 @@ class TabunganController extends Controller
         // Data rekening nasabah untuk auto-fill form transfer (bank & no rekening)
         $rekeningNasabah = Nasabah::with('dataRek')->find($idAnggota)?->dataRek;
 
+        // Get data bank aktif
+        $banks = JnsBank::where('status', 'aktif')->get();
+
         return view('nasabah.tabungan.penarikan-tabungan', [
             'user' => Auth::user(),
             'tabunganInfo' => $tabunganInfo,
             'riwayatPenarikan' => $riwayatPenarikan,
             'lokasi' => $lokasi,
             'rekeningNasabah' => $rekeningNasabah,
+            'banks' => $banks,
         ]);
     }
 
@@ -814,8 +818,7 @@ class TabunganController extends Controller
 
         $totalPenarikanTrans = \App\Models\TransTabungan::where('id_anggota', $idAnggota)
             ->whereHas('jnsTransaksi', function($q) { $q->where('kode', 'PNR'); })
-            ->get()
-            ->sum(function($t) { return abs((float)$t->nominal); });
+            ->sum(DB::raw('abs(nominal)')) ?? 0;
 
         // Tambahkan setoran dari pengajuan yang sudah approved tapi belum ada transaksi
         $approvedNoTransSum = \App\Models\PengajuanTabungan::where('id_anggota', $idAnggota)
@@ -831,12 +834,17 @@ class TabunganController extends Controller
             ->where('metode_setor', 'saldo_tabungan')
             ->sum('nominal') ?? 0;
 
-        $finalSaldo = max(0, $rawSaldo - $pendingDepositoTabungan);
+        // Kurangi juga dengan penarikan tabungan yang pending (status == '1')
+        $pendingPenarikanTabungan = \App\Models\PengajuanPenarikanTabungan::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Pending
+            ->sum('nominal') ?? 0;
+
+        $finalSaldo = max(0, $rawSaldo - $pendingDepositoTabungan - $pendingPenarikanTabungan);
 
         if ($returnDetail) {
             return [
                 'saldo' => $finalSaldo,
-                'hold'  => $pendingDepositoTabungan
+                'hold'  => $pendingDepositoTabungan + $pendingPenarikanTabungan
             ];
         }
 

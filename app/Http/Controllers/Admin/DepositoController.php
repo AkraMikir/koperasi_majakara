@@ -83,8 +83,7 @@ class DepositoController extends Controller
         for ($i = 5; $i >= 0; $i--) {
             $date = now()->subMonths($i);
             $trend_labels[] = $date->translatedFormat('M Y');
-            $trend_data[] = DepositoH::where('status', 'aktif')
-                                     ->whereMonth('tgl_mulai', $date->month)
+            $trend_data[] = DepositoH::whereMonth('tgl_mulai', $date->month)
                                      ->whereYear('tgl_mulai', $date->year)
                                      ->sum('nominal_awal');
         }
@@ -1192,6 +1191,7 @@ class DepositoController extends Controller
 
         $query = DepositoPersiapanCair::with(['deposito.nasabah.user', 'deposito.tenor', 'nasabah.user'])
             ->whereIn('status', ['tentatif', 'diproses'])
+            ->where('tgl_target_cair', '<=', now()->addDays(7))
             ->orderBy('tgl_target_cair');
 
         if ($request->filled('metode_cair')) {
