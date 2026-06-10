@@ -10,7 +10,7 @@ WORKDIR /app
 COPY package.json package-lock.json vite.config.js ./
 
 # Install npm dependencies
-RUN npm ci --prefer-offline
+RUN npm ci
 
 # Copy frontend source
 COPY resources/ ./resources/
@@ -20,25 +20,8 @@ COPY public/ ./public/
 RUN npm run build
 
 # =============================================================================
-# Stage 2: PHP Dependencies (Composer)
-# =============================================================================
-FROM composer:2.7 AS composer-deps
-
-WORKDIR /app
-
-COPY composer.json composer.lock ./
-
-# Install production PHP deps (no dev)
-RUN composer install \
-    --optimize-autoloader \
-    --no-dev \
-    --no-interaction \
-    --no-scripts \
-    --prefer-dist
-
-# =============================================================================
-# Stage 3: Production Image
-# PHP 8.2-FPM + Tesseract OCR + semua extensions
+# Stage 2: Production Image
+# PHP 8.2-FPM + Composer (inline) + Tesseract OCR + semua extensions
 # =============================================================================
 FROM php:8.2-fpm-bookworm AS production
 
@@ -63,7 +46,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     # Tesseract OCR
     tesseract-ocr \
     tesseract-ocr-ind \
-    # Proccess utilities
+    # Process utilities
     supervisor \
     && docker-php-ext-configure gd \
         --with-freetype \
@@ -85,6 +68,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
+# ---- Install Composer (langsung di dalam PHP stage) ----
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
 # ---- PHP Configuration ----
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
@@ -95,16 +81,19 @@ COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # ---- Application Files ----
 WORKDIR /var/www/html
 
-# Copy vendor dari stage composer
-COPY --from=composer-deps /app/vendor ./vendor
-
-# Copy built frontend assets dari stage frontend
-COPY --from=frontend /app/public/build ./public/build
-
-# Copy seluruh source code aplikasi
+# Copy source code dulu
 COPY . .
 
-# Copy built assets lagi (pastikan tidak tertimpa)
+# ---- Install PHP dependencies (dengan semua extensions sudah tersedia) ----
+RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+    --optimize-autoloader \
+    --no-dev \
+    --no-interaction \
+    --no-scripts \
+    --prefer-dist \
+    && composer clear-cache
+
+# ---- Copy built frontend assets dari stage frontend ----
 COPY --from=frontend /app/public/build ./public/build
 
 # ---- Permissions ----
