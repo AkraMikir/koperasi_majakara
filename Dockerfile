@@ -73,12 +73,14 @@ WORKDIR /var/www/html
 COPY . .
 
 # ---- Install PHP dependencies ----
-RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
+RUN COMPOSER_MEMORY_LIMIT=-1 COMPOSER_ALLOW_SUPERUSER=1 composer install \
     --optimize-autoloader \
     --no-dev \
     --no-interaction \
     --no-scripts \
+    --no-plugins \
     --prefer-dist \
+    --ignore-platform-reqs \
     && composer clear-cache
 
 # ---- Copy built frontend assets dari stage frontend ----
