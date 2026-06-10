@@ -1,54 +1,59 @@
 # =============================================================================
 # Stage 1: Frontend Build (Node.js)
-# Build Vite assets (Tailwind CSS v4 + Alpine.js)
 # =============================================================================
 FROM node:20-alpine AS frontend
 
 WORKDIR /app
 
-# Copy package files
 COPY package.json package-lock.json vite.config.js ./
-
-# Install npm dependencies
 RUN npm ci
 
-# Copy frontend source
 COPY resources/ ./resources/
 COPY public/ ./public/
-
-# Build production assets
 RUN npm run build
 
 # =============================================================================
-# Stage 2: Production Image
-# PHP 8.2-FPM + Composer (inline) + Tesseract OCR + semua extensions
+# Stage 2: Production — PHP 8.2-FPM
 # =============================================================================
 FROM php:8.2-fpm-bookworm AS production
 
-# ---- System Dependencies & PHP Extensions ----
+# ---- Step 1: Update apt & install system libs dasar ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    # Utilities
     curl \
     unzip \
     git \
-    # Image processing (GD)
+    zip \
+    supervisor \
     libpng-dev \
     libjpeg62-turbo-dev \
     libfreetype6-dev \
-    libwebp-dev \
-    # Zip
     libzip-dev \
-    zip \
-    # Intl
     libicu-dev \
-    # PDF (DomPDF)
     libxml2-dev \
-    # Tesseract OCR
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Step 2: Install libwebp (terpisah, lebih mudah debug) ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libwebp-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Step 3: Install Tesseract OCR (terpisah) ----
+RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
-    tesseract-ocr-ind \
-    # Process utilities
-    supervisor \
-    && docker-php-ext-configure gd \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install bahasa Indonesia (opsional, tidak gagalkan build jika tidak ada)
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr-ind \
+    || (echo "WARNING: tesseract-ocr-ind not found, skipping" && true) \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---- Step 4: Install PHP extensions ----
+RUN docker-php-ext-configure gd \
         --with-freetype \
         --with-jpeg \
         --with-webp \
@@ -62,29 +67,28 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         opcache \
         intl \
         exif \
-        pcntl \
-    && pecl install redis \
-    && docker-php-ext-enable redis \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+        pcntl
 
-# ---- Install Composer (langsung di dalam PHP stage) ----
-COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+# ---- Step 5: Install PHP Redis extension ----
+RUN pecl install redis \
+    && docker-php-ext-enable redis
 
-# ---- PHP Configuration ----
+# ---- PHP & FPM Configuration ----
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
 COPY docker/php/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
 # ---- Supervisor Configuration ----
 COPY docker/supervisor/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# ---- Install Composer binary ----
+COPY --from=composer:2.7 /usr/bin/composer /usr/bin/composer
+
 # ---- Application Files ----
 WORKDIR /var/www/html
 
-# Copy source code dulu
 COPY . .
 
-# ---- Install PHP dependencies (dengan semua extensions sudah tersedia) ----
+# ---- Install PHP dependencies ----
 RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
     --optimize-autoloader \
     --no-dev \
@@ -93,7 +97,7 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
     --prefer-dist \
     && composer clear-cache
 
-# ---- Copy built frontend assets dari stage frontend ----
+# ---- Copy built frontend assets ----
 COPY --from=frontend /app/public/build ./public/build
 
 # ---- Permissions ----
