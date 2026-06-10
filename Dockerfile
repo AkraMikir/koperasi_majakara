@@ -14,14 +14,16 @@ RUN npm run build
 
 # =============================================================================
 # Stage 2: Production — PHP 8.2-FPM
-# Gunakan install-php-extensions untuk handle semua extension otomatis
 # =============================================================================
 FROM php:8.2-fpm-bookworm AS production
 
-# ---- Install helper install-php-extensions (handle deps otomatis) ----
-COPY --from=mlocati/docker-php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+# ---- Install install-php-extensions dari GitHub (bukan Docker Hub) ----
+RUN curl -sSLf \
+    "https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions" \
+    -o /usr/local/bin/install-php-extensions \
+    && chmod +x /usr/local/bin/install-php-extensions
 
-# ---- Install semua PHP extensions sekaligus ----
+# ---- Install semua PHP extensions ----
 RUN install-php-extensions \
     pdo_mysql \
     mbstring \
@@ -43,18 +45,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # ---- Install Tesseract OCR ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    tesseract-ocr \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install bahasa Indonesia (opsional)
+# Bahasa Indonesia (opsional — tidak gagalkan build jika tidak ada)
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends tesseract-ocr-ind \
-    || echo "WARNING: tesseract-ocr-ind not found, skipping" \
+    && (apt-get install -y --no-install-recommends tesseract-ocr-ind \
+        || echo "WARNING: tesseract-ocr-ind not available, OCR bahasa Indonesia tidak aktif") \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/* \
-    || true
+    && rm -rf /var/lib/apt/lists/*
 
 # ---- PHP & FPM Configuration ----
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
@@ -80,18 +81,21 @@ RUN COMPOSER_MEMORY_LIMIT=-1 composer install \
     --prefer-dist \
     && composer clear-cache
 
-# ---- Copy built frontend assets ----
+# ---- Copy built frontend assets dari stage frontend ----
 COPY --from=frontend /app/public/build ./public/build
 
 # ---- Permissions ----
 RUN chown -R www-data:www-data /var/www/html \
-    && chmod -R 755 /var/www/html/storage \
-    && chmod -R 755 /var/www/html/bootstrap/cache
+    && chmod -R 775 /var/www/html/storage \
+    && chmod -R 775 /var/www/html/bootstrap/cache
 
-# ---- Entrypoint ----
+# ---- Entrypoint & default command ----
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 EXPOSE 9000
 
+# ENTRYPOINT: jalankan setup script
+# CMD: default command (bisa dioverride oleh docker-compose)
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["php-fpm", "-F"]
