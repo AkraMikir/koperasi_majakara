@@ -488,6 +488,9 @@
                     </button>
                 </div>
             </div>
+        </form>
+    </div>
+</div>
 
 <!-- Modal PIN Verification untuk Edit Profile -->
 <div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[1000] flex items-center justify-center p-4">
@@ -543,6 +546,7 @@ const formTemplates = {
     'data_user': {
         title: 'Edit Data Akun User',
         fields: [
+            { name: 'foto', label: 'Foto Profil', type: 'file', value: '{{ $nasabah->user->foto && $nasabah->user->foto !== "default-avatar.jpg" ? $nasabah->user->foto : "" }}', optional: true },
             { name: 'nama', label: 'Nama (Display Name)', type: 'text', value: '{{ old("nama") ?? ($nasabah->user->nama ?? "") }}' },
             { name: 'email', label: 'Email', type: 'email', value: '{{ old("email") ?? ($nasabah->user->email ?? "") }}' },
             { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ old("nomor_hp") ?? ($nasabah->user->nomor_hp ?? "") }}' }
@@ -667,14 +671,17 @@ function openEditModal(jenisData) {
             });
             html += '</select>';
         } else if (field.type === 'file') {
-            html += `<input type="file" name="${field.name}" accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-[#674c1d] hover:file:bg-amber-100">`;
+            const requiredAttr = field.optional ? '' : 'required';
+            html += `<input type="file" name="${field.name}" ${requiredAttr} accept="image/*" class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f] text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-amber-50 file:text-[#674c1d] hover:file:bg-amber-100">`;
             if (field.value) {
-                html += `<div class="mt-2 text-xs text-gray-500">File saat ini: <a href="/storage/${field.value}" target="_blank" class="text-[#8b6f2f] hover:underline font-semibold">Lihat Foto KTP</a></div>`;
+                const labelText = field.name === 'foto' ? 'Foto Profil' : 'Foto KTP';
+                html += `<div class="mt-2 text-xs text-gray-500">File saat ini: <a href="/storage/${field.value}" target="_blank" class="text-[#8b6f2f] hover:underline font-semibold">Lihat ${labelText}</a></div>`;
             }
         } else {
             const maxlengthAttr = field.maxlength ? `maxlength="${field.maxlength}"` : '';
             const oninputAttr = field.numeric ? 'oninput="this.value = this.value.replace(/[^0-9]/g, \'\')"' : '';
-            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" ${maxlengthAttr} ${oninputAttr} class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
+            const requiredAttr = field.optional ? '' : 'required';
+            html += `<input type="${field.type}" name="${field.name}" value="${field.value}" ${maxlengthAttr} ${oninputAttr} ${requiredAttr} class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-[#8b6f2f] focus:border-[#8b6f2f]">`;
         }
         
         html += '</div>';
@@ -724,12 +731,16 @@ function closeEditModal() {
 function goToStep2() {
     // Validate required fields in step 1
     const form = document.getElementById('editProfileForm');
+    if (!form.reportValidity()) {
+        return;
+    }
     
     // Transfer data ke PIN modal
     const pinFormFields = document.getElementById('pinFormFields');
     const pinJenisData = document.getElementById('pin_jenis_data');
+    const editJenisData = document.getElementById('edit_jenis_data');
     
-    pinJenisData.value = jenisData;
+    pinJenisData.value = editJenisData ? editJenisData.value : '';
     pinFormFields.innerHTML = '';
     
     // Transfer text/select fields as hidden inputs, and clone file inputs
@@ -787,13 +798,29 @@ function openPinVerificationModal() {
 }
 
 function goToStep1() {
-    document.getElementById('step2').classList.add('hidden');
-    document.getElementById('step1').classList.remove('hidden');
+    const step2 = document.getElementById('step2');
+    if (step2) step2.classList.add('hidden');
     
-    const jenisData = document.getElementById('edit_jenis_data').value;
-    const template = formTemplates[jenisData];
-    document.getElementById('editModalTitle').textContent = template ? template.title : 'Edit Data';
-    document.getElementById('pin_verification').removeAttribute('required');
+    const step1 = document.getElementById('step1');
+    if (step1) step1.classList.remove('hidden');
+
+    const pinModal = document.getElementById('modalPinVerification');
+    if (pinModal) pinModal.classList.add('hidden');
+    
+    const editModal = document.getElementById('modalEditProfile');
+    if (editModal) {
+        editModal.classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+    }
+    
+    const jenisDataInput = document.getElementById('edit_jenis_data');
+    if (jenisDataInput && jenisDataInput.value) {
+        const template = formTemplates[jenisDataInput.value];
+        document.getElementById('editModalTitle').textContent = template ? template.title : 'Edit Data';
+    }
+    
+    const pinVerif = document.getElementById('pin_verification');
+    if (pinVerif) pinVerif.removeAttribute('required');
 }
 
 // PIN input: only numbers
