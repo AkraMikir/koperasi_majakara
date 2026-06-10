@@ -24,10 +24,6 @@ tests/
 .phpunit.result.cache
 phpunit.xml
 
-# Docker files itu sendiri (tidak perlu di dalam image)
-docker/
-docker-compose*.yml
-Dockerfile
 
 # Dokumentasi lokal
 *.md
