@@ -14,64 +14,47 @@ RUN npm run build
 
 # =============================================================================
 # Stage 2: Production — PHP 8.2-FPM
+# Gunakan install-php-extensions untuk handle semua extension otomatis
 # =============================================================================
 FROM php:8.2-fpm-bookworm AS production
 
-# ---- Step 1: Update apt & install system libs dasar ----
+# ---- Install helper install-php-extensions (handle deps otomatis) ----
+COPY --from=mlocati/docker-php-extension-installer /usr/bin/install-php-extensions /usr/local/bin/
+
+# ---- Install semua PHP extensions sekaligus ----
+RUN install-php-extensions \
+    pdo_mysql \
+    mbstring \
+    gd \
+    zip \
+    bcmath \
+    opcache \
+    intl \
+    exif \
+    pcntl \
+    redis
+
+# ---- Install system tools ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
     unzip \
     git \
-    zip \
     supervisor \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libfreetype6-dev \
-    libzip-dev \
-    libicu-dev \
-    libxml2-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# ---- Step 2: Install libwebp (terpisah, lebih mudah debug) ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libwebp-dev \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# ---- Step 3: Install Tesseract OCR (terpisah) ----
+# ---- Install Tesseract OCR ----
 RUN apt-get update && apt-get install -y --no-install-recommends \
     tesseract-ocr \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install bahasa Indonesia (opsional, tidak gagalkan build jika tidak ada)
+# Install bahasa Indonesia (opsional)
 RUN apt-get update \
     && apt-get install -y --no-install-recommends tesseract-ocr-ind \
-    || (echo "WARNING: tesseract-ocr-ind not found, skipping" && true) \
+    || echo "WARNING: tesseract-ocr-ind not found, skipping" \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
-
-# ---- Step 4: Install PHP extensions ----
-RUN docker-php-ext-configure gd \
-        --with-freetype \
-        --with-jpeg \
-        --with-webp \
-    && docker-php-ext-install -j$(nproc) \
-        pdo \
-        pdo_mysql \
-        mbstring \
-        gd \
-        zip \
-        bcmath \
-        opcache \
-        intl \
-        exif \
-        pcntl
-
-# ---- Step 5: Install PHP Redis extension ----
-RUN pecl install redis \
-    && docker-php-ext-enable redis
+    && rm -rf /var/lib/apt/lists/* \
+    || true
 
 # ---- PHP & FPM Configuration ----
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/app.ini
