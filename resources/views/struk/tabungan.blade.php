@@ -11,8 +11,10 @@
         .underline { text-decoration: underline; }
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
-        .table-row td { vertical-align: top; font-size:8px }
-        .label { font-weight: normal; width: 45%; font-size:11px }
+        .table-row td { vertical-align: top; }
+        .label { font-weight: bold; width: 65%; font-size:11px }
+        .td-data{font-size:9px; text-align:right}
+        .td-dot{width:1%;}
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -24,7 +26,6 @@
         .nominal-table td { padding: 2px 0; }
         .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
         .approver { margin-top: 10px; font-size: 10px; }
-        .id-kecil{font-size:8px}
     </style>
 </head>
 @php
@@ -54,28 +55,30 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">ID Transaksi</td>
-            <td class="id-kecil">: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT) }}</td>
+            <td class="label">ID Transaksi </td>
+            <td class="td-dot">:</td>
+            <td class="td-data">{{ $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT) }}</td>
         </tr>
         <tr>
             <td class="label">Tanggal & Waktu</td>
-            <td class="id-kecil">: {{ $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d-m-Y H:i') : '-' }}</td>
+            <td>:</td>
+            <td class="td-data"> {{ $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d-m-Y H:i') : '-' }}</td>
         </tr>
         <tr>
             <td class="label">Nama Anggota</td>
-            <td class="id-kecil">: {{ $transaksi->nasabah->user->nama ?? 'N/A' }}</td>
+            <td class="td-data">: {{ $transaksi->nasabah->user->nama ?? 'N/A' }}</td>
         </tr>
         <tr>
             <td class="label">NIK</td>
-            <td class="id-kecil">: {{ $transaksi->nasabah->dataKtp->nik ?? '-' }}</td>
+            <td class="td-data">: {{ $transaksi->nasabah->dataKtp->nik ?? '-' }}</td>
         </tr>
         <tr>
             <td class="label">Jenis Transaksi</td>
-            <td class="id-kecil">: {{ ucfirst($transaksi->jenis) }}</td>
+            <td class="td-data">: {{ ucfirst($transaksi->jenis) }}</td>
         </tr>
         <tr>
             <td class="label">Via</td>
-            <td class="id-kecil">: {{ ucfirst($transaksi->via ?? '-') }}</td>
+            <td class="td-data">: {{ ucfirst($transaksi->via ?? '-') }}</td>
         </tr>
     </table>
     
@@ -110,7 +113,7 @@
     <table class="table-row">
         <tr>
             <td class="label">Keterangan</td>
-            <td class="text-right">: {{ $transaksi->keterangan }}</td>
+            <td>: {{ $transaksi->keterangan }}</td>
         </tr>
     </table>
     @endif
