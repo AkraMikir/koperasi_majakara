@@ -349,6 +349,7 @@ class ProfileController extends Controller
     private function validateDataBaru($request, $jenisData)
     {
         $rules = [];
+        $data = $request->all();
 
         switch ($jenisData) {
             case 'data_user':

@@ -40,6 +40,7 @@ class TransTabungan extends Model
         'is_petty_cash'     => 'boolean',
     ];
 
+    protected $with = ['jnsTransaksi', 'jnsVia'];
     protected $appends = ['jenis', 'via'];
 
     /**
