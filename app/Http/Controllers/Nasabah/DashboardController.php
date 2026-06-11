@@ -70,6 +70,7 @@ class DashboardController extends Controller
 
         // 1. Tabungan
         $transTabungan = TransTabungan::where('id_anggota', $idAnggota)
+            ->with('jnsTransaksi')
             ->latest('tgl_transaksi')
             ->take(5)
             ->get();
@@ -147,7 +148,9 @@ class DashboardController extends Controller
 
         // Sort by tgl_transaksi descending
         usort($allTransaksi, function($a, $b) {
-            return $b->tgl_transaksi->timestamp - $a->tgl_transaksi->timestamp;
+            $timeA = $a->tgl_transaksi ? Carbon::parse($a->tgl_transaksi)->timestamp : 0;
+            $timeB = $b->tgl_transaksi ? Carbon::parse($b->tgl_transaksi)->timestamp : 0;
+            return $timeB - $timeA;
         });
         
         // Take latest 5

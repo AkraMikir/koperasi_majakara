@@ -101,7 +101,7 @@
                     <div class="flex items-center justify-between mb-2">
                         <div>
                             <p class="text-white/60 text-xs font-mono">{{ $dep->nomor_deposito }}</p>
-                            <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor->tenor_bulan ?? '-' }} Bulan</p>
+                            <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
                         </div>
                         <div class="text-right">
                             <p class="text-[#f0d060] font-black text-xl leading-none">{{ number_format($dep->bunga * 100, 2) }}%</p>
@@ -246,11 +246,11 @@
                     </div>
                     <div class="mt-3 pt-3 border-t border-[#d4af37]/20">
                         <div class="flex justify-between text-xs text-gray-500">
-                            <span>Bunga Setelah Pajak (20%)</span>
+                            <span>Bunga Setelah Pajak ({{ $pajakRate * 100 }}%)</span>
                             <span id="sim_bersih" class="font-semibold text-gray-700">Rp 0</span>
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mt-1">
-                            <span>Pajak Bunga (20%)</span>
+                            <span>Pajak Bunga ({{ $pajakRate * 100 }}%)</span>
                             <span id="sim_pajak" class="font-semibold text-red-500">Rp 0</span>
                         </div>
                     </div>
@@ -483,7 +483,7 @@
                                 ['label' => 'Suku Bunga', 'vals' => ['6,00%', '7,50%', '9,00%', '12,00%']],
                                 ['label' => 'Pokok', 'vals' => ['Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000', 'Rp 10.000.000']],
                                 ['label' => 'Bunga Kotor', 'vals' => ['Rp 47.671', 'Rp 184.932', 'Rp 443.836', 'Rp 1.200.000']],
-                                ['label' => 'Pajak (20%)', 'vals' => ['Rp 9.534', 'Rp 36.986', 'Rp 88.767', 'Rp 240.000'], 'class' => 'text-red-500'],
+                                ['label' => 'Pajak (' . ($pajakRate * 100) . '%)', 'vals' => ['Rp 9.534', 'Rp 36.986', 'Rp 88.767', 'Rp 240.000'], 'class' => 'text-red-500'],
                                 ['label' => 'Bunga Bersih', 'vals' => ['Rp 38.137', 'Rp 147.946', 'Rp 355.069', 'Rp 960.000'], 'class' => 'text-green-600 font-bold'],
                                 ['label' => 'Total Cair', 'vals' => ['Rp 10.038.137', 'Rp 10.147.946', 'Rp 10.355.069', 'Rp 10.960.000'], 'class' => 'font-black text-[#674c1d]'],
                             ];
@@ -541,8 +541,10 @@ function hitungSimulasi() {
         return;
     }
     const hari = selectedTenorBulan * 30;
-    const bungaKotor = nominal * (selectedRate / 100) * (hari / 365);
-    const pajak = bungaKotor * 0.20;
+    const pembagiHari = {{ $pembagiHari }};
+    const pajakRate = {{ $pajakRate }};
+    const bungaKotor = nominal * (selectedRate / 100) * (hari / pembagiHari);
+    const pajak = bungaKotor * pajakRate;
     const bungaBersih = bungaKotor - pajak;
     const total = nominal + bungaBersih;
 

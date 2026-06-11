@@ -14,6 +14,7 @@ use App\Models\PengajuanDeposito;
 use App\Models\PengajuanGadai;
 use App\Models\TempoPinjamanB;
 use App\Models\TempoPinjamanM;
+use App\Models\TempoGadai;
 use App\Models\TransDeposito;
 use App\Models\TransGadai;
 use Illuminate\Http\Request;
@@ -47,6 +48,64 @@ class DashboardController extends Controller
             'pengajuan_pending' => $this->getTotalPengajuanPending(),
             'pendapatan_bulan' => $this->getPendapatanBulanIni(),
         ];
+
+        // Stats modul breakdown
+        $totalTabunganNasabah = \App\Models\Nasabah::whereHas('transTabungan')->count();
+        $pinjamanTerlambatCount = TempoPinjamanB::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->count() +
+            TempoPinjamanM::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->count();
+        $gadaiJatuhTempoCount = GadaiH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->count();
+        $depositoJatuhTempoCount = DepositoH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->count();
+
+        $stats_modul = [
+            'tabungan_saldo'     => $stats['total_tabungan'] ?? 0,
+            'tabungan_nasabah'   => $totalTabunganNasabah,
+            'pinjaman_count'     => $stats['pinjaman_aktif'] ?? 0,
+            'pinjaman_total'     => $stats['total_pinjaman'] ?? 0,
+            'pinjaman_terlambat' => $pinjamanTerlambatCount,
+            'deposito_count'     => $stats['deposito_aktif'] ?? 0,
+            'deposito_total'     => $stats['total_deposito'] ?? 0,
+            'deposito_jatuh'     => $depositoJatuhTempoCount,
+            'gadai_count'        => $stats['gadai_aktif'] ?? 0,
+            'gadai_total'        => $stats['total_gadai'] ?? 0,
+            'gadai_jatuh'        => $gadaiJatuhTempoCount,
+        ];
+
+        // Jatuh tempo data
+        $jatuh_tempo_gadai = GadaiH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->with('nasabah.user')
+            ->orderBy('tgl_jatuh_tempo')
+            ->take(5)
+            ->get();
+
+        $angsuran_terlambat_b = TempoPinjamanB::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->with('pinjaman.nasabah.user')
+            ->get();
+
+        $angsuran_terlambat_m = TempoPinjamanM::where('status_bayar', '!=', 'lunas')
+            ->where('tgl_jatuh_tempo', '<', now())
+            ->with('pinjaman.nasabah.user')
+            ->get();
+
+        $angsuran_terlambat = $angsuran_terlambat_b->concat($angsuran_terlambat_m)
+            ->sortBy('tgl_jatuh_tempo')
+            ->take(5);
+
+        $jatuh_tempo_deposito = DepositoH::where('status', 'aktif')
+            ->where('tgl_jatuh_tempo', '<=', now()->addDays(7))
+            ->with('nasabah.user')
+            ->orderBy('tgl_jatuh_tempo')
+            ->take(5)
+            ->get();
 
         // Pengajuan pending dengan Eager Loading
         $pengajuan_pending = $this->getPengajuanPending();
@@ -143,14 +202,28 @@ class DashboardController extends Controller
             'keluar' => $dataKeluar,
         ];
 
-        return view('admin.dashboard', compact('stats', 'pengajuan_pending', 'aktivitas_terkini', 'grafik_likuiditas'));
+        $totalAset = ($stats['total_tabungan'] ?? 0) + ($stats['total_deposito'] ?? 0);
+        $totalPenyaluran = ($stats['total_pinjaman'] ?? 0) + ($stats['total_gadai'] ?? 0);
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'pengajuan_pending',
+            'aktivitas_terkini',
+            'grafik_likuiditas',
+            'stats_modul',
+            'jatuh_tempo_gadai',
+            'angsuran_terlambat',
+            'jatuh_tempo_deposito',
+            'totalAset',
+            'totalPenyaluran'
+        ));
     }
 
     private function getTotalPengajuanPending()
     {
         // Status '1' biasanya berarti pending untuk pengajuan tabungan dan deposito
         $tabungan = PengajuanTabungan::where('status', '1')->count();
-        $pinjaman = PengajuanPinjaman::whereDoesntHave('pinjaman')->count();
+        $pinjaman = PengajuanPinjaman::where('status', '1')->count();
         $deposito = PengajuanDeposito::where('status', '1')->count();
         // Cek status gadai - biasanya 'pending' atau '1'
         // Skip gadai try catch for now
@@ -191,7 +264,7 @@ class DashboardController extends Controller
         }
 
         // Pengajuan Pinjaman
-        $pinjaman = PengajuanPinjaman::whereDoesntHave('pinjaman')
+        $pinjaman = PengajuanPinjaman::where('status', '1')
             ->with('nasabah.user')
             ->latest()
             ->take(5)
@@ -370,20 +443,46 @@ class DashboardController extends Controller
 
     private function getPendapatanBulanIni()
     {
-        $bulanIni = now()->startOfMonth();
+        $bulanIni = now()->month;
+        $tahunIni = now()->year;
         
-        // Bunga dari pinjaman
-        $bungaPinjaman = PinjamanH::where('created_at', '>=', $bulanIni)
-            ->sum('bunga_rp') ?? 0;
+        // Bunga dari pinjaman bulanan (TempoPinjamanB)
+        $bungaPinjamanB = TempoPinjamanB::where('status_bayar', 'lunas')
+            ->whereMonth('tgl_bayar', $bulanIni)
+            ->whereYear('tgl_bayar', $tahunIni)
+            ->with('pinjaman')
+            ->get()
+            ->sum(function($t) {
+                return $t->pinjaman && $t->pinjaman->lama_pinjam > 0 
+                    ? $t->pinjaman->bunga_rp / $t->pinjaman->lama_pinjam 
+                    : 0;
+            });
 
-        // Bunga dari deposito (jika ada)
-        $bungaDeposito = 0; // Implementasi sesuai kebutuhan
+        // Bunga dari pinjaman mingguan (TempoPinjamanM)
+        $bungaPinjamanM = TempoPinjamanM::where('status_bayar', 'lunas')
+            ->whereMonth('tgl_bayar', $bulanIni)
+            ->whereYear('tgl_bayar', $tahunIni)
+            ->with('pinjaman')
+            ->get()
+            ->sum(function($t) {
+                return $t->pinjaman && $t->pinjaman->lama_pinjam > 0 
+                    ? $t->pinjaman->bunga_rp / $t->pinjaman->lama_pinjam 
+                    : 0;
+            });
 
-        // Bunga dari gadai
-        $bungaGadai = GadaiH::where('created_at', '>=', $bulanIni)
-            ->sum('bunga_rp') ?? 0;
+        // Bunga dan Denda dari gadai
+        $bungaGadai = TransGadai::whereIn('jenis', ['bunga', 'denda'])
+            ->whereMonth('tgl_transaksi', $bulanIni)
+            ->whereYear('tgl_transaksi', $tahunIni)
+            ->sum('nominal');
 
-        return ($bungaPinjaman ?? 0) + $bungaDeposito + ($bungaGadai ?? 0);
+        // Pencairan bunga deposito
+        $bungaDeposito = TransDeposito::where('jenis', 'pencairan_bunga')
+            ->whereMonth('tgl_transaksi', $bulanIni)
+            ->whereYear('tgl_transaksi', $tahunIni)
+            ->sum('nominal');
+
+        return $bungaPinjamanB + $bungaPinjamanM + $bungaGadai + $bungaDeposito;
     }
 }
 

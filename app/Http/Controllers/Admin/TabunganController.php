@@ -35,21 +35,19 @@ class TabunganController extends Controller
         // Statistik tabungan (pengajuan tarik = hanya transfer; tunai lewat Janji Temu)
         $stats = [
             'total_pengajuan_setor' => PengajuanTabungan::where('status', '1')->count(),
-            'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->where('metode_transfer', 'transfer')->count(),
-            'total_transaksi_hari_ini' => TransTabungan::whereDate('created_at', today())->count(),
+            'total_pengajuan_tarik' => PengajuanPenarikanTabungan::where('status', '1')->count(),
             'count_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'STR');
-                })->whereDate('created_at', today())->count(),
+                })->whereDate('tgl_transaksi', today())->count(),
             'total_setoran_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'STR');
-                })->whereDate('created_at', today())->sum('nominal') ?? 0,
+                })->whereDate('tgl_transaksi', today())->sum('nominal') ?? 0,
             'count_penarikan_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'PNR');
-                })->whereDate('created_at', today())->count(),
+                })->whereDate('tgl_transaksi', today())->count(),
             'total_penarikan_hari_ini' => TransTabungan::whereHas('jnsTransaksi', function($q) {
                     $q->where('kode', 'PNR');
-                })->whereDate('created_at', today())->sum('nominal') ?? 0,
-            'total_janji_temu_pending' => JanjiTemuTabungan::where('tanggal_janji_temu', '>=', now())->count(),
+                })->whereDate('tgl_transaksi', today())->sum('nominal') ?? 0,
         ];
 
         // Pengajuan setoran terbaru (pending)
@@ -68,7 +66,7 @@ class TabunganController extends Controller
             ->get();
 
         // Transaksi terbaru
-        $transaksi_terbaru = TransTabungan::with('nasabah.user')
+        $transaksi_terbaru = TransTabungan::with(['nasabah.user', 'jnsTransaksi', 'jnsVia'])
             ->latest()
             ->take(10)
             ->get();

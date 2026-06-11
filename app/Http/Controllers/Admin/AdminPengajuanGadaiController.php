@@ -28,8 +28,14 @@ class AdminPengajuanGadaiController extends Controller
         $orderBy = $status === 'pending' ? 'asc' : 'desc';
         
         $pengajuan = $query->orderBy('created_at', $orderBy)->get();
+        $gadaiCounts = [
+            'pending' => GadaiPengajuan::where('status', 'pending')->count(),
+            'approved' => GadaiPengajuan::where('status', 'approved')->count(),
+            'rejected' => GadaiPengajuan::where('status', 'rejected')->count(),
+            'all' => GadaiPengajuan::count()
+        ];
             
-        return view('admin.gadai_baru.pengajuan_index', compact('pengajuan', 'status'));
+        return view('admin.gadai_baru.pengajuan_index', compact('pengajuan', 'status', 'gadaiCounts'));
     }
 
     public function approve(Request $request, $id)
@@ -92,8 +98,8 @@ class AdminPengajuanGadaiController extends Controller
                 if (!in_array($gadai->status, ['active', 'grace_period'])) {
                     throw new \Exception('Perpanjangan hanya dapat dilakukan untuk gadai aktif atau dalam masa tenggang.');
                 }
-                if ($gadai->jumlah_perpanjangan >= 3) {
-                    throw new \Exception('Maksimal perpanjangan adalah 3 kali.');
+                if ($gadai->jumlah_perpanjangan >= $gadai->kategori->max_extend_default) {
+                    throw new \Exception('Maksimal perpanjangan adalah ' . $gadai->kategori->max_extend_default . ' kali.');
                 }
                 $newJatuhTempo = $gadai->tgl_jatuh_tempo->copy()->addDays($gadai->kategori->masa_gadai_hari)->endOfDay();
                 $newTenggang = $newJatuhTempo->copy()->addDays($gadai->kategori->masa_tenggang_hari)->endOfDay();

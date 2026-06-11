@@ -37,12 +37,20 @@ class PinjamanController extends Controller
     public function index()
     {
         // Statistik pinjaman
+        $outstanding_b = \App\Models\TempoPinjamanB::whereHas('pinjaman', function($q) {
+            $q->where('lunas', 'belum');
+        })->where('status_bayar', '!=', 'lunas')->sum(\DB::raw('jumlah_tagihan - jumlah_terbayar'));
+
+        $outstanding_m = \App\Models\TempoPinjamanM::whereHas('pinjaman', function($q) {
+            $q->where('lunas', 'belum');
+        })->where('status_bayar', '!=', 'lunas')->sum(\DB::raw('jumlah_tagihan - jumlah_terbayar'));
+
         $stats = [
             'total_pengajuan_pending' => PengajuanPinjaman::whereDoesntHave('pinjaman')->count(),
             'total_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->count(),
             'total_pinjaman_lunas' => PinjamanH::where('lunas', 'lunas')->count(),
             'total_pinjaman_hari_ini' => PinjamanH::whereDate('created_at', today())->count(),
-            'total_nominal_pinjaman_aktif' => PinjamanH::where('lunas', 'belum')->sum('jumlah_pinjam') ?? 0,
+            'total_nominal_pinjaman_aktif' => $outstanding_b + $outstanding_m,
             'total_angsuran_telat' => $this->getTotalAngsuranTelat(),
             'total_pembayaran_pending' => PengajuanPembayaranPinjaman::where('status', '1')->count(),
         ];
@@ -631,7 +639,7 @@ class PinjamanController extends Controller
      */
     public function pinjamanAktif(Request $request)
     {
-        $query = PinjamanH::with('nasabah.user')
+        $query = PinjamanH::with(['nasabah.user', 'tempoBulanan', 'tempoMingguan'])
             ->where('lunas', 'belum')
             // ->whereIn('status', ['pencairan', 'telaksana']) // Removed status check
             ->latest();
@@ -839,7 +847,6 @@ class PinjamanController extends Controller
     private function getTotalAngsuranTelat()
     {
         $bulanan = TempoPinjamanB::where('status_bayar', 'telat')
-            ->whereDate('tgl_jatuh_tempo', '<', now())
             ->count();
 
         // Fitur mingguan dinonaktifkan sementara
@@ -1488,14 +1495,23 @@ class PinjamanController extends Controller
             $bungaPersen = $masterBunga->bunga_persen;
             $bungaRp = ($nominal * $bungaPersen) / 100;
 
+            $totalKewajiban = $nominal + $bungaRp;
+            $durasi = (int)$request->durasi;
+            $angsuranRaw = $totalKewajiban / $durasi;
+            $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+            if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
+            }
+
             // Create pinjaman langsung (tanpa pengajuan)
             $pinjaman = PinjamanH::create([
                 'id_anggota' => $request->id_anggota,
                 'id_pengajuan' => null, // Tidak ada pengajuan
                 'jumlah_pinjam' => $nominal,
-                'lama_pinjam' => (int)$request->durasi,
+                'lama_pinjam' => $durasi,
+                'ags_bulan' => $angsuranBulanan,
                 'jenis' => 'bulanan',
-                'bunga' => $bungaPersen / 100,
+                'bunga' => $bungaPersen,
                 'bunga_rp' => $bungaRp,
                 'denda_persen' => $masterDenda->denda_persen,
                 'tgl_pinjam' => $request->tgl_pinjam,
@@ -1583,12 +1599,21 @@ class PinjamanController extends Controller
             $bungaPersen = $masterBunga->bunga_persen;
             $bungaRp = ($nominal * $bungaPersen) / 100;
 
+            $totalKewajiban = $nominal + $bungaRp;
+            $durasi = (int)$request->durasi;
+            $angsuranRaw = $totalKewajiban / $durasi;
+            $angsuranBulanan = (int) floor($angsuranRaw / 1000) * 1000;
+            if ($angsuranBulanan == 0 && $totalKewajiban > 0) {
+                $angsuranBulanan = (int) floor($totalKewajiban / $durasi);
+            }
+
             // Update pinjaman
             $pinjaman->update([
                 'id_anggota' => $request->id_anggota,
                 'jumlah_pinjam' => $nominal,
-                'lama_pinjam' => (int)$request->durasi,
-                'bunga' => $bungaPersen / 100,
+                'lama_pinjam' => $durasi,
+                'ags_bulan' => $angsuranBulanan,
+                'bunga' => $bungaPersen,
                 'bunga_rp' => $bungaRp,
                 'tgl_pinjam' => $request->tgl_pinjam,
             ]);

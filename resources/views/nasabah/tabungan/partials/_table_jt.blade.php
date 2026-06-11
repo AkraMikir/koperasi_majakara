@@ -12,7 +12,7 @@
             @forelse($janjiTemuTabungans as $jt)
                 <tr class="hover:bg-[#674c1d]/5 transition-colors">
                     <td class="px-5 py-3">
-                        <p class="text-sm text-gray-700">{{ $jt->tanggal_janji_temu->format('d M Y') }}</p>
+                        <p class="text-sm text-gray-700">{{ $jt->tanggal_janji_temu?->format('d M Y') ?? '-' }}</p>
                         <p class="text-[10px] text-gray-400 mt-0.5">
                             {{ $jt->waktu_janji_temu ? \Carbon\Carbon::parse($jt->waktu_janji_temu)->format('H:i') : '-' }}
                         </p>

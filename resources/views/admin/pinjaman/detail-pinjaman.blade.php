@@ -245,17 +245,11 @@
                         // Hitung total denda
                         $totalDenda = 0;
                         foreach ($angsuran as $a) {
-                        if ($a->status_bayar !== 'lunas') {
-                        $hariTelat = $a->tgl_jatuh_tempo < now() ? now()->diffInDays($a->tgl_jatuh_tempo, false) : 0;
-                            if ($hariTelat > 0) {
-                            $sisaTagihanAngsuran = max(0, $a->jumlah_tagihan - ($a->jumlah_terbayar ?? 0));
-                            $denda = $sisaTagihanAngsuran * ($pinjaman->denda_persen / 100) * $hariTelat;
-                            $dendaMax = $a->jumlah_tagihan * 0.5;
-                            $totalDenda += min($denda, $dendaMax);
+                            if ($a->status_bayar !== 'lunas') {
+                                $totalDenda += $a->hitungDenda();
                             }
-                            }
-                            }
-                            $totalBayar = $sisaTagihanPokok + $totalDenda;
+                        }
+                        $totalBayar = $sisaTagihanPokok + $totalDenda;
                             @endphp
                             <div class="space-y-4 mb-4">
                                 <div class="p-4 bg-gray-50 rounded-lg">

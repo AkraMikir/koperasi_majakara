@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use App\Models\AdminNotification;
 use App\Models\NasabahNotification;
 use App\Services\AdminPermissionService;
@@ -30,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Cegah N+1 query (Lazy Loading) kecuali di production
+        Model::preventLazyLoading(!app()->isProduction());
+
         // Set Carbon locale ke Indonesia agar diffForHumans() tampil dalam bahasa Indonesia
         Carbon::setLocale('id');
 

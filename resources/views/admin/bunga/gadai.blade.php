@@ -230,7 +230,9 @@
 @endsection
 
 @push('scripts')
+@once
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+@endonce
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     new Chart(document.getElementById('gadaiTrendChart').getContext('2d'), {

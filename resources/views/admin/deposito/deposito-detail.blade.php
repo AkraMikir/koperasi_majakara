@@ -104,11 +104,11 @@
 
         {{-- Estimasi Bunga --}}
         @php
-            $bungaPerHari = ((float)$deposito->nominal_awal * (float)$deposito->bunga) / 365;
-            $hariTersimpan = $deposito->tgl_mulai ? min($deposito->tgl_mulai->diffInDays(now()), $deposito->tenor->tenor_hari ?? 365) : 0;
-            $totalBunga = $bungaPerHari * ($deposito->tenor->tenor_hari ?? 365);
-            $bungaAkumulasi = $bungaPerHari * $hariTersimpan;
-            $pajak = $totalBunga * 0.20;
+            $pembagiHari = now()->isLeapYear() ? 366 : 365;
+            $bungaPerHari = ((float)$deposito->nominal_awal * (float)$deposito->bunga) / $pembagiHari;
+            $totalBunga = $bungaPerHari * ($deposito->tenor->tenor_hari ?? $pembagiHari);
+            $taxRate = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+            $pajak = $totalBunga * $taxRate;
             $totalBersih = (float)$deposito->nominal_awal + $totalBunga - $pajak;
         @endphp
         <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-3 gap-3">
@@ -117,7 +117,7 @@
                 <p class="font-bold text-[#674c1d] text-sm">Rp {{ number_format($totalBunga, 0, ',', '.') }}</p>
             </div>
             <div class="bg-red-50 rounded-xl p-3 text-center">
-                <p class="text-xs text-gray-500 mb-1">Pajak (20%)</p>
+                <p class="text-xs text-gray-500 mb-1">Pajak ({{ $taxRate * 100 }}%)</p>
                 <p class="font-bold text-red-600 text-sm">Rp {{ number_format($pajak, 0, ',', '.') }}</p>
             </div>
             <div class="bg-green-50 rounded-xl p-3 text-center">

@@ -100,6 +100,9 @@ class NasabahGadaiBaruController extends Controller
     public function showActiveDetail($id)
     {
         $nasabah = Auth::user()->nasabah;
+        if (!$nasabah) {
+            return redirect()->route('nasabah.dashboard')->with('error', 'Profil nasabah tidak ditemukan.');
+        }
         
         // BANK ACCESS GUARD dihapus dari showActiveDetail agar nasabah selalu bisa melihat detail gadai aktifnya
 
@@ -113,6 +116,9 @@ class NasabahGadaiBaruController extends Controller
     public function riwayat()
     {
         $nasabah = Auth::user()->nasabah;
+        if (!$nasabah) {
+            return redirect()->route('nasabah.dashboard')->with('error', 'Profil nasabah tidak ditemukan.');
+        }
         
         // BANK ACCESS GUARD dihapus dari riwayat agar nasabah selalu bisa melihat riwayat gadainya
         
@@ -133,10 +139,15 @@ class NasabahGadaiBaruController extends Controller
 
     public function createPengajuan($id, $jenis)
     {
+        $nasabah = Auth::user()->nasabah;
+        if (!$nasabah) {
+            return redirect()->route('nasabah.dashboard')->with('error', 'Profil nasabah tidak ditemukan.');
+        }
+
         $gadai = GadaiActive::with(['kategori', 'item', 'lokasi'])->findOrFail($id);
         
         // Safety check: ensure gadai belongs to current nasabah
-        if ($gadai->nasabah_id !== Auth::user()->nasabah->id) {
+        if ($gadai->nasabah_id !== $nasabah->id) {
             abort(403);
         }
 
@@ -153,13 +164,13 @@ class NasabahGadaiBaruController extends Controller
             if (!in_array($gadai->status, ['active', 'grace_period'])) {
                 return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan untuk gadai yang aktif atau dalam masa tenggang.');
             }
-            if ($gadai->jumlah_perpanjangan >= 3) {
-                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah 3 kali.');
+            if ($gadai->jumlah_perpanjangan >= $gadai->kategori->max_extend_default) {
+                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah ' . $gadai->kategori->max_extend_default . ' kali.');
             }
         }
 
         // Calculate totals (re-using logic from dashboard)
-        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0); // Denda hanya untuk perpanjang
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + $gadai->denda_aktif + ($gadai->extra_pinjaman_nominal ?? 0); // Termasuk denda_aktif
         $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
         
         $nominal = ($jenis == 'lunas') ? $totalTagihan : $totalPerpanjang;
@@ -171,6 +182,11 @@ class NasabahGadaiBaruController extends Controller
 
     public function storePengajuan(Request $request, $id, $jenis)
     {
+        $nasabah = Auth::user()->nasabah;
+        if (!$nasabah) {
+            return redirect()->route('nasabah.dashboard')->with('error', 'Profil nasabah tidak ditemukan.');
+        }
+
         $request->validate([
             'pin' => 'required|numeric|digits:6',
             'metode' => 'required|in:cash,transfer',
@@ -182,7 +198,7 @@ class NasabahGadaiBaruController extends Controller
         $gadai = GadaiActive::findOrFail($id);
         
         // Safety check
-        if ($gadai->nasabah_id !== Auth::user()->nasabah->id) {
+        if ($gadai->nasabah_id !== $nasabah->id) {
             abort(403);
         }
 
@@ -216,18 +232,18 @@ class NasabahGadaiBaruController extends Controller
             if (!in_array($gadai->status, ['active', 'grace_period'])) {
                 return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Perpanjangan hanya dapat dilakukan untuk gadai yang aktif atau dalam masa tenggang.');
             }
-            if ($gadai->jumlah_perpanjangan >= 3) {
-                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah 3 kali.');
+            if ($gadai->jumlah_perpanjangan >= $gadai->kategori->max_extend_default) {
+                return redirect()->route('nasabah.gadai_baru.index')->with('warning', 'Maksimal perpanjangan adalah ' . $gadai->kategori->max_extend_default . ' kali.');
             }
         }
 
         // Calculate nominal again to be safe
-        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + ($gadai->extra_pinjaman_nominal ?? 0); // Denda hanya untuk perpanjang
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + $gadai->denda_aktif + ($gadai->extra_pinjaman_nominal ?? 0); // Termasuk denda_aktif
         $totalPerpanjang = $gadai->biaya_jasa + $gadai->denda_aktif + $gadai->biaya_inap;
         $nominal = ($jenis == 'lunas') ? $totalTagihan : $totalPerpanjang;
 
         $pengajuan = new \App\Models\GadaiPengajuan();
-        $pengajuan->nasabah_id = Auth::user()->nasabah->id;
+        $pengajuan->nasabah_id = $nasabah->id;
         $pengajuan->gadai_active_id = $id;
         $pengajuan->jenis_pengajuan = $jenis;
         $pengajuan->metode = $request->metode;
@@ -271,6 +287,9 @@ class NasabahGadaiBaruController extends Controller
     public function statusPengajuan()
     {
         $nasabah = Auth::user()->nasabah;
+        if (!$nasabah) {
+            return redirect()->route('nasabah.dashboard')->with('error', 'Profil nasabah tidak ditemukan.');
+        }
 
         // ── BANK ACCESS GUARD ──────────────────────────────────────
         if ($nasabah) {

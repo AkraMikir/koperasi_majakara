@@ -12,7 +12,7 @@
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
         .table-row td { vertical-align: top; }
-        .label { font-weight: bold; width: 45%; }
+        .label { font-weight: normal; width: 45%; font-size:12px}
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -24,6 +24,7 @@
         .nominal-table td { padding: 2px 0; }
         .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
         .approver { margin-top: 10px; font-size: 10px; }
+        .id-kecil{font-size:12px}
     </style>
 </head>
 @php
@@ -49,34 +50,30 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">ID Pengajuan</td>
-            <td>: {{ $pengajuan->id }}</td>
-        </tr>
-        <tr>
             <td class="label">ID Pinjaman</td>
-            <td>: {{ $pengajuan->pinjaman->id ?? '-' }}</td>
+            <td class="id-kecil">: {{ $pengajuan->pinjaman->id ?? '-' }}</td>
         </tr>
         @if($angsuran)
         <tr>
             <td class="label">Angsuran Ke</td>
-            <td>: {{ $angsuran->no_urut ?? '-' }}</td>
+            <td class="id-kecil">: {{ $angsuran->no_urut ?? '-' }}</td>
         </tr>
         @endif
         <tr>
-            <td class="label">Nama Anggota</td>
-            <td>: {{ $pengajuan->nasabah->user->nama ?? 'N/A' }}</td>
+            <td class="label">Nama</td>
+            <td class="id-kecil">: {{ $pengajuan->nasabah->user->nama ?? 'N/A' }}</td>
         </tr>
         <tr>
-            <td class="label">Tanggal Bayar</td>
-            <td>: {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</td>
+            <td class="label">Tanggal</td>
+            <td class="id-kecil">: {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</td>
         </tr>
         <tr>
             <td class="label">Metode</td>
-            <td>: {{ $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-' }}</td>
+            <td class="id-kecil">: {{ $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-' }}</td>
         </tr>
         <tr>
             <td class="label">Status</td>
-            <td>: Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</td>
+            <td class="id-kecil">: Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</td>
         </tr>
     </table>
     

@@ -33,11 +33,28 @@ class AdminGadaiBaruController extends Controller
             $query->where('lokasi_id', $request->cabang);
         }
 
-        $gadiList = $query->orderBy('created_at', 'desc')->get();
+        $globalStats = [
+            'active' => GadaiActive::where('status', 'active')->count(),
+            'grace_period' => GadaiActive::where('status', 'grace_period')->count(),
+            'expired_final' => GadaiActive::where('status', 'expired_final')->count(),
+            'lunas' => GadaiActive::where('status', 'lunas')->count(),
+            'returned' => GadaiActive::where('status', 'returned')->count(),
+            'auctioned' => GadaiActive::where('status', 'auctioned')->count(),
+        ];
+
+        $page = (int) $request->get('page', 1);
+        $limit = 25;
+        $totalRecords = $query->count();
+        $gadiList = $query->orderBy('created_at', 'desc')
+                          ->skip(($page - 1) * $limit)
+                          ->take($limit)
+                          ->get();
+        $hasMore = ($page * $limit) < $totalRecords;
+
         $kategoriList = GadaiMasterKategori::all();
         $lokasiList = JnsLokasiPerusahaan::all();
 
-        return view('admin.gadai_baru.index', compact('gadiList', 'kategoriList', 'lokasiList'));
+        return view('admin.gadai_baru.index', compact('gadiList', 'kategoriList', 'lokasiList', 'globalStats', 'page', 'hasMore'));
     }
 
     public function create()

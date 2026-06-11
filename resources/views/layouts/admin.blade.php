@@ -111,6 +111,20 @@
             if (sidebar) sidebar.classList.add('-translate-x-full');
             if (overlay) overlay.classList.add('hidden');
         });
+
+        // ─── GLOBAL DEBOUNCE UNTUK FILTER / SEARCH ────────────────────────────────
+        let searchTimeout = null;
+        document.addEventListener('input', function (e) {
+            if (e.target.name === 'search' || e.target.classList.contains('debounce-search')) {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(function () {
+                    let form = e.target.closest('form');
+                    if (form) {
+                        form.requestSubmit();
+                    }
+                }, 500); // 500ms delay
+            }
+        });
     </script>
 </body>
 </html>

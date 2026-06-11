@@ -26,7 +26,8 @@ class BungaController extends Controller
         
         $gadaiTotal = GadaiActive::whereIn('status', ['active', 'extended', 'expired_grace', 'expired_final'])->sum(DB::raw('biaya_jasa + biaya_inap'));
         
-        $depositoData = DepositoH::with(['persiapanCair', 'tenor'])->whereIn('status', ['aktif', 'selesai'])->get();
+        // BUG-06 FIX: Gunakan hanya 'aktif' agar konsisten dengan halaman detail deposito
+        $depositoData = DepositoH::with(['persiapanCair', 'tenor'])->where('status', 'aktif')->get();
         $depositoTotalKotor = 0;
         $depositoPajak = 0;
         foreach($depositoData as $depo) {
@@ -51,7 +52,8 @@ class BungaController extends Controller
                 $pembagi = $isLeap ? 366 : 365;
                 
                 $bKotor = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
-                $pjk = $bKotor * 0.20;
+                $taxRate = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+                $pjk = $bKotor * $taxRate;
                 
                 $depositoTotalKotor += $bKotor;
                 $depositoPajak += $pjk;
@@ -95,9 +97,12 @@ class BungaController extends Controller
 
         foreach ($angsuranMingguan as $angsuran) {
             $pinjaman = $angsuran->pinjaman;
+            if (!$pinjaman || !$pinjaman->lama_pinjam || $pinjaman->lama_pinjam <= 0) {
+                continue;
+            }
             // Mingguan: lama_pinjam dalam bulan, dikonversi ke minggu (x4)
-            $jumlahMinggu = $pinjaman && $pinjaman->lama_pinjam > 0 ? ($pinjaman->lama_pinjam * 4) : 0;
-            if ($jumlahMinggu > 0) {
+            $jumlahMinggu = $pinjaman->lama_pinjam * 4;
+            if ($jumlahMinggu > 0 && $pinjaman->bunga_rp) {
                 $realisasiPinjaman += ($pinjaman->bunga_rp / $jumlahMinggu);
             }
         }
@@ -144,6 +149,7 @@ class BungaController extends Controller
             return $items->sum('biaya_jasa') + $items->sum('biaya_inap');
         });
 
+        // BUG-05 FIX: Tambah fallback estimasi agar chart trend konsisten dengan KPI card
         $depositoTrend = [];
         foreach($depositoItems->groupBy(function($item) { return Carbon::parse($item->tgl_mulai)->format('Y-m'); }) as $month => $items) {
             $totalMonth = 0;
@@ -151,23 +157,26 @@ class BungaController extends Controller
                 $p = $item->persiapanCair->last();
                 if ($p) {
                     $totalMonth += $p->bunga_bersih;
-                } else if ($item->status === 'aktif') {
+                } elseif ($item->status === 'aktif') {
+                    // Fallback in-memory — sama dengan logika di KPI card
                     $pokok = (float) $item->nominal_awal;
                     $bungaTahunan = (float) $item->bunga;
-                    
+
                     $tenorHari = 30;
                     if ($item->tenor) {
                         $tenorHari = (int) $item->tenor->tenor_hari;
                     } elseif ($item->tgl_mulai && $item->tgl_jatuh_tempo) {
                         $tenorHari = (int) $item->tgl_mulai->diffInDays($item->tgl_jatuh_tempo);
                     }
-                    
+
                     $tahunJatuhTempo = $item->tgl_jatuh_tempo ? $item->tgl_jatuh_tempo->year : Carbon::now()->year;
                     $isLeap = ($tahunJatuhTempo % 4 === 0 && $tahunJatuhTempo % 100 !== 0) || ($tahunJatuhTempo % 400 === 0);
                     $pembagi = $isLeap ? 366 : 365;
-                    
-                    $bKotor = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
-                    $totalMonth += ($bKotor * 0.80);
+
+                    if ($pokok > 0 && $bungaTahunan > 0 && $tenorHari > 0) {
+                        $bKotor = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
+                        $totalMonth += ($bKotor * 0.80); // setelah pajak 20%
+                    }
                 }
             }
             $depositoTrend[$month] = $totalMonth;
@@ -243,15 +252,20 @@ class BungaController extends Controller
         $bungaMingguan = 0;
         foreach ($angsuranMingguan as $angsuran) {
             $pinjaman = $angsuran->pinjaman;
+            if (!$pinjaman || !$pinjaman->lama_pinjam || $pinjaman->lama_pinjam <= 0) {
+                continue;
+            }
             // Mingguan: lama_pinjam dalam bulan, dikonversi ke minggu (x4)
-            $jumlahMinggu = $pinjaman && $pinjaman->lama_pinjam > 0 ? ($pinjaman->lama_pinjam * 4) : 0;
-            if ($jumlahMinggu > 0) {
+            $jumlahMinggu = $pinjaman->lama_pinjam * 4;
+            if ($jumlahMinggu > 0 && $pinjaman->bunga_rp) {
                 $bungaMingguan += ($pinjaman->bunga_rp / $jumlahMinggu);
             }
         }
         $bungaBulanIni += $bungaMingguan;
-        
-        $proyeksiBulanDepan = $totalBunga * 1.05; // Estimasi 5% growth
+
+        // BUG-11 FIX: Basis proyeksi = realisasi bulan ini (bukan total portofolio)
+        // $totalBunga adalah total semua portofolio aktif, terlalu besar untuk basis proyeksi bulan depan
+        $proyeksiBulanDepan = $bungaBulanIni > 0 ? $bungaBulanIni * 1.05 : $totalBunga * 0.05;
         
         $listPinjaman = (clone $query)->with('nasabah.user')->orderByDesc('bunga_rp')->take(10)->get();
 
@@ -326,7 +340,8 @@ class BungaController extends Controller
                 $pembagi = $isLeap ? 366 : 365;
 
                 $bungaKotor  = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
-                $pajak       = $bungaKotor * 0.20;
+                $taxRate     = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+                $pajak       = $bungaKotor * $taxRate;
                 $bungaBersih = $bungaKotor - $pajak;
                 $totalEstimasiAkrual += $bungaBersih;
                 $depo->sumber_bunga = 'estimasi';

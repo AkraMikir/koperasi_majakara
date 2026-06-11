@@ -143,11 +143,12 @@
             <p class="text-xs text-gray-400 mt-0.5">Diurutkan berdasarkan bunga terbesar</p>
         </div>
         <div class="flex items-center gap-2">
-            <input type="text" placeholder="Cari nasabah..." class="text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#8b6f2f] w-48">
+            {{-- BUG-10 FIX: input search dengan JS live filter --}}
+            <input id="searchPinjaman" type="text" placeholder="Cari nasabah..." class="text-sm border border-gray-200 rounded-xl px-3 py-1.5 focus:outline-none focus:border-[#8b6f2f] w-48" oninput="filterPinjaman(this.value)">
         </div>
     </div>
     <div class="overflow-x-auto">
-        <table class="w-full text-sm">
+        <table id="tabelPinjaman" class="w-full text-sm">
             <thead>
                 <tr class="border-b border-gray-100">
                     <th class="pb-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Nasabah</th>
@@ -174,12 +175,28 @@
                     <td class="py-3.5 text-center">
                         <span class="px-2 py-0.5 bg-blue-50 text-blue-700 text-xs font-semibold rounded-full">{{ (float) $row->bunga }}%</span>
                     </td>
-                    <td class="py-3.5 text-right font-semibold text-green-600">Rp {{ number_format($row->bunga_rp ?? 0, 0, ',', '.') }}</td>
+                    <td class="py-3.5 text-right font-semibold text-green-600">
+                        @php
+                            // BUG-07 FIX: tampilkan bunga per bulan, bukan total bunga
+                            $bungaPerBulan = ($row->bunga_rp && $row->lama_pinjam > 0)
+                                ? ($row->bunga_rp / $row->lama_pinjam)
+                                : ($row->bunga_rp ?? 0);
+                        @endphp
+                        Rp {{ number_format($bungaPerBulan, 0, ',', '.') }}
+                    </td>
                     <td class="py-3.5 text-center text-gray-500">{{ $row->lama_pinjam }} Bln</td>
                     <td class="py-3.5 text-center text-gray-500">{{ $row->payment_progress }}</td>
                     <td class="py-3.5 text-center">
-                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ strtolower($row->lunas) === 'lancar' ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700' }}">
-                            {{ ucfirst($row->lunas ?? 'Aktif') }}
+                        @php
+                            // BUG-08 FIX: nilai lunas yang valid = null atau 'lunas', tidak ada 'lancar'
+                            $lunasVal = strtolower($row->lunas ?? '');
+                            $badgeClass = $lunasVal === 'lunas'
+                                ? 'bg-blue-50 text-blue-700'
+                                : 'bg-green-50 text-green-700';
+                            $badgeLabel = $lunasVal === 'lunas' ? 'Lunas' : 'Aktif';
+                        @endphp
+                        <span class="px-2 py-0.5 text-xs font-semibold rounded-full {{ $badgeClass }}">
+                            {{ $badgeLabel }}
                         </span>
                     </td>
                 </tr>
@@ -195,14 +212,16 @@
         </table>
     </div>
     <div class="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between text-sm text-gray-500">
-        <span>Menampilkan {{ $listPinjaman->count() }} dari {{ $pinjamanAktif }} data</span>
+        <span id="pinjamanCounter">Menampilkan {{ $listPinjaman->count() }} dari {{ $pinjamanAktif }} data</span>
         <a href="{{ route('admin.pinjaman.pinjaman-aktif') }}" class="text-[#674c1d] hover:underline font-medium text-xs">Lihat semua pinjaman →</a>
     </div>
 </div>
 @endsection
 
 @push('scripts')
+@once
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+@endonce
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Trend Pinjaman
@@ -238,6 +257,22 @@ document.addEventListener('DOMContentLoaded', function () {
         },
         options: { responsive: true, cutout: '68%', plugins: { legend: { display: false } } }
     });
+
+    // BUG-10 FIX: Live search filter untuk tabel pinjaman
+    window.filterPinjaman = function(query) {
+        const q = query.toLowerCase().trim();
+        const rows = document.querySelectorAll('#tabelPinjaman tbody tr');
+        let visible = 0;
+        rows.forEach(row => {
+            const name = row.querySelector('td:first-child')?.textContent?.toLowerCase() ?? '';
+            const show = q === '' || name.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        // Update counter
+        const counter = document.getElementById('pinjamanCounter');
+        if (counter) counter.textContent = 'Menampilkan ' + visible + ' dari {{ $pinjamanAktif }} data';
+    };
 });
 </script>
 @endpush

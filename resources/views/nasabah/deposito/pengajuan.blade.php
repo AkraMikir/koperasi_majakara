@@ -270,7 +270,7 @@
                             </div>
                         </div>
                         <div class="flex justify-between text-xs text-gray-500 mt-3 pt-3 border-t border-[#d4af37]/20">
-                            <span>Setelah pajak 20%</span>
+                            <span>Setelah pajak {{ $pajakRate * 100 }}%</span>
                             <span id="est-bersih" class="font-semibold">Rp 0</span>
                         </div>
                     </div>
@@ -286,12 +286,12 @@
                         <div class="p-6 space-y-4">
                             <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
                                 <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Bunga Kotor</p>
-                                <p class="text-sm font-mono font-bold text-gray-800">(Nominal × Bunga × Tenor_Hari) / 365
+                                <p class="text-sm font-mono font-bold text-gray-800">(Nominal × Bunga × Tenor_Hari) / {{ $pembagiHari }}
                                 </p>
                             </div>
                             <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
-                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Pajak (20%)</p>
-                                <p class="text-sm font-mono font-bold text-gray-800">Bunga Kotor × 0.20</p>
+                                <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Pajak ({{ $pajakRate * 100 }}%)</p>
+                                <p class="text-sm font-mono font-bold text-gray-800">Bunga Kotor × {{ $pajakRate }}</p>
                             </div>
                             <div class="p-3 bg-gray-50 rounded-lg border border-gray-100">
                                 <p class="text-[10px] text-gray-500 uppercase font-bold mb-1">Total Cair</p>
@@ -584,13 +584,12 @@
                 cont.classList.remove('hidden');
 
                 // RUMUS SESUAI STANDAR PERBANKAN (SEABANK/MAJAKARA)
-                const year = new Date().getFullYear();
-                const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-                const pembagi = isLeap ? 366 : 365;
+                const pembagi = {{ $pembagiHari }};
+                const pajakRate = {{ $pajakRate }};
 
                 const hari = selectedTenorBulan * 30; // Simulasi: 30 hari per bulan
                 const kotor = Math.round(nominal * (selectedTenorRate / 100) * (hari / pembagi));
-                const pajak = Math.round(kotor * 0.2);
+                const pajak = Math.round(kotor * pajakRate);
                 const bersih = kotor - pajak;
                 const total = nominal + bersih;
 
@@ -601,13 +600,12 @@
             }
 
             function fillConfirmation(nominal, metode) {
-                const year = new Date().getFullYear();
-                const isLeap = (year % 4 === 0 && year % 100 !== 0) || (year % 400 === 0);
-                const pembagi = isLeap ? 366 : 365;
+                const pembagi = {{ $pembagiHari }};
+                const pajakRate = {{ $pajakRate }};
 
                 const hari = selectedTenorBulan * 30;
                 const kotor = Math.round(nominal * (selectedTenorRate / 100) * (hari / pembagi));
-                const pajak = Math.round(kotor * 0.2);
+                const pajak = Math.round(kotor * pajakRate);
                 const bersih = kotor - pajak;
                 const total = nominal + bersih;
 

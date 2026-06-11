@@ -67,14 +67,14 @@
     @php
         $tglMulai = $deposito->tgl_mulai;
         $tglJatuhTempo = $deposito->tgl_jatuh_tempo;
-        $totalHari = $deposito->tenor->tenor_hari ?? ($tglMulai && $tglJatuhTempo ? $tglMulai->diffInDays($tglJatuhTempo) : 0);
+        $totalHari = $deposito->tenor?->tenor_hari ?? ($tglMulai && $tglJatuhTempo ? $tglMulai->diffInDays($tglJatuhTempo) : 0);
         $lewatHari = $tglMulai ? min($totalHari, $tglMulai->diffInDays(now())) : 0;
         $persen = $totalHari > 0 ? round(($lewatHari / $totalHari) * 100) : 0;
         $hariSisa = $tglJatuhTempo ? max(0, (int) now()->diffInDays($tglJatuhTempo, false)) : 0;
 
         // Estimasi bunga
-        $bungaKotor = $deposito->nominal_awal * $deposito->bunga * ($totalHari / 365);
-        $pajak = $bungaKotor * 0.2;
+        $bungaKotor = $deposito->nominal_awal * $deposito->bunga * ($totalHari / $pembagiHari);
+        $pajak = $bungaKotor * $pajakRate;
         $bungaBersih = $bungaKotor - $pajak;
         $totalCair = $deposito->nominal_awal + $bungaBersih;
     @endphp
@@ -110,7 +110,7 @@
                     ['label' => 'Nominal Awal', 'value' => 'Rp ' . number_format($deposito->nominal_awal, 0, ',', '.')],
                     ['label' => 'Suku Bunga', 'value' => number_format($deposito->bunga * 100, 2) . '% p.a.', 'highlight' => true],
                     ['label' => 'Estimasi Bunga Kotor', 'value' => 'Rp ' . number_format($bungaKotor, 0, ',', '.')],
-                    ['label' => 'Pajak Bunga (20%)', 'value' => '- Rp ' . number_format($pajak, 0, ',', '.'), 'red' => true],
+                    ['label' => 'Pajak Bunga (' . ($pajakRate * 100) . '%)', 'value' => '- Rp ' . number_format($pajak, 0, ',', '.'), 'red' => true],
                     ['label' => 'Estimasi Bunga Bersih', 'value' => 'Rp ' . number_format($bungaBersih, 0, ',', '.'), 'green' => true],
                 ] as $row)
                 <div class="flex justify-between items-center info-row py-3">
@@ -363,7 +363,7 @@
                     </div>
                     <p class="text-xs text-gray-400 mb-3">
                         Estimasi pencairan: <strong class="text-[#674c1d]">Rp {{ number_format($totalCair, 0, ',', '.') }}</strong>
-                        (sudah dipotong pajak 20%)
+                        (sudah dipotong pajak {{ $pajakRate * 100 }}%)
                     </p>
                     <button type="submit"
                         class="w-full bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white py-3 rounded-xl text-sm font-bold hover:opacity-90 transition shadow">

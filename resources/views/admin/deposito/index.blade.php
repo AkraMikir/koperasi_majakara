@@ -70,8 +70,15 @@
                             {{ $p->metode_setor === 'transfer' ? 'Transfer' : 'Tabungan' }}
                         </span>
                         <div class="flex items-center gap-1 mt-1">
-                            <form action="{{ route('admin.deposito.approve', $p->id) }}" method="POST" class="inline" onsubmit="return confirm('Setujui pengajuan ini?')">
+                            <form action="{{ route('admin.deposito.approve', $p->id) }}" method="POST" class="inline flex items-center gap-1" onsubmit="return confirm('Setujui pengajuan ini?')">
                                 @csrf
+                                @if($p->metode_setor === 'transfer')
+                                <select name="metode_bayar" class="text-[10px] py-0.5 px-1 border-gray-200 rounded">
+                                    <option value="transfer_koperasi">Transfer Koperasi</option>
+                                    <option value="transfer_admin">Petty Cash (TF)</option>
+                                    <option value="cash">Petty Cash (Tunai)</option>
+                                </select>
+                                @endif
                                 <button type="submit" class="p-1 rounded-md text-green-600 hover:bg-green-100" title="Setujui">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>

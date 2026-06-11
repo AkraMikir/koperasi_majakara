@@ -164,7 +164,7 @@
                             </div>
                             <div>
                                 <h4 class="text-xs font-black text-gray-800 uppercase tracking-wide">Respon Admin</h4>
-                                <p class="text-[10px] text-gray-500">Diproses oleh <span class="font-bold text-gray-700">{{ $item->admin->nama ?? 'Sistem' }}</span> pada {{ $item->processed_at->format('d M Y H:i') }}</p>
+                                <p class="text-[10px] text-gray-500">Diproses oleh <span class="font-bold text-gray-700">{{ $item->admin?->nama ?? 'Sistem' }}</span> pada {{ $item->processed_at->format('d M Y H:i') }}</p>
                             </div>
                         </div>
                         

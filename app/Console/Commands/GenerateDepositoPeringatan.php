@@ -69,7 +69,8 @@ class GenerateDepositoPeringatan extends Command
 
                 // Bunga kotor = Pokok × (bunga/tahun) × (tenor_hari / pembagi)
                 $bungaKotor  = $pokok * $bungaTahunan * ($tenorHari / $pembagi);
-                $pajak       = $bungaKotor * 0.20;    // Pajak 20%
+                $taxRate     = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+                $pajak       = $bungaKotor * $taxRate;    // Pajak dinamis
                 $bungaBersih = $bungaKotor - $pajak;
                 $totalDibayar = $pokok + $bungaBersih;
 

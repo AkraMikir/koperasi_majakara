@@ -1,0 +1,31 @@
+<USER_REQUEST>
+buatkan saya seeder untuk item gadai dengan ketentuan seperti ini
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class MasterItemGadaiSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        $items = [
+            // ==========================================
+            // KATEGORI: ELEKTRONIK
+            // ==========================================
+            [
+                'kategori_barang'       => 'Elektronik',
+                'deskripsi_utama'       => 'Laptop MacBook Pro M2',
+                'deskripsi_sekunder'    => 'Tahun 2022, RAM 8GB, SSD 256GB, Mulus',
+                'harga_real'            => 15000000,
+                'status'                => 'Aktif',
+                'persentase_taksir_min' => 40,
+                'persentase_taksir_max' => 60,
+<truncated 10279 bytes>
