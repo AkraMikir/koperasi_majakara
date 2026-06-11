@@ -301,7 +301,7 @@ class NasabahGadaiBaruController extends Controller
         }
         // ──────────────────────────────────────────────────────────
 
-        $pengajuan = \App\Models\GadaiPengajuan::with(['gadaiActive.item', 'gadaiActive.kategori', 'files'])
+        $pengajuan = \App\Models\GadaiPengajuan::with(['gadaiActive.item', 'gadaiActive.kategori', 'files', 'admin'])
             ->where('nasabah_id', $nasabah->id)
             ->orderBy('created_at', 'desc')
             ->get();

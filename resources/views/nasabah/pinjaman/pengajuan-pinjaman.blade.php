@@ -3,7 +3,7 @@
 @section('title', 'Pengajuan Pinjaman')
 
 @section('content')
-<div class="w-full pb-6">
+<div class="w-full pb-28">
     <!-- Back Button -->
     <div class="mx-4 mt-4 mb-4">
         <a href="{{ route('nasabah.pinjaman.index') }}"
@@ -176,21 +176,21 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTransfer">
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiNominalTransfer">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBungaTransfer">-</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBungaTransfer">-</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
-                            <span class="text-lg font-bold text-[#8b6f2f]" id="estimasiTotalTransfer">Rp 0</span>
+                            <span class="text-lg font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
-                            <span class="font-semibold text-gray-900" id="estimasiAngsuranTransfer">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuranTransfer">Rp 0</span>
                         </div>
                     </div>
                 </div>
@@ -295,21 +295,21 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTunai">
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiNominalTunai">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominalTunai">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBungaTunai">-</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBungaTunai">-</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
-                            <span class="text-lg font-bold text-[#8b6f2f]" id="estimasiTotalTunai">Rp 0</span>
+                            <span class="text-lg font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotalTunai">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
-                            <span class="font-semibold text-gray-900" id="estimasiAngsuranTunai">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuranTunai">Rp 0</span>
                         </div>
                     </div>
                 </div>

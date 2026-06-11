@@ -3,7 +3,7 @@
 @section('title', 'Registrasi - Koperasi Majakara')
 
 @section('content')
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center py-8 sm:py-12 pb-24 sm:pb-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl w-full">
             @php
                 $step = $step ?? request()->get('step', 1);
@@ -22,8 +22,8 @@
                     </div>
 
                 <!-- Progress Steps -->
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200/50">
-                    <div class="flex items-center justify-between">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200/50 overflow-x-auto scrollbar-none">
+                    <div class="flex items-center justify-between min-w-[600px] md:min-w-0">
                         @php
                         $subStepLabels = [
                             1 => 'Data Diri',
@@ -90,7 +90,7 @@
                 class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden max-w-6xl mx-auto border border-gray-200/50 fade-in-up">
                 <div class="lg:grid lg:grid-cols-2">
                     <!-- Left Side - Form -->
-                    <div class="p-8 lg:p-12">
+                    <div class="p-4 sm:p-8 lg:p-12">
                         <!-- Header with Icon -->
                         <div class="mb-8">
                             <div class="flex items-center gap-3 mb-4">
@@ -687,7 +687,7 @@
                                 <input type="text" name="no_rekening" id="no_rekening"
                                     value="{{ old('no_rekening', $formData['no_rekening'] ?? '') }}" maxlength="16"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
-                                    placeholder="16 digit nomor rekening" pattern="[0-9]*" inputmode="numeric"
+                                    placeholder="Nomor rekening" pattern="[0-9]*" inputmode="numeric"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
 
@@ -940,7 +940,7 @@
                                             <div class="mt-6">
                                                 <button type="button" name="send_otp_btn" value="1" id="btnSendOtp"
                                                     onclick="setSendOtpAndLoading(this); return false;"
-                                                    class="w-full px-6 py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
+                                                    class="w-full px-4 py-3.5 sm:px-6 sm:py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
                                                     <svg class="w-6 h-6" id="iconSend" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1014,25 +1014,25 @@
                                                 <input type="hidden" name="otp_code" id="otp_code_hidden" required>
 
                                                 {{-- 6 OTP Input Boxes --}}
-                                                <div class="flex justify-center gap-2 sm:gap-3" id="otpBoxes">
+                                                <div class="flex justify-center gap-1.5 sm:gap-3" id="otpBoxes">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="0">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="1">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="2">
-                                                    <span class="flex items-center text-2xl text-gray-400 font-bold">-</span>
+                                                    <span class="flex items-center text-xl sm:text-2xl text-gray-400 font-bold">-</span>
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="3">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="4">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="5">
                                                 </div>
 
@@ -2313,8 +2313,8 @@
                             errorMsg = 'Nomor Rekening wajib diisi.';
                             focusEl = noRekeningInput;
                             isValid = false;
-                        } else if (no_rekening.length < 10 || no_rekening.length > 16 || !/^[0-9]+$/.test(no_rekening)) {
-                            errorMsg = 'Nomor Rekening tidak valid (harus 10-16 digit angka).';
+                        } else if (no_rekening.length < 5 || no_rekening.length > 16 || !/^[0-9]+$/.test(no_rekening)) {
+                            errorMsg = 'Nomor Rekening tidak valid (harus 5-16 digit angka).';
                             focusEl = noRekeningInput;
                             isValid = false;
                         } else if (!nama_pemilik) {

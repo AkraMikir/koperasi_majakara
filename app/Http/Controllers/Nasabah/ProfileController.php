@@ -405,9 +405,9 @@ class ProfileController extends Controller
                 $nasabah = Auth::user()->nasabah;
                 $daruratId = $nasabah && $nasabah->darurat ? $nasabah->darurat->id : null;
                 $rules = [
-                    'nama_lengkap' => 'required|string|min:3|max:255',
+                    'nama_lengkap_darurat' => 'required|string|min:3|max:255',
                     'hubungan_peminjam' => 'required|string|min:2|max:100',
-                    'no_telepon' => [
+                    'no_telepon_darurat' => [
                         'required',
                         'string',
                         'regex:/^[0-9]+$/',
@@ -415,15 +415,15 @@ class ProfileController extends Controller
                         'max:12',
                         \Illuminate\Validation\Rule::unique('tbl_darurat', 'no_telepon')->ignore($daruratId),
                     ],
-                    'email' => 'nullable|string|email|max:255',
-                    'pekerjaan' => 'required|string|min:3|max:100',
-                    'no_ktp' => [
+                    'email_darurat' => 'nullable|string|email|max:255',
+                    'pekerjaan_darurat' => 'required|string|min:3|max:100',
+                    'no_ktp_darurat' => [
                         'required',
                         'string',
                         'digits:16',
                         \Illuminate\Validation\Rule::unique('tbl_darurat', 'no_ktp')->ignore($daruratId),
                     ],
-                    'alamat' => 'required|string|min:10',
+                    'alamat_darurat' => 'required|string|min:10',
                 ];
                 
                 if (request()->hasFile('foto_ktp_darurat')) {
@@ -436,26 +436,25 @@ class ProfileController extends Controller
         $messages = [];
         if ($jenisData === 'kontak_darurat') {
             $messages = [
-                'nama_lengkap.required' => 'Nama lengkap kontak darurat wajib diisi.',
-                'nama_lengkap.min' => 'Nama lengkap kontak darurat minimal 3 karakter.',
+                'nama_lengkap_darurat.required' => 'Nama lengkap kontak darurat wajib diisi.',
+                'nama_lengkap_darurat.min' => 'Nama lengkap kontak darurat minimal 3 karakter.',
                 'hubungan_peminjam.required' => 'Hubungan wajib diisi.',
                 'hubungan_peminjam.min' => 'Hubungan minimal 2 karakter.',
                 'hubungan_peminjam.max' => 'Hubungan maksimal 100 karakter.',
-                'no_telepon.required' => 'Nomor telepon wajib diisi.',
-                'no_telepon.regex' => 'Nomor telepon hanya boleh berisi angka.',
-                'no_telepon.min' => 'Nomor telepon minimal 10 digit.',
-                'no_telepon.max' => 'Nomor telepon maksimal 12 digit.',
-                'no_telepon.unique' => 'Nomor telepon kontak darurat sudah terdaftar.',
-                'email.required' => 'Email wajib diisi.',
-                'email.email' => 'Format email tidak valid.',
-                'pekerjaan.required' => 'Pekerjaan wajib diisi.',
-                'pekerjaan.min' => 'Pekerjaan minimal 3 karakter.',
-                'pekerjaan.max' => 'Pekerjaan maksimal 100 karakter.',
-                'no_ktp.required' => 'NIK (No KTP) wajib diisi.',
-                'no_ktp.digits' => 'NIK harus tepat 16 digit angka.',
-                'no_ktp.unique' => 'NIK kontak darurat sudah terdaftar.',
-                'alamat.required' => 'Alamat wajib diisi.',
-                'alamat.min' => 'Alamat minimal 10 karakter.',
+                'no_telepon_darurat.required' => 'Nomor telepon wajib diisi.',
+                'no_telepon_darurat.regex' => 'Nomor telepon hanya boleh berisi angka.',
+                'no_telepon_darurat.min' => 'Nomor telepon minimal 10 digit.',
+                'no_telepon_darurat.max' => 'Nomor telepon maksimal 12 digit.',
+                'no_telepon_darurat.unique' => 'Nomor telepon kontak darurat sudah terdaftar.',
+                'email_darurat.email' => 'Format email tidak valid.',
+                'pekerjaan_darurat.required' => 'Pekerjaan wajib diisi.',
+                'pekerjaan_darurat.min' => 'Pekerjaan minimal 3 karakter.',
+                'pekerjaan_darurat.max' => 'Pekerjaan maksimal 100 karakter.',
+                'no_ktp_darurat.required' => 'NIK (No KTP) wajib diisi.',
+                'no_ktp_darurat.digits' => 'NIK harus tepat 16 digit angka.',
+                'no_ktp_darurat.unique' => 'NIK kontak darurat sudah terdaftar.',
+                'alamat_darurat.required' => 'Alamat wajib diisi.',
+                'alamat_darurat.min' => 'Alamat minimal 10 karakter.',
                 'foto_ktp_darurat.image' => 'File KTP harus berupa gambar.',
                 'foto_ktp_darurat.mimes' => 'Format file KTP harus jpeg, png, atau jpg.',
                 'foto_ktp_darurat.max' => 'Ukuran file KTP maksimal 5MB.',
