@@ -150,6 +150,16 @@ class Nasabah extends Model
     {
         return $this->hasMany(TransGadai::class, 'nasabah_id');
     }
+
+    public function limitPinjaman(): HasOne
+    {
+        return $this->hasOne(LimitPinjaman::class, 'id_nasabah');
+    }
+
+    public function logsLimitPinjaman(): HasMany
+    {
+        return $this->hasMany(LogLimitPinjaman::class, 'id_nasabah');
+    }
 }
 
 

@@ -148,6 +148,10 @@
                         class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.pinjaman.pembayaran') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         Pembayaran
                     </a>
+                    <a href="{{ route('admin.pinjaman.limit.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.pinjaman.limit') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Limit Pinjaman
+                    </a>
                 </div>
             </div>
 

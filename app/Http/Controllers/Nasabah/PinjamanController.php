@@ -170,12 +170,21 @@ class PinjamanController extends Controller
         }
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
 
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
         return view('nasabah.pinjaman.pengajuan-pinjaman', [
             'riwayatPengajuan' => $riwayatPengajuan,
             'masterBunga' => $masterBunga,
             'durasiList' => $durasiList,
             'lokasi' => $lokasi,
             'openMetode' => $request->get('metode'), // 'transfer' | 'tunai'
+            'limitNominal' => $limitNominal,
+            'nominalTerpakai' => $nominalTerpakai,
+            'sisaLimit' => $sisaLimit,
         ]);
     }
 
@@ -318,6 +327,20 @@ class PinjamanController extends Controller
 
         $idAnggota = $this->getIdAnggota();
         $jenisPencairan = 'transfer'; // Auto set to transfer for this form
+
+        // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        if ((float)$request->nominal > $sisaLimit) {
+            return redirect()->back()
+                ->with('error', 'Nominal pengajuan melebihi sisa limit pinjaman Anda. Sisa limit Anda: Rp ' . number_format($sisaLimit, 0, ',', '.'))
+                ->withInput($request->except('pin'));
+        }
+        // ──────────────────────────────────────────────────────────
 
         // ── BANK ACCESS GUARD (server-side double check) ───────────
         $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
@@ -499,6 +522,20 @@ class PinjamanController extends Controller
         }
 
         $idAnggota = $this->getIdAnggota();
+
+        // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        if ((float)$request->nominal > $sisaLimit) {
+            return redirect()->back()
+                ->with('error', 'Nominal pengajuan melebihi sisa limit pinjaman Anda. Sisa limit Anda: Rp ' . number_format($sisaLimit, 0, ',', '.'))
+                ->withInput($request->except('pin'));
+        }
+        // ──────────────────────────────────────────────────────────
 
         // ── BANK ACCESS GUARD (server-side double check) ───────────
         $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);

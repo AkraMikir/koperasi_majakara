@@ -261,6 +261,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pengajuan', [\App\Http\Controllers\Admin\PinjamanController::class, 'pengajuan'])->name('pengajuan');
         Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
         Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/limit', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitIndex'])->name('limit.index');
+        Route::get('/limit/{id_nasabah}/logs', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitLogs'])->name('limit.logs');
+        Route::post('/limit/{id_nasabah}/update', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitUpdate'])->name('limit.update');
         // CRUD Pinjaman - MUST be before /pinjaman-aktif/{id} agar 'create' tidak tertangkap sebagai {id}
         Route::middleware('admin.permission:crud-pinjaman')->group(function () {
             Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');

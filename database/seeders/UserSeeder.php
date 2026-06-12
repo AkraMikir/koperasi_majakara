@@ -90,9 +90,9 @@ class UserSeeder extends Seeder
         // --- AKUN BARU ---
         // 3 Owners Baru (admin_utama)
         $owners = [
-            ['nama' => 'Owner 1', 'email' => 'owner1@o.com', 'password' => '1'],
-            ['nama' => 'Owner 2', 'email' => 'owner2@o.com', 'password' => '1'],
-            ['nama' => 'Owner 3', 'email' => 'owner3@o.com', 'password' => '1'],
+            ['nama' => 'Owner 1', 'email' => 'owner1@o.com', 'password' => '11111111'],
+            ['nama' => 'Owner 2', 'email' => 'owner2@o.com', 'password' => '11111111'],
+            ['nama' => 'Owner 3', 'email' => 'owner3@o.com', 'password' => '11111111'],
         ];
 
         foreach ($owners as $ownerData) {
@@ -114,9 +114,9 @@ class UserSeeder extends Seeder
 
         // 3 Admin Operasional Baru (admin_operasional)
         $ops = [
-            ['nama' => 'Ops 1', 'email' => 'ops1@o.com', 'password' => '1'],
-            ['nama' => 'Ops 2', 'email' => 'ops2@o.com', 'password' => '1'],
-            ['nama' => 'Ops 3', 'email' => 'ops3@o.com', 'password' => '1'],
+            ['nama' => 'Ops 1', 'email' => 'ops1@o.com', 'password' => '11111111'],
+            ['nama' => 'Ops 2', 'email' => 'ops2@o.com', 'password' => '11111111'],
+            ['nama' => 'Ops 3', 'email' => 'ops3@o.com', 'password' => '11111111'],
         ];
 
         foreach ($ops as $opData) {
@@ -138,15 +138,15 @@ class UserSeeder extends Seeder
 
         // 9 Nasabah Baru (nasabah)
         $nasabahs = [
-            ['nama' => 'Nsb 1', 'email' => 'nsb1@o.com', 'password' => '1', 'verified' => now()],
-            ['nama' => 'Nsb 2', 'email' => 'nsb2@o.com', 'password' => '1', 'verified' => now()],
-            ['nama' => 'Nsb 3', 'email' => 'nsb3@o.com', 'password' => '1', 'verified' => now()],
-            ['nama' => 'Nsb 4', 'email' => 'nsb4@o.com', 'password' => '1', 'verified' => null],
-            ['nama' => 'Nsb 5', 'email' => 'nsb5@o.com', 'password' => '1', 'verified' => null],
-            ['nama' => 'Nsb 6', 'email' => 'nsb6@o.com', 'password' => '1', 'verified' => null],
-            ['nama' => 'Nsb 7', 'email' => 'nsb7@o.com', 'password' => '1', 'verified' => null],
-            ['nama' => 'Nsb 8', 'email' => 'nsb8@o.com', 'password' => '1', 'verified' => null],
-            ['nama' => 'Nsb 9', 'email' => 'nsb9@o.com', 'password' => '1', 'verified' => null],
+            ['nama' => 'Nsb 1', 'email' => 'nsb1@o.com', 'password' => '11111111', 'verified' => now()],
+            ['nama' => 'Nsb 2', 'email' => 'nsb2@o.com', 'password' => '11111111', 'verified' => now()],
+            ['nama' => 'Nsb 3', 'email' => 'nsb3@o.com', 'password' => '11111111', 'verified' => now()],
+            ['nama' => 'Nsb 4', 'email' => 'nsb4@o.com', 'password' => '11111111', 'verified' => null],
+            ['nama' => 'Nsb 5', 'email' => 'nsb5@o.com', 'password' => '11111111', 'verified' => null],
+            ['nama' => 'Nsb 6', 'email' => 'nsb6@o.com', 'password' => '11111111', 'verified' => null],
+            ['nama' => 'Nsb 7', 'email' => 'nsb7@o.com', 'password' => '11111111', 'verified' => null],
+            ['nama' => 'Nsb 8', 'email' => 'nsb8@o.com', 'password' => '11111111', 'verified' => null],
+            ['nama' => 'Nsb 9', 'email' => 'nsb9@o.com', 'password' => '11111111', 'verified' => null],
         ];
 
         foreach ($nasabahs as $nasabahData) {
