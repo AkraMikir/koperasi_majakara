@@ -64,123 +64,187 @@
 <div class="w-full pb-6">
 
 
-    {{-- ===== TOP SECTION: Active Deposito OR Hero Banner ===== --}}
-    @if($depositoAktif->isNotEmpty())
-    {{-- ===== DEPOSITO AKTIF (menggantikan hero) ===== --}}
-    <div class="bg-gradient-to-br from-[#3a2800] to-[#674c1d] mx-4 mt-4 rounded-2xl px-5 pt-5 pb-4 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -mr-20 -mt-20"></div>
-        <div class="relative z-10">
-            <div class="flex items-center justify-between mb-3">
-                <div>
-                    <p class="text-[#f0d060] text-xs font-bold uppercase tracking-widest">Deposito Aktif Saya</p>
-                    <p class="text-white/70 text-xs mt-0.5">{{ $depositoAktif->count() }} deposito berjalan</p>
-                </div>
-                <a href="{{ route('nasabah.deposito.pengajuan') }}" class="bg-white/20 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/30 hover:bg-white/30 transition font-semibold">
-                    + Buka Baru
-                </a>
+    {{-- ===== HERO CARD: Pantau Deposito Anda ===== --}}
+    <div class="mx-4 mt-4">
+        <div class="bg-linear-to-br from-[#4a3514] via-[#674c1d] to-[#8b6f2f] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+            {{-- Background Pattern --}}
+            <div class="absolute inset-0 opacity-10">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -ml-24 -mb-24"></div>
             </div>
 
-            <div class="space-y-3">
-                @foreach($depositoAktif as $dep)
-                @php
-                    $persen = 0;
-                    $now = now();
-                    if ($dep->tgl_mulai && $dep->tgl_jatuh_tempo) {
-                        $total = $dep->tgl_mulai->diffInDays($dep->tgl_jatuh_tempo);
-                        $lewat = $dep->tgl_mulai->diffInDays($now);
-                        $persen = $total > 0 ? min(100, round(($lewat / $total) * 100)) : 0;
-                    }
+            <div class="relative z-10">
+                <div class="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white font-display mb-1">Pantau Deposito Anda</h1>
+                    </div>
+                </div>
 
-                    // Hitung sisa waktu (Bulan & Hari)
-                    $diff = $now->diff($dep->tgl_jatuh_tempo);
-                    $bulanSisa = $diff->y * 12 + $diff->m;
-                    $hariSisaCount = $diff->d;
-                    $isPast = $now->gt($dep->tgl_jatuh_tempo);
-                @endphp
-                <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition">
-                    <div class="flex items-center justify-between mb-2">
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20 mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
+                    @php
+                        $totalNominalDeposito = $depositoAktif->sum('nominal_awal');
+                        $jumlahDepositoAktif = $depositoAktif->count();
+                    @endphp
+                    <div>
+                        <p class="text-white/80 text-sm mb-1">Total Nilai Deposito Aktif</p>
+                        <h2 class="text-3xl md:text-4xl font-bold text-white font-display">
+                            Rp {{ number_format($totalNominalDeposito, 0, ',', '.') }}
+                        </h2>
+                        <p class="text-white/90 text-sm mt-1">
+                            @if($jumlahDepositoAktif > 0)
+                                <span class="font-semibold">{{ $jumlahDepositoAktif }} deposito</span> sedang berjalan
+                            @else
+                                Belum ada deposito aktif
+                            @endif
+                        </p>
+                    </div>
+                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                {{-- Quick Menu --}}
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <a href="{{ route('nasabah.deposito.pengajuan') }}" class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 transition-all border border-white/20 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                        </div>
                         <div>
-                            <p class="text-white/60 text-xs font-mono">{{ $dep->nomor_deposito }}</p>
-                            <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
+                            <p class="text-white text-xs font-medium leading-tight">Buka<br>Deposito</p>
                         </div>
-                        <div class="text-right">
-                            <p class="text-[#f0d060] font-black text-xl leading-none">{{ number_format($dep->bunga * 100, 2) }}%</p>
-                            <p class="text-white/60 text-xs">p.a.</p>
+                    </a>
+                    <a href="{{ route('nasabah.deposito.riwayat') }}" class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 transition-all border border-white/20 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
                         </div>
-                    </div>
-                    <div class="flex justify-between items-end mb-2">
                         <div>
-                            <p class="text-white/60 text-xs">Nominal</p>
-                            <p class="text-white font-bold">Rp {{ number_format($dep->nominal_awal, 0, ',', '.') }}</p>
+                            <p class="text-white text-xs font-medium leading-tight">Riwayat<br>Deposito</p>
                         </div>
-                        <span class="bg-green-400/20 text-green-300 text-xs font-bold px-2 py-0.5 rounded-full border border-green-400/30">Aktif</span>
-                    </div>
-                    {{-- Progress bar --}}
-                    <div class="mb-1.5">
-                        <div class="flex justify-between text-xs text-white/50 mb-1">
-                            <span>Progress Tenor</span>
-                            <span class="{{ ($isPast || ($bulanSisa == 0 && $hariSisaCount <= 7)) ? 'text-red-300' : 'text-white/60' }} font-semibold">
-                                @if($isPast)
-                                    Jatuh Tempo
-                                @else
-                                    {{ $bulanSisa > 0 ? $bulanSisa . ' bulan ' : '' }}{{ $hariSisaCount > 0 || $bulanSisa == 0 ? $hariSisaCount . ' hari ' : '' }}lagi
-                                @endif
-                            </span>
+                    </a>
+                    <a href="#riwayat-pengajuan" class="group bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 transition-all border border-white/20 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
                         </div>
-                        <div class="w-full bg-white/20 rounded-full h-1.5">
-                            <div class="h-1.5 rounded-full shimmer-gold" style="width: {{ $persen }}%"></div>
+                        <div>
+                            <p class="text-white text-xs font-medium leading-tight">Status<br>Pengajuan</p>
                         </div>
-                    </div>
-                    <div class="flex justify-between text-xs text-white/40">
-                        <span>Mulai: {{ $dep->tgl_mulai?->format('d M Y') }}</span>
-                        <span>Jatuh Tempo: {{ $dep->tgl_jatuh_tempo?->format('d M Y') }}</span>
-                    </div>
-                </a>
-                @endforeach
+                    </a>
+                    @php
+                        $cairkanUrl = $depositoAktif->count() === 1
+                            ? route('nasabah.deposito.detail', $depositoAktif->first()->id)
+                            : '#deposito-aktif';
+                    @endphp
+                    <a href="{{ $cairkanUrl }}" class="group {{ $depositoAktif->isEmpty() ? 'opacity-40 pointer-events-none' : '' }} bg-white/10 hover:bg-white/20 backdrop-blur-sm rounded-xl p-3 transition-all border border-white/20 flex items-center gap-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center group-hover:scale-105 transition-transform">
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-white text-xs font-medium leading-tight">Cairkan<br>Deposito</p>
+                        </div>
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
-    @else
-    {{-- ===== HERO BANNER (tampil jika belum punya deposito aktif) ===== --}}
-    <div class="bg-gradient-to-br from-[#4a3514] to-[#8b6f2f] mx-4 mt-4 rounded-2xl px-6 py-12 text-center relative overflow-hidden">
-        {{-- Background Decorations --}}
-        <div class="absolute top-0 left-0 w-full h-full overflow-hidden opacity-50 z-0 text-[#d4af37]">
-            <svg class="absolute -right-20 -top-20 w-96 h-96 opacity-20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-            <div class="absolute -left-16 -bottom-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-            <div class="absolute right-10 top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+    {{-- ===== DEPOSITO AKTIF SECTION ===== --}}
+    <div class="mx-4 mt-5" id="deposito-aktif">
+        <div class="flex items-center justify-between mb-4 px-2">
+            <h2 class="text-lg font-bold text-[#674c1d] font-display">Deposito Aktif Anda</h2>
+            <span class="text-sm text-[#674c1d] font-medium">{{ $depositoAktif->count() }} berjalan</span>
         </div>
 
-        <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
-            <p class="text-[#f0d060] text-xs font-bold uppercase tracking-[0.2em] mb-3">Halo {{ explode(' ', auth()->user()->nama ?? 'Nasabah')[0] }},</p>
-            
-            <h1 class="text-white text-3xl md:text-4xl font-bold leading-tight font-display mb-4">
-                Kembangkan Uang Anda<br>
-                <span class="text-[#f0d060]">Lebih Menguntungkan</span>
-            </h1>
-            
-            <p class="text-white/90 text-sm md:text-base mb-1">Nikmati imbal hasil kompetitif hingga</p>
-            <div class="flex items-baseline justify-center gap-1 mb-8">
-                <span class="text-[#f0d060] text-6xl font-black drop-shadow-md">6%</span>
-                <span class="text-white/90 text-xl font-bold">p.a.</span>
-            </div>
-
-            <a href="{{ route('nasabah.deposito.pengajuan') }}" class="inline-flex items-center gap-2 bg-white text-[#674c1d] font-bold px-8 py-3.5 rounded-full shadow-xl hover:shadow-2xl hover:scale-105 active:scale-95 transition-all text-sm mb-6">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        @if($depositoAktif->isNotEmpty())
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @foreach($depositoAktif as $dep)
+            @php
+                $persen = 0;
+                $now = now();
+                if ($dep->tgl_mulai && $dep->tgl_jatuh_tempo) {
+                    $total = $dep->tgl_mulai->diffInDays($dep->tgl_jatuh_tempo);
+                    $lewat = $dep->tgl_mulai->diffInDays($now);
+                    $persen = $total > 0 ? min(100, round(($lewat / $total) * 100)) : 0;
+                }
+                $diff = $now->diff($dep->tgl_jatuh_tempo);
+                $bulanSisa = $diff->y * 12 + $diff->m;
+                $hariSisaCount = $diff->d;
+                $isPast = $now->gt($dep->tgl_jatuh_tempo);
+            @endphp
+            <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-[#d4af37]/50 transition-all group">
+                <div class="flex justify-between items-start mb-4">
+                    <div>
+                        <p class="text-xs text-gray-400 font-mono">{{ $dep->nomor_deposito }}</p>
+                        <p class="font-bold text-gray-800 text-sm mt-0.5">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Aktif</span>
+                        <div class="w-7 h-7 rounded-full bg-[#674c1d]/10 flex items-center justify-center group-hover:bg-[#674c1d] transition-colors">
+                            <svg class="w-3.5 h-3.5 text-[#674c1d] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex justify-between items-end mb-3">
+                    <div>
+                        <p class="text-xs text-gray-500 mb-0.5">Nominal</p>
+                        <p class="font-bold text-gray-900 text-lg">Rp {{ number_format($dep->nominal_awal, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-xs text-gray-500 mb-0.5">Suku Bunga</p>
+                        <p class="text-[#674c1d] font-black text-2xl leading-none">{{ number_format($dep->bunga * 100, 2) }}%</p>
+                        <p class="text-xs text-gray-400">p.a.</p>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-xs text-gray-500 mb-1.5">
+                        <span>Progress Tenor</span>
+                        <span class="{{ ($isPast || ($bulanSisa == 0 && $hariSisaCount <= 7)) ? 'text-red-500 font-bold' : 'text-[#674c1d] font-semibold' }}">
+                            @if($isPast)
+                                ⚠️ Jatuh Tempo
+                            @else
+                                {{ $bulanSisa > 0 ? $bulanSisa . ' bln ' : '' }}{{ $hariSisaCount > 0 || $bulanSisa == 0 ? $hariSisaCount . ' hari ' : '' }}lagi
+                            @endif
+                        </span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2">
+                        <div class="h-2 rounded-full bg-gradient-to-r from-[#a0824d] to-[#d4af37] transition-all duration-500" style="width: {{ $persen }}%"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-400 mt-1.5">
+                        <span>{{ $dep->tgl_mulai?->format('d M Y') }}</span>
+                        <span>{{ $dep->tgl_jatuh_tempo?->format('d M Y') }}</span>
+                    </div>
+                </div>
+            </a>
+            @endforeach
+        </div>
+        @else
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center flex flex-col items-center justify-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-100 rounded-full flex items-center justify-center mb-4">
+                <svg class="w-8 h-8 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                 </svg>
+            </div>
+            <h3 class="text-base font-bold text-gray-800 mb-2">Belum Ada Deposito Aktif</h3>
+            <p class="text-gray-500 text-sm mb-5 max-w-xs mx-auto">Mulai investasikan dana Anda dan nikmati imbal hasil hingga 12% p.a.</p>
+            <a href="{{ route('nasabah.deposito.pengajuan') }}" class="px-6 py-2.5 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white font-semibold rounded-xl hover:opacity-90 transition shadow-md shadow-[#674c1d]/20">
                 Buka Deposito Sekarang
             </a>
-
-            {{-- Feature pills --}}
-            <div class="flex flex-wrap justify-center gap-3">
-                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">🛡️</span> Aman & Terpercaya</div>
-                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">📈</span> Bunga Kompetitif</div>
-                <div class="bg-white/15 backdrop-blur-sm text-white text-xs px-4 py-2 rounded-full border border-white/20 shadow-sm flex items-center gap-1.5"><span class="text-[#f0d060]">⚡</span> Proses Cepat</div>
-            </div>
         </div>
+        @endif
     </div>
-    @endif
+
+
 
 
     {{-- ===== SIMULASI CEPAT ===== --}}
@@ -398,7 +462,7 @@
 
 
     {{-- ===== RIWAYAT PENGAJUAN ===== --}}
-    <div class="mx-4 mb-5">
+    <div class="mx-4 mb-5" id="riwayat-pengajuan">
         <div class="flex items-center justify-between mb-3">
             <h2 class="text-base font-bold text-[#674c1d] font-display">Riwayat Pengajuan</h2>
             <a href="{{ route('nasabah.deposito.riwayat') }}" class="text-sm text-[#d4af37] font-bold hover:text-[#674c1d] transition-colors">Lihat Semua →</a>

@@ -101,8 +101,16 @@
             <td class="text-right">: Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td class="label">Estimasi Bunga</td>
+            <td class="label">Estimasi Bunga Kotor</td>
             <td class="text-right">: Rp {{ number_format($estimasi_bunga, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td class="label">Pajak Bunga ({{ number_format($pajak_rate * 100, 0) }}%)</td>
+            <td class="text-right">: - Rp {{ number_format($pajak_bunga, 0, ',', '.') }}</td>
+        </tr>
+        <tr>
+            <td class="label">Estimasi Bunga Bersih</td>
+            <td class="text-right">: Rp {{ number_format($bunga_bersih, 0, ',', '.') }}</td>
         </tr>
         <div class="dashed"></div>
         <tr>

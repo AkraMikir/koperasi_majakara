@@ -60,6 +60,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
 
     // Restricted Nasabah Routes (Require Account Verification)
     Route::middleware('nasabah.verified')->group(function () {
+        Route::get('/riwayat-transaksi', [NasabahDashboardController::class, 'riwayatTransaksi'])->name('riwayat-transaksi');
         // PIN Management Routes (DEPRECATED - Moved to Setting)
         Route::prefix('pin')->name('pin.')->group(function () {
             Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
@@ -149,6 +150,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
             Route::get('/riwayat', [DepositoController::class, 'riwayat'])->name('riwayat');
             Route::get('/pengajuan', [DepositoController::class, 'pengajuan'])->name('pengajuan');
             Route::post('/pengajuan', [DepositoController::class, 'submitPengajuan'])->name('submit-pengajuan');
+            Route::post('/verify-pin', [DepositoController::class, 'verifyPin'])->name('verify-pin');
             Route::get('/pengajuan/{id}/status', [DepositoController::class, 'statusPengajuan'])->name('status-pengajuan');
             Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
             // Ajukan pencairan deposito

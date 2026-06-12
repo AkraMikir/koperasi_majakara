@@ -180,6 +180,7 @@ class DepositoController extends Controller
     public function submitPengajuan(Request $request)
     {
         $request->validate([
+            'pin'            => 'required|numeric|digits:6',
             'nominal'        => 'required|numeric|min:1000000',
             'paket_id'       => 'required|exists:paket_depositos,id',
             'metode_setor'   => 'required|in:transfer,saldo_tabungan',
@@ -187,6 +188,18 @@ class DepositoController extends Controller
         ]);
 
         $nasabah = Auth::user()->nasabah;
+
+        // Verify PIN
+        $user = Auth::user();
+        if (!$user->pin) {
+            return back()->with('error', 'PIN belum diatur. Silakan atur PIN terlebih dahulu di profil Anda.')
+                ->withInput($request->except('pin'));
+        }
+
+        if (!Hash::check($request->pin, $user->pin)) {
+            return back()->with('error', 'PIN yang Anda masukkan salah!')
+                ->withInput($request->except('pin'));
+        }
 
         // ── BANK ACCESS GUARD (server-side double check) ───────────
         if ($nasabah) {
@@ -241,6 +254,38 @@ class DepositoController extends Controller
 
         return redirect()->route('nasabah.deposito.status-pengajuan', $pengajuan->id)
             ->with('success', 'Pengajuan deposito berhasil dikirim! Kami akan memproses pengajuan Anda.');
+    }
+
+    /**
+     * Verify PIN AJAX.
+     */
+    public function verifyPin(Request $request)
+    {
+        $request->validate([
+            'pin' => 'required|numeric|digits:6',
+        ]);
+
+        /** @var User $user */
+        $user = Auth::user();
+        
+        if (!$user->pin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN belum diatur. Silakan atur PIN terlebih dahulu.'
+            ], 400);
+        }
+
+        if (!Hash::check($request->pin, $user->pin)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN yang Anda masukkan salah.'
+            ], 400);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'PIN berhasil diverifikasi.'
+        ]);
     }
 
     /**

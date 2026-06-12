@@ -51,6 +51,25 @@
     </div>
     @endif
 
+    @if(is_null(auth()->user()->verified))
+    <!-- Verification Pending Banner (Profile Page) -->
+    <div class="mx-4 mb-6">
+        <div class="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-md flex items-start gap-4 animate-fade-in relative z-20">
+            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0 shadow-inner">
+                <svg class="w-6 h-6 text-amber-700 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-amber-900 font-display">Status Akun: Menunggu Verifikasi</h3>
+                <p class="text-xs text-amber-700 leading-relaxed mt-1">
+                    Akun Anda saat ini belum diverifikasi oleh Admin Utama. Mohon menunggu proses peninjauan berkas pendaftaran Anda selesai. Fitur-fitur transaksi akan diaktifkan setelah verifikasi disetujui.
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Profile Header -->
     <div class="mx-4 mt-4 mb-6">
         <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
@@ -79,9 +98,17 @@
                         
                         <!-- Status Badge -->
                         <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30">
-                                Nasabah Aktif
-                            </span>
+                            @if(is_null($nasabah->user->verified))
+                                <span class="px-4 py-2 bg-amber-500/20 backdrop-blur-sm rounded-full text-amber-200 text-sm font-semibold border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
+                                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                    Menunggu Verifikasi Admin
+                                </span>
+                            @else
+                                <span class="px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-200 text-sm font-semibold border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                                    Terverifikasi
+                                </span>
+                            @endif
                             <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30">
                                 Saldo: Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}
                             </span>

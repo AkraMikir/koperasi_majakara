@@ -98,7 +98,7 @@
                     </div>
                     @php
                         $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
-                            ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
+                            ? (int) now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
                             : 0;
                         $totalTagihanPlusDenda = $angsuran->jumlah_tagihan + ($dendaDisplay ?? 0);
                     @endphp

@@ -1303,8 +1303,10 @@ class RegisterController extends Controller
         $otpExpiresAtRemainingSeconds = 0;
         if ($otpExpiresAt) {
             $expiresAt = \Carbon\Carbon::parse($otpExpiresAt);
-            $otpExpiresAtRemainingSeconds = max(0, (int) $expiresAt->diffInSeconds(now(), false));
-            $otpExpiresAtRemainingSeconds = min(60, $otpExpiresAtRemainingSeconds); // kode berlaku 1 menit saja
+            // diffInSeconds: positive when $expiresAt is in the future
+            $diff = now()->diffInSeconds($expiresAt, false);
+            $otpExpiresAtRemainingSeconds = max(0, (int) $diff);
+            $otpExpiresAtRemainingSeconds = min(60, $otpExpiresAtRemainingSeconds);
         }
 
         // Tampilkan view dengan data (phone dinormalisasi agar tidak "Nomor tidak ditemukan")

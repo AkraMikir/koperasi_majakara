@@ -158,7 +158,7 @@
                     @php
                         $sisa = max(0, $angsuran->jumlah_tagihan - ($angsuran->jumlah_terbayar ?? 0));
                         $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
-                            ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
+                            ? (int) now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
                             : 0;
                         $denda = $angsuran->denda ?? 0;
                         if ($hariTelat > 0 && !$denda) {

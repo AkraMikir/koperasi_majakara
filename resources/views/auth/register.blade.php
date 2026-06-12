@@ -716,7 +716,7 @@
                                         
                                         <!-- Dropdown Content -->
                                         <div id="bank_dropdown_content" 
-                                            class="hidden absolute z-30 mt-1 w-full rounded-lg bg-white shadow-xl border border-gray-100 max-h-72 flex flex-col transition-all duration-200">
+                                            class="hidden w-full rounded-lg bg-white shadow-xl border border-gray-100 max-h-72 flex flex-col transition-all duration-200">
                                             <!-- Search Input -->
                                             <div class="p-2 border-b border-gray-100">
                                                 <div class="relative">
@@ -877,6 +877,7 @@
                     @endif
                     @elseif($step == 2)
                     {{-- Step 2: OTP Verification --}}
+                    <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                     <div class="space-y-6">
                         {{-- OTP step 2 alerts handled by SweetAlert2 --}}
 
@@ -935,7 +936,6 @@
 
                                             {{-- Hidden input: tombol yang disabled tidak ikut dikirim, jadi kita set send_otp=1
                                             lewat input ini saat klik --}}
-                                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                                             {{-- Button Kirim OTP with Loading State --}}
                                             <div class="mt-6">
                                                 <button type="button" name="send_otp_btn" value="1" id="btnSendOtp"
@@ -1058,7 +1058,7 @@
                                             </div>
 
                                             {{-- Button Kirim Ulang --}}
-                                            <div class="flex items-center justify-center">
+                                            <div class="flex items-center justify-center" id="resendBtnWrapper">
                                                 @if(($remainingCooldown ?? 0) > 0)
                                                     <button type="button" disabled
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed border border-gray-200">
@@ -1074,7 +1074,8 @@
                                                         </span>
                                                     </button>
                                                 @else
-                                                    <button type="submit" name="send_otp" value="1"
+                                                    <button type="button"
+                                                        onclick="setSendOtpAndLoading(this)"
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1402,6 +1403,7 @@
 
 @push('scripts')
     <script>
+        window.isRegisterFormSubmitting = false;
         function goToStep(step, substep = null) {
             // Convert step to number
             step = parseInt(step);
@@ -1800,7 +1802,7 @@
         });
 
             // Submit form sekali (programmatic submit = hanya satu request, tidak double)
-            const form = button.form;
+            const form = button.form || document.getElementById('registerForm');
             if (form) form.submit();
         }
 
@@ -1882,12 +1884,29 @@
 
                 // Auto-submit when all 6 boxes filled
                 if (allFilled) {
+                    if (window.isRegisterFormSubmitting) return;
+                    window.isRegisterFormSubmitting = true;
+
                     setTimeout(() => {
                         const form = document.getElementById('registerForm');
                         if (form) {
+                            // Show verification/loading screen popup
+                            Swal.fire({
+                                title: 'Memproses...',
+                                html: 'Sedang memverifikasi data Anda, mohon tunggu.',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                didOpen: () => {
+                                    Swal.showLoading();
+                                },
+                                customClass: {
+                                    popup: 'rounded-2xl shadow-2xl',
+                                    title: 'text-lg font-bold text-gray-900 font-display'
+                                }
+                            });
                             form.submit();
                         }
-                    }, 300); // Small delay for better UX
+                    }, 50);
                 }
             }
         }
@@ -1954,8 +1973,21 @@
                         </div>
                     `;
                     }
-                    // Reload agar tombol Kirim Ulang bisa muncul (cooldown = 0 setelah OTP kadaluarsa)
-                    setTimeout(function () { window.location.reload(); }, 800);
+                    // Tampilkan tombol Kirim Ulang langsung tanpa reload (reload menyebabkan infinite loop)
+                    const resendWrapper = document.getElementById('resendBtnWrapper');
+                    if (resendWrapper) {
+                        resendWrapper.innerHTML = `
+                            <button type="button"
+                                onclick="setSendOtpAndLoading(this)"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                <span class="text-sm">Kirim Ulang Kode OTP</span>
+                            </button>
+                        `;
+                    }
                 }
             }, 1000);
         }
@@ -2014,8 +2046,13 @@
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', async function(e) {
+                if (window.isRegisterFormSubmitting) {
+                    e.preventDefault();
+                    return;
+                }
                 // Prevent form submission to allow checks first
                 e.preventDefault();
+                window.isRegisterFormSubmitting = true;
 
                 const stepInput = registerForm.querySelector('input[name="step"]');
                 const substepInput = registerForm.querySelector('input[name="substep"]');
@@ -2350,6 +2387,7 @@
                 }
 
                 if (!isValid) {
+                    window.isRegisterFormSubmitting = false;
                     showErrorAlert(errorMsg);
                     if (focusEl) focusEl.focus();
                     return;
@@ -2397,6 +2435,7 @@
                     // If any uniqueness check failed, stop submission
                     const failedCheck = results.find(res => res.unique === false);
                     if (failedCheck) {
+                        window.isRegisterFormSubmitting = false;
                         Swal.close();
                         showErrorAlert(failedCheck.message);
                         if (failedCheck.element) {
@@ -2415,6 +2454,7 @@
                     registerForm.submit();
 
                 } catch (error) {
+                    window.isRegisterFormSubmitting = false;
                     Swal.close();
                     console.error('Error in uniqueness validation:', error);
                     showErrorAlert('Terjadi kesalahan koneksi saat memverifikasi data. Silakan coba lagi.');
@@ -2598,15 +2638,25 @@
     // Custom Searchable Dropdown Logic
     function toggleBankDropdown(forceState = null) {
         const dropdownContent = document.getElementById('bank_dropdown_content');
+        const trigger = document.getElementById('bank_dropdown_trigger');
         const arrow = document.getElementById('bank_dropdown_arrow');
-        if (!dropdownContent) return;
+        if (!dropdownContent || !trigger) return;
 
         const isHidden = dropdownContent.classList.contains('hidden');
         const shouldShow = forceState !== null ? forceState : isHidden;
 
         if (shouldShow) {
+            // Position dropdown using fixed coords to escape overflow-hidden parent
+            const rect = trigger.getBoundingClientRect();
+            dropdownContent.style.position = 'fixed';
+            dropdownContent.style.top = (rect.bottom + 4) + 'px';
+            dropdownContent.style.left = rect.left + 'px';
+            dropdownContent.style.width = rect.width + 'px';
+            dropdownContent.style.zIndex = '9999';
+
             dropdownContent.classList.remove('hidden');
             if (arrow) arrow.classList.add('rotate-180');
+
             // Focus the search input when opening
             const searchInput = document.getElementById('bank_search');
             if (searchInput) {
@@ -2619,6 +2669,19 @@
             if (arrow) arrow.classList.remove('rotate-180');
         }
     }
+
+    // Reposition on scroll/resize so fixed dropdown stays aligned
+    function repositionBankDropdown() {
+        const dropdownContent = document.getElementById('bank_dropdown_content');
+        const trigger = document.getElementById('bank_dropdown_trigger');
+        if (!dropdownContent || dropdownContent.classList.contains('hidden') || !trigger) return;
+        const rect = trigger.getBoundingClientRect();
+        dropdownContent.style.top = (rect.bottom + 4) + 'px';
+        dropdownContent.style.left = rect.left + 'px';
+        dropdownContent.style.width = rect.width + 'px';
+    }
+    window.addEventListener('scroll', repositionBankDropdown, true);
+    window.addEventListener('resize', repositionBankDropdown);
 
     function filterBanks() {
         const searchInput = document.getElementById('bank_search');
@@ -2696,16 +2759,26 @@
         }
     }
 
-    // Close dropdown on click outside
+    // Close dropdown on click outside (check both wrapper and dropdown content in body)
     document.addEventListener('click', function(event) {
         const wrapper = document.getElementById('bank_dropdown_wrapper');
-        if (wrapper && !wrapper.contains(event.target)) {
+        const dropdownContent = document.getElementById('bank_dropdown_content');
+        const clickedWrapper = wrapper && wrapper.contains(event.target);
+        const clickedDropdown = dropdownContent && dropdownContent.contains(event.target);
+        if (!clickedWrapper && !clickedDropdown) {
             toggleBankDropdown(false);
         }
     });
 
     // Initialize Bank Selection on page load
     document.addEventListener('DOMContentLoaded', function() {
+        // Move bank dropdown to <body> to escape backdrop-blur stacking context
+        // backdrop-filter creates a new containing block that traps position:fixed children
+        const dd = document.getElementById('bank_dropdown_content');
+        if (dd) {
+            document.body.appendChild(dd);
+        }
+
         const jenisAtmInput = document.getElementById('jenis_atm');
         if (jenisAtmInput) {
             const savedValue = jenisAtmInput.value.trim();
