@@ -276,21 +276,28 @@
                                             </div>
 
                             <div>
-                                <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil
+                                <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <button type="button" onclick="openWebcam('foto', 'fotoPreview', 'Ambil Foto Profil')"
+                                        class="w-full px-3 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:shadow-md transition-all text-xs font-semibold flex items-center justify-center gap-1.5">
+                                        Buka Kamera
+                                    </button>
+                                    <label for="foto" class="w-full px-3 py-2 border border-[#674c1d] text-[#674c1d] hover:bg-amber-50/30 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                                        Pilih File
                                     </label>
-                                <label for="foto" class="cursor-pointer">
-                                    <div
-                                        class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">
-                                        <span class="text-sm text-gray-600">Pilih Foto</span>
-                                    </div>
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
-                                </label>
-                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }}">
+                                </div>
+                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }} relative inline-block">
                                     <img id="fotoPreviewImg" 
                                         src="{{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? asset('storage/' . $formData['foto']) : '' }}" 
                                         alt="Preview"
                                         class="h-20 w-20 rounded-lg object-cover">
+                                    <button type="button" onclick="removeImage('foto', '', 'fotoPreview')" class="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow transition-all">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
