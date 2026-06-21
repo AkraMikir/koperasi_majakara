@@ -290,6 +290,7 @@ class RegisterController extends Controller
                     $formData['tanggal_lahir'] = $nasabahTemp->tanggal_lahir ? $nasabahTemp->tanggal_lahir->format('Y-m-d') : null;
                     $formData['jenis_kelamin'] = $nasabahTemp->jenis_kelamin;
                     $formData['alamat'] = $nasabahTemp->alamat;
+                    $formData['alamat_domisili'] = $nasabahTemp->alamat_domisili;
                     $formData['foto_ktp'] = $nasabahTemp->foto_ktp;
                     $formData['foto_kk'] = $nasabahTemp->foto_kk;
                     $formData['foto_selfie'] = $nasabahTemp->foto_selfie;
@@ -609,6 +610,7 @@ class RegisterController extends Controller
                 'tanggal_lahir' => 'required|date',
                 'jenis_kelamin' => 'required|in:L,P',
                 'alamat' => 'required|string',
+                'alamat_domisili' => 'required|string',
                 'foto_ktp' => $hasFotoKtp ? 'nullable|string' : 'required_without:foto_ktp_upload|nullable|string',
                 'foto_ktp_upload' => $hasFotoKtp ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required_without:foto_ktp|nullable|image|mimes:jpeg,png,jpg|max:5120',
                 'foto_kk' => $hasFotoKk ? 'nullable|string' : 'required_without:foto_kk_upload|nullable|string',
@@ -846,6 +848,7 @@ class RegisterController extends Controller
                         'tanggal_lahir' => null,
                         'jenis_kelamin' => 'L',
                         'alamat' => '',
+                        'alamat_domisili' => '',
                     ]);
                     $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id);
                 }
@@ -856,6 +859,7 @@ class RegisterController extends Controller
                     'tanggal_lahir' => $request->tanggal_lahir,
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'alamat' => $request->alamat,
+                    'alamat_domisili' => $request->alamat_domisili,
                 ];
 
                 $userId = $userTemp->id;
@@ -1396,6 +1400,7 @@ class RegisterController extends Controller
                     'tanggal_lahir' => $nasabahTemp->tanggal_lahir,
                     'jenis_kelamin' => $nasabahTemp->jenis_kelamin,
                     'alamat' => $nasabahTemp->alamat,
+                    'alamat_domisili' => $nasabahTemp->alamat_domisili,
                     'foto_ktp' => $nasabahTemp->foto_ktp,
                     'foto_kk' => $nasabahTemp->foto_kk,
                     'foto_selfie' => $nasabahTemp->foto_selfie,

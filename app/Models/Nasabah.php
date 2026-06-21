@@ -21,6 +21,7 @@ class Nasabah extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
+        'alamat_domisili',
         'foto_ktp',
         'foto_kk',
         'foto_selfie',

@@ -154,7 +154,7 @@
                 {{-- Global alerts are handled by sweetalert2 component --}}
 
                         <form method="POST" action="{{ route('register.submit') }}" enctype="multipart/form-data"
-                            id="registerForm">
+                            id="registerForm" onsubmit="return validatePasswordSubmit(event)">
                             @csrf
                             <input type="hidden" name="step" value="{{ $step }}">
                             @if($step == 1)
@@ -282,9 +282,9 @@
                                         class="w-full px-3 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:shadow-md transition-all text-xs font-semibold flex items-center justify-center gap-1.5">
                                         Buka Kamera
                                     </button>
-                                    <label for="foto" class="w-full px-3 py-2 border border-[#674c1d] text-[#674c1d] hover:bg-amber-50/30 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                                    <!-- <label for="foto" class="w-full px-3 py-2 border border-[#674c1d] text-[#674c1d] hover:bg-amber-50/30 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-center">
                                         Pilih File
-                                    </label>
+                                    </label> -->
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
                                 </div>
@@ -529,6 +529,13 @@
                                                 <textarea name="alamat" id="alamat" rows="3"
                                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
                                                     placeholder="Alamat lengkap tempat tinggal">{{ old('alamat', $formData['alamat'] ?? '') }}</textarea>
+                                            </div>
+
+                                            <div>
+                                                <label for="alamat_domisili" class="block text-sm font-medium text-gray-700 mb-2">Alamat Domisili</label>
+                                                <textarea name="alamat_domisili" id="alamat_domisili" rows="3"
+                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
+                                                    placeholder="Alamat domisili saat ini (isi sama dengan KTP jika sesuai KTP)">{{ old('alamat_domisili', $formData['alamat_domisili'] ?? '') }}</textarea>
                                             </div>
 
                             <!-- Upload section: 3 documents -->
@@ -1382,6 +1389,45 @@
                     class="w-full h-full object-cover rounded-xl hidden"></video>
                 <canvas id="cameraCanvas" class="hidden"></canvas>
 
+                <!-- KTP Grid Overlay -->
+                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center">
+                    <!-- Semi-transparent overlay with a clear cutout in the middle for KTP card format (~85.6mm x 53.98mm, ratio 1.58) -->
+                    <div class="absolute inset-0 bg-black/50"></div>
+                    <div class="relative z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
+                        <!-- Corner markers -->
+                        <div class="absolute -top-1.5 -left-1.5 w-4 h-4 border-t-4 border-l-4 border-yellow-400"></div>
+                        <div class="absolute -top-1.5 -right-1.5 w-4 h-4 border-t-4 border-r-4 border-yellow-400"></div>
+                        <div class="absolute -bottom-1.5 -left-1.5 w-4 h-4 border-b-4 border-l-4 border-yellow-400"></div>
+                        <div class="absolute -bottom-1.5 -right-1.5 w-4 h-4 border-b-4 border-r-4 border-yellow-400"></div>
+                        
+                        <!-- Left Side: Text Guidelines -->
+                        <div class="w-[60%] flex flex-col justify-center gap-2.5 opacity-40">
+                            <!-- NIK line -->
+                            <div class="h-3 bg-white/60 rounded-xs w-[85%]"></div>
+                            <!-- Detail lines -->
+                            <div class="h-2 bg-white/40 rounded-xs w-[65%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[75%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[70%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[50%]"></div>
+                        </div>
+
+                        <!-- Right Side: Photo Guideline -->
+                        <div class="w-[30%] flex items-center justify-center">
+                            <div class="w-full aspect-[3/4] border border-dashed border-white/60 rounded flex flex-col items-center justify-center gap-1 bg-white/5 opacity-55">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span class="text-[8px] text-white font-semibold">FOTO KTP</span>
+                            </div>
+                        </div>
+
+                        <!-- Instruction text inside the box -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-2">
+                            <span class="text-[10px] text-white bg-black/75 px-2.5 py-1 rounded-full font-medium text-center shadow-md">Posisikan KTP di dalam bingkai</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div id="cameraPreview" class="w-full h-full hidden">
                     <img id="cameraPreviewImg" src="" alt="Preview"
                         class="w-full h-full object-cover rounded-xl border border-gray-200">
@@ -1418,6 +1464,53 @@
 
 @push('scripts')
     <script>
+        function validatePasswordSubmit(e) {
+            // Check if we are currently on Step 1, Substep 1 (where password inputs are visible)
+            const passwordInput = document.getElementById('password');
+            if (!passwordInput) {
+                return true; // Let form submit if password field doesn't exist on this substep
+            }
+
+            const password = passwordInput.value;
+            const errors = [];
+
+            // 1. Minimal 8 karakter
+            if (password.length < 8) {
+                errors.push('Minimal 8 karakter');
+            }
+            // 2. Harus ada huruf besar
+            if (!/[A-Z]/.test(password)) {
+                errors.push('Harus mengandung minimal 1 huruf kapital (A-Z)');
+            }
+            // 3. Harus ada karakter spesial
+            if (!/[!@#$%^&*(),.?":{}|<>_]/.test(password)) {
+                errors.push('Harus mengandung minimal 1 karakter spesial (contoh: @, ., #, $, %, dll)');
+            }
+
+            if (errors.length > 0) {
+                e.preventDefault();
+                
+                // Construct HTML list for SweetAlert
+                let htmlErrors = '<ul class="text-left list-disc list-inside text-red-600 space-y-1 mt-2">';
+                errors.forEach(function(error) {
+                    htmlErrors += '<li>' + error + '</li>';
+                });
+                htmlErrors += '</ul>';
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Keamanan Password Lemah',
+                    html: '<div class="text-gray-700 text-sm">Password Anda harus memenuhi kriteria berikut:' + htmlErrors + '</div>',
+                    confirmButtonColor: '#674c1d',
+                    confirmButtonText: 'Perbaiki'
+                });
+
+                return false;
+            }
+
+            return true;
+        }
+
         function goToStep(step, substep = null) {
             // Convert step to number
             step = parseInt(step);
@@ -1473,6 +1566,7 @@
         const preview = document.getElementById('cameraPreview');
         const titleEl = document.getElementById('cameraModalTitle');
         const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+        const ktpOverlay = document.getElementById('cameraKtpOverlay');
 
         if (titleEl) {
             titleEl.textContent = title;
@@ -1483,6 +1577,15 @@
         btnRetake.classList.add('hidden');
         btnUsePhoto.classList.add('hidden');
         btnCapture.classList.remove('hidden');
+
+        // Show KTP Overlay only for KTP uploads
+        if (ktpOverlay) {
+            if (inputId === 'file_ktp_upload' || inputId === 'foto_ktp_upload') {
+                ktpOverlay.classList.remove('hidden');
+            } else {
+                ktpOverlay.classList.add('hidden');
+            }
+        }
 
         // Check if device has multiple cameras to show switch button
         if (btnSwitchCamera) {
@@ -1599,6 +1702,12 @@
                 btnRetake.classList.remove('hidden');
                 btnUsePhoto.classList.remove('hidden');
 
+                // Hide KTP Overlay during preview
+                const ktpOverlay = document.getElementById('cameraKtpOverlay');
+                if (ktpOverlay) {
+                    ktpOverlay.classList.add('hidden');
+                }
+
                 // Stop video stream
                 if (cameraStream) {
                     cameraStream.getTracks().forEach(track => track.stop());
@@ -1621,11 +1730,17 @@
             btnCapture.classList.remove('hidden');
             capturedPhotoBlob = null;
 
+            // Show KTP overlay again if it is KTP input
+            const ktpOverlay = document.getElementById('cameraKtpOverlay');
+            if (ktpOverlay && (activeInputId === 'file_ktp_upload' || activeInputId === 'foto_ktp_upload')) {
+                ktpOverlay.classList.remove('hidden');
+            }
+
             // Restart camera
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: 'environment',
+                        facingMode: currentFacingMode,
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     }
