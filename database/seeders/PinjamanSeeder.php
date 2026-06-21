@@ -46,10 +46,22 @@ class PinjamanSeeder extends Seeder
 
         $bunga3 = MasterBungaPinjaman::getBungaByDurasi(3);
         $bunga6 = MasterBungaPinjaman::getBungaByDurasi(6);
+        $bunga3 = MasterBungaPinjaman::getBungaByDurasi(3);
+        $bunga6 = MasterBungaPinjaman::getBungaByDurasi(6);
         if (!$bunga3 || !$bunga6) {
             $this->command->warn('PinjamanSeeder: Master bunga untuk durasi 3 dan 6 bulan belum ada.');
             return;
         }
+
+        // ---- Seeding MasterTujuanPinjaman ----
+        $tujuanModal = \App\Models\MasterTujuanPinjaman::updateOrCreate(
+            ['tujuan' => 'Modal Usaha'],
+            ['status' => true, 'keterangan' => 'Untuk keperluan modal usaha nasabah']
+        );
+        $tujuanRenov = \App\Models\MasterTujuanPinjaman::updateOrCreate(
+            ['tujuan' => 'Renovasi Rumah'],
+            ['status' => true, 'keterangan' => 'Untuk biaya renovasi tempat tinggal']
+        );
 
         DB::beginTransaction();
         try {
@@ -72,6 +84,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPengajuan1],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'tgl_pengajuan' => $tglCair1->copy()->subDays(2),
                     'nominal' => $nominal1,
                     'jenis' => 'bulanan',
@@ -87,6 +100,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPinjaman1],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'id_pengajuan' => $idPengajuan1,
                     'jumlah_pinjam' => $nominal1,
                     'lama_pinjam' => $durasi1,
@@ -133,6 +147,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPengajuan2],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanRenov->id,
                     'tgl_pengajuan' => $tanggalJanjiTemu->copy()->subDays(3),
                     'nominal' => $nominal2,
                     'jenis' => 'bulanan',
@@ -162,6 +177,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPinjaman2],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanRenov->id,
                     'id_pengajuan' => $idPengajuan2,
                     'jumlah_pinjam' => $nominal2,
                     'lama_pinjam' => $durasi2,
@@ -205,6 +221,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPengajuan3],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'tgl_pengajuan' => $tglPengajuan3,
                     'nominal' => $nominal3,
                     'jenis' => 'bulanan',
@@ -219,6 +236,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPinjaman3],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'id_pengajuan' => $idPengajuan3,
                     'jumlah_pinjam' => $nominal3,
                     'lama_pinjam' => $durasi3,
@@ -258,6 +276,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPengajuan4],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'tgl_pengajuan' => $tglCair4->copy()->subDays(3),
                     'nominal' => $nominal4,
                     'jenis' => 'bulanan',
@@ -272,6 +291,7 @@ class PinjamanSeeder extends Seeder
                 ['id' => $idPinjaman4],
                 [
                     'id_anggota' => $nasabah->id,
+                    'id_tujuan' => $tujuanModal->id,
                     'id_pengajuan' => $idPengajuan4,
                     'jumlah_pinjam' => $nominal4,
                     'lama_pinjam' => $durasi4,

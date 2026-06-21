@@ -60,6 +60,32 @@
     </div>
     @endif
 
+    <!-- Limit Pinjaman Info -->
+    <div class="mx-4 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-linear-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Limit Pinjaman Anda</p>
+                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($sisaLimit, 0, ',', '.') }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-linear-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Limit Terpakai</p>
+                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($nominalTerpakai, 0, ',', '.') }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
         <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
@@ -156,12 +182,24 @@
                     <select name="durasi" id="durasi-transfer" required
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                         <option value="">Pilih durasi</option>
-                        @foreach($durasiList ?? [] as $d)
-                        <option value="{{ $d->bulan ?? $d->ket }}" {{ old('durasi') == ($d->bulan ?? $d->ket) ? 'selected' : '' }}>{{ $d->bulan ?? $d->ket }} bulan</option>
+                        @foreach($durasiList as $val)
+                            <option value="{{ $val }}" {{ old('durasi') == $val ? 'selected' : '' }}>{{ $val }} bulan</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-500 mt-2">Pilih jangka waktu pinjaman (1-24 bulan)</p>
+                    <p class="text-xs text-gray-500 mt-2">Pilih jangka waktu pinjaman</p>
                     @error('durasi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Pinjaman *</label>
+                    <select name="id_tujuan" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        <option value="">Pilih tujuan pinjaman</option>
+                        @foreach($tujuanList as $tujuan)
+                            <option value="{{ $tujuan->id }}" {{ old('id_tujuan') == $tujuan->id ? 'selected' : '' }}>{{ $tujuan->tujuan }}</option>
+                        @endforeach
+                    </select>
+                    @error('id_tujuan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
 
@@ -180,9 +218,12 @@
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBungaTransfer">-</span>
+                            <div class="text-right">
+                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>
+                            </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
@@ -251,11 +292,23 @@
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
                         onchange="updateEstimasiTunai()">
                         <option value="">Pilih durasi</option>
-                        @foreach($durasiList ?? [] as $d)
-                        <option value="{{ $d->bulan ?? $d->ket }}" {{ old('durasi') == ($d->bulan ?? $d->ket) ? 'selected' : '' }}>{{ $d->bulan ?? $d->ket }} bulan</option>
+                        @foreach($durasiList as $val)
+                            <option value="{{ $val }}" {{ old('durasi') == $val ? 'selected' : '' }}>{{ $val }} bulan</option>
                         @endforeach
                     </select>
                     @error('durasi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Pinjaman *</label>
+                    <select name="id_tujuan" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        <option value="">Pilih tujuan pinjaman</option>
+                        @foreach($tujuanList as $tujuan)
+                            <option value="{{ $tujuan->id }}" {{ old('id_tujuan') == $tujuan->id ? 'selected' : '' }}>{{ $tujuan->tujuan }}</option>
+                        @endforeach
+                    </select>
+                    @error('id_tujuan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
@@ -299,9 +352,12 @@
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominalTunai">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBungaTunai">-</span>
+                            <div class="text-right">
+                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="text-sm text-gray-500 block" id="estimasiBungaTunai">-</span>
+                            </div>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>

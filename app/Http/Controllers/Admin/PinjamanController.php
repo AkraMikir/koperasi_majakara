@@ -234,13 +234,18 @@ class PinjamanController extends Controller
                 'tgl_pinjam' => now(), // Tanggal approval
                 'lunas' => 'belum',
             ]);
-
             // Update status pengajuan menjadi '3' (Disetujui)
             $pengajuan->update([
                 'status' => '3',
                 'bunga_persen' => $masterBunga->bunga_persen,
                 'keterangan_admin' => $request->keterangan_admin,
             ]);
+            // Update nominal terpakai limit nasabah
+            $limit = \App\Models\LimitPinjaman::firstOrCreate(
+                ['id_nasabah' => $pengajuan->id_anggota],
+                ['limit_nominal' => 1000000.00, 'nominal_terpakai' => 0.00]
+            );
+            $limit->increment('nominal_terpakai', $nominal);
 
             DB::commit();
 
@@ -557,12 +562,20 @@ class PinjamanController extends Controller
                     'tgl_pinjam' => $request->tgl_cair,
                     'lunas' => 'belum',
                 ]);
-                $pengajuan->update([
-                    'status' => '3',
-                    'bunga_persen' => $bungaPersen,
-                    'keterangan_admin' => $request->keterangan_admin,
-                ]);
-                $pengajuan->load('pinjaman');
+                 $pengajuan->update([
+                     'status' => '3',
+                     'bunga_persen' => $bungaPersen,
+                     'keterangan_admin' => $request->keterangan_admin,
+                 ]);
+
+                 // Update nominal terpakai limit nasabah
+                 $limit = \App\Models\LimitPinjaman::firstOrCreate(
+                     ['id_nasabah' => $pengajuan->id_anggota],
+                     ['limit_nominal' => 1000000.00, 'nominal_terpakai' => 0.00]
+                 );
+                 $limit->increment('nominal_terpakai', $nominal);
+
+                 $pengajuan->load('pinjaman');
             }
 
             $pinjaman = $pengajuan->pinjaman;
@@ -704,15 +717,15 @@ class PinjamanController extends Controller
             'nasabah.dataKtp',
             'nasabah.pekerjaan',
             'pengajuan',
-            'tempoBulanan',
-            'tempoMingguan',
+            'tempoBulanan.pinjaman',
+            'tempoMingguan.pinjaman',
             'buktiPelunasan'
         ])->findOrFail($id);
 
-        // Get angsuran berdasarkan jenis
+        // Get angsuran berdasarkan jenis (gunakan collection agar relasi pinjaman yang telah di-eagerload tetap ada)
         $angsuran = $pinjaman->jenis === 'bulanan' 
-            ? $pinjaman->tempoBulanan()->orderBy('no_urut')->get()
-            : $pinjaman->tempoMingguan()->orderBy('no_urut')->get();
+            ? $pinjaman->tempoBulanan->sortBy('no_urut')
+            : $pinjaman->tempoMingguan->sortBy('no_urut');
 
         return view('admin.pinjaman.detail-pinjaman', compact('pinjaman', 'angsuran'));
     }
@@ -995,6 +1008,13 @@ class PinjamanController extends Controller
         }
 
         app(ActivityLogService::class)->logPelunasanDipercepat($pinjaman->id, $jumlahBayar, $pinjaman->nasabah->user->nama ?? 'N/A');
+
+        // Update nominal terpakai limit nasabah
+        $limit = \App\Models\LimitPinjaman::where('id_nasabah', $pinjaman->id_anggota)->first();
+        if ($limit) {
+            $limit->nominal_terpakai = max(0, $limit->nominal_terpakai - $pinjaman->jumlah_pinjam);
+            $limit->save();
+        }
 
         return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
             ->with('success', 'Pinjaman berhasil dilunasi dipercepat. Total pembayaran: Rp ' . number_format($jumlahBayar, 0, ',', '.'));
@@ -1439,9 +1459,6 @@ class PinjamanController extends Controller
         }
     }
 
-    /**
-     * Show form create pinjaman (untuk yang janji temu/ketemu langsung).
-     */
     public function createPinjaman()
     {
         // Authorization: Only Admin Utama can create manual pinjaman
@@ -1451,8 +1468,10 @@ class PinjamanController extends Controller
 
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        $durasiList = MasterBungaPinjaman::getOpsiDurasi();
+        $tujuanList = MasterTujuanPinjaman::where('status', true)->orderBy('tujuan')->get();
         
-        return view('admin.pinjaman.create-pinjaman', compact('nasabah', 'masterBunga'));
+        return view('admin.pinjaman.create-pinjaman', compact('nasabah', 'masterBunga', 'durasiList', 'tujuanList'));
     }
 
     /**
@@ -1469,6 +1488,7 @@ class PinjamanController extends Controller
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'nominal' => 'required|numeric|min:100000',
             'durasi' => 'required|integer|min:1|max:24',
+            'id_tujuan' => 'required|exists:master_tujuan_pinjaman,id',
             'tgl_pinjam' => 'required|date',
         ]);
 
@@ -1506,6 +1526,7 @@ class PinjamanController extends Controller
             // Create pinjaman langsung (tanpa pengajuan)
             $pinjaman = PinjamanH::create([
                 'id_anggota' => $request->id_anggota,
+                'id_tujuan' => $request->id_tujuan,
                 'id_pengajuan' => null, // Tidak ada pengajuan
                 'jumlah_pinjam' => $nominal,
                 'lama_pinjam' => $durasi,
@@ -1672,6 +1693,92 @@ class PinjamanController extends Controller
 
             return redirect()->route('admin.pinjaman.pinjaman-aktif')
                 ->with('success', 'Pinjaman berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Display list of limit pinjaman nasabah.
+     */
+    public function limitIndex(Request $request)
+    {
+        $query = Nasabah::with(['user', 'limitPinjaman'])
+            ->whereHas('user', function($q) {
+                $q->where('role', 'nasabah');
+            });
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('user', function($q) use ($search) {
+                $q->where('nama', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+            });
+        }
+
+        $nasabahs = $query->paginate(15);
+
+        return view('admin.pinjaman.limit-index', compact('nasabahs'));
+    }
+
+    /**
+     * Show log limit pinjaman for a specific nasabah.
+     */
+    public function limitLogs($id_nasabah)
+    {
+        $nasabah = Nasabah::with(['user', 'limitPinjaman', 'logsLimitPinjaman.admin'])->findOrFail($id_nasabah);
+        $logs = $nasabah->logsLimitPinjaman()->with('admin')->latest()->paginate(15);
+
+        return view('admin.pinjaman.limit-logs', compact('nasabah', 'logs'));
+    }
+
+    /**
+     * Update limit nominal for a specific nasabah.
+     */
+    public function limitUpdate(Request $request, $id_nasabah)
+    {
+        // Only Admin Utama (owner) and Admin Operasional can update limit
+        $user = Auth::user();
+        if (!in_array($user->role, ['admin_utama', 'admin_operasional'])) {
+            abort(403, 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'limit_nominal' => 'required|numeric|min:0',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        $nasabah = Nasabah::findOrFail($id_nasabah);
+        
+        try {
+            DB::beginTransaction();
+
+            $limit = \App\Models\LimitPinjaman::firstOrCreate(
+                ['id_nasabah' => $id_nasabah],
+                ['limit_nominal' => 1000000.00, 'nominal_terpakai' => 0.00]
+            );
+
+            $limitSebelum = $limit->limit_nominal;
+            $limit->limit_nominal = $request->limit_nominal;
+            $limit->save();
+
+            // Record Log
+            \App\Models\LogLimitPinjaman::create([
+                'id_nasabah' => $id_nasabah,
+                'id_user_admin' => $user->id,
+                'limit_sebelum' => $limitSebelum,
+                'limit_sesudah' => $request->limit_nominal,
+                'keterangan' => $request->keterangan,
+            ]);
+
+            DB::commit();
+
+            app(ActivityLogService::class)->logUpdateLimitPinjaman($id_nasabah, $nasabah->user->nama ?? 'N/A', (float) $limitSebelum, (float) $request->limit_nominal);
+
+            return redirect()->back()
+                ->with('success', 'Limit pinjaman nasabah ' . ($nasabah->user->nama ?? '') . ' berhasil diperbarui');
         } catch (\Exception $e) {
             DB::rollBack();
             return redirect()->back()

@@ -18,6 +18,7 @@ class PengajuanPinjaman extends Model
     protected $fillable = [
         'id',
         'id_anggota',
+        'id_tujuan',
         'tgl_pengajuan',
         'nominal',
         'jenis',
@@ -44,6 +45,11 @@ class PengajuanPinjaman extends Model
     public function nasabah(): BelongsTo
     {
         return $this->belongsTo(Nasabah::class, 'id_anggota');
+    }
+
+    public function tujuanPinjaman(): BelongsTo
+    {
+        return $this->belongsTo(MasterTujuanPinjaman::class, 'id_tujuan');
     }
 
     public function pinjaman(): HasOne

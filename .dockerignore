@@ -1,0 +1,50 @@
+# Dependencies — diinstall di container
+node_modules/
+vendor/
+
+# Git
+.git/
+.gitattributes
+
+# Environment — JANGAN include .env di image!
+.env
+.env.*
+!.env.example
+
+# Logs & cache
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Tests
+tests/
+
+# Dev tools
+.phpunit.result.cache
+phpunit.xml
+
+
+# Dokumentasi lokal
+*.md
+!README.md
+
+# IDE
+.vscode/
+.idea/
+.agents/
+.gemini/
+.postman/
+postman/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Scratch files
+scratch/
+scratch_*.php
+test*.php
+extracted_request.txt
+routes_list.json
+scan_report.md

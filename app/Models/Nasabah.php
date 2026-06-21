@@ -21,6 +21,7 @@ class Nasabah extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
+        'alamat_domisili',
         'foto_ktp',
         'foto_kk',
         'foto_selfie',
@@ -149,6 +150,16 @@ class Nasabah extends Model
     public function transGadai(): HasMany
     {
         return $this->hasMany(TransGadai::class, 'nasabah_id');
+    }
+
+    public function limitPinjaman(): HasOne
+    {
+        return $this->hasOne(LimitPinjaman::class, 'id_nasabah');
+    }
+
+    public function logsLimitPinjaman(): HasMany
+    {
+        return $this->hasMany(LogLimitPinjaman::class, 'id_nasabah');
     }
 }
 

@@ -165,7 +165,14 @@ trait CalculatesDenda
 
         // 5. Check pelunasan pinjaman induk
         if ($this->pinjaman) {
-            $this->pinjaman->checkAndUpdateLunasStatus();
+            $isLunas = $this->pinjaman->checkAndUpdateLunasStatus();
+            if ($isLunas) {
+                $limit = \App\Models\LimitPinjaman::where('id_nasabah', $this->pinjaman->id_anggota)->first();
+                if ($limit) {
+                    $limit->nominal_terpakai = max(0, $limit->nominal_terpakai - $this->pinjaman->jumlah_pinjam);
+                    $limit->save();
+                }
+            }
         }
 
         return $this;

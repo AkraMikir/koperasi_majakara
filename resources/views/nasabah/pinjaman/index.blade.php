@@ -41,10 +41,23 @@
                         @endphp
                         <p class="text-white/90 text-sm mt-1">Sisa Pembayaran: <span class="font-semibold">Rp {{ number_format($sisaPinjamanTotal, 0, ',', '.') }}</span></p>
                     </div>
-                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                </div>
+                
+                @php
+                    $limitPercent = $limitNominal > 0 ? min(100, max(0, ($nominalTerpakai / $limitNominal) * 100)) : 0;
+                @endphp
+                <!-- Progress Bar Limit Pinjaman -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-semibold text-white/90">Limit Terpakai ({{ number_format($limitPercent, 1) }}%)</span>
+                        <span class="text-xs font-semibold text-white/95">Rp {{ number_format($nominalTerpakai, 0, ',', '.') }} / Rp {{ number_format($limitNominal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="w-full bg-white/20 rounded-full h-3">
+                        <div class="bg-linear-to-r from-red-400 to-orange-400 h-3 rounded-full transition-all duration-500" style="width: {{ $limitPercent }}%"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-white/80 mt-1">
+                        <span>Sisa Limit Tersedia: Rp {{ number_format($sisaLimit, 0, ',', '.') }}</span>
+                        <span>Sisa limit dapat digunakan untuk pengajuan baru</span>
                     </div>
                 </div>
                 
