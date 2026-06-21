@@ -717,15 +717,15 @@ class PinjamanController extends Controller
             'nasabah.dataKtp',
             'nasabah.pekerjaan',
             'pengajuan',
-            'tempoBulanan',
-            'tempoMingguan',
+            'tempoBulanan.pinjaman',
+            'tempoMingguan.pinjaman',
             'buktiPelunasan'
         ])->findOrFail($id);
 
-        // Get angsuran berdasarkan jenis
+        // Get angsuran berdasarkan jenis (gunakan collection agar relasi pinjaman yang telah di-eagerload tetap ada)
         $angsuran = $pinjaman->jenis === 'bulanan' 
-            ? $pinjaman->tempoBulanan()->orderBy('no_urut')->get()
-            : $pinjaman->tempoMingguan()->orderBy('no_urut')->get();
+            ? $pinjaman->tempoBulanan->sortBy('no_urut')
+            : $pinjaman->tempoMingguan->sortBy('no_urut');
 
         return view('admin.pinjaman.detail-pinjaman', compact('pinjaman', 'angsuran'));
     }
@@ -1459,9 +1459,6 @@ class PinjamanController extends Controller
         }
     }
 
-    /**
-     * Show form create pinjaman (untuk yang janji temu/ketemu langsung).
-     */
     public function createPinjaman()
     {
         // Authorization: Only Admin Utama can create manual pinjaman
@@ -1471,8 +1468,10 @@ class PinjamanController extends Controller
 
         $nasabah = Nasabah::with('user')->get();
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
+        $durasiList = MasterBungaPinjaman::getOpsiDurasi();
+        $tujuanList = MasterTujuanPinjaman::where('status', true)->orderBy('tujuan')->get();
         
-        return view('admin.pinjaman.create-pinjaman', compact('nasabah', 'masterBunga'));
+        return view('admin.pinjaman.create-pinjaman', compact('nasabah', 'masterBunga', 'durasiList', 'tujuanList'));
     }
 
     /**
@@ -1489,6 +1488,7 @@ class PinjamanController extends Controller
             'id_anggota' => 'required|exists:tbl_nasabah,id',
             'nominal' => 'required|numeric|min:100000',
             'durasi' => 'required|integer|min:1|max:24',
+            'id_tujuan' => 'required|exists:master_tujuan_pinjaman,id',
             'tgl_pinjam' => 'required|date',
         ]);
 
@@ -1526,6 +1526,7 @@ class PinjamanController extends Controller
             // Create pinjaman langsung (tanpa pengajuan)
             $pinjaman = PinjamanH::create([
                 'id_anggota' => $request->id_anggota,
+                'id_tujuan' => $request->id_tujuan,
                 'id_pengajuan' => null, // Tidak ada pengajuan
                 'jumlah_pinjam' => $nominal,
                 'lama_pinjam' => $durasi,

@@ -106,14 +106,15 @@ class MasterDataSeeder extends Seeder
         // 5. Bunga & Denda Pinjaman
         DB::table('master_bunga_pinjaman')->truncate();
         $bungaData = [
-            ['durasi_min' => 1, 'durasi_max' => 3, 'bunga_persen' => 10.00, 'keterangan' => 'Pinjaman 1-3 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 4, 'durasi_max' => 6, 'bunga_persen' => 12.00, 'keterangan' => 'Pinjaman 4-6 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 7, 'durasi_max' => 9, 'bunga_persen' => 14.00, 'keterangan' => 'Pinjaman 7-9 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 10, 'durasi_max' => 12, 'bunga_persen' => 16.00, 'keterangan' => 'Pinjaman 10-12 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 13, 'durasi_max' => 15, 'bunga_persen' => 18.00, 'keterangan' => 'Pinjaman 13-15 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 16, 'durasi_max' => 18, 'bunga_persen' => 20.00, 'keterangan' => 'Pinjaman 16-18 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 19, 'durasi_max' => 21, 'bunga_persen' => 22.00, 'keterangan' => 'Pinjaman 19-21 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
-            ['durasi_min' => 22, 'durasi_max' => 24, 'bunga_persen' => 24.00, 'keterangan' => 'Pinjaman 22-24 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 1, 'durasi_max' => 3, 'durasi_pilihan' => 1, 'bunga_persen' => 10.00, 'keterangan' => 'Pinjaman 1-3 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 1, 'durasi_max' => 3, 'durasi_pilihan' => 3, 'bunga_persen' => 10.00, 'keterangan' => 'Pinjaman 1-3 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 4, 'durasi_max' => 6, 'durasi_pilihan' => 6, 'bunga_persen' => 12.00, 'keterangan' => 'Pinjaman 4-6 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 7, 'durasi_max' => 9, 'durasi_pilihan' => 9, 'bunga_persen' => 14.00, 'keterangan' => 'Pinjaman 7-9 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 10, 'durasi_max' => 12, 'durasi_pilihan' => 12, 'bunga_persen' => 16.00, 'keterangan' => 'Pinjaman 10-12 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 13, 'durasi_max' => 15, 'durasi_pilihan' => 15, 'bunga_persen' => 18.00, 'keterangan' => 'Pinjaman 13-15 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 16, 'durasi_max' => 18, 'durasi_pilihan' => 18, 'bunga_persen' => 20.00, 'keterangan' => 'Pinjaman 16-18 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 19, 'durasi_max' => 21, 'durasi_pilihan' => 21, 'bunga_persen' => 22.00, 'keterangan' => 'Pinjaman 19-21 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
+            ['durasi_min' => 22, 'durasi_max' => 24, 'durasi_pilihan' => 24, 'bunga_persen' => 24.00, 'keterangan' => 'Pinjaman 22-24 bulan', 'status_aktif' => true, 'created_at' => now(), 'updated_at' => now()],
         ];
         DB::table('master_bunga_pinjaman')->insert($bungaData);
         

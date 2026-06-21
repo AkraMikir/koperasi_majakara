@@ -1360,12 +1360,21 @@
         <div class="bg-white/95 backdrop-blur-md rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl relative">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="cameraModalTitle" class="text-lg font-bold text-[#674c1d]">Ambil Foto</h3>
-                <button type="button" onclick="closeCamera()"
-                    class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="switchCamera()" id="btnSwitchCamera"
+                        class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50 hidden"
+                        title="Ganti Kamera">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3z"></path>
+                        </svg>
+                    </button>
+                    <button type="button" onclick="closeCamera()"
+                        class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-video mb-4 flex items-center justify-center">
@@ -1434,6 +1443,7 @@
     let capturedPhotoBlob = null;
     let activeInputId = null;
     let activePreviewId = null;
+    let currentFacingMode = 'environment'; // Default to back camera for document capture
 
     // Open Camera Webcam
     function openWebcam(inputId, previewId, title) {
@@ -1448,6 +1458,13 @@
         activeInputId = inputId;
         activePreviewId = previewId;
 
+        // Set default facing mode based on capture type: selfie vs document
+        if (inputId === 'foto' || inputId === 'foto_selfie_upload') {
+            currentFacingMode = 'user'; // Camera selfie
+        } else {
+            currentFacingMode = 'environment'; // Camera belakang untuk KTP/KK
+        }
+
         const modal = document.getElementById('cameraModal');
         const video = document.getElementById('cameraVideo');
         const btnCapture = document.getElementById('btnCapture');
@@ -1455,59 +1472,92 @@
         const btnUsePhoto = document.getElementById('btnUsePhoto');
         const preview = document.getElementById('cameraPreview');
         const titleEl = document.getElementById('cameraModalTitle');
+        const btnSwitchCamera = document.getElementById('btnSwitchCamera');
 
         if (titleEl) {
             titleEl.textContent = title;
         }
 
-            modal.classList.remove('hidden');
-            preview.classList.add('hidden');
-            btnRetake.classList.add('hidden');
-            btnUsePhoto.classList.add('hidden');
-            btnCapture.classList.remove('hidden');
+        modal.classList.remove('hidden');
+        preview.classList.add('hidden');
+        btnRetake.classList.add('hidden');
+        btnUsePhoto.classList.add('hidden');
+        btnCapture.classList.remove('hidden');
 
-            // Request camera access
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment', // Use back camera on mobile
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            })
-            .then(function(stream) {
-                cameraStream = stream;
-                video.srcObject = stream;
-                video.classList.remove('hidden');
-            })
-            .catch(function(err) {
-                console.error('Error accessing camera:', err);
-                let errorMsg = 'Tidak dapat mengakses kamera. ';
-                if (err.name === 'NotAllowedError') {
-                    errorMsg += 'Pastikan browser mengizinkan akses kamera.';
-                } else if (err.name === 'NotFoundError') {
-                    errorMsg += 'Kamera tidak ditemukan.';
-                } else {
-                    errorMsg += 'Silakan gunakan opsi Upload dari File.';
-                }
-                showErrorAlert(errorMsg);
-                closeCamera();
-            });
+        // Check if device has multiple cameras to show switch button
+        if (btnSwitchCamera) {
+            btnSwitchCamera.classList.add('hidden'); // Hide by default
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    if (videoDevices.length > 1) {
+                        btnSwitchCamera.classList.remove('hidden');
+                    }
+                })
+                .catch(function(err) {
+                    console.warn('Error listing media devices:', err);
+                });
+        }
+
+        startCameraStream();
     }
 
-        // Close Camera
-        function closeCamera() {
-            const modal = document.getElementById('cameraModal');
-            const video = document.getElementById('cameraVideo');
-            const preview = document.getElementById('cameraPreview');
-            const btnCapture = document.getElementById('btnCapture');
-            const btnRetake = document.getElementById('btnRetake');
-            const btnUsePhoto = document.getElementById('btnUsePhoto');
+    function startCameraStream() {
+        const video = document.getElementById('cameraVideo');
 
-            // Stop camera stream
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
+        // Stop current stream if running
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: currentFacingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             }
+        })
+        .then(function(stream) {
+            cameraStream = stream;
+            video.srcObject = stream;
+            video.classList.remove('hidden');
+        })
+        .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            let errorMsg = 'Tidak dapat mengakses kamera. ';
+            if (err.name === 'NotAllowedError') {
+                errorMsg += 'Pastikan browser mengizinkan akses kamera.';
+            } else if (err.name === 'NotFoundError') {
+                errorMsg += 'Kamera tidak ditemukan.';
+            } else {
+                errorMsg += 'Silakan gunakan opsi Upload dari File.';
+            }
+            showErrorAlert(errorMsg);
+            closeCamera();
+        });
+    }
+
+    function switchCamera() {
+        // Toggle facing mode
+        currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+        startCameraStream();
+    }
+
+    // Close Camera
+    function closeCamera() {
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraVideo');
+        const preview = document.getElementById('cameraPreview');
+        const btnCapture = document.getElementById('btnCapture');
+        const btnRetake = document.getElementById('btnRetake');
+        const btnUsePhoto = document.getElementById('btnUsePhoto');
+        const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+
+        // Stop camera stream
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
 
         video.srcObject = null;
         video.classList.add('hidden');
@@ -1515,6 +1565,9 @@
         btnRetake.classList.add('hidden');
         btnUsePhoto.classList.add('hidden');
         btnCapture.classList.remove('hidden');
+        if (btnSwitchCamera) {
+            btnSwitchCamera.classList.add('hidden');
+        }
         modal.classList.add('hidden');
         capturedPhotoBlob = null;
         activeInputId = null;

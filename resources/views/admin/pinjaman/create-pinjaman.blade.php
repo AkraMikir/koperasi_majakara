@@ -40,6 +40,22 @@
                 @enderror
             </div>
 
+            <!-- Pilih Tujuan Pinjaman -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Pilih Tujuan Pinjaman *</label>
+                <select name="id_tujuan" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                    <option value="">Pilih Tujuan Pinjaman</option>
+                    @foreach($tujuanList as $item)
+                        <option value="{{ $item->id }}" {{ old('id_tujuan') == $item->id ? 'selected' : '' }}>
+                            {{ $item->tujuan }}
+                        </option>
+                    @endforeach
+                </select>
+                @error('id_tujuan')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Nominal -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Nominal Pinjaman *</label>
@@ -60,9 +76,9 @@
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pinjaman (Bulan) *</label>
                 <select name="durasi" id="durasi" required class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                     <option value="">Pilih Durasi</option>
-                    @for($i = 1; $i <= 24; $i++)
-                        <option value="{{ $i }}" {{ old('durasi') == $i ? 'selected' : '' }}>{{ $i }} {{ $i == 1 ? 'bulan' : 'bulan' }}</option>
-                    @endfor
+                    @foreach($durasiList as $durasiVal)
+                        <option value="{{ $durasiVal }}" {{ old('durasi') == $durasiVal ? 'selected' : '' }}>{{ $durasiVal }} bulan</option>
+                    @endforeach
                 </select>
                 @error('durasi')
                     <p class="text-xs text-red-600 mt-1">{{ $message }}</p>

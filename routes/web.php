@@ -345,6 +345,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanToggleStatus'])->name('toggle-status');
             });
         });
+
+        // Tujuan Pinjaman - CRUD (Admin Utama & Operasional)
+        Route::prefix('tujuan-pinjaman')->name('tujuan-pinjaman.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanToggleStatus'])->name('toggle-status');
+        });
         
         // Denda Pinjaman
         Route::prefix('denda-pinjaman')->name('denda-pinjaman.')->group(function () {
