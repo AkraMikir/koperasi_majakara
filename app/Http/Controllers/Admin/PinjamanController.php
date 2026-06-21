@@ -28,6 +28,7 @@ use App\Helpers\IdGenerator;
 use App\Models\NasabahNotification;
 use App\Models\User;
 use App\Models\PettyCashOwnerTransaksi;
+use App\Models\MasterTujuanPinjaman;
 
 class PinjamanController extends Controller
 {
@@ -739,8 +740,8 @@ class PinjamanController extends Controller
 
         $query = PinjamanH::with(['nasabah.user'])
             ->where('lunas', 'belum')
-            ->when($jenis === 'bulanan', fn ($q) => $q->with(['tempoBulanan' => fn ($q) => $q->orderBy('no_urut')]))
-            ->when($jenis === 'mingguan', fn ($q) => $q->with(['tempoMingguan' => fn ($q) => $q->orderBy('no_urut')]))
+            ->when($jenis === 'bulanan', fn ($q) => $q->with(['tempoBulanan' => fn ($q) => $q->with('pinjaman')->orderBy('no_urut')]))
+            ->when($jenis === 'mingguan', fn ($q) => $q->with(['tempoMingguan' => fn ($q) => $q->with('pinjaman')->orderBy('no_urut')]))
             ->latest();
 
         // Filter by status (pinjaman yang punya minimal satu angsuran dengan status ini)
@@ -970,10 +971,11 @@ class PinjamanController extends Controller
         // Hitung total denda dari semua angsuran yang belum lunas
         $totalDenda = 0;
         $angsuranBelumLunas = $pinjaman->jenis === 'bulanan' 
-            ? $pinjaman->tempoBulanan()->where('status_bayar', '!=', 'lunas')->get()
-            : $pinjaman->tempoMingguan()->where('status_bayar', '!=', 'lunas')->get();
+            ? $pinjaman->tempoBulanan->where('status_bayar', '!=', 'lunas')
+            : $pinjaman->tempoMingguan->where('status_bayar', '!=', 'lunas');
 
         foreach ($angsuranBelumLunas as $a) {
+            $a->setRelation('pinjaman', $pinjaman);
             $denda = $a->hitungDenda();
             $totalDenda += $denda;
         }
@@ -1119,11 +1121,13 @@ class PinjamanController extends Controller
             $angsuran = null;
             if ($pengajuan->tempo_id && $pengajuan->jenis_tempo) {
                 if ($pengajuan->jenis_tempo === 'bulanan') {
-                    $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)
+                    $angsuran = TempoPinjamanB::with('pinjaman')
+                        ->where('id', $pengajuan->tempo_id)
                         ->lockForUpdate()
                         ->first();
                 } else {
-                    $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)
+                    $angsuran = TempoPinjamanM::with('pinjaman')
+                        ->where('id', $pengajuan->tempo_id)
                         ->lockForUpdate()
                         ->first();
                 }
@@ -1292,9 +1296,9 @@ class PinjamanController extends Controller
             // Get angsuran
             $angsuran = null;
             if ($pengajuan->jenis_tempo === 'bulanan') {
-                $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)->first();
+                $angsuran = TempoPinjamanB::with('pinjaman')->where('id', $pengajuan->tempo_id)->first();
             } else {
-                $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)->first();
+                $angsuran = TempoPinjamanM::with('pinjaman')->where('id', $pengajuan->tempo_id)->first();
             }
 
             if (!$angsuran) {
@@ -1392,9 +1396,9 @@ class PinjamanController extends Controller
             // Get angsuran dan update
             $angsuran = null;
             if ($pengajuan->jenis_tempo === 'bulanan') {
-                $angsuran = TempoPinjamanB::where('id', $pengajuan->tempo_id)->first();
+                $angsuran = TempoPinjamanB::with('pinjaman')->where('id', $pengajuan->tempo_id)->first();
             } else {
-                $angsuran = TempoPinjamanM::where('id', $pengajuan->tempo_id)->first();
+                $angsuran = TempoPinjamanM::with('pinjaman')->where('id', $pengajuan->tempo_id)->first();
             }
 
             if ($angsuran) {

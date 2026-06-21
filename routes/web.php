@@ -632,6 +632,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pinjaman', [\App\Http\Controllers\Admin\BungaController::class, 'pinjaman'])->name('pinjaman');
         Route::get('/deposito', [\App\Http\Controllers\Admin\BungaController::class, 'deposito'])->name('deposito');
         Route::get('/gadai', [\App\Http\Controllers\Admin\BungaController::class, 'gadai'])->name('gadai');
+
+        // Pembayaran Pajak (PPh) CRUD
+        Route::prefix('pajak')->name('pajak.')->group(function () {
+            Route::get('/hitung', [\App\Http\Controllers\Admin\PajakBungaController::class, 'hitung'])->name('hitung');
+            Route::get('/', [\App\Http\Controllers\Admin\PajakBungaController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\PajakBungaController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\PajakBungaController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\PajakBungaController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\PajakBungaController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\PajakBungaController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // ── Deposito ──

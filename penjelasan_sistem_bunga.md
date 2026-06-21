@@ -68,7 +68,7 @@ Total Kewajiban Nasabah = jumlah_pinjam + bunga_rp
 | **Total Bunga Masuk** | `SUM(bunga_rp)` — pinjaman status `3` & `4`, belum lunas |
 | **Pinjaman Aktif** | `COUNT(*)` pinjaman dimana `lunas != 'lunas'` |
 | **Rata-rata Bunga/Pinjaman** | `Total Bunga / Jumlah Aktif` |
-| **Proyeksi Bulan Depan** | `Total Bunga × 1.05` (asumsi tumbuh 5%) |
+| **Proyeksi Bulan Depan** | `Realisasi Bulan Ini × 1.05` (asumsi tumbuh 5%). Fallback: `Total Bunga × 0.05` jika belum ada realisasi. *(BUG-11 FIX: basis realisasi lebih akurat dari total portofolio)* |
 
 #### Mekanisme Angsuran:
 - **Bulanan** → tabel `tbl_tempo_pinjaman_b`, relasi `TempoPinjamanB`
