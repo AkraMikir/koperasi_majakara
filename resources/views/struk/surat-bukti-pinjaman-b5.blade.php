@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Surat Bukti Pinjaman - {{ $data['no_pinjaman'] }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        @page {
+            size: 9.5in 5.5in;
+            margin: 0.17in 0.51in;
+        }
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 9px;
+            line-height: 1.25;
+            color: #000;
+            background-color: #fff;
+        }
+        .content-pad {
+            padding: 0 50px;
+        }
+        .header-table {
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .header-table td {
+            vertical-align: middle;
+        }
+        .logo-img {
+            max-height: 60px;
+            width: auto;
+            display: inline-block;
+            vertical-align: middle;
+        }
+        .koperasi-info {
+            font-size: 10px;
+            padding-left: 10px !important;
+        }
+
+        .koperasi-info td{
+            font-size:10px;
+        }
+
+        .nasabah-info {
+            font-size: 9px;
+            text-align: right;
+        }
+        .banner {
+            background-color: #935a16;
+            color: #fff;
+            text-align: center;
+            font-weight: bold;
+            font-size: 10.5px;
+            padding: 4px 10px;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+            margin-left: -10px;
+            margin-right: -10px;
+            text-transform: uppercase;
+        }
+        .params-title {
+            font-weight: bold;
+            font-size: 8.5px;
+            color: #111;
+            margin-bottom: 1px;
+        }
+        .params-value {
+            font-size: 8.5px;
+            color: #333;
+        }
+        .angsuran-subtable {
+            margin: 0;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .angsuran-subtable th, .angsuran-subtable td {
+            border: 1px solid #ccc;
+            padding: 3px 4px;
+            font-size: 8px; /* perbesar table jadwal angsuran */
+            text-align: center;
+        }
+        .perjanjian-section {
+            margin-bottom: 8px;
+        }
+        .perjanjian-text {
+            font-size: 7.5px;
+            text-align: justify;
+            margin-bottom: 2px;
+        }
+        .perjanjian-list {
+            list-style-type: decimal;
+            margin-left: 12px;
+            font-size: 7.5px;
+        }
+        .perjanjian-list li {
+            margin-bottom: 1px;
+            text-align: justify;
+        }
+        .footer-section {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        .footer-section td {
+            vertical-align: top;
+            text-align: center;
+            font-size: 8px;
+        }
+        .info-box {
+            border: 1px solid #935a16;
+            padding: 4px 6px;
+            text-align: left;
+            font-size: 7.5px;
+            color: #935a16;
+            border-radius: 4px;
+            width: 190px;
+            line-height: 1.2;
+        }
+        .signature-title {
+            font-weight: bold;
+            margin-bottom: 45px;
+        }
+        .signature-line {
+            border-top: 1px solid #000;
+            width: 100%;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+    <div class="content-pad">
+    <!-- HEADER KOP -->
+    <table class="header-table">
+        <tr>
+            <!-- Logo -->
+            <td style="width: 18%; text-align: right; padding-right: 10px;">
+                @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
+                <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
+                @else
+                <div style="font-weight: bold; font-size: 14px; color: #935a16;">MAJAKARA</div>
+                @endif
+            </td>
+            <!-- Koperasi Info -->
+            <td class="koperasi-info" style="width: 52%;">
+                <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; line-height: 1.2;">
+                    <tr>
+                        <td style="width: 90px; font-weight: bold; vertical-align: top;">Kantor Perwakilan</td>
+                        <td style="width: 5px; vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $settings->alamat_koperasi }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; vertical-align: top;">Nomor Tlp Kantor</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $settings->no_telp }}</td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold; vertical-align: top;">Kritik dan Saran</td>
+                        <td style="vertical-align: top;">:</td>
+                        <td style="vertical-align: top;">{{ $settings->no_telp }}</td>
+                    </tr>
+                </table>
+            </td>
+            <!-- Nasabah Info -->
+            <td class="nasabah-info" style="width: 30%;">
+                Nama: {{ $data['nama_anggota'] }}<br>
+                Alamat: {{ $data['alamat_nasabah'] ?? '-' }}<br>
+                Negara: Indonesia<br>
+                Kode Pos: {{ $data['kode_pos_nasabah'] ?? '-' }}
+            </td>
+        </tr>
+    </table>
+    </div>
+    <!-- BANNER BROWN -->
+    <div class="banner">
+        Surat Bukti Pinjaman
+    </div>
+
+    <div class="content-pad">
+        <!-- CONTENT DATA & CALCULATIONS (UNIFIED GRID TABLE) -->
+    <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 8px;">
+        <!-- ROW 1 (Labels for Params 1-3 & Cicilan Per Bulan Row) -->
+        <tr>
+            <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: center;">Tujuan Pinjaman</td>
+            <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: center;">Tanggal Pencairan</td>
+            <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: center;">Suku Bunga</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Cicilan Per Bulan:</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 2px; vertical-align: middle;">
+                @if(isset($data['jadwal_angsuran']) && count($data['jadwal_angsuran']) > 0)
+                    <table class="angsuran-subtable">
+                        <thead>
+                            <tr style="background-color: #f5f5f5;">
+                                <th style="border: 1px solid #ccc; font-size: 8px; padding: 2px;">No</th>
+                                <th style="border: 1px solid #ccc; font-size: 8px; padding: 2px;">Jatuh Tempo</th>
+                                <th style="border: 1px solid #ccc; font-size: 8px; padding: 2px;">Tagihan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($data['jadwal_angsuran'] as $ags)
+                            <tr>
+                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: center;">{{ $ags['no'] }}</td>
+                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: center;">{{ $ags['jatuh_tempo'] }}</td>
+                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: right; padding-right: 2px;">Rp {{ number_format($ags['tagihan'], 0, ',', '.') }}</td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                @else
+                    <div style="font-weight: bold; text-align: right; padding-right: 4px; font-size: 9px;">Rp {{ number_format($data['angsuran_pertama'], 0, ',', '.') }},-</div>
+                @endif
+            </td>
+        </tr>
+        <!-- ROW 2 (Values for Params 1-3 & Nominal Harus Dibayarkan Row) -->
+        <tr>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['tujuan_pinjaman'] ?? 'Modal Usaha' }}</td>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['tanggal'] }}</td>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ number_format($data['bunga_rate'] ?? 0, 2) }}% Flat per bulan</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Nominal yang harus dibayarkan:</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['nominal_total_bayar'], 0, ',', '.') }},-</td>
+        </tr>
+        <!-- ROW 3 (Labels for Params 4-6 & Bunga Row) -->
+        <tr>
+            <td style="border: none; padding: 4px; font-weight: bold; text-align: center;">Tenor Pinjaman</td>
+            <td style="border: none; padding: 4px; font-weight: bold; text-align: center;">Jangka Waktu Pelunasan</td>
+            <td style="border: none; padding: 4px; font-weight: bold; text-align: center;">Biaya Keterlambatan</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Bunga:</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['bunga_rp'], 0, ',', '.') }},-</td>
+        </tr>
+        <!-- ROW 4 (Values for Params 4-6 & Nominal Diterima Row) -->
+        <tr>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['lama_pinjam'] }} Bulan</td>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold; font-size: 8px;">{{ $data['tanggal'] }} s/d {{ $data['tanggal_jatuh_tempo'] ?? '-' }}</td>
+            <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ number_format($data['denda_rate'] ?? 0, 2) }}% Per Hari</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Nominal yang diterima:</td>
+            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['jumlah_pinjam'], 0, ',', '.') }},-</td>
+        </tr>
+    </table>
+    <!-- PERJANJIAN SYARAT KETENTUAN -->
+    <div class="perjanjian-section">
+        <table style="width:100%; border-collapse:collapse; margin-bottom: 6px;">
+            <tr>
+                <td style="width: 33%; vertical-align: middle;">
+                    <div style="border-bottom: 1px dashed #935a16;"></div>
+                </td>
+                <td style="text-align: center; white-space: nowrap; font-weight: bold; font-size: 8.5px; color: #935a16; text-transform: uppercase; vertical-align: middle;">
+                    PERJANJIAN PINJAMAN DENGAN MAJAKARA
+                </td>
+                <td style="width: 33%; vertical-align: middle;">
+                    <div style="border-bottom: 1px dashed #935a16;"></div>
+                </td>
+            </tr>
+        </table>
+        <div class="perjanjian-text">
+            Yang bertanda tangan dibawah ini:<br>
+            Petugas bagian kredit bertindak untuk dan atas nama <strong>MAJAKARA</strong> dengan nasabah membuat perjanjian sebagai berikut:
+        </div>
+        <ol class="perjanjian-list">
+            <li>Saya bersedia memberikan informasi data pribadi dan kontak darurat kepada PIHAK <strong>MAJAKARA</strong>.</li>
+            <li>Nasabah wajib menyimpan Surat Bukti Pinjam <strong>MAJAKARA</strong>.</li>
+            <li>Saya bersedia dan tidak ada TUNTUTAN DALAM BENTUK APAPUN, baik secara PIDANA/PERDATA kepada Pihak <strong>MAJAKARA</strong>, jika saya LALAI/tidak melakukan pembayaran sampai Tanggal Jatuh Tempo Saya Bersedia disita barang saya senilai pinjaman dan bunga oleh pihak <strong>MAJAKARA</strong>.</li>
+            <li>Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.</li>
+            <li>Pihak Majakara berhak menolak barang yang tidak memenuhi syarat.</li>
+            <li>Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.</li>
+        </ol>
+    </div>
+    <!-- BEKASI DATE - section tersendiri di atas tanda tangan -->
+    <div style="text-align: right; font-size: 8px; margin-bottom: 4px; padding-right: 0;">
+        Bekasi, .....................................
+    </div>
+    <!-- SIGNATURES AND INFO BOX -->
+    <table class="footer-section">
+        <tr>
+            <!-- Info Box -->
+            <td style="width: 35%; text-align: left; vertical-align: middle;">
+                <div class="info-box">
+                    <strong>PINJAMAN BISA DIANGSUR</strong><br>
+                    HARI BESAR DAN HARI MINGGU TETAP BUKA<br>
+                    Jam Pengambilan Barang: 08.00 - 18.00<br>
+                    Buka Jam: 08.00 - 20.00
+                </div>
+            </td>
+            <!-- Signature: Nasabah -->
+            <td style="width: 20%; vertical-align: top; text-align: center;">
+                <div class="signature-title" style="margin-bottom: 48px;">Nasabah/yang dikuasakan,</div>
+                <div style=" padding-top: 2px;">(...................................)</div>
+            </td>
+            <!-- Conditional Emergency Contact -->
+            @if((float)$data['jumlah_pinjam'] >= 1000000)
+            <td style="width: 20%; vertical-align: top; text-align: center;">
+                <div class="signature-title" style="margin-bottom: 48px;">Kontak Darurat,</div>
+                <div style=" padding-top: 2px;">(...................................)</div>
+            </td>
+            @endif
+            <!-- Signature: Petugas -->
+            <td style="width: 25%; vertical-align: top; text-align: center;">
+                <div class="signature-title" style="margin-bottom: 48px;">Petugas,</div>
+                <div style=" padding-top: 2px;">(...................................)</div>
+            </td>
+        </tr>
+    </table>
+    </div>
+
+</body>
+</html>

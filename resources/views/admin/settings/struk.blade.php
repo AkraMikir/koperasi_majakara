@@ -11,6 +11,8 @@
     no_telp: '{{ $settings->no_telp }}',
     nama_pt: '{{ $settings->nama_pt }}',
     format_no_struk: '{{ $settings->format_no_struk }}',
+    email: '{{ $settings->email }}',
+    website: '{{ $settings->website }}',
     syarat_ketentuan_gadai: `{!! addslashes($settings->syarat_ketentuan_gadai) !!}`,
     bunga_admin_gadai: '1.2',
     
@@ -62,6 +64,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.tabungan_jenis,
                 nominal: this.tabungan_nominal,
                 saldo_sebelum: this.tabungan_saldo_sebelum
@@ -88,6 +92,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.pinjaman_jenis,
                 jumlah_pinjam: this.pinjaman_jumlah,
                 lama_pinjam: this.pinjaman_tenor,
@@ -115,6 +121,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.deposito_jenis,
                 nominal_awal: this.deposito_nominal,
                 jangka_waktu: this.deposito_tenor,
@@ -142,6 +150,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 syarat_ketentuan_gadai: this.syarat_ketentuan_gadai,
                 bunga_admin_gadai: this.bunga_admin_gadai,
                 jenis_trans: this.gadai_jenis,
@@ -217,6 +227,8 @@
                                  no_telp = $event.target.form.no_telp.value;
                                  nama_pt = $event.target.form.nama_pt.value;
                                  format_no_struk = $event.target.form.format_no_struk.value;
+                                 email = $event.target.form.email.value;
+                                 website = $event.target.form.website.value;
                                  updateTabungan(); updatePinjaman(); updateDeposito(); updateGadai();">
                         @include('admin.settings.partials.header-settings')
                     </div>

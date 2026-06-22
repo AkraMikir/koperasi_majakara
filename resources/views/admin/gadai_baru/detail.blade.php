@@ -248,6 +248,10 @@
                                     <span>Struk Detail Gadai</span>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 </a>
+                                <a href="{{ route('admin.gadai_baru.struk-detail.awal-b5', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-amber-50/50 border border-amber-100 rounded-xl hover:bg-amber-100/70 transition-colors text-xs font-bold text-amber-800">
+                                    <span>Surat Bukti Gadai (B5)</span>
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
                                 <a href="{{ route('admin.gadai_baru.struk-detail.syarat', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
                                     <span>Syarat & Ketentuan</span>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>

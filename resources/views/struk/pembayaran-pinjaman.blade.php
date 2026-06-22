@@ -29,69 +29,23 @@
 </head>
 @php
     $strukSettings = \App\Models\SettingsStruk::getSettings();
+    
+    $mappedData = [
+        'jenis_trans' => 'BAYAR_ANGSURAN',
+        'no_pinjaman' => $pengajuan->pinjaman->id ?? '-',
+        'tanggal' => $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-',
+        'nama_anggota' => $pengajuan->nasabah->user->nama ?? 'N/A',
+        'lama_pinjam' => '',
+        'angsuran_pertama' => 0,
+        'metode' => $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-',
+        'jumlah_pinjam' => 0,
+        'angsuran_ke' => $angsuran->no_urut ?? '-',
+        'status' => 'Lunas angsuran' . ($angsuran ? ' ke-' . $angsuran->no_urut : ''),
+        'nominal' => $pengajuan->nominal ?? 0,
+        'tanggal_cetak' => now()->format('d-m-Y H:i')
+    ];
 @endphp
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
-            {{ $strukSettings->nama_koperasi }}
-        </div>
-        <div class="center" style="font-size: 10px;">
-            {{ $strukSettings->alamat_koperasi }}<br>
-            Telp: {{ $strukSettings->no_telp }}
-        </div>
-    </div>
-    
-    <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
-        STRUK PEMBAYARAN ANGSURAN
-    </div>
-    
-    <div class="dashed"></div>
-    
-    <table class="table-row">
-        <tr>
-            <td class="label">ID Pinjaman</td>
-            <td class="id-kecil">: {{ $pengajuan->pinjaman->id ?? '-' }}</td>
-        </tr>
-        @if($angsuran)
-        <tr>
-            <td class="label">Angsuran Ke</td>
-            <td class="id-kecil">: {{ $angsuran->no_urut ?? '-' }}</td>
-        </tr>
-        @endif
-        <tr>
-            <td class="label">Nama</td>
-            <td class="id-kecil">: {{ $pengajuan->nasabah->user->nama ?? 'N/A' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tanggal</td>
-            <td class="id-kecil">: {{ $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Metode</td>
-            <td class="id-kecil">: {{ $pengajuan->metode_pembayaran ? ucfirst(str_replace('_', ' ', $pengajuan->metode_pembayaran)) : '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Status</td>
-            <td class="id-kecil">: Lunas angsuran{{ $angsuran ? ' ke-' . $angsuran->no_urut : '' }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <table class="table-row">
-        <tr>
-            <td class="bold">NOMINAL</td>
-            <td class="bold text-right">: Rp {{ number_format($pengajuan->nominal ?? 0, 0, ',', '.') }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <!-- FOOTER -->
-    <div class="footer center">
-        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
-    </div>
+    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData])
 </body>
 </html>
