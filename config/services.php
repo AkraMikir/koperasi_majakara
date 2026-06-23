@@ -70,4 +70,8 @@ return [
         'cooldown_seconds' => env('OTP_COOLDOWN_SECONDS', 60),
     ],
 
+    'gemini' => [
+        'api_key' => env('GEMINI_API_KEY'),
+    ],
+
 ];

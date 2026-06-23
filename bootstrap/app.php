@@ -19,6 +19,10 @@ return Application::configure(basePath: dirname(__DIR__))
             'emergency_contact' => \App\Http\Middleware\EnsureEmergencyContactFilled::class,
             'nasabah.verified' => \App\Http\Middleware\EnsureNasabahVerified::class,
         ]);
+
+        $middleware->validateCsrfTokens(except: [
+            '/fonnte-webhook',
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, \Illuminate\Http\Request $request) {

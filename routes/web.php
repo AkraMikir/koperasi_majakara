@@ -795,3 +795,4 @@ Route::get('/test-whatsapp', function () {
         echo "<pre>" . $e->getTraceAsString() . "</pre>";
     }
 });
+Route::post('/fonnte-webhook', [\App\Http\Controllers\FonnteWebhookController::class, 'handle']);
