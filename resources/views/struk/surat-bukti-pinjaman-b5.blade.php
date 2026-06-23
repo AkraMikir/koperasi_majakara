@@ -17,19 +17,16 @@
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 9px;
+            font-size: 12px;
             line-height: 1.25;
             color: #000;
             background-color: #fff;
         }
 
-        .content-pad {
-            padding: 0 50px;
-        }
 
         .header-table {
             width: 100%;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .header-table td {
@@ -37,23 +34,27 @@
         }
 
         .logo-img {
-            max-height: 70px;
-            width: auto;
+            max-height: 90px;
+            width:auto;
             display: inline-block;
             vertical-align: middle;
         }
 
         .koperasi-info {
-            font-size: 10px;
+            font-size: 12px;
             padding-left: 10px !important;
         }
 
         .koperasi-info td {
-            font-size: 10px;
+            font-size: 12px;
+        }
+
+        .content_pad{
+            padding: 0 20px;
         }
 
         .nasabah-info {
-            font-size: 9px;
+            font-size: 12px;
             text-align: right;
         }
 
@@ -62,57 +63,65 @@
             color: #fff;
             text-align: center;
             font-weight: bold;
-            font-size: 10.5px;
-            padding: 4px 10px;
+            font-size: 13.5px;
+            padding: 3px 10px;
             letter-spacing: 1px;
-            margin-bottom: 8px;
-            margin-left: -10px;
-            margin-right: -10px;
+            margin-bottom: 6px;
+            margin-left: -30px;
+            margin-right: -30px;
             text-transform: uppercase;
         }
 
         .params-title {
             font-weight: bold;
-            font-size: 8.5px;
+            font-size: 11px;
             color: #111;
             margin-bottom: 1px;
         }
 
         .params-value {
-            font-size: 8.5px;
+            font-size: 11px;
             color: #333;
         }
 
         .angsuran-subtable {
             margin: 0;
             width: 100%;
-            margin-bottom:15px;
+            margin-bottom: 8px;
             border-collapse: collapse;
         }
 
         .angsuran-subtable th,
         .angsuran-subtable td {
-            border: 1px solid #ccc;
-            padding: 3px 4px;
-            font-size: 8px;
+            border: 3px solid #ccc;
+            padding: 2px 3px;
+            font-size: 11px;
             /* perbesar table jadwal angsuran */
             text-align: center;
         }
 
         .perjanjian-section {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+        }
+
+        .perjanjian-title{
+            font-size:10px;
+            text-align:left;
+            margin-bottom:1px;
+            padding-left:15px;
         }
 
         .perjanjian-text {
-            font-size: 7.5px;
+            font-size: 10px;
             text-align: justify;
             margin-bottom: 2px;
         }
 
         .perjanjian-list {
+            padding-left:5px;
             list-style-type: decimal;
             margin-left: 12px;
-            font-size: 7.5px;
+            font-size: 10px;
         }
 
         .perjanjian-list li {
@@ -123,29 +132,29 @@
         .footer-section {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 15px;
+            margin-top: 10px;
         }
 
         .footer-section td {
             vertical-align: top;
             text-align: center;
-            font-size: 8px;
+            font-size: 11px;
         }
 
         .info-box {
             border: 1px solid #935a16;
-            padding: 4px 6px;
+            padding: 3px 5px;
             text-align: left;
-            font-size: 7.5px;
+            font-size: 10px;
             color: #935a16;
             border-radius: 4px;
-            width: 190px;
+            width: 250px;
             line-height: 1.2;
         }
 
         .signature-title {
             font-weight: bold;
-            margin-bottom: 45px;
+            margin-bottom: 35px;
         }
 
         .signature-line {
@@ -162,18 +171,18 @@
         <table class="header-table">
             <tr>
                 <!-- Logo -->
-                <td style="width: 18%; text-align: right; padding-right: 10px;">
+                <td style="width: 10%; text-align: right; padding-right: 10px;">
                     @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
                     <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
                     @else
-                    <div style="font-weight: bold; font-size: 14px; color: #935a16;">MAJAKARA</div>
+                    <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
                 </td>
                 <!-- Koperasi Info -->
                 <td class="koperasi-info" style="width: 52%;">
-                    <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; line-height: 1.2;">
+                    <table style="width: 100%; border-collapse: collapse; font-size: 11px; line-height: 1.2;">
                         <tr>
-                            <td style="width: 90px; font-weight: bold; vertical-align: top;">Kantor Perwakilan</td>
+                            <td style="width: 120px; font-weight: bold; vertical-align: top;">Kantor Perwakilan</td>
                             <td style="width: 5px; vertical-align: top;">:</td>
                             <td style="vertical-align: top;">{{ $settings->alamat_koperasi }}</td>
                         </tr>
@@ -206,63 +215,63 @@
 
     <div class="content-pad">
         <!-- CONTENT DATA & CALCULATIONS (UNIFIED GRID TABLE) -->
-        <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 8px;">
+        <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 6px;">
             <!-- ROW 1 (Labels for Params 1-3 & Cicilan Per Bulan Row) -->
             <tr>
-                <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: left;">Tujuan
+                <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">Tujuan
                     Pinjaman</td>
-                <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: left;">:{{
+                <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">:{{
                     $data['tujuan_pinjaman'] ?? 'Modal Usaha' }}
                 </td>
-                <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: left;">Tenor
+                <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">Tenor
                     Pinjaman
                 </td>
-                <td style="width: 20%; padding: 4px 6px; font-weight: bold; vertical-align: middle; text-align:middle;">
+                <td style="width: 20%; padding: 2px 4px; vertical-align: middle; text-align:left;">
                     :{{ $data['lama_pinjam'] }} Bulan</td>
             </tr>
             <!-- ROW 2 (Values for Params 1-3 & Nominal Harus Dibayarkan Row) -->
             <tr>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: middle; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Tanggal Pencairan</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: middle; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     :{{ $data['tanggal'] }}</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: middle; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Biaya Keterlambatan</td>
-                <td style="padding: 4px 6px; font-weight: bold; vertical-align: middle; text-align: middle;">:
+                <td style="padding: 2px 4px; vertical-align: middle; text-align: left;">:
                     {{ number_format($data['denda_rate'] ?? 0, 2) }}% Per Hari</td>
             </tr>
 
             <!-- ROW 3 (Values for Params 4-6 & Nominal Diterima Row) -->
             <tr>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Suku Bunga</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold; font-size: 8px;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle; font-size: 11px;">
                     :{{ number_format($data['bunga_rate'] ?? 0, 2) }}% Flat per bulan</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Jangka Waktu Pelunasan</td>
-                <td style=" padding: 4px 6px; font-weight: bold; vertical-align: middle; text-align: middle;">:{{
+                <td style=" padding: 2px 4px; vertical-align: middle; text-align: left;">:{{
                     $data['tanggal'] }} s/d {{
                     $data['tanggal_jatuh_tempo'] ?? '-' }}</td>
             </tr>
             <!-- ROW 4 Pinjaman-->
             <tr>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Nominal Pokok Pinjaman</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     :Rp {{ number_format($data['jumlah_pinjam'], 0, ',', '.') }},-</td>
                 <td
-                style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                 Nominal wajib dibayarkan</td>
                 <td
-                    style="border: none; padding: 6px 4px; text-align: left; vertical-align: middle; font-weight: bold;">
+                    style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     :Rp {{ number_format($data['nominal_total_bayar'], 0, ',', '.') }},-</td>
             </tr>
         </table>
@@ -270,30 +279,32 @@
                     <table class="angsuran-subtable">
                         <tbody>
                             <tr>
-                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: center;">Cicilan Perbulan</td>
+                                <td style="font-size: 11px; padding: 2px; text-align: center;">Cicilan Perbulan</td>
                                 @foreach($data['jadwal_angsuran'] as $ags)
-                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: center;">{{
+                                <td style="font-size: 11px; padding: 2px; text-align: center;">{{
                                     $ags['jatuh_tempo'] }}</td>   
                                 @endforeach
                             </tr>
                             <tr>
                                 <td> </td>
                                 @foreach($data['jadwal_angsuran'] as $ags)
-                                <td style="border: 1px solid #ccc; font-size: 8px; padding: 2px; text-align: center;">
+                                <td style="font-size: 11px; padding: 2px; text-align: center;">
                                     Rp {{ number_format($ags['tagihan'], 0, ',', '.') }}</td>
                                 @endforeach
                             </tr>
                         </tbody>
                     </table>
                     @else
-                    <div style="font-weight: bold; text-align: right; padding-right: 4px; font-size: 9px;">Rp {{
+                    <div style="font-weight: bold; text-align: right; padding-right: 4px; font-size: 12px;">Rp {{
                         number_format($data['angsuran_pertama'], 0, ',', '.') }},-</div>
                     @endif
 
         <!-- PERJANJIAN SYARAT KETENTUAN -->
         <div class="perjanjian-section">
+            <div class="perjanjian-title">
+                Yang bertanda tangan dibawah ini:
+            </div>
             <div class="perjanjian-text">
-                Yang bertanda tangan dibawah ini:<br>
                 Bekasi, @php
                 $now = new DateTime(); 
                 echo $now->format('Y-m-d');
@@ -316,7 +327,7 @@
             </ol>
         </div>
 
-        <div style="text-align: right; font-size: 8px; margin-bottom: 4px; padding-right: 0;">
+        <div style="text-align: right; font-size: 11px; margin-bottom: 4px; padding-right: 0;">
             Bekasi, .....................................
         </div>
         <!-- SIGNATURES AND INFO BOX -->
@@ -333,19 +344,19 @@
                 </td>
                 <!-- Signature: Nasabah -->
                 <td style="width: 20%; vertical-align: top; text-align: center;">
-                    <div class="signature-title" style="margin-bottom: 48px;">Nasabah/yang dikuasakan,</div>
+                    <div class="signature-title">Nasabah/yang dikuasakan,</div>
                     <div style=" padding-top: 2px;">(...................................)</div>
                 </td>
                 <!-- Conditional Emergency Contact -->
                 @if((float)$data['jumlah_pinjam'] >= 1000000)
                 <td style="width: 20%; vertical-align: top; text-align: center;">
-                    <div class="signature-title" style="margin-bottom: 48px;">Kontak Darurat,</div>
+                    <div class="signature-title">Kontak Darurat,</div>
                     <div style=" padding-top: 2px;">(...................................)</div>
                 </td>
                 @endif
                 <!-- Signature: Petugas -->
                 <td style="width: 25%; vertical-align: top; text-align: center;">
-                    <div class="signature-title" style="margin-bottom: 48px;">Petugas,</div>
+                    <div class="signature-title">Petugas,</div>
                     <div style=" padding-top: 2px;">(...................................)</div>
                 </td>
             </tr>
