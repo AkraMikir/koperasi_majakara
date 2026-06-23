@@ -280,6 +280,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
         Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
         Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Admin\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
+        Route::get('/pinjaman-aktif/{id}/struk-pencairan-b5', [\App\Http\Controllers\Admin\StrukController::class, 'pencairanPinjamanB5'])->name('struk-pencairan-b5');
         Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'angsuran'])->name('struk-angsuran');
 
         // Approval & Cairkan routes - accessible by all admins (Admin Utama & Admin Operasional)
@@ -711,6 +712,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Struk Gadai Detail Routes
         Route::prefix('struk-detail')->name('struk-detail.')->group(function () {
             Route::get('/{id}/awal', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwal'])->name('awal');
+            Route::get('/{id}/awal-b5', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwalB5'])->name('awal-b5');
             Route::get('/{id}/syarat', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSyarat'])->name('syarat');
             Route::get('/{id}/loker', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiLoker'])->name('loker');
             Route::get('/{id}/perpanjangan/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPerpanjangan'])->name('perpanjangan');
