@@ -157,6 +157,7 @@
                             id="registerForm" onsubmit="return validatePasswordSubmit(event)">
                             @csrf
                             <input type="hidden" name="step" value="{{ $step }}">
+                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                             @if($step == 1)
                                 <input type="hidden" name="substep" value="{{ $subStep }}">
                                 {{-- Bawa data kritis Langkah 1 (Data Diri) di setiap submit substep 2–6 agar nomor HP tidak
@@ -288,7 +289,7 @@
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
                                 </div>
-                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }} relative inline-block">
+                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? 'inline-block' : 'hidden' }} relative">
                                     <img id="fotoPreviewImg" 
                                         src="{{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? asset('storage/' . $formData['foto']) : '' }}" 
                                         alt="Preview"
@@ -710,7 +711,7 @@
                                 <input type="text" name="no_rekening" id="no_rekening"
                                     value="{{ old('no_rekening', $formData['no_rekening'] ?? '') }}" maxlength="16"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
-                                    placeholder="16 digit nomor rekening" pattern="[0-9]*" inputmode="numeric"
+                                    placeholder="nomor rekening" pattern="[0-9]*" inputmode="numeric"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
 
@@ -956,9 +957,6 @@
                                                 </ul>
                                             </div>
 
-                                            {{-- Hidden input: tombol yang disabled tidak ikut dikirim, jadi kita set send_otp=1
-                                            lewat input ini saat klik --}}
-                                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                                             {{-- Button Kirim OTP with Loading State --}}
                                             <div class="mt-6">
                                                 <button type="button" name="send_otp_btn" value="1" id="btnSendOtp"
@@ -1082,7 +1080,7 @@
 
                                             {{-- Button Kirim Ulang --}}
                                             <div class="flex items-center justify-center">
-                                                @if(($remainingCooldown ?? 0) > 0)
+                                                <div id="btnResendDisabledWrapper" class="{{ ($remainingCooldown ?? 0) > 0 ? '' : 'hidden' }}">
                                                     <button type="button" disabled
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed border border-gray-200">
                                                         <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor"
@@ -1096,8 +1094,10 @@
                                                             detik
                                                         </span>
                                                     </button>
-                                                @else
-                                                    <button type="submit" name="send_otp" value="1"
+                                                </div>
+                                                
+                                                <div id="btnResendActiveWrapper" class="{{ ($remainingCooldown ?? 0) > 0 ? 'hidden' : '' }}">
+                                                    <button type="button" onclick="setSendOtpAndLoading(this); return false;"
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1105,7 +1105,7 @@
                                                         </svg>
                                                         <span class="text-sm">Kirim Ulang Kode OTP</span>
                                                     </button>
-                                                @endif
+                                                </div>
                                             </div>
 
                                             {{-- Info Bantuan --}}
@@ -1473,6 +1473,8 @@
 
 @push('scripts')
     <script>
+        var isFormSubmitting = false;
+
         function validatePasswordSubmit(e) {
             // Check if we are currently on Step 1, Substep 1 (where password inputs are visible)
             const passwordInput = document.getElementById('password');
@@ -1833,6 +1835,7 @@
         if (hiddenInput) hiddenInput.value = '';
         if (preview) {
             preview.classList.add('hidden');
+            preview.classList.remove('inline-block');
             const previewImg = document.getElementById(previewId + 'Img');
             if (previewImg) previewImg.src = '';
         }
@@ -1952,36 +1955,39 @@
 
         // Set send_otp=1 dan kirim form sekali saja (cegah double submit yang bikin OTP ke-invalidate)
         function setSendOtpAndLoading(button) {
+            if (isFormSubmitting) return;
             const sendOtpInput = document.getElementById('send_otp_input');
             if (!sendOtpInput) return;
             if (button.disabled) return; // Sudah diklik, jangan proses lagi
+            
+            isFormSubmitting = true;
             sendOtpInput.value = '1';
 
-        // Loading state
-        const iconSend = document.getElementById('iconSend');
-        const iconLoading = document.getElementById('iconLoading');
-        const textSendOtp = document.getElementById('textSendOtp');
-        if (iconSend && iconLoading && textSendOtp) {
-            iconSend.classList.add('hidden');
-            iconLoading.classList.remove('hidden');
-            textSendOtp.textContent = 'Mengirim OTP...';
-        }
-        button.disabled = true;
-
-        // Show SweetAlert2 loading popup
-        Swal.fire({
-            title: 'Mengirim OTP...',
-            html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            customClass: {
-                popup: 'rounded-2xl shadow-2xl',
-                title: 'text-lg font-bold text-gray-900 font-display'
+            // Loading state
+            const iconSend = document.getElementById('iconSend');
+            const iconLoading = document.getElementById('iconLoading');
+            const textSendOtp = document.getElementById('textSendOtp');
+            if (iconSend && iconLoading && textSendOtp) {
+                iconSend.classList.add('hidden');
+                iconLoading.classList.remove('hidden');
+                textSendOtp.textContent = 'Mengirim OTP...';
             }
-        });
+            button.disabled = true;
+
+            // Show SweetAlert2 loading popup
+            Swal.fire({
+                title: 'Mengirim OTP...',
+                html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    popup: 'rounded-2xl shadow-2xl',
+                    title: 'text-lg font-bold text-gray-900 font-display'
+                }
+            });
 
             // Submit form sekali (programmatic submit = hanya satu request, tidak double)
             const form = button.form;
@@ -2057,6 +2063,7 @@
             }
 
             function checkAutoSubmit() {
+                if (isFormSubmitting) return;
                 let allFilled = true;
                 otpInputs.forEach(input => {
                     if (input.value === '') {
@@ -2066,6 +2073,22 @@
 
                 // Auto-submit when all 6 boxes filled
                 if (allFilled) {
+                    isFormSubmitting = true;
+                    // Show verification/loading screen popup
+                    Swal.fire({
+                        title: 'Memproses...',
+                        html: 'Sedang memverifikasi data Anda, mohon tunggu.',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                        customClass: {
+                            popup: 'rounded-2xl shadow-2xl',
+                            title: 'text-lg font-bold text-gray-900 font-display'
+                        }
+                    });
+
                     setTimeout(() => {
                         const form = document.getElementById('registerForm');
                         if (form) {
@@ -2083,7 +2106,11 @@
 
             let remainingSeconds = parseInt(cooldownElement.textContent) || 0;
 
-            if (remainingSeconds <= 0) return;
+            if (remainingSeconds <= 0) {
+                document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
+                return;
+            }
 
             const countdown = setInterval(function () {
                 remainingSeconds--;
@@ -2094,8 +2121,9 @@
 
                 if (remainingSeconds <= 0) {
                     clearInterval(countdown);
-                    // Refresh page untuk enable resend button
-                    window.location.reload();
+                    // Enable resend button
+                    document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                    document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
                 }
             }, 1000);
         }
@@ -2138,8 +2166,9 @@
                         </div>
                     `;
                     }
-                    // Reload agar tombol Kirim Ulang bisa muncul (cooldown = 0 setelah OTP kadaluarsa)
-                    setTimeout(function () { window.location.reload(); }, 800);
+                    // Enable resend button
+                    document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                    document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
                 }
             }, 1000);
         }
@@ -2200,6 +2229,8 @@
             registerForm.addEventListener('submit', async function(e) {
                 // Prevent form submission to allow checks first
                 e.preventDefault();
+                
+                if (isFormSubmitting) return;
 
                 const stepInput = registerForm.querySelector('input[name="step"]');
                 const substepInput = registerForm.querySelector('input[name="substep"]');
@@ -2208,9 +2239,12 @@
                 
                 const sendOtpInput = document.getElementById('send_otp_input');
                 if (sendOtpInput && sendOtpInput.value === '1') {
+                    isFormSubmitting = true;
                     registerForm.submit();
                     return; // Skip client-side check if sending OTP
                 }
+                
+                isFormSubmitting = true;
 
                 let isValid = true;
                 let errorMsg = '';
@@ -2536,6 +2570,7 @@
                 if (!isValid) {
                     showErrorAlert(errorMsg);
                     if (focusEl) focusEl.focus();
+                    isFormSubmitting = false;
                     return;
                 }
 
@@ -2586,6 +2621,7 @@
                         if (failedCheck.element) {
                             failedCheck.element.focus();
                         }
+                        isFormSubmitting = false;
                         return;
                     }
                     
@@ -2602,6 +2638,7 @@
                     Swal.close();
                     console.error('Error in uniqueness validation:', error);
                     showErrorAlert('Terjadi kesalahan koneksi saat memverifikasi data. Silakan coba lagi.');
+                    isFormSubmitting = false;
                 }
             });
         }
@@ -2616,6 +2653,9 @@
                     if (preview && previewImg) {
                         previewImg.src = e.target.result;
                         preview.classList.remove('hidden');
+                        if (previewId === 'fotoPreview') {
+                            preview.classList.add('inline-block');
+                        }
                     }
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -2631,6 +2671,7 @@
                 if (fotoPreview && fotoPreviewImg) {
                     fotoPreviewImg.src = '{{ asset("storage/" . $formData["foto"]) }}';
                     fotoPreview.classList.remove('hidden');
+                    fotoPreview.classList.add('inline-block');
                 }
             @endif
 

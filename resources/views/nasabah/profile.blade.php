@@ -79,9 +79,20 @@
                         
                         <!-- Status Badge -->
                         <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30">
-                                Nasabah Aktif
-                            </span>
+                            @if(is_null(auth()->user()->verified))
+                                <span class="px-4 py-2 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-semibold border border-yellow-500/30 flex items-center gap-1.5 animate-pulse">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Menunggu Verifikasi
+                                </span>
+                                <span class="px-4 py-2 bg-red-500/20 backdrop-blur-sm rounded-full text-red-200 text-sm font-semibold border border-red-500/30 flex items-center gap-1.5">
+                                    Status: Non-Aktif
+                                </span>
+                            @else
+                                <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                    Nasabah Aktif
+                                </span>
+                            @endif
                             <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 truncate max-w-[10rem]">
                                 Saldo: Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}
                             </span>

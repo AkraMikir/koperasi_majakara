@@ -39,6 +39,21 @@
                         <p class="text-[10px] md:text-xs text-white/50 mt-1 font-mono tracking-widest">NO. ANGGOTA : {{ auth()->user()->id }}</p>
                     </div>
                 </div>
+
+                @if(is_null(auth()->user()->verified))
+                <!-- Verification Status Notice -->
+                <div class="flex-1 max-w-sm w-full bg-yellow-500/10 backdrop-blur-md border border-yellow-500/30 rounded-2xl p-4 flex gap-3 shadow-lg my-2 lg:my-0">
+                    <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-yellow-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-yellow-200 uppercase tracking-wider mb-0.5">Akun Sedang Diverifikasi</h4>
+                        <p class="text-[10.5px] text-white/80 leading-normal">
+                            Akun Anda saat ini berstatus <strong class="text-red-300 font-bold">Non-Aktif</strong> karena sedang dalam proses verifikasi oleh Admin.
+                        </p>
+                    </div>
+                </div>
+                @endif
                 
                 <!-- Financial Summary Container -->
                 <div class="bg-white/10 backdrop-blur-xl rounded-[1.5rem] border border-white/20 p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] w-full lg:w-auto relative group-hover:bg-white/15 transition-colors duration-500">
