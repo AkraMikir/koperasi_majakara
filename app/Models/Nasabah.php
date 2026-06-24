@@ -22,6 +22,7 @@ class Nasabah extends Model
         'jenis_kelamin',
         'alamat',
         'alamat_domisili',
+        'kode_pos',
         'foto_ktp',
         'foto_kk',
         'foto_selfie',

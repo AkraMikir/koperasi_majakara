@@ -8,12 +8,12 @@
         <!-- Content Cards -->
         <div class="space-y-4">
         <!-- Top Row: 3 Tables -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <!-- Table Tabungan -->
             <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition-all duration-300 border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-primary">Table Tabungan</h3>
-                    <div class="w-10 h-10 bg-linear-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d]/20 to-[#674c1d]/10 rounded-xl flex items-center justify-center shadow-sm">
                         <svg class="w-5 h-5 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                         </svg>
@@ -40,7 +40,7 @@
             <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition-all duration-300 border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-primary">Table Pinjaman</h3>
-                    <div class="w-10 h-10 bg-linear-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#8b6f2f]/20 to-[#8b6f2f]/10 rounded-xl flex items-center justify-center shadow-sm">
                         <svg class="w-5 h-5 text-[#8b6f2f]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                         </svg>
@@ -67,7 +67,7 @@
             <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition-all duration-300 border border-gray-100">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-sm font-bold text-primary">Table Deposito</h3>
-                    <div class="w-10 h-10 bg-linear-to-br from-[#4a3514]/20 to-[#4a3514]/10 rounded-xl flex items-center justify-center shadow-sm">
+                    <div class="w-10 h-10 bg-gradient-to-br from-[#4a3514]/20 to-[#4a3514]/10 rounded-xl flex items-center justify-center shadow-sm">
                         <svg class="w-5 h-5 text-[#4a3514]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
@@ -95,7 +95,7 @@
         <div class="bg-white rounded-2xl shadow-md p-5 hover:shadow-lg transition-all duration-300 border border-gray-100">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-sm font-bold text-primary">Table Gadai</h3>
-                <div class="w-10 h-10 bg-linear-to-br from-[#d4af37]/20 to-[#d4af37]/10 rounded-xl flex items-center justify-center shadow-sm">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#d4af37]/20 to-[#d4af37]/10 rounded-xl flex items-center justify-center shadow-sm">
                     <svg class="w-5 h-5 text-[#d4af37]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                     </svg>

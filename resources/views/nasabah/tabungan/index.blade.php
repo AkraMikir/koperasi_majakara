@@ -96,7 +96,7 @@
             </div>
 
             {{-- Nominal --}}
-            <h1 class="text-white font-black text-4xl tracking-tight mb-1 font-display">
+            <h1 class="text-white font-black text-2xl sm:text-4xl tracking-tight mb-1 font-display">
                 Rp {{ number_format($tabunganInfo->saldo ?? 0, 0, ',', '.') }}
             </h1>
 
@@ -195,7 +195,7 @@
             {{-- PANE: Riwayat Transaksi --}}
             <div id="pane-trans" class="tab-pane active" data-container="trans-container">
                 <div class="flex items-center justify-between px-5 pt-4 pb-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-bold text-[#674c1d] font-display">Riwayat Transaksi</p>
                         <p class="text-xs text-gray-400 mt-0.5">Semua setoran & penarikan tercatat</p>
                     </div>
@@ -217,7 +217,7 @@
             {{-- PANE: Status Setoran --}}
             <div id="pane-setor" class="tab-pane" data-container="setor-container">
                 <div class="flex items-center justify-between px-5 pt-4 pb-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-bold text-[#674c1d] font-display">Status Pengajuan Setoran</p>
                         <p class="text-xs text-gray-400 mt-0.5">Riwayat transfer & setoran yang diajukan</p>
                     </div>
@@ -239,7 +239,7 @@
             {{-- PANE: Status Penarikan --}}
             <div id="pane-tarik" class="tab-pane" data-container="tarik-container">
                 <div class="flex items-center justify-between px-5 pt-4 pb-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-bold text-[#674c1d] font-display">Status Pengajuan Penarikan</p>
                         <p class="text-xs text-gray-400 mt-0.5">Riwayat penarikan yang diajukan</p>
                     </div>
@@ -261,7 +261,7 @@
             {{-- PANE: Janji Temu --}}
             <div id="pane-jt" class="tab-pane" data-container="jt-container">
                 <div class="flex items-center justify-between px-5 pt-4 pb-3">
-                    <div>
+                    <div class="min-w-0">
                         <p class="text-sm font-bold text-[#674c1d] font-display">Riwayat Janji Temu</p>
                         <p class="text-xs text-gray-400 mt-0.5">Jadwal kunjungan ke koperasi</p>
                     </div>

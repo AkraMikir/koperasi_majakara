@@ -14,7 +14,7 @@
 
     <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
         <!-- Premium Header Banner -->
-        <div class="bg-gradient-to-r from-[#674c1d] to-[#d4af37] px-6 py-6 flex items-center justify-between relative overflow-hidden">
+        <div class="bg-gradient-to-r from-[#674c1d] to-[#d4af37] px-6 py-6 flex items-center justify-between flex-wrap gap-2 relative overflow-hidden">
             <!-- Decorative background elements -->
             <div class="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-white opacity-10 blur-2xl"></div>
             <div class="absolute bottom-0 left-0 -ml-8 -mb-8 w-24 h-24 rounded-full bg-black opacity-10 blur-xl"></div>
@@ -131,7 +131,7 @@
                         <svg class="w-4 h-4 text-[#674c1d]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
                         Pilih Metode Pembayaran
                     </label>
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <label class="relative flex flex-col items-center justify-center p-4 border-2 border-gray-100 rounded-2xl cursor-pointer transition-all duration-200 hover:shadow-md hover:border-amber-200 peer-checked:border-[#d4af37] peer-checked:bg-gradient-to-br peer-checked:from-amber-50 peer-checked:to-white peer-checked:shadow-amber-100 group" id="label-cash">
                             <input type="radio" name="metode" value="cash" class="sr-only peer" checked onclick="toggleMetode('cash')">
                             <div class="absolute inset-0 bg-white opacity-0 peer-checked:opacity-50 rounded-2xl transition-opacity"></div>
@@ -191,10 +191,10 @@
                                 <div class="w-12 h-12 bg-white rounded-xl p-2 flex items-center justify-center shadow-sm border border-gray-100">
                                     <img src="{{ $bank->logo_url }}" class="w-full h-full object-contain" alt="{{ $bank->bank }}">
                                 </div>
-                                <div>
+                                <div class="min-w-0">
                                     <p class="font-extrabold text-gray-900 tracking-tight leading-none mb-1 text-lg">{{ $bank->bank }}</p>
                                     <div class="flex items-center gap-2">
-                                        <p class="font-mono font-bold text-[#674c1d] text-base tracking-widest">{{ $bank->no_rek }}</p>
+                                        <p class="font-mono font-bold text-[#674c1d] text-base tracking-widest truncate">{{ $bank->no_rek }}</p>
                                         <button type="button" onclick="copyToClipboard('{{ $bank->no_rek }}')" class="text-gray-400 hover:text-[#d4af37] transition-colors p-1 bg-gray-50 hover:bg-amber-50 rounded-md" title="Salin No. Rekening">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                         </button>
@@ -407,7 +407,7 @@
 <div id="pin-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/60 backdrop-blur-sm opacity-0 transition-opacity duration-300" onclick="closePinModal()"></div>
     
-    <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-8 transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
+    <div class="relative bg-white rounded-3xl shadow-2xl max-w-md w-full p-5 sm:p-8 transform scale-95 opacity-0 transition-all duration-300 overflow-hidden">
         <!-- Decorative Top Border -->
         <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-[#674c1d] via-[#d4af37] to-[#674c1d]"></div>
         
@@ -430,7 +430,7 @@
 
         <div class="mb-8">
             <input type="password" id="pin-input" maxlength="6" pattern="[0-9]*" inputmode="numeric"
-                class="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-[#674c1d] focus:ring-4 focus:ring-[#674c1d]/10 outline-none text-center text-3xl font-mono tracking-[0.5em] text-gray-800 transition-all shadow-sm"
+                class="w-full px-4 py-4 border-2 border-gray-200 rounded-2xl focus:border-[#674c1d] focus:ring-4 focus:ring-[#674c1d]/10 outline-none text-center text-2xl sm:text-3xl font-mono tracking-[0.3em] sm:tracking-[0.5em] text-gray-800 transition-all shadow-sm"
                 placeholder="••••••" oninput="this.value = this.value.replace(/[^0-9]/g, '')" autocomplete="off">
         </div>
 

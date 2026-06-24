@@ -72,10 +72,10 @@
         {{-- Method Toggle Guide --}}
         <div class="flex justify-center mb-10">
             <div class="bg-gray-100 p-1.5 rounded-2xl flex items-center shadow-inner">
-                <button onclick="switchGuide('transfer')" id="tab-guide-transfer" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all bg-white shadow-sm text-[#674c1d]">
+                <button onclick="switchGuide('transfer')" id="tab-guide-transfer" class="px-6 py-3 rounded-xl font-bold text-sm transition-all bg-white shadow-sm text-[#674c1d]">
                     Metode Transfer
                 </button>
-                <button onclick="switchGuide('tunai')" id="tab-guide-tunai" class="px-6 py-2.5 rounded-xl font-bold text-sm transition-all text-gray-500 hover:text-gray-700">
+                <button onclick="switchGuide('tunai')" id="tab-guide-tunai" class="px-6 py-3 rounded-xl font-bold text-sm transition-all text-gray-500 hover:text-gray-700">
                     Metode Tunai
                 </button>
             </div>
@@ -169,7 +169,7 @@
                         {{-- Row 1: No Rekening --}}
                         <div>
                             <label class="block text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Nomor Rekening {{ $bank->bank }}</label>
-                            <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
                                 <span class="font-mono text-2xl md:text-3xl font-bold text-[#674c1d]">{{ $bank->no_rek }}</span>
                                 <button onclick="copyToClipboard('{{ $bank->no_rek }}')" class="px-4 py-2 bg-[#674c1d] text-white text-xs font-bold rounded-lg hover:bg-[#4a3514] transition-colors shadow-lg">SALIN</button>
                             </div>
@@ -234,7 +234,7 @@
         {{-- Next Button --}}
         <div class="text-center pb-10">
             <button onclick="nextStep()" 
-                    class="group relative inline-flex items-center gap-3 px-10 py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-[1.02] transform transition-all active:scale-95">
+                    class="group relative w-full sm:w-auto inline-flex items-center justify-center gap-3 px-6 sm:px-10 py-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-2xl font-bold text-lg shadow-xl hover:shadow-2xl hover:scale-[1.02] transform transition-all active:scale-95">
                 <span>Lanjut Setor Tabungan</span>
                 <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>

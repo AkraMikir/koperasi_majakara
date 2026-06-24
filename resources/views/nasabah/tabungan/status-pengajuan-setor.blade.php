@@ -82,7 +82,7 @@
             @endphp
             @foreach($filters as $val => $f)
                 <a href="{{ route('nasabah.tabungan.status-pengajuan-setor', ['status' => $val]) }}"
-                    class="flex-shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all border-2
+                    class="flex-shrink-0 flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-2xl text-sm font-bold transition-all border-2
                     {{ ($currentStatus ?? null) == $val 
                         ? 'bg-[#674c1d] text-white border-[#674c1d] shadow-xl shadow-[#674c1d]/20' 
                         : 'bg-white text-gray-500 border-gray-100 hover:border-[#674c1d]/30 hover:text-[#674c1d] shadow-sm' }}">
@@ -196,7 +196,7 @@
                 </div>
             </div>
             @empty
-            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-16 text-center">
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 sm:p-16 text-center">
                 <div class="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-6">
                     <svg class="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

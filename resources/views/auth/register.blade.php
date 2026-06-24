@@ -538,6 +538,15 @@
                                                     placeholder="Alamat domisili saat ini (isi sama dengan KTP jika sesuai KTP)">{{ old('alamat_domisili', $formData['alamat_domisili'] ?? '') }}</textarea>
                                             </div>
 
+                                            <div>
+                                                <label for="kode_pos" class="block text-sm font-medium text-gray-700 mb-2">Kode Pos</label>
+                                                <input type="text" name="kode_pos" id="kode_pos"
+                                                    value="{{ old('kode_pos', $formData['kode_pos'] ?? '') }}"
+                                                    maxlength="5" pattern="[0-9]{5}"
+                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
+                                                    placeholder="5 digit Kode Pos" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
+                                            </div>
+
                             <!-- Upload section: 3 documents -->
                             <div class="space-y-6 pt-4 border-t border-gray-100">
                                 <h4 class="text-sm font-bold text-gray-800 uppercase tracking-wider">Unggah Dokumen Nasabah</h4>

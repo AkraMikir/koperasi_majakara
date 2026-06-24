@@ -90,7 +90,7 @@
                     
                     <!-- Tracking Box Area -->
                     <div class="bg-gray-50 rounded-2xl p-5 border border-gray-100 shadow-inner">
-                        <div class="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-6 text-sm">
                             <div class="col-span-1">
                                 <p class="text-[11px] text-gray-400 font-bold uppercase tracking-widest mb-1">Nominal</p>
                                 <p class="font-black text-[#674c1d] text-lg">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>

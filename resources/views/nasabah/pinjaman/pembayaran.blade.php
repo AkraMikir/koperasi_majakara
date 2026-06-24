@@ -18,7 +18,7 @@
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
         <div
-            class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+            class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Pembayaran Pinjaman</h1>
                 <p class="text-white/90 text-sm">Pilih pinjaman dan angsuran yang akan dibayar</p>
@@ -128,33 +128,33 @@
                     class="mb-6 p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Informasi Angsuran</h3>
                     <div class="space-y-2">
-                        <div class="flex justify-between">
+                        <div class="flex justify-between flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Jatuh Tempo:</span>
                             <span
                                 class="font-semibold text-gray-900">{{ $selectedAngsuran->tgl_jatuh_tempo->format('d M Y') }}</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Jumlah Tagihan:</span>
                             <span class="font-semibold text-gray-900">Rp
                                 {{ number_format($selectedAngsuran->jumlah_tagihan, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Terbayar:</span>
                             <span class="font-semibold text-green-600">Rp
                                 {{ number_format($selectedAngsuran->jumlah_terbayar ?? 0, 0, ',', '.') }}</span>
                         </div>
-                        <div class="flex justify-between">
+                        <div class="flex justify-between flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Sisa Tagihan:</span>
                             <span class="font-semibold text-gray-900">Rp
                                 {{ number_format($sisaTagihan, 0, ',', '.') }}</span>
                         </div>
                         @if($dendaAngsuran > 0)
-                        <div class="flex justify-between">
+                        <div class="flex justify-between flex-wrap gap-1">
                             <span class="text-sm text-red-600">Denda ({{ $hariTelat }} hari):</span>
                             <span class="font-semibold text-red-600">Rp {{ number_format($dendaAngsuran, 0, ',', '.') }}</span>
                         </div>
                         @endif
-                        <div class="flex justify-between pt-2 border-t border-gray-300">
+                        <div class="flex flex-wrap justify-between gap-1 pt-2 border-t border-gray-300">
                             <span class="font-semibold text-[#8b6f2f]">Total yang harus dibayar:</span>
                             <span class="text-xl font-bold text-[#8b6f2f]">Rp
                                 {{ number_format($totalBayar, 0, ',', '.') }}</span>
@@ -167,12 +167,12 @@
                 <div class="mb-6">
                     <div class="flex border-b border-gray-200 gap-1">
                         <button type="button" onclick="showTransferForm()" id="tab-transfer" aria-selected="true"
-                            class="tab-payment flex-1 px-4 py-3.5 font-semibold border-b-2 border-[#8b6f2f] text-[#8b6f2f] transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
-                            Transfer
+                            class="tab-payment flex-1 px-4 py-3.5 text-sm font-semibold border-b-2 border-[#8b6f2f] text-[#8b6f2f] transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
+                            <span class="whitespace-nowrap">Transfer</span>
                         </button>
                         <button type="button" onclick="showCashForm()" id="tab-cash" aria-selected="false"
-                            class="tab-payment flex-1 px-4 py-3.5 font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
-                            Janji Temu (Cash)
+                            class="tab-payment flex-1 px-4 py-3.5 text-sm font-semibold border-b-2 border-transparent text-gray-500 hover:text-gray-700 transition-all duration-200 rounded-t-lg hover:bg-amber-50/50">
+                            <span class="whitespace-nowrap">Janji Temu (Cash)</span>
                         </button>
                     </div>
                 </div>
@@ -203,7 +203,7 @@
                                     placeholder="Masukkan nominal pembayaran">
                                 <input type="hidden" name="nominal" id="nominal-transfer-raw" @if($isSecondPayment) value="{{ (int)$sisaKewajiban }}" @endif>
                             </div>
-                            <p class="text-xs text-gray-500 mt-2">
+                            <p class="text-xs text-gray-500 mt-2 break-words">
                                 @if($isSecondPayment)
                                     <span class="text-amber-600 font-semibold">Pembayaran ke-2 (Pelunasan): Harus membayar sisa tagihan sebesar Rp {{ number_format($sisaKewajiban, 0, ',', '.') }}</span>
                                 @else
@@ -352,7 +352,7 @@
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-bold text-gray-900">Verifikasi PIN</h3>
-            <button onclick="closePinModal()" class="text-gray-400 hover:text-gray-600">
+            <button onclick="closePinModal()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12">
                     </path>

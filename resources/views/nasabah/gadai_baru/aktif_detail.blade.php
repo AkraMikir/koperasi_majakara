@@ -53,7 +53,7 @@
             {{-- Status label --}}
             <div class="mb-2">
                 <p class="text-white/80 text-[10px] font-black uppercase tracking-widest mb-1 drop-shadow-md">Status Transaksi</p>
-                <h1 class="text-2xl font-black text-white mt-0.5 tracking-tight font-display drop-shadow-lg">
+                <h1 class="text-2xl font-black text-white mt-0.5 tracking-tight font-display drop-shadow-lg break-words">
                     @if($isTenggang) ⚠ MASA TENGGANG
                     @elseif($isLunas) ✅ LUNAS / SELESAI
                     @elseif($isHangus) ❌ HANGUS
@@ -66,7 +66,7 @@
             {{-- Countdown --}}
             @if($isLunas && $gadai->tgl_ambil_limit)
             <div class="mt-4 bg-amber-500/25 rounded-2xl px-4 py-3 backdrop-blur-sm border border-amber-500/30">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-2">
                     <span class="text-white text-[10px] font-black uppercase tracking-widest">⚠️ Batas Waktu Pengambilan</span>
                     <span class="text-white font-black text-sm" id="detail-countdown">-- H -- M -- S</span>
                 </div>
@@ -117,11 +117,11 @@
 
         {{-- CTA inside hero (active & tenggang) --}}
         @if(in_array($gadai->status, ['active', 'grace_period']))
-        <div class="relative z-10 px-6 pb-8 flex gap-4">
+        <div class="relative z-10 px-6 pb-8 flex flex-wrap gap-4">
             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
-               class="flex-1 flex items-center justify-center gap-2 py-4 bg-white text-emerald-700 font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95 transition-all hover:bg-emerald-50 hover:shadow-2xl">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Tebus — Rp {{ number_format($totalTebus, 0, ',', '.') }}
+               class="flex-1 min-w-0 flex items-center justify-center gap-2 py-4 bg-white text-emerald-700 font-black rounded-2xl text-xs uppercase tracking-widest shadow-xl shadow-black/10 active:scale-95 transition-all hover:bg-emerald-50 hover:shadow-2xl">
+                <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="truncate">Tebus — Rp {{ number_format($totalTebus, 0, ',', '.') }}</span>
             </a>
             @if($gadai->jumlah_perpanjangan < $gadai->kategori->max_extend_default)
             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'perpanjang']) }}"
@@ -225,7 +225,7 @@
                     </div>
                     <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                         <span class="text-xs text-gray-500 font-bold">Nama Item</span>
-                        <span class="text-sm font-black text-gray-900 text-right max-w-[60%] leading-tight">{{ $gadai->item->head_1 }}</span>
+                        <span class="text-sm font-black text-gray-900 text-right max-w-[60%] leading-tight truncate">{{ $gadai->item->head_1 }}</span>
                     </div>
                     <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                         <span class="text-xs text-gray-500 font-bold">Lokasi Simpan</span>

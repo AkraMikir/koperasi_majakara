@@ -11,16 +11,16 @@
                 <h1 class="text-2xl font-bold text-gray-900 font-display">Notifikasi</h1>
                 <p class="text-gray-600 text-sm mt-1">Semua notifikasi dari pengajuan tabungan, pinjaman, dan aktivitas lainnya</p>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2 flex-wrap">
                 @if($notifications->whereNull('read_at')->count() > 0)
                     <form method="POST" action="{{ route('nasabah.notifications.mark-all-read') }}" class="inline">
                         @csrf
-                        <button type="submit" class="px-4 py-2 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-colors text-sm font-medium">
+                        <button type="submit" class="px-4 py-2.5 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-colors text-sm font-medium">
                             Tandai semua dibaca
                         </button>
                     </form>
                 @endif
-                <a href="{{ route('nasabah.dashboard') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                <a href="{{ route('nasabah.dashboard') }}" class="px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
                     ← Dashboard
                 </a>
             </div>
@@ -39,7 +39,7 @@
                     <input type="checkbox" name="unread_only" value="1" {{ request('unread_only') ? 'checked' : '' }} class="rounded border-gray-300 text-[#674c1d] focus:ring-[#674c1d]">
                     <span class="text-sm text-gray-700">Hanya belum dibaca</span>
                 </label>
-                <button type="submit" class="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">Filter</button>
+                <button type="submit" class="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium">Filter</button>
             </form>
         </div>
 
