@@ -18,6 +18,9 @@ use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFoto;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
+use App\Models\PersetujuanSyaratPinjaman;
+use App\Models\SettingsStruk;
+use App\Models\SyaratKetentuanLayanan;
 use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -130,13 +133,15 @@ class PinjamanController extends Controller
                 $p->total_terbayar = $terbayar;
                 return $p;
             });
-
         // Get limit pinjaman
         $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
         $limit = $nasabah->limitPinjaman;
         $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
         $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
         $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        $syaratPinjaman = SyaratKetentuanLayanan::first()->konten ?? '';
 
         return view('nasabah.pinjaman.index', [
             'pinjamanAktif' => $pinjamanAktif,
@@ -149,7 +154,33 @@ class PinjamanController extends Controller
             'limitNominal' => $limitNominal,
             'nominalTerpakai' => $nominalTerpakai,
             'sisaLimit' => $sisaLimit,
+            'hasAgreed' => $hasAgreed,
+            'syaratPinjaman' => $syaratPinjaman,
         ]);
+    }
+
+    /**
+     * Store customer agreement to terms.
+     */
+    public function agreeTerms(Request $request)
+    {
+        try {
+            $idAnggota = $this->getIdAnggota();
+            PersetujuanSyaratPinjaman::updateOrCreate(
+                ['nasabah_id' => $idAnggota],
+                ['agreed_at' => now()]
+            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Syarat dan ketentuan berhasil disetujui.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error saving T&C agreement: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan persetujuan.'
+            ], 500);
+        }
     }
 
     /**
@@ -177,12 +208,14 @@ class PinjamanController extends Controller
         $durasiList = MasterBungaPinjaman::getOpsiDurasi();
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
         $tujuanList = \App\Models\MasterTujuanPinjaman::where('status', true)->orderBy('tujuan')->get();
-
         $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
         $limit = $nasabah->limitPinjaman;
         $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
         $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
         $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        $syaratPinjaman = SyaratKetentuanLayanan::first()->konten ?? '';
 
         return view('nasabah.pinjaman.pengajuan-pinjaman', [
             'riwayatPengajuan' => $riwayatPengajuan,
@@ -194,6 +227,8 @@ class PinjamanController extends Controller
             'limitNominal' => $limitNominal,
             'nominalTerpakai' => $nominalTerpakai,
             'sisaLimit' => $sisaLimit,
+            'hasAgreed' => $hasAgreed,
+            'syaratPinjaman' => $syaratPinjaman,
         ]);
     }
 
@@ -317,6 +352,13 @@ class PinjamanController extends Controller
                 ->withErrors($e->errors())
                 ->withInput($request->except('pin'));
         }
+        $idAnggota = $this->getIdAnggota();
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        if (!$hasAgreed) {
+            return redirect()->back()
+                ->with('error', 'Anda harus membaca dan menyetujui Syarat & Ketentuan terlebih dahulu.')
+                ->withInput($request->except('pin'));
+        }
 
         // Verify PIN
         /** @var User $user */
@@ -335,7 +377,6 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $idAnggota = $this->getIdAnggota();
         $jenisPencairan = 'transfer'; // Auto set to transfer for this form
 
         // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
@@ -510,6 +551,16 @@ class PinjamanController extends Controller
                 ->withErrors($e->errors())
                 ->withInput($request->except('pin'));
         }
+        $idAnggota = $this->getIdAnggota();
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        if (!$hasAgreed) {
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'Anda harus membaca dan menyetujui Syarat & Ketentuan terlebih dahulu.')
+                ->withInput($request->except('pin'));
+        }
 
         // Verify PIN
         /** @var User $user */
@@ -532,8 +583,6 @@ class PinjamanController extends Controller
                 ->with('error', 'PIN yang Anda masukkan salah!')
                 ->withInput($request->except('pin'));
         }
-
-        $idAnggota = $this->getIdAnggota();
 
         // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
         $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
