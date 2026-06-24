@@ -2,7 +2,7 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Surat Bukti Gadai Kendaraan - {{ $data['slot_kode'] }}</title>
+    <title>Surat Bukti Gadai Elektronik - {{ $data['slot_kode'] }}</title>
     <style>
         * {
             margin: 0;
@@ -10,7 +10,7 @@
             box-sizing: border-box;
         }
         @page {
-            size: 9.5in 6.5in;
+            size: 9.5in 5.5in;
         }
         body {
             font-family: 'Arial', sans-serif;
@@ -67,8 +67,9 @@
             margin-bottom: 10px;
         }
         .detail-table td {
-            padding: 8px 6px;
+            padding: 4px 6px;
             vertical-align: middle;
+            width: 100%:
             font-size: 12px;
             border-bottom: 1px solid #f3f4f6;
         }
@@ -134,7 +135,7 @@
 </head>
 <body>
 
-    <!-- HALAMAN 1: SURAT BUKTI GADAI KENDARAAN -->
+    <!-- HALAMAN 1: SURAT BUKTI GADAI ELEKTRONIK -->
     <div class="page">
         <table class="header-table">
             <tr>
@@ -146,7 +147,7 @@
                     @endif
                 </td>
                 <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
-                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <br>
+                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br>
                     <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <td class="nasabah-info" style="width: 30%;">
@@ -159,17 +160,16 @@
         </table>
 
         <div class="banner">
-            SURAT BUKTI GADAI BARANG KENDARAAN
+            SURAT BUKTI GADAI BARANG ELEKTRONIK
         </div>
 
         <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 10px; table-layout: fixed;">
             <tr>
-                <!-- Column 1 (Left) -->
-                <td style="width: 31%; vertical-align: top; padding-left: 20px; border: none;">
-                    <table class="detail-table" style="width: 100%;">
+                <td style="width: 48%; vertical-align: top; padding-left: 20px; border: none;">
+                    <table class="detail-table">
                         <tr>
-                            <td class="label" style="width: 45%;">Nama Peminjam</td>
-                            <td class="value" style="width: 55%;">: {{ $data['nama_anggota'] }}</td>
+                            <td class="label">Nama Peminjam</td>
+                            <td class="value">: {{ $data['nama_anggota'] }}</td>
                         </tr>
                         <tr>
                             <td class="label">No HP</td>
@@ -187,20 +187,18 @@
                             <td class="label">Tanggal Kredit</td>
                             <td class="value">: {{ $data['tgl_mulai'] }}</td>
                         </tr>
-                        <tr>
+
+                        <tr><!---Checkpoint pindah-->
                             <td class="label">Nilai Pinjaman</td>
                             <td class="value">: Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }}</td>
                         </tr>
                     </table>
                 </td>
-                <!-- Gap 1 -->
-                <td style="width: 3.5%; border: none;"></td>
-                <!-- Column 2 (Middle) -->
-                <td style="width: 31%; vertical-align: top; border: none;">
-                    <table class="detail-table" style="width: 100%;">
+                <td>
+                    <table>
                         <tr>
-                            <td class="label" style="width: 45%;">Biaya Inap</td>
-                            <td class="value" style="width: 55%;">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
+                            <td class="label">Biaya Admin</td>
+                            <td class="value">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
                         </tr>
                         <tr>
                             <td class="label">Petugas</td>
@@ -215,23 +213,22 @@
                             <td class="value">: {{ $data['merk_type'] }}</td>
                         </tr>
                         <tr>
-                            <td class="label">No Mesin/Rangka</td>
-                            <td class="value">: {{ $data['no_mesin_rangka'] }}</td>
+                            <td class="label">No IMEI/SN</td>
+                            <td class="value">: {{ $data['no_imei_sn'] }}</td>
                         </tr>
-                        <tr>
+                        <tr><!---Checkpoint pindah-->
                             <td class="label">Kelengkapan</td>
                             <td class="value">: {{ $data['kelengkapan'] }}</td>
                         </tr>
-                    </table>
+                    </table> 
+                </td>       
                 </td>
-                <!-- Gap 2 -->
-                <td style="width: 3.5%; border: none;"></td>
-                <!-- Column 3 (Right) -->
-                <td style="width: 31%; vertical-align: top; padding-right: 20px; border: none;">
-                    <table class="detail-table" style="width: 100%;">
+                <td style="width: 4%; border: none;"></td>
+                <td style="width: 48%; vertical-align: top; padding-right: 20px; border: none;">
+                    <table class="detail-table">
                         <tr>
-                            <td class="label" style="width: 45%;">Status</td>
-                            <td class="value" style="width: 55%;">: {{ $data['status'] }}</td>
+                            <td class="label">Status</td>
+                            <td class="value">: {{ $data['status'] }}</td>
                         </tr>
                         <tr>
                             <td class="label">Jatuh Tempo</td>
@@ -255,22 +252,14 @@
         </table>
 
         <!-- Signatures at the bottom of Page 1 -->
-        <table style="width: 100%; margin-top: 15px; table-layout: fixed; border-collapse: collapse; border: none;">
+        <table style="width: 100%; margin-top: 15px;">
             <tr>
-                <!-- Signature: Nasabah -->
-                <td style="width: 31%; text-align: left; font-weight: bold; font-size: 9.5px; padding-left: 20px; border: none; vertical-align: top;">
+                <td style="width: 50%; text-align: left; font-weight: bold; font-size: 9.5px; padding-left: 20px;">
                     Tanda Tangan Nasabah
                     <div style="height: 100px;"></div>
                     <span>( .................................................. )</span>
                 </td>
-                <!-- Gap 1 -->
-                <td style="width: 3.5%; border: none;"></td>
-                <!-- Middle Column -->
-                <td style="width: 31%; border: none;"></td>
-                <!-- Gap 2 -->
-                <td style="width: 3.5%; border: none;"></td>
-                <!-- Signature: Petugas -->
-                <td style="width: 31%; text-align: left; font-weight: bold; font-size: 9.5px; border: none; vertical-align: top;">
+                <td style="width: 50%; text-align: right; font-weight: bold; font-size: 9.5px; padding-right: 20px;">
                     Tanda Tangan Petugas
                     <div style="height: 100px;"></div>
                     <span>( .................................................. )</span>
@@ -279,7 +268,7 @@
         </table>
     </div>
 
-    <!-- HALAMAN 2: PERJANJIAN PINJAMAN DENGAN JAMINAN BARANG BERGERAK (KENDARAAN) -->
+    <!-- HALAMAN 2: PERJANJIAN PINJAMAN DENGAN JAMINAN BARANG BERGERAK (ELEKTRONIK) -->
     <div class="page">
         <table class="header-table">
             <tr>
@@ -315,9 +304,9 @@
             <li>Barang yang dijaminkan adalah <strong>milik pribadi dan bukan hasil tindak kejahatan</strong>, jika dikemudian hari saya terbukti bersalah maka saya akan mempertanggung jawabkan sendiri.</li>
             <li>Untuk menebus barang gadai, nasabah harus datang sendiri atau dengan mengalihkan hak kepada orang lain dengan melampirkan Surat Kuasa Asli dan KTP peminjam dan KTP penerima kuasa.</li>
             <li>Nasabah wajib menyimpan <strong>Surat Bukti Gadai MAJAKARA</strong> sebagai syarat penebusan.</li>
-            <li>Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya <strong>LALAI/tidak melakukan pembayaran bunga</strong> sampai tanggal jatuh tempo dan <strong>BARANG KENDARAAN YANG SAYA GADAI AKAN HANGUS/DIJUAL</strong> oleh pihak <strong>MAJAKARA</strong>.</li>
+            <li>Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya <strong>LALAI/tidak melakukan pembayaran bunga</strong> sampai tanggal jatuh tempo dan <strong>BARANG ELEKTRONIK YANG SAYA GADAI AKAN HANGUS/DIJUAL</strong> oleh pihak <strong>MAJAKARA</strong>.</li>
             <li>Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.</li>
-            <li>Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan <strong>hari ke 16 barang kendaraan yang saya gadaikan dianggap HANGUS</strong>.</li>
+            <li>Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan <strong>hari ke 16 barang elektronik yang saya gadaikan dianggap HANGUS</strong>.</li>
             <li>Pihak Majakara Gadai berhak menolak barang yang tidak memenuhi syarat.</li>
             <li>Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.</li>
         </ol>

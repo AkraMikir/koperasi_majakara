@@ -94,6 +94,11 @@ class AdminGadaiBaruController extends Controller
 
     public function store(Request $request)
     {
+        $kategori = \App\Models\GadaiMasterKategori::find($request->kategori_id);
+        if ($kategori && $kategori->kode_kategori === 'vehicle') {
+            $request->merge(['rate_inap_persen' => 0]);
+        }
+
         $request->validate([
             'nasabah_id' => 'required|exists:tbl_nasabah,id',
             'kategori_id' => 'required|exists:tbl_gadai_master_kategori,id',

@@ -67,7 +67,7 @@
             margin-bottom: 10px;
         }
         .detail-table td {
-            padding: 4px 6px;
+            padding: 8px 6px;
             vertical-align: middle;
             font-size: 12px;
             border-bottom: 1px solid #f3f4f6;
@@ -162,74 +162,117 @@
             SURAT BUKTI GADAI BARANG ELEKTRONIK
         </div>
 
-        <table class="detail-table">
+        <table style="width: 100%; border-collapse: collapse; border: none; margin-bottom: 10px; table-layout: fixed;">
             <tr>
-                <td class="label">Nama Peminjam</td>
-                <td class="value">: {{ $data['nama_anggota'] }}</td>
-                <td class="label">Merk/Type</td>
-                <td class="value">: {{ $data['merk_type'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">No HP</td>
-                <td class="value">: {{ $data['nomor_hp'] }}</td>
-                <td class="label">No IMEI/SN</td>
-                <td class="value">: {{ $data['no_imei_sn'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">Alamat</td>
-                <td class="value">: {{ $data['alamat_nasabah'] }}</td>
-                <td class="label">Kelengkapan</td>
-                <td class="value">: {{ $data['kelengkapan'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">No KTP</td>
-                <td class="value">: {{ $data['nik'] }}</td>
-                <td class="label">Status</td>
-                <td class="value">: {{ $data['status'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">Tanggal Kredit</td>
-                <td class="value">: {{ $data['tgl_mulai'] }}</td>
-                <td class="label">Jatuh Tempo</td>
-                <td class="value">: {{ $data['jatuh_tempo'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">Nilai Pinjaman</td>
-                <td class="value">: Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }}</td>
-                <td class="label">Bunga</td>
-                <td class="value">: Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td class="label">Biaya Admin</td>
-                <td class="value">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
-                <td class="label">Total Tebus</td>
-                <td class="value">: Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }}</td>
-            </tr>
-            <tr>
-                <td class="label">Petugas</td>
-                <td class="value">: {{ $data['admin_nama'] }}</td>
-                <td class="label">Kode Transaksi</td>
-                <td class="value">: {{ $data['slot_kode'] }}</td>
-            </tr>
-            <tr>
-                <td class="label">Catatan</td>
-                <td class="value">: {{ $data['catatan'] }}</td>
-                <td class="label"></td>
-                <td class="value"></td>
+                <!-- Column 1 (Left) -->
+                <td style="width: 31%; vertical-align: top; padding-left: 20px; border: none;">
+                    <table class="detail-table" style="width: 100%;">
+                        <tr>
+                            <td class="label" style="width: 45%;">Nama Peminjam</td>
+                            <td class="value" style="width: 55%;">: {{ $data['nama_anggota'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">No HP</td>
+                            <td class="value">: {{ $data['nomor_hp'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Alamat</td>
+                            <td class="value">: {{ $data['alamat_nasabah'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">No KTP</td>
+                            <td class="value">: {{ $data['nik'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Tanggal Kredit</td>
+                            <td class="value">: {{ $data['tgl_mulai'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Nilai Pinjaman</td>
+                            <td class="value">: Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <!-- Gap 1 -->
+                <td style="width: 3.5%; border: none;"></td>
+                <!-- Column 2 (Middle) -->
+                <td style="width: 31%; vertical-align: top; border: none;">
+                    <table class="detail-table" style="width: 100%;">
+                        <tr>
+                            <td class="label" style="width: 45%;">Biaya Inap</td>
+                            <td class="value" style="width: 55%;">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Petugas</td>
+                            <td class="value">: {{ $data['admin_nama'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Catatan</td>
+                            <td class="value">: {{ $data['catatan'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Merk/Type</td>
+                            <td class="value">: {{ $data['merk_type'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">No IMEI/SN</td>
+                            <td class="value">: {{ $data['no_imei_sn'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Kelengkapan</td>
+                            <td class="value">: {{ $data['kelengkapan'] }}</td>
+                        </tr>
+                    </table>
+                </td>
+                <!-- Gap 2 -->
+                <td style="width: 3.5%; border: none;"></td>
+                <!-- Column 3 (Right) -->
+                <td style="width: 31%; vertical-align: top; padding-right: 20px; border: none;">
+                    <table class="detail-table" style="width: 100%;">
+                        <tr>
+                            <td class="label" style="width: 45%;">Status</td>
+                            <td class="value" style="width: 55%;">: {{ $data['status'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Jatuh Tempo</td>
+                            <td class="value">: {{ $data['jatuh_tempo'] }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Bunga</td>
+                            <td class="value">: Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Total Tebus</td>
+                            <td class="value">: Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }}</td>
+                        </tr>
+                        <tr>
+                            <td class="label">Kode Transaksi</td>
+                            <td class="value">: {{ $data['slot_kode'] }}</td>
+                        </tr>
+                    </table>
+                </td>
             </tr>
         </table>
 
         <!-- Signatures at the bottom of Page 1 -->
-        <table style="width: 100%; margin-top: 15px;">
+        <table style="width: 100%; margin-top: 15px; table-layout: fixed; border-collapse: collapse; border: none;">
             <tr>
-                <td style="width: 50%; text-align: left; font-weight: bold; font-size: 9.5px; padding-left: 20px;">
+                <!-- Signature: Nasabah -->
+                <td style="width: 31%; text-align: left; font-weight: bold; font-size: 9.5px; padding-left: 20px; border: none; vertical-align: top;">
                     Tanda Tangan Nasabah
-                    <div style="height: 40px;"></div>
+                    <div style="height: 100px;"></div>
                     <span>( .................................................. )</span>
                 </td>
-                <td style="width: 50%; text-align: right; font-weight: bold; font-size: 9.5px; padding-right: 20px;">
+                <!-- Gap 1 -->
+                <td style="width: 3.5%; border: none;"></td>
+                <!-- Middle Column -->
+                <td style="width: 31%; border: none;"></td>
+                <!-- Gap 2 -->
+                <td style="width: 3.5%; border: none;"></td>
+                <!-- Signature: Petugas -->
+                <td style="width: 31%; text-align: left; font-weight: bold; font-size: 9.5px; border: none; vertical-align: top;">
                     Tanda Tangan Petugas
-                    <div style="height: 40px;"></div>
+                    <div style="height: 100px;"></div>
                     <span>( .................................................. )</span>
                 </td>
             </tr>

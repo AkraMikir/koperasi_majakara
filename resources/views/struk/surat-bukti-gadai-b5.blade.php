@@ -12,7 +12,7 @@
         }
 
         @page {
-            size: 9.5in 5.5in;
+            size: 9.5in 6.5in;
         }
 
         body {
@@ -114,7 +114,7 @@
 
         .signature-title {
             font-weight: bold;
-            margin-bottom: 45px;
+            padding-bottom: 65px;
         }
 
         .signature-line {
@@ -254,21 +254,21 @@
             <!-- Signature: Nasabah -->
             <td style="width: 20%; vertical-align: top; text-align: center;">
                 <div class="signature-title" style="margin-bottom: 48px;">Nasabah/yang dikuasakan,</div>
-                <div style="border-top: 1px solid #000; padding-top: 2px;">(...................................)</div>
+                <div style="border-top: 1px solid #000; padding-top: 10px;">(...................................)</div>
             </td>
 
             <!-- Conditional Emergency Contact -->
             @if((float)$data['nominal_deal'] >= 1000000)
             <td style="width: 20%; vertical-align: top; text-align: center;">
                 <div class="signature-title" style="margin-bottom: 48px;">Kontak Darurat,</div>
-                <div style="border-top: 1px solid #000; padding-top: 2px;">(...................................)</div>
+                <div style="border-top: 1px solid #000; padding-top: 10px;">(...................................)</div>
             </td>
             @endif
 
             <!-- Signature: Petugas -->
             <td style="width: 25%; vertical-align: top; text-align: center;">
                 <div class="signature-title" style="margin-bottom: 48px;">Petugas,</div>
-                <div style="border-top: 1px solid #000; padding-top: 2px;">(...................................)</div>
+                <div style="border-top: 1px solid #000; padding-top: 10px;">(...................................)</div>
             </td>
         </tr>
     </table>
