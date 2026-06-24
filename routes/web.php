@@ -587,6 +587,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
+        Route::post('/verify-admin-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyAdminPin'])->name('verify-admin-pin');
         
         // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
         Route::middleware('admin.permission:manage-nasabah')->group(function () {
