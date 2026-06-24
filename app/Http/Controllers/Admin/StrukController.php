@@ -143,11 +143,15 @@ class StrukController extends Controller
             $tanggal_jatuh_tempo = $tempos->last()->tgl_jatuh_tempo ? $tempos->last()->tgl_jatuh_tempo->format('d/m/Y') : '-';
         }
 
+        $alamat = $pinjaman->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
         $data = [
             'no_pinjaman' => $pinjaman->id,
-            'nama_anggota' => $pinjaman->nasabah->user->name ?? '-',
+            'nama_anggota' => $pinjaman->nasabah->user->nama ?? '-',
             'alamat_nasabah' => $pinjaman->nasabah->alamat ?? '-',
-            'kode_pos_nasabah' => $pinjaman->nasabah->kode_pos ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
             'tujuan_pinjaman' => $pinjaman->tujuanPinjaman->tujuan ?? 'Modal Usaha',
             'tanggal' => $pinjaman->tgl_pinjam ? $pinjaman->tgl_pinjam->format('d/m/Y') : now()->format('d/m/Y'),
             'bunga_rate' => (float)$pinjaman->bunga,
@@ -263,7 +267,7 @@ class StrukController extends Controller
 
     public function gadaiAwalB5(string $id)
     {
-        $gadai = GadaiActive::with(['nasabah.user', 'nasabah.dataKtp', 'kategori', 'item', 'lokasi'])
+        $gadai = GadaiActive::with(['nasabah.user', 'nasabah.dataKtp', 'kategori', 'item', 'lokasi', 'admin'])
             ->findOrFail($id);
         
         $settings = SettingsStruk::getSettings();
@@ -273,16 +277,41 @@ class StrukController extends Controller
             $totalTagihan += $gadai->extra_pinjaman_nominal;
         }
 
+        $alamat = $gadai->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
+        $formatIndoDate = function ($date) {
+            if (!$date) return '-';
+            $months = [
+                'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
+                'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
+                'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
+                'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'
+            ];
+            $engDate = $date->format('d F Y');
+            return strtr($engDate, $months);
+        };
+
         $data = [
             'jenis_trans' => 'Gadai Awal',
-            'nama_anggota' => $gadai->nasabah->user->name ?? '-',
+            'nama_anggota' => $gadai->nasabah->user->nama ?? '-',
+            'nomor_hp' => $gadai->nasabah->user->nomor_hp ?? '-',
             'alamat_nasabah' => $gadai->nasabah->alamat ?? '-',
-            'kode_pos_nasabah' => $gadai->nasabah->kode_pos ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
+            'nik' => $gadai->nasabah->dataKtp->nik ?? '-',
             'kategori' => $gadai->kategori->nama_kategori ?? '-',
             'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
+            'merk_type' => ($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-'),
+            'no_mesin_rangka' => $gadai->no_mesin_rangka ?? '-',
+            'no_imei_sn' => $gadai->no_imei_sn ?? '-',
+            'kelengkapan' => $gadai->kelengkapan ?? '-',
+            'catatan' => $gadai->catatan ?? '-',
+            'status' => $gadai->status === 'active' ? 'Gadai' : ($gadai->status === 'grace_period' ? 'Tenggang' : $gadai->status),
+            'admin_nama' => $gadai->admin->nama ?? '-',
             'slot_kode' => $gadai->slot_kode,
-            'tgl_mulai' => $gadai->tgl_mulai ? \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d/m/Y') : '-',
-            'jatuh_tempo' => $gadai->tgl_jatuh_tempo ? \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->format('d/m/Y') : '-',
+            'tgl_mulai' => $formatIndoDate($gadai->tgl_mulai),
+            'jatuh_tempo' => $formatIndoDate($gadai->tgl_jatuh_tempo),
             'nominal_deal' => (float)$gadai->nominal_deal,
             'biaya_jasa' => (float)$gadai->biaya_jasa,
             'biaya_inap' => (float)$gadai->biaya_inap,
@@ -291,7 +320,12 @@ class StrukController extends Controller
             'total_tagihan' => (float)$totalTagihan,
         ];
 
-        $pdf = Pdf::loadView('struk.surat-bukti-gadai-b5', compact('data', 'settings'));
+        $view = 'struk.surat-bukti-gadai-elektronik-b5';
+        if ($gadai->kategori->kode_kategori === 'vehicle') {
+            $view = 'struk.surat-bukti-gadai-kendaraan-b5';
+        }
+
+        $pdf = Pdf::loadView($view, compact('data', 'settings'));
         $pdf->setPaper('b5', 'landscape');
         return $pdf->download('Surat-Bukti-Gadai-' . $gadai->slot_kode . '.pdf');
     }

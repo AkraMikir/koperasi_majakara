@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Nasabah\DashboardController as NasabahDashboardController;
 use App\Http\Controllers\Nasabah\TabunganController;
@@ -38,6 +39,14 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/login/verify-pin', [LoginController::class, 'verifyPin'])->name('login.verify-pin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Guest Forgot Password Routes
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showVerifyForm'])->name('password.verify');
+Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtpAndResetPassword'])->name('password.update');
+Route::post('/forgot-password/resend-otp', [ForgotPasswordController::class, 'resendOtp'])->name('password.resend-otp');
+Route::get('/forgot-password/otp-cooldown', [ForgotPasswordController::class, 'getOtpCooldown'])->name('password.otp-cooldown');
 
 // Nasabah Routes (Protected with Auth Middleware)
 Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function () {
@@ -193,6 +202,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/struk', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'index'])->name('struk');
         Route::post('/struk/update-header', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateHeader'])->name('struk.update-header');
         Route::post('/struk/update-syarat-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadai'])->name('struk.update-syarat-gadai');
+        Route::post('/struk/update-syarat-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratPinjaman'])->name('struk.update-syarat-pinjaman');
+        Route::post('/struk/update-info-box-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxPinjaman'])->name('struk.update-info-box-pinjaman');
         Route::post('/struk/update-extra-kehilangan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateExtraKehilangan'])->name('struk.update-extra-kehilangan');
         Route::post('/struk/preview-tabungan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewTabungan'])->name('struk.preview-tabungan');
         Route::post('/struk/preview-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewPinjaman'])->name('struk.preview-pinjaman');
@@ -576,6 +587,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
+        Route::post('/verify-admin-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyAdminPin'])->name('verify-admin-pin');
         
         // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
         Route::middleware('admin.permission:manage-nasabah')->group(function () {
@@ -797,3 +809,4 @@ Route::get('/test-whatsapp', function () {
         echo "<pre>" . $e->getTraceAsString() . "</pre>";
     }
 });
+Route::post('/fonnte-webhook', [\App\Http\Controllers\FonnteWebhookController::class, 'handle']);
