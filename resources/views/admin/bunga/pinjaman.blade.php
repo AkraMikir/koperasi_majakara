@@ -44,11 +44,26 @@
             <p class="text-green-200 text-[10px] uppercase font-semibold tracking-wider">Pendapatan Bunga Bulan Ini</p>
             <p class="text-2xl font-bold text-yellow-300">Rp {{ number_format($bungaBulanIni, 0, ',', '.') }}</p>
             <p class="text-green-300 text-xs">Realisasi angsuran diterima bulan ini</p>
+            {{-- PPh Breakdown --}}
+            <div class="flex items-center gap-2 mt-3 pt-3 border-t border-white/10">
+                <div class="flex-1 bg-white/10 rounded-lg px-3 py-1.5">
+                    <p class="text-[9px] text-green-200 font-semibold uppercase">85% Bersih</p>
+                    <p class="text-sm font-bold text-green-100">Rp {{ number_format($bungaBulanIni * 0.85, 0, ',', '.') }}</p>
+                </div>
+                <div class="flex-1 bg-amber-500/20 border border-amber-400/30 rounded-lg px-3 py-1.5">
+                    <p class="text-[9px] text-amber-200 font-semibold uppercase">15% PPh</p>
+                    <p class="text-sm font-bold text-amber-300">Rp {{ number_format($bungaBulanIni * 0.15, 0, ',', '.') }}</p>
+                </div>
+            </div>
         </div>
         <div class="space-y-1 pt-4 md:pt-0 md:pl-6">
             <p class="text-green-200 text-[10px] uppercase font-semibold tracking-wider">Proyeksi Bulan Depan</p>
             <p class="text-2xl font-bold text-cyan-300">Rp {{ number_format($proyeksiBulanDepan, 0, ',', '.') }}</p>
-            <p class="text-green-300 text-xs">Estimasi tren +5% dari portofolio aktif</p>
+            <p class="text-green-300 text-xs">Estimasi tren +5% dari realisasi bulan ini</p>
+            <a href="{{ route('admin.bunga.pajak.index') }}" class="inline-flex items-center gap-1.5 mt-3 text-[10px] font-semibold text-amber-200 hover:text-white transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+                Kelola Pembayaran Pajak
+            </a>
         </div>
     </div>
 </div>
