@@ -409,50 +409,84 @@
             input.value = value;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', initGadaiForm);
+        document.addEventListener('turbo:load', initGadaiForm);
+
+        function initGadaiForm() {
             const katSelect = document.getElementById('kategori_id');
+            if (!katSelect || katSelect.dataset.initialized) return;
+            katSelect.dataset.initialized = 'true';
+
             const itemSelect = document.getElementById('item_id');
             const nominalInput = document.getElementById('nominal_deal');
             const errorNominal = document.getElementById('error_nominal');
             const btnSubmit = document.getElementById('btnSubmit');
-            const taksiranInfo = document.getElementById('taksiranInfo');
             const maxTaksiranText = document.getElementById('max_taksiran_text');
             const tInfoBox = document.getElementById('taksiran_info');
+            const slotSelect = document.getElementById('slot_kode');
+            const namaBarangManual = document.getElementById('nama_barang_manual');
 
             const allItems = @json($itemList);
             const availableSlots = @json($availableSlots);
-            const slotSelect = document.getElementById('slot_kode');
+
+            function updateFormState() {
+                const val = katSelect.value;
+                const selectedOpt = katSelect.options[katSelect.selectedIndex];
+                const kode = selectedOpt ? selectedOpt.dataset.kode : '';
+                const jasa = selectedOpt ? (selectedOpt.dataset.jasa || '0.00') : '0.00';
+                const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
+
+                const rateJasaInput = document.getElementById('rate_jasa');
+                if (rateJasaInput) rateJasaInput.value = jasa;
+
+                const rateInapInput = document.getElementById('rate_inap_persen');
+                const labelInap = document.getElementById('label_rate_inap');
+
+                if (rateInapInput) {
+                    if (kode === 'vehicle') {
+                        rateInapInput.readOnly = true;
+                        rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                        if (labelInap) {
+                            labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
+                        }
+                        
+                        // Set the value based on the selected item's flat nominal inap fee
+                        const selectedItemOpt = itemSelect.options[itemSelect.selectedIndex];
+                        const itemInap = selectedItemOpt ? parseFloat(selectedItemOpt.dataset.inap) || 0 : 0;
+                        rateInapInput.value = itemInap;
+                    } else {
+                        rateInapInput.readOnly = false;
+                        rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                        if (labelInap) {
+                            labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
+                        }
+                        rateInapInput.value = inap;
+                    }
+                }
+
+                // Update placeholder of nama_barang_manual
+                if (namaBarangManual) {
+                    if (kode === 'electronic') {
+                        namaBarangManual.placeholder = 'Iphone, Macbook / 128 gb hitam';
+                    } else if (kode === 'vehicle') {
+                        namaBarangManual.placeholder = 'Beat / 125 Merah';
+                    } else {
+                        namaBarangManual.placeholder = 'Nama...';
+                    }
+                }
+            }
 
             katSelect.addEventListener('change', function () {
                 const val = this.value;
                 const selectedOpt = this.options[this.selectedIndex];
                 const kode = selectedOpt ? selectedOpt.dataset.kode : '';
-                const jasa = selectedOpt ? (selectedOpt.dataset.jasa || '0.00') : '0.00';
-                const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
 
-                document.getElementById('rate_jasa').value = jasa;
-                
-                const rateInapInput = document.getElementById('rate_inap_persen');
-                const labelInap = document.getElementById('label_rate_inap');
-                
-                rateInapInput.value = inap;
-                if (kode === 'vehicle') {
-                    rateInapInput.readOnly = true;
-                    rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-                    if (labelInap) {
-                        labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
-                    }
-                } else {
-                    rateInapInput.readOnly = false;
-                    rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                    if (labelInap) {
-                        labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
-                    }
-                }
-                
+                const currentItemVal = itemSelect.value;
+                const currentSlotVal = slotSelect.value;
+
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
-                tInfoBox.classList.add('hidden');
+                if (tInfoBox) tInfoBox.classList.add('hidden');
 
                 // Dynamic field toggle
                 document.getElementById('no_mesin_rangka').value = '';
@@ -478,18 +512,18 @@
                     document.getElementById('col_catatan').classList.remove('hidden');
                 }
 
-                if (!val) return;
-
-                const filtered = allItems.filter(item => item.kategori_id == val);
-                filtered.forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.id;
-                    opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
-                    opt.dataset.min = item.nominal_low;
-                    opt.dataset.max = item.nominal_high;
-                    opt.dataset.inap = item.nominal_inap || 0;
-                    itemSelect.appendChild(opt);
-                });
+                if (val) {
+                    const filtered = allItems.filter(item => item.kategori_id == val);
+                    filtered.forEach(item => {
+                        const opt = document.createElement('option');
+                        opt.value = item.id;
+                        opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
+                        opt.dataset.min = item.nominal_low;
+                        opt.dataset.max = item.nominal_high;
+                        opt.dataset.inap = item.nominal_inap || 0;
+                        itemSelect.appendChild(opt);
+                    });
+                }
 
                 if (kode && availableSlots[kode]) {
                     const slots = availableSlots[kode];
@@ -500,29 +534,33 @@
                         slotSelect.appendChild(opt);
                     });
                 }
+
+                if (currentItemVal) {
+                    itemSelect.value = currentItemVal;
+                    itemSelect.dispatchEvent(new Event('change'));
+                }
+                if (currentSlotVal) {
+                    slotSelect.value = currentSlotVal;
+                }
+
+                updateFormState();
             });
 
             itemSelect.addEventListener('change', function () {
                 if (!this.value) {
-                    tInfoBox.classList.add('hidden');
+                    if (tInfoBox) tInfoBox.classList.add('hidden');
                     return;
                 }
                 const selectedOpt = this.options[this.selectedIndex];
                 const min = parseFloat(selectedOpt.dataset.min) || 0;
                 const max = parseFloat(selectedOpt.dataset.max) || 0;
 
-                // Set nominal inap if category is vehicle
-                const katSelectedOpt = katSelect.options[katSelect.selectedIndex];
-                const kode = katSelectedOpt ? katSelectedOpt.dataset.kode : '';
-                if (kode === 'vehicle') {
-                    const inapNominal = parseFloat(selectedOpt.dataset.inap) || 0;
-                    document.getElementById('rate_inap_persen').value = inapNominal;
-                }
-
                 // Format to IDR
                 document.getElementById('min_taksiran_text').textContent = new Intl.NumberFormat('id-ID').format(min);
-                maxTaksiranText.textContent = new Intl.NumberFormat('id-ID').format(max);
-                tInfoBox.classList.remove('hidden');
+                if (maxTaksiranText) maxTaksiranText.textContent = new Intl.NumberFormat('id-ID').format(max);
+                if (tInfoBox) tInfoBox.classList.remove('hidden');
+
+                updateFormState();
 
                 // Trigger nominal validation if already filled
                 if (nominalInput.value) {
@@ -609,8 +647,10 @@
                     pettyLabel = 'Saldo Petty Cash (Transfer) Anda';
                 }
                 
-                document.getElementById('petty-cash-label').innerText = pettyLabel;
-                document.getElementById('petty-cash-value').innerText = 'Rp ' + adminSaldoAvailable.toLocaleString('id-ID');
+                const pLabel = document.getElementById('petty-cash-label');
+                if (pLabel) pLabel.innerText = pettyLabel;
+                const pVal = document.getElementById('petty-cash-value');
+                if (pVal) pVal.innerText = 'Rp ' + adminSaldoAvailable.toLocaleString('id-ID');
                 
                 // Calculate Transfer Fee
                 let biayaAdmin = 0;
@@ -694,6 +734,6 @@
             // Initial run
             validateBalances();
             katSelect.dispatchEvent(new Event('change'));
-        });
+        }
     </script>
 @endsection
