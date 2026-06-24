@@ -163,7 +163,7 @@
             <h2 class="text-lg font-bold text-[#674c1d] font-display">Deposito Aktif Anda</h2>
             <span class="text-sm text-[#674c1d] font-medium">{{ $depositoAktif->count() }} berjalan</span>
         </div>
-
+        @if($depositoAktif->isNotEmpty())
             <div class="space-y-3">
                 @foreach($depositoAktif as $dep)
                 @php

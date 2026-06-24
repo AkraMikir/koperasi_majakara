@@ -1131,6 +1131,7 @@
                                             </div>
                                         </div>
                                     @endif
+                                @endif
                                 </div>
 
                     @elseif($step == 3)
