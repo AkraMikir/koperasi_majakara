@@ -5,22 +5,22 @@
 @section('content')
 <div class="space-y-6">
     <!-- Page Header -->
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
             <h1 class="text-3xl font-bold text-gray-900 font-display">Detail Pinjaman</h1>
             <p class="text-gray-600 mt-1">ID Pinjaman: #{{ $pinjaman->id }}</p>
         </div>
-        <div class="flex items-center space-x-3">
-            <a href="{{ route('admin.pinjaman.struk-pencairan', $pinjaman->id) }}" target="_blank" class="px-4 py-2 bg-[#674c1d] text-white rounded-lg hover:bg-[#8b6f2f] transition-colors text-sm font-medium inline-flex items-center gap-2">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <a href="{{ route('admin.pinjaman.struk-pencairan', $pinjaman->id) }}" target="_blank" class="w-full sm:w-auto px-4 py-2 bg-[#674c1d] text-white rounded-lg hover:bg-[#8b6f2f] transition-colors text-sm font-medium inline-flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Download PDF Struk
+                Download Struk PDF
             </a>
-            <a href="{{ route('admin.pinjaman.struk-pencairan-b5', $pinjaman->id) }}" target="_blank" class="px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors text-sm font-medium inline-flex items-center gap-2">
+            <a href="{{ route('admin.pinjaman.struk-pencairan-b5', $pinjaman->id) }}" target="_blank" class="w-full sm:w-auto px-4 py-2 bg-amber-700 text-white rounded-lg hover:bg-amber-800 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Download Surat Perjanjian (B5)
+                Download Kwitansi PDF
             </a>
             <a href="{{ route('admin.pinjaman.pinjaman-aktif') }}"
-                class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium">
+                class="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors text-sm font-medium inline-flex items-center justify-center gap-2">
                 ← Kembali
             </a>
         </div>
