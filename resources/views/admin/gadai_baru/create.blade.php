@@ -133,7 +133,7 @@
                                 <input type="text" name="nama_barang_manual" id="nama_barang_manual"
                                     class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900 placeholder-gray-400"
                                     placeholder="Nama...">
-                            </div>
+                            </div> 
 
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nominal Deal (Rp) <span
@@ -421,6 +421,7 @@
             const nominalInput = document.getElementById('nominal_deal');
             const errorNominal = document.getElementById('error_nominal');
             const btnSubmit = document.getElementById('btnSubmit');
+            const taksiranInfo = document.getElementById('taksiranInfo');
             const maxTaksiranText = document.getElementById('max_taksiran_text');
             const tInfoBox = document.getElementById('taksiran_info');
             const slotSelect = document.getElementById('slot_kode');
@@ -438,28 +439,28 @@
 
                 const rateJasaInput = document.getElementById('rate_jasa');
                 if (rateJasaInput) rateJasaInput.value = jasa;
-
+                
                 const rateInapInput = document.getElementById('rate_inap_persen');
                 const labelInap = document.getElementById('label_rate_inap');
-
+                
                 if (rateInapInput) {
-                    if (kode === 'vehicle') {
-                        rateInapInput.readOnly = true;
-                        rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-                        if (labelInap) {
-                            labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
-                        }
+                if (kode === 'vehicle') {
+                    rateInapInput.readOnly = true;
+                    rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
+                    }
                         
                         // Set the value based on the selected item's flat nominal inap fee
                         const selectedItemOpt = itemSelect.options[itemSelect.selectedIndex];
                         const itemInap = selectedItemOpt ? parseFloat(selectedItemOpt.dataset.inap) || 0 : 0;
                         rateInapInput.value = itemInap;
-                    } else {
-                        rateInapInput.readOnly = false;
-                        rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                        if (labelInap) {
-                            labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
-                        }
+                } else {
+                    rateInapInput.readOnly = false;
+                    rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
+                    }
                         rateInapInput.value = inap;
                     }
                 }
@@ -483,7 +484,7 @@
 
                 const currentItemVal = itemSelect.value;
                 const currentSlotVal = slotSelect.value;
-
+                
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
                 if (tInfoBox) tInfoBox.classList.add('hidden');
@@ -513,16 +514,16 @@
                 }
 
                 if (val) {
-                    const filtered = allItems.filter(item => item.kategori_id == val);
-                    filtered.forEach(item => {
-                        const opt = document.createElement('option');
-                        opt.value = item.id;
-                        opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
-                        opt.dataset.min = item.nominal_low;
-                        opt.dataset.max = item.nominal_high;
-                        opt.dataset.inap = item.nominal_inap || 0;
-                        itemSelect.appendChild(opt);
-                    });
+                const filtered = allItems.filter(item => item.kategori_id == val);
+                filtered.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
+                    opt.dataset.min = item.nominal_low;
+                    opt.dataset.max = item.nominal_high;
+                    opt.dataset.inap = item.nominal_inap || 0;
+                    itemSelect.appendChild(opt);
+                });
                 }
 
                 if (kode && availableSlots[kode]) {
