@@ -24,14 +24,14 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
                         <h1 class="text-3xl font-bold text-white mb-2 font-display">Detail Angsuran</h1>
                         <p class="text-white/90 text-sm">Angsuran ke-{{ $angsuran->no_urut }}</p>
                     </div>
-                    <span class="px-4 py-2 {{ $angsuran->status_bayar === 'lunas' ? 'bg-green-500' : ($isTelat ? 'bg-red-500' : 'bg-yellow-500') }} text-white rounded-full text-sm font-semibold">
+                    <span class="shrink-0 px-4 py-2 {{ $angsuran->status_bayar === 'lunas' ? 'bg-green-500' : ($isTelat ? 'bg-red-500' : 'bg-yellow-500') }} text-white rounded-full text-sm font-semibold">
                         {{ $angsuran->status_bayar === 'lunas' ? 'Lunas' : ($isTelat ? 'Telat' : 'Belum') }}
                     </span>
                 </div>

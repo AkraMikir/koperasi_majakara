@@ -18,7 +18,7 @@
     <div class="bg-gradient-to-br from-[#4a3514] to-[#8b6f2f] px-4 pt-6 pb-20 relative overflow-hidden">
         <div class="absolute top-0 right-0 w-40 h-40 bg-white/10 rounded-full -mr-20 -mt-20"></div>
         <div class="relative z-10">
-            <div class="flex items-center gap-3 mb-6">
+            <div class="flex items-center flex-wrap gap-2 mb-6">
                 <a href="{{ route('nasabah.deposito.index') }}" class="w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center text-white hover:bg-white/30">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
@@ -28,9 +28,9 @@
                     <p class="text-white/70 text-xs font-mono">{{ $deposito->nomor_deposito }}</p>
                     <h1 class="text-white font-bold text-lg">Detail Deposito</h1>
                 </div>
-                <div class="ml-auto flex items-center gap-2">
+                <div class="w-full sm:w-auto sm:ml-auto flex items-center justify-between sm:justify-end gap-2 mt-2 sm:mt-0">
                     <a href="{{ route('nasabah.struk-deposito', $deposito->id) }}" target="_blank"
-                       class="px-3 py-1.5 bg-white/20 text-white text-xs font-black rounded-lg border border-white/30 hover:bg-white/30 flex items-center gap-1.5 transition-colors">
+                       class="px-3 py-2 min-h-[44px] bg-white/20 text-white text-xs font-black rounded-lg border border-white/30 hover:bg-white/30 flex items-center gap-1.5 transition-colors">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                         </svg>
@@ -52,7 +52,7 @@
             {{-- Main balance card --}}
             <div class="text-center">
                 <p class="text-white/70 text-xs mb-1">Nominal Awal</p>
-                <h2 class="text-white text-4xl font-black font-display">
+                <h2 class="text-white text-3xl sm:text-4xl font-black font-display">
                     Rp {{ number_format($deposito->nominal_awal, 0, ',', '.') }}
                 </h2>
                 <div class="flex items-center justify-center gap-3 mt-2">
@@ -91,9 +91,9 @@
                 <div class="h-3 rounded-full bg-gradient-to-r from-[#674c1d] via-[#8b6f2f] to-[#d4af37] transition-all duration-700"
                      style="width: {{ $persen }}%"></div>
             </div>
-            <div class="flex justify-between text-xs text-gray-400">
+            <div class="flex justify-between text-xs text-gray-400 gap-1">
                 <span>{{ $tglMulai?->format('d M Y') ?? '-' }}</span>
-                <span class="font-bold text-[#674c1d]">{{ $persen }}% selesai</span>
+                <span class="hidden sm:block font-bold text-[#674c1d]">{{ $persen }}% selesai</span>
                 <span>{{ $tglJatuhTempo?->format('d M Y') ?? '-' }}</span>
             </div>
         </div>

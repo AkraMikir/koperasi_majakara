@@ -88,7 +88,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Ajukan Pinjaman</h1>
                 <p class="text-white/90 text-sm">Pilih metode pencairan pinjaman Anda</p>
@@ -214,7 +214,7 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTransfer">
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominalTransfer">Rp 0</span>
                         </div>
@@ -225,11 +225,11 @@
                                 <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
                             <span class="text-lg font-bold text-[#8b6f2f]" id="estimasiTotalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
                             <span class="font-semibold text-gray-900" id="estimasiAngsuranTransfer">Rp 0</span>
                         </div>
@@ -348,7 +348,7 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTunai">
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900" id="estimasiNominalTunai">Rp 0</span>
                         </div>
@@ -359,11 +359,11 @@
                                 <span class="text-sm text-gray-500 block" id="estimasiBungaTunai">-</span>
                             </div>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
                             <span class="text-lg font-bold text-[#8b6f2f]" id="estimasiTotalTunai">Rp 0</span>
                         </div>
-                        <div class="flex justify-between items-center">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
                             <span class="font-semibold text-gray-900" id="estimasiAngsuranTunai">Rp 0</span>
                         </div>
@@ -467,7 +467,7 @@
                     <p class="text-sm text-gray-600">Masukkan PIN Anda</p>
                 </div>
             </div>
-            <button type="button" onclick="closePinModalTransfer()" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closePinModalTransfer()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -499,7 +499,7 @@
                     <p class="text-sm text-gray-600">Masukkan PIN Anda</p>
                 </div>
             </div>
-            <button type="button" onclick="closePinModalTunai()" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closePinModalTunai()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

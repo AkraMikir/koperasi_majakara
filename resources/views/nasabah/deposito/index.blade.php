@@ -98,7 +98,7 @@
                     $isPast = $now->gt($dep->tgl_jatuh_tempo);
                 @endphp
                 <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition">
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
                         <div>
                             <p class="text-white/60 text-xs font-mono">{{ $dep->nomor_deposito }}</p>
                             <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
@@ -211,7 +211,7 @@
                 </div>
                 <div>
                     <label class="text-xs font-semibold text-gray-700 block mb-1">Pilih Tenor</label>
-                    <div class="grid grid-cols-4 gap-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         @php
                             $uniqueTenors = $pakets->unique('tenor_bulan')->values();
                         @endphp

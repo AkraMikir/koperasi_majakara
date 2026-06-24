@@ -140,24 +140,8 @@
                 @endif
             </td>
             <!-- Koperasi Info -->
-            <td class="koperasi-info" style="width: 52%;">
-                <table style="width: 100%; border-collapse: collapse; font-size: 8.5px; line-height: 1.2;">
-                    <tr>
-                        <td style="width: 90px; font-weight: bold; vertical-align: top;">Kantor Perwakilan</td>
-                        <td style="width: 5px; vertical-align: top;">:</td>
-                        <td style="vertical-align: top;">{{ $settings->alamat_koperasi }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; vertical-align: top;">Nomor Tlp Kantor</td>
-                        <td style="vertical-align: top;">:</td>
-                        <td style="vertical-align: top;">{{ $settings->no_telp }}</td>
-                    </tr>
-                    <tr>
-                        <td style="font-weight: bold; vertical-align: top;">Kritik dan Saran</td>
-                        <td style="vertical-align: top;">:</td>
-                        <td style="vertical-align: top;">{{ $settings->no_telp }}</td>
-                    </tr>
-                </table>
+            <td class="koperasi-info" style="width: 52%; font-size: 8.5px; line-height: 1.35; padding-left: 10px;">
+                <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
             </td>
             <!-- Nasabah Info -->
             <td class="nasabah-info" style="width: 30%;">

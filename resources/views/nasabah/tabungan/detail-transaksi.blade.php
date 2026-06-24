@@ -6,8 +6,8 @@
 <div class="w-full pb-6">
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
-            <div class="flex items-center justify-between">
+        <div class="bg-gradient-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+            <div class="flex flex-wrap items-center justify-between gap-2">
                 <div class="flex items-center gap-4">
                     <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                         <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -19,7 +19,7 @@
                         <p class="text-white/90 text-sm">ID: #{{ $transaksi->id }}</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <a href="{{ route('nasabah.tabungan.struk-transaksi', $transaksi->id) }}" target="_blank" class="px-4 py-2 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-colors inline-flex items-center gap-2">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                         Download PDF Struk
@@ -51,7 +51,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">Nominal</p>
-                        <p class="text-3xl font-bold {{ ($transaksi->jenis ?? '') === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
+                        <p class="text-2xl sm:text-3xl font-bold {{ ($transaksi->jenis ?? '') === 'setoran' ? 'text-green-600' : 'text-red-600' }}">
                             {{ ($transaksi->jenis ?? '') === 'setoran' ? '+' : '-' }}Rp {{ number_format(abs((float) $transaksi->nominal), 0, ',', '.') }}
                         </p>
                     </div>
@@ -61,7 +61,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600 mb-1">ID Transaksi</p>
-                        <p class="font-semibold text-gray-900 font-mono">{{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
+                        <p class="font-semibold text-gray-900 font-mono truncate">{{ $transaksi->id_transaksi ?? str_pad($transaksi->id, 5, '0', STR_PAD_LEFT) }}</p>
                     </div>
                 </div>
 
@@ -69,7 +69,7 @@
                 <div class="pt-4 mt-4 border-t border-gray-200 bg-amber-50/50 rounded-xl p-4">
                     <p class="text-sm font-semibold text-[#674c1d] mb-3">Rincian penarikan (Transfer)</p>
                     <div class="space-y-2">
-                        <div class="flex justify-between text-sm">
+                        <div class="flex flex-wrap justify-between gap-1 text-sm">
                             <span class="text-gray-600">Nominal penarikan (diterima ke rekening)</span>
                             <span class="font-semibold text-gray-900">Rp {{ number_format((float) $transaksi->pengajuanTarik->nominal, 0, ',', '.') }}</span>
                         </div>
@@ -127,7 +127,7 @@
         @if($hasManualProof || $hasJanjiTemuProof)
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -177,7 +177,7 @@
         <!-- Proof from withdrawal request -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-[#674c1d] to-[#8b6f2f] rounded-xl flex items-center justify-center">
                     <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                     </svg>
@@ -241,13 +241,13 @@
     <!-- Photo Preview Modal -->
     <div id="photoPreviewModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4" onclick="closePhotoPreview()">
         <div class="relative max-w-4xl w-full" onclick="event.stopPropagation()">
-            <button onclick="closePhotoPreview()" class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors">
+            <button onclick="closePhotoPreview()" class="absolute -top-10 sm:-top-12 right-0 text-white hover:text-gray-300 transition-colors">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
             </button>
             <div class="bg-white rounded-2xl overflow-hidden shadow-2xl">
-                <div class="p-4 bg-linear-to-r from-[#674c1d] to-[#8b6f2f]">
+                <div class="p-4 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f]">
                     <h3 id="photoTitle" class="text-white font-bold text-lg"></h3>
                 </div>
                 <div class="p-4 bg-gray-50">

@@ -135,6 +135,32 @@
                             <p class="text-xs text-gray-500 font-medium mb-1">Nama Item</p>
                             <p class="font-bold text-gray-900 text-lg">{{ $gadai->item->head_1 }}</p>
                         </div>
+
+                        @if($gadai->kategori->kode_kategori === 'vehicle')
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">No Mesin/Rangka</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->no_mesin_rangka ?? '-' }}</p>
+                        </div>
+                        @elseif($gadai->kategori->kode_kategori === 'electronic')
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">No IMEI/SN</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->no_imei_sn ?? '-' }}</p>
+                        </div>
+                        @endif
+
+                        @if($gadai->kelengkapan)
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Kelengkapan</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->kelengkapan }}</p>
+                        </div>
+                        @endif
+
+                        @if($gadai->catatan)
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Catatan</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->catatan }}</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

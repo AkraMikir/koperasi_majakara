@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Nasabah\DashboardController as NasabahDashboardController;
 use App\Http\Controllers\Nasabah\TabunganController;
@@ -38,6 +39,14 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/login/verify-pin', [LoginController::class, 'verifyPin'])->name('login.verify-pin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Guest Forgot Password Routes
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showVerifyForm'])->name('password.verify');
+Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtpAndResetPassword'])->name('password.update');
+Route::post('/forgot-password/resend-otp', [ForgotPasswordController::class, 'resendOtp'])->name('password.resend-otp');
+Route::get('/forgot-password/otp-cooldown', [ForgotPasswordController::class, 'getOtpCooldown'])->name('password.otp-cooldown');
 
 // Nasabah Routes (Protected with Auth Middleware)
 Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function () {

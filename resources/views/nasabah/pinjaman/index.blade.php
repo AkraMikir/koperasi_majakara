@@ -6,7 +6,7 @@
 <div class="w-full pb-6 space-y-6">
     <!-- Hero Section -->
     <div class="mx-4 mt-4">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
@@ -48,14 +48,14 @@
                 @endphp
                 <!-- Progress Bar Limit Pinjaman -->
                 <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 mb-6">
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex items-center justify-between flex-wrap gap-1 mb-2">
                         <span class="text-xs font-semibold text-white/90">Limit Terpakai ({{ number_format($limitPercent, 1) }}%)</span>
                         <span class="text-xs font-semibold text-white/95">Rp {{ number_format($nominalTerpakai, 0, ',', '.') }} / Rp {{ number_format($limitNominal, 0, ',', '.') }}</span>
                     </div>
                     <div class="w-full bg-white/20 rounded-full h-3">
-                        <div class="bg-linear-to-r from-red-400 to-orange-400 h-3 rounded-full transition-all duration-500" style="width: {{ $limitPercent }}%"></div>
+                        <div class="bg-gradient-to-r from-red-400 to-orange-400 h-3 rounded-full transition-all duration-500" style="width: {{ $limitPercent }}%"></div>
                     </div>
-                    <div class="flex justify-between text-[11px] text-white/80 mt-1">
+                    <div class="flex justify-between flex-wrap gap-1 text-[11px] text-white/80 mt-1">
                         <span>Sisa Limit Tersedia: Rp {{ number_format($sisaLimit, 0, ',', '.') }}</span>
                         <span>Sisa limit dapat digunakan untuk pengajuan baru</span>
                     </div>
@@ -123,7 +123,7 @@
             
             <div class="space-y-3">
                 @if(($totalAngsuranTelat ?? 0) > 0)
-                <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div class="flex items-center justify-between flex-wrap gap-2 p-3 bg-red-50 rounded-xl border border-red-100">
                     <div>
                         <p class="text-sm font-bold text-red-800">Anda memiliki {{ $totalAngsuranTelat }} angsuran telat.</p>
                         <p class="text-xs text-red-600 mt-1">Mohon segera lakukan pembayaran untuk menghindari denda tambahan.</p>
@@ -138,7 +138,7 @@
                     $jenisAngsuran = $angsuran->pinjaman->jenis ?? 'bulanan';
                     $urlDetail = route('nasabah.pinjaman.detail-angsuran', ['id' => $angsuran->id, 'jenis' => $jenisAngsuran]);
                 @endphp
-                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer" onclick="window.location.href='{{ $urlDetail }}'">
+                <div class="flex items-center justify-between flex-wrap gap-2 p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer" onclick="window.location.href='{{ $urlDetail }}'">
                     <div>
                         <p class="text-sm font-bold text-orange-800">Angsuran Rp {{ number_format($angsuran->jumlah_tagihan, 0, ',', '.') }}</p>
                         <p class="text-xs text-orange-600 mt-1">Jatuh tempo: {{ $angsuran->tgl_jatuh_tempo->format('d M Y') }} ({{ $angsuran->tgl_jatuh_tempo->diffForHumans() }})</p>

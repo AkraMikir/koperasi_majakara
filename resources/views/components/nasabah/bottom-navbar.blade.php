@@ -41,7 +41,7 @@
     $isVerified = auth()->check() && auth()->user()->verified !== null;
 @endphp
 
-<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(103,76,29,0.08)] z-50 transition-transform duration-300">
+<nav id="bottomNavbar" class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200/80 shadow-[0_-4px_20px_rgba(103,76,29,0.08)] z-50 transition-transform duration-300 pb-[env(safe-area-inset-bottom)]">
     <div class="w-full px-2">
         {{-- Desktop: full 7-item nav dengan sliding indicator --}}
         <div id="navBarInner" class="hidden md:flex relative items-end justify-around py-2">

@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Status Pengajuan Pinjaman</h1>
                 <p class="text-white/90 text-sm">Lihat status pengajuan pinjaman Anda</p>
@@ -78,21 +78,21 @@
                     <tbody>
                         @forelse(($pengajuan ?? []) as $item)
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" role="button" tabindex="0" data-href="{{ route('nasabah.pinjaman.detail-pengajuan', $item->id) }}" onclick="window.location.href=this.dataset.href">
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-4 text-sm">
                                 <p class="font-medium text-gray-900">{{ $item->tgl_pengajuan->format('d M Y') }}</p>
                                 <p class="text-xs text-gray-500">{{ $item->tgl_pengajuan->format('H:i') }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                     {{ ucfirst($item->jenis) }}
                                 </span>
                             </td>
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ $item->durasi }} bulan</td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center justify-between">
+                            <td class="px-4 py-4 text-sm text-gray-600">{{ $item->durasi }} bulan</td>
+                            <td class="px-4 py-4">
+                                <div class="flex items-center justify-between gap-2">
                                     <span class="px-3 py-1 {{ $item->pinjaman ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700' }} rounded-full text-xs font-semibold">
                                         {{ $item->pinjaman ? 'Disetujui' : 'Pending' }}
                                     </span>

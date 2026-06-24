@@ -70,7 +70,7 @@
                                     class="w-4 h-4 text-majakara-brown border-gray-300 rounded focus:ring-majakara-brown">
                                 <label for="remember" class="ml-2 text-sm text-gray-600">Ingat saya</label>
                             </div>
-                            <a href="#" class="text-sm text-majakara-brown hover:text-majakara-dark-gold font-medium transition-colors">Lupa password?</a>
+                            <a href="{{ route('password.request') }}" class="text-sm text-majakara-brown hover:text-majakara-dark-gold font-medium transition-colors">Lupa password?</a>
                         </div>
 
                         <!-- Submit Button -->

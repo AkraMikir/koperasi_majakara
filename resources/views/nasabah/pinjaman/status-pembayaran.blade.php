@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Status Pembayaran Pinjaman</h1>
                 <p class="text-white/90 text-sm">Lihat status pengajuan pembayaran Anda</p>
@@ -36,7 +36,7 @@
     <!-- Filter -->
     <div class="mx-4 mb-6">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
-            <form method="GET" action="{{ route('nasabah.pinjaman.status-pembayaran') }}" class="flex gap-4">
+            <form method="GET" action="{{ route('nasabah.pinjaman.status-pembayaran') }}" class="flex flex-col sm:flex-row gap-3">
                 <select name="status" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg">
                     <option value="">Semua Status</option>
                     <option value="1" {{ request('status') == '1' ? 'selected' : '' }}>Pending</option>
@@ -44,7 +44,7 @@
                     <option value="3" {{ request('status') == '3' ? 'selected' : '' }}>Disetujui</option>
                     <option value="4" {{ request('status') == '4' ? 'selected' : '' }}>Terlaksana</option>
                 </select>
-                <button type="submit" class="px-6 py-2 bg-[#8b6f2f] text-white rounded-lg hover:bg-[#a0824d] transition-colors">
+                <button type="submit" class="px-6 py-3 bg-[#8b6f2f] text-white rounded-lg hover:bg-[#a0824d] transition-colors">
                     Filter
                 </button>
             </form>
@@ -71,16 +71,16 @@
                         @forelse($pengajuan ?? [] as $item)
                         <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors cursor-pointer" 
                             onclick="window.location.href='{{ route('nasabah.pinjaman.detail-pembayaran', $item->id) }}'">
-                            <td class="px-4 py-3 text-sm">
+                            <td class="px-4 py-4 text-sm">
                                 <p class="font-medium text-gray-900">{{ $item->created_at->format('d M Y') }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 <p class="font-semibold text-gray-900">Pinjaman #{{ str_pad($item->pinjaman_id, 6, '0', STR_PAD_LEFT) }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($item->nominal, 0, ',', '.') }}</p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 @if($item->rekening_tujuan)
                                 <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
                                     Transfer
@@ -91,7 +91,7 @@
                                 </span>
                                 @endif
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-4">
                                 @php
                                     $statusConfig = [
                                         '1' => ['bg' => 'bg-yellow-100', 'text' => 'text-yellow-700', 'label' => 'Pending'],

@@ -291,6 +291,7 @@ class RegisterController extends Controller
                     $formData['jenis_kelamin'] = $nasabahTemp->jenis_kelamin;
                     $formData['alamat'] = $nasabahTemp->alamat;
                     $formData['alamat_domisili'] = $nasabahTemp->alamat_domisili;
+                    $formData['kode_pos'] = $nasabahTemp->kode_pos;
                     $formData['foto_ktp'] = $nasabahTemp->foto_ktp;
                     $formData['foto_kk'] = $nasabahTemp->foto_kk;
                     $formData['foto_selfie'] = $nasabahTemp->foto_selfie;
@@ -611,6 +612,7 @@ class RegisterController extends Controller
                 'jenis_kelamin' => 'required|in:L,P',
                 'alamat' => 'required|string',
                 'alamat_domisili' => 'required|string',
+                'kode_pos' => 'required|digits:5',
                 'foto_ktp' => $hasFotoKtp ? 'nullable|string' : 'required_without:foto_ktp_upload|nullable|string',
                 'foto_ktp_upload' => $hasFotoKtp ? 'nullable|image|mimes:jpeg,png,jpg|max:5120' : 'required_without:foto_ktp|nullable|image|mimes:jpeg,png,jpg|max:5120',
                 'foto_kk' => $hasFotoKk ? 'nullable|string' : 'required_without:foto_kk_upload|nullable|string',
@@ -849,6 +851,7 @@ class RegisterController extends Controller
                         'jenis_kelamin' => 'L',
                         'alamat' => '',
                         'alamat_domisili' => '',
+                        'kode_pos' => null,
                     ]);
                     $request->session()->put('register_nasabah_temp_id', $nasabahTemp->id);
                 }
@@ -860,6 +863,7 @@ class RegisterController extends Controller
                     'jenis_kelamin' => $request->jenis_kelamin,
                     'alamat' => $request->alamat,
                     'alamat_domisili' => $request->alamat_domisili,
+                    'kode_pos' => $request->kode_pos,
                 ];
 
                 $userId = $userTemp->id;

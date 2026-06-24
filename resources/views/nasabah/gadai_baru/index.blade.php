@@ -12,7 +12,7 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -ml-24 -mb-24"></div>
             </div>
-            <div class="relative z-10 flex items-center justify-between gap-4">
+            <div class="relative z-10 flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <p class="text-white/80 text-xs font-black uppercase tracking-widest mb-1">Layanan Cepat & Aman</p>
                     <h1 class="text-3xl font-black text-white font-display leading-tight">Gadai Majakara</h1>
@@ -94,7 +94,7 @@
                     <div class="p-6">
                         {{-- Header card --}}
                         <div class="flex justify-between items-start mb-4">
-                            <div>
+                            <div class="min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $gadai->kategori->nama_kategori }}</span>
                                     <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -160,7 +160,7 @@
                         <div class="mb-5">
                             <div class="flex justify-between text-[9px] font-bold text-gray-400 mb-1.5">
                                 <span>{{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d M Y') }}</span>
-                                <span class="{{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
+                                <span class="hidden sm:inline {{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
                                 <span>{{ $jatuhTempo->format('d M Y') }}</span>
                             </div>
                             <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
@@ -177,13 +177,13 @@
                         {{-- CTA Buttons --}}
                         <div class="grid grid-cols-2 gap-3">
                             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
-                               class="flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
+                               class="flex items-center justify-center gap-2 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Tebus
                             </a>
                             @if($gadai->jumlah_perpanjangan < $gadai->kategori->max_extend_default)
                             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'perpanjang']) }}"
-                               class="flex items-center justify-center gap-2 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
+                               class="flex items-center justify-center gap-2 py-3 min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Perpanjang
                             </a>

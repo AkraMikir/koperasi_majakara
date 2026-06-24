@@ -24,14 +24,14 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between flex-wrap gap-2">
                     <div>
                         <h1 class="text-3xl font-bold text-white mb-2 font-display">Detail Pinjaman</h1>
                         <p class="text-white/90 text-sm">ID: #{{ str_pad($pinjaman->id, 6, '0', STR_PAD_LEFT) }}</p>
                     </div>
-                    <span class="px-4 py-2 {{ $pinjaman->status === 'telaksana' ? 'bg-green-500' : 'bg-yellow-500' }} text-white rounded-full text-sm font-semibold">
+                    <span class="shrink-0 px-4 py-2 {{ $pinjaman->status === 'telaksana' ? 'bg-green-500' : 'bg-yellow-500' }} text-white rounded-full text-sm font-semibold">
                         {{ ucfirst($pinjaman->status) }}
                     </span>
                 </div>
@@ -74,9 +74,9 @@
                 <span class="text-sm font-semibold text-gray-700">{{ number_format($progress, 1) }}%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-4 mb-2">
-                <div class="bg-linear-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
+                <div class="bg-gradient-to-r from-[#8b6f2f] to-[#d4af37] h-4 rounded-full transition-all duration-500" style="width: {{ number_format($progress, 2) }}%"></div>
             </div>
-            <div class="flex justify-between text-xs text-gray-500">
+            <div class="flex justify-between flex-wrap gap-1 text-xs text-gray-500">
                 <span>{{ $angsuranLunas ?? 0 }} / {{ $totalAngsuran ?? 0 }} angsuran lunas</span>
                 <span>Rp {{ number_format($totalTerbayar ?? 0, 0, ',', '.') }} / Rp {{ number_format($totalKewajiban ?? $totalTagihan ?? 0, 0, ',', '.') }}</span>
             </div>
@@ -203,7 +203,7 @@
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Jumlah Tagihan</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Denda</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Terbayar</th>
-                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Sisa</th>
+                            <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase hidden sm:table-cell">Sisa</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Total Harus Bayar</th>
                             <th class="px-4 py-3 text-left text-xs font-bold text-[#8b6f2f] uppercase">Status</th>
                         </tr>
@@ -239,7 +239,7 @@
                                     Rp {{ number_format($item->jumlah_terbayar ?? 0, 0, ',', '.') }}
                                 </p>
                             </td>
-                            <td class="px-4 py-3">
+                            <td class="px-4 py-3 hidden sm:table-cell">
                                 <p class="font-semibold text-gray-900">Rp {{ number_format($sisa, 0, ',', '.') }}</p>
                             </td>
                             <td class="px-4 py-3">
@@ -280,7 +280,7 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
             <h3 class="text-lg font-bold text-[#8b6f2f] mb-4 font-display">Aksi</h3>
             <a href="{{ route('nasabah.pinjaman.pembayaran', ['pinjaman_id' => $pinjaman->id]) }}" 
-                class="w-full inline-flex items-center justify-center gap-2 bg-linear-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
+                class="w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-[#8b6f2f] to-[#a0824d] text-white font-semibold py-3 rounded-xl hover:shadow-lg transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                 </svg>

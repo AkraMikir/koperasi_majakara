@@ -17,7 +17,7 @@
 
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Angsuran</h1>
                 <p class="text-white/90 text-sm">Daftar semua angsuran pinjaman Anda dikelompokkan per pinjaman</p>
@@ -97,7 +97,8 @@
                                 <p class="text-xs font-medium text-[#8b6f2f] mt-1">Rp {{ number_format($pinjaman->jumlah_pinjam, 0, ',', '.') }}</p>
                             </td>
                             <td class="px-4 py-3">
-                                <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-linear-to-b from-amber-50/80 to-white">
+                                <div class="rounded-xl overflow-hidden shadow-sm border border-[#8b6f2f]/20 bg-gradient-to-b from-amber-50/80 to-white">
+                                    <div class="overflow-x-auto">
                                     <table class="w-full text-xs">
                                         <thead>
                                             <tr class="bg-linear-to-r from-[#8b6f2f]/15 to-[#d4af37]/10">
@@ -146,6 +147,7 @@
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    </div>
                                 </div>
                             </td>
                         </tr>
