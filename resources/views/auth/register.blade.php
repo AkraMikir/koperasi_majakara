@@ -901,7 +901,6 @@
                     @endif
                     @elseif($step == 2)
                     {{-- Step 2: OTP Verification --}}
-                    <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                     <div class="space-y-6">
                         {{-- OTP step 2 alerts handled by SweetAlert2 --}}
 
@@ -1396,7 +1395,7 @@
                 </div>
             </div>
 
-            <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-video mb-4 flex items-center justify-center">
+            <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-[4/3] mb-4 flex items-center justify-center">
                 <video id="cameraVideo" autoplay playsinline
                     class="w-full h-full object-cover rounded-xl hidden"></video>
                 <canvas id="cameraCanvas" class="hidden"></canvas>
@@ -1476,7 +1475,13 @@
 
 @push('scripts')
     <script>
-        window.isRegisterFormSubmitting = false;
+        window.otpFormBusy = false;
+
+        // Reset flag on bfcache restore (browser back/forward)
+        window.addEventListener('pageshow', function(e) {
+            window.otpFormBusy = false;
+        });
+
         function goToStep(step, substep = null) {
             // Convert step to number
             step = parseInt(step);
@@ -1582,14 +1587,20 @@
         navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: currentFacingMode,
+                aspectRatio: 4/3,
                 width: { ideal: 1280 },
-                height: { ideal: 720 }
+                height: { ideal: 960 }
             }
         })
         .then(function(stream) {
             cameraStream = stream;
             video.srcObject = stream;
             video.classList.remove('hidden');
+            if (currentFacingMode === 'user') {
+                video.style.transform = 'scaleX(-1)';
+            } else {
+                video.style.transform = 'none';
+            }
         })
         .catch(function(err) {
             console.error('Error accessing camera:', err);
@@ -1630,6 +1641,7 @@
 
         video.srcObject = null;
         video.classList.add('hidden');
+        video.style.transform = 'none';
         preview.classList.add('hidden');
         btnRetake.classList.add('hidden');
         btnUsePhoto.classList.add('hidden');
@@ -1656,6 +1668,12 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
+
+            if (currentFacingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
             ctx.drawImage(video, 0, 0);
 
             // Convert to blob
@@ -1663,6 +1681,7 @@
                 capturedPhotoBlob = blob;
                 const url = URL.createObjectURL(blob);
                 previewImg.src = url;
+                previewImg.style.transform = 'none';
                 preview.classList.remove('hidden');
                 btnCapture.classList.add('hidden');
                 btnRetake.classList.remove('hidden');
@@ -1707,14 +1726,20 @@
                 navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: currentFacingMode,
+                        aspectRatio: 4/3,
                         width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        height: { ideal: 960 }
                     }
                 })
                 .then(function(stream) {
                     cameraStream = stream;
                     video.srcObject = stream;
                     video.classList.remove('hidden');
+                    if (currentFacingMode === 'user') {
+                        video.style.transform = 'scaleX(-1)';
+                    } else {
+                        video.style.transform = 'none';
+                    }
                 })
                 .catch(function(err) {
                     console.error('Error accessing camera:', err);
@@ -1915,14 +1940,13 @@
                 });
         }
 
-        // Set send_otp=1 dan kirim form sekali saja (cegah double submit yang bikin OTP ke-invalidate)
         function setSendOtpAndLoading(button) {
-            if (isFormSubmitting) return;
+            if (button.disabled) return; // already clicked
+            
             const sendOtpInput = document.getElementById('send_otp_input');
             if (!sendOtpInput) return;
-            if (button.disabled) return; // Sudah diklik, jangan proses lagi
             
-            isFormSubmitting = true;
+            button.disabled = true;
             sendOtpInput.value = '1';
 
             // Loading state
@@ -1934,25 +1958,26 @@
                 iconLoading.classList.remove('hidden');
                 textSendOtp.textContent = 'Mengirim OTP...';
             }
-            button.disabled = true;
 
             // Show SweetAlert2 loading popup
-            Swal.fire({
-                title: 'Mengirim OTP...',
-                html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
-                allowOutsideClick: false,
-                showConfirmButton: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-                customClass: {
-                    popup: 'rounded-2xl shadow-2xl',
-                    title: 'text-lg font-bold text-gray-900 font-display'
-                }
-            });
+            try {
+                Swal.fire({
+                    title: 'Mengirim OTP...',
+                    html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl',
+                        title: 'text-lg font-bold text-gray-900 font-display'
+                    }
+                });
+            } catch(err) { /* continue even if Swal fails */ }
 
-            // Submit form sekali (programmatic submit = hanya satu request, tidak double)
-            const form = button.form || document.getElementById('registerForm');
+            // Submit form
+            const form = document.getElementById('registerForm');
             if (form) form.submit();
         }
 
@@ -2025,38 +2050,31 @@
             }
 
             function checkAutoSubmit() {
-                if (isFormSubmitting) return;
+                if (window.otpFormBusy) return;
                 let allFilled = true;
                 otpInputs.forEach(input => {
-                    if (input.value === '') {
-                        allFilled = false;
-                    }
+                    if (input.value === '') allFilled = false;
                 });
 
-                // Auto-submit when all 6 boxes filled
                 if (allFilled) {
-                    if (window.isRegisterFormSubmitting) return;
-                    window.isRegisterFormSubmitting = true;
+                    window.otpFormBusy = true;
+                    try {
+                        Swal.fire({
+                            title: 'Memproses...',
+                            html: 'Sedang memverifikasi data Anda, mohon tunggu.',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => { Swal.showLoading(); },
+                            customClass: {
+                                popup: 'rounded-2xl shadow-2xl',
+                                title: 'text-lg font-bold text-gray-900 font-display'
+                            }
+                        });
+                    } catch(err) { /* continue */ }
 
                     setTimeout(() => {
                         const form = document.getElementById('registerForm');
-                        if (form) {
-                            // Show verification/loading screen popup
-                            Swal.fire({
-                                title: 'Memproses...',
-                                html: 'Sedang memverifikasi data Anda, mohon tunggu.',
-                                allowOutsideClick: false,
-                                showConfirmButton: false,
-                                didOpen: () => {
-                                    Swal.showLoading();
-                                },
-                                customClass: {
-                                    popup: 'rounded-2xl shadow-2xl',
-                                    title: 'text-lg font-bold text-gray-900 font-display'
-                                }
-                            });
-                            form.submit();
-                        }
+                        if (form) form.submit();
                     }, 50);
                 }
             }
@@ -2202,27 +2220,20 @@
         const registerForm = document.getElementById('registerForm');
         if (registerForm) {
             registerForm.addEventListener('submit', async function(e) {
-                if (window.isRegisterFormSubmitting) {
-                    e.preventDefault();
-                    return;
-                }
                 // Prevent form submission to allow checks first
                 e.preventDefault();
-                window.isRegisterFormSubmitting = true;
 
                 const stepInput = registerForm.querySelector('input[name="step"]');
                 const substepInput = registerForm.querySelector('input[name="substep"]');
                 const step = stepInput ? parseInt(stepInput.value) : 1;
                 const substep = substepInput ? parseInt(substepInput.value) : 1;
-                
+
+                // If programmatic send OTP — bypass all validation
                 const sendOtpInput = document.getElementById('send_otp_input');
                 if (sendOtpInput && sendOtpInput.value === '1') {
-                    isFormSubmitting = true;
                     registerForm.submit();
-                    return; // Skip client-side check if sending OTP
+                    return;
                 }
-                
-                isFormSubmitting = true;
 
                 let isValid = true;
                 let errorMsg = '';
@@ -2546,10 +2557,8 @@
                 }
 
                 if (!isValid) {
-                    window.isRegisterFormSubmitting = false;
                     showErrorAlert(errorMsg);
                     if (focusEl) focusEl.focus();
-                    isFormSubmitting = false;
                     return;
                 }
 
@@ -2595,13 +2604,9 @@
                     // If any uniqueness check failed, stop submission
                     const failedCheck = results.find(res => res.unique === false);
                     if (failedCheck) {
-                        window.isRegisterFormSubmitting = false;
                         Swal.close();
                         showErrorAlert(failedCheck.message);
-                        if (failedCheck.element) {
-                            failedCheck.element.focus();
-                        }
-                        isFormSubmitting = false;
+                        if (failedCheck.element) failedCheck.element.focus();
                         return;
                     }
                     
@@ -2615,15 +2620,15 @@
                     registerForm.submit();
 
                 } catch (error) {
-                    window.isRegisterFormSubmitting = false;
                     Swal.close();
                     console.error('Error in uniqueness validation:', error);
                     showErrorAlert('Terjadi kesalahan koneksi saat memverifikasi data. Silakan coba lagi.');
-                    isFormSubmitting = false;
                 }
             });
         }
     });
+
+        // Reset otpFormBusy on pageshow (browser back/forward cache)
 
         function previewImage(input, previewId) {
             if (input.files && input.files[0]) {

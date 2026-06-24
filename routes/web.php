@@ -598,6 +598,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiUpdate'])->name('update');
             });
         });
+
+        // Master Data Bank Registrasi - Semua admin bisa lihat, CRUD hanya Admin Utama & Operasional
+        Route::prefix('bank-regis')->name('bank-regis.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisToggleStatus'])->name('toggle-status');
+            });
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama

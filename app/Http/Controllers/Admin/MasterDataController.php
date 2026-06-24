@@ -12,6 +12,7 @@ use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\AdminOperasional;
+use App\Models\MasterDataBankRegis;
 use App\Models\JnsBank;
 use App\Models\LogoBank;
 use App\Models\User;
@@ -56,6 +57,7 @@ class MasterDataController extends Controller
             'total_inap_kendaraan' => \App\Models\GadaiMasterInapKendaraan::count(),
             'total_denda_deposito' => MasterDendaDeposito::where('status_aktif', true)->count(),
             'total_tujuan_pinjaman' => MasterTujuanPinjaman::count(),
+            'total_bank_regis' => MasterDataBankRegis::where('status', true)->count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -1194,5 +1196,94 @@ class MasterDataController extends Controller
         }
 
         return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan Gadai berhasil diperbarui.');
+    }
+
+    // ==================== MASTER DATA BANK REGIS ====================
+
+    public function bankRegisIndex()
+    {
+        $data = MasterDataBankRegis::latest()->paginate(15);
+        return view('admin.master-data.bank-regis.index', compact('data'));
+    }
+
+    public function bankRegisCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.bank-regis.create');
+    }
+
+    public function bankRegisStore(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'nama_bank' => 'required|string|max:100|unique:master_data_bank_regis,nama_bank',
+            'kode_bank' => 'nullable|string|max:20',
+            'status'    => 'boolean',
+        ], [
+            'nama_bank.required' => 'Nama bank wajib diisi.',
+            'nama_bank.unique'   => 'Nama bank sudah terdaftar.',
+            'nama_bank.max'      => 'Nama bank maksimal 100 karakter.',
+            'kode_bank.max'      => 'Kode bank maksimal 20 karakter.',
+        ]);
+
+        MasterDataBankRegis::create([
+            'nama_bank' => $request->nama_bank,
+            'kode_bank' => $request->kode_bank,
+            'status'    => $request->boolean('status', true),
+        ]);
+
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil ditambahkan.');
+    }
+
+    public function bankRegisEdit($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        return view('admin.master-data.bank-regis.edit', compact('data'));
+    }
+
+    public function bankRegisUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $request->validate([
+            'nama_bank' => 'required|string|max:100|unique:master_data_bank_regis,nama_bank,' . $id,
+            'kode_bank' => 'nullable|string|max:20',
+            'status'    => 'boolean',
+        ], [
+            'nama_bank.required' => 'Nama bank wajib diisi.',
+            'nama_bank.unique'   => 'Nama bank sudah terdaftar.',
+            'nama_bank.max'      => 'Nama bank maksimal 100 karakter.',
+            'kode_bank.max'      => 'Kode bank maksimal 20 karakter.',
+        ]);
+
+        $data->update([
+            'nama_bank' => $request->nama_bank,
+            'kode_bank' => $request->kode_bank,
+            'status'    => $request->boolean('status', true),
+        ]);
+
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil diperbarui.');
+    }
+
+    public function bankRegisDestroy($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $data->delete();
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil dihapus.');
+    }
+
+    public function bankRegisToggleStatus($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $data->status = !$data->status;
+        $data->save();
+        return redirect()->back()
+            ->with('success', 'Status bank berhasil diubah.');
     }
 }
