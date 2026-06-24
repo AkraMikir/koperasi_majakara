@@ -193,6 +193,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/struk', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'index'])->name('struk');
         Route::post('/struk/update-header', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateHeader'])->name('struk.update-header');
         Route::post('/struk/update-syarat-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadai'])->name('struk.update-syarat-gadai');
+        Route::post('/struk/update-syarat-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratPinjaman'])->name('struk.update-syarat-pinjaman');
+        Route::post('/struk/update-info-box-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxPinjaman'])->name('struk.update-info-box-pinjaman');
         Route::post('/struk/update-extra-kehilangan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateExtraKehilangan'])->name('struk.update-extra-kehilangan');
         Route::post('/struk/preview-tabungan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewTabungan'])->name('struk.preview-tabungan');
         Route::post('/struk/preview-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewPinjaman'])->name('struk.preview-pinjaman');

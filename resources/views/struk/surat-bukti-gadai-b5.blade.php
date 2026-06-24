@@ -86,7 +86,7 @@
 
         .perjanjian-text {
             font-size: 7.5px;
-            text-align: justify;
+            text-align: left;
             margin-bottom: 2px;
         }
 
@@ -163,7 +163,7 @@
             <td class="nasabah-info" style="width: 30%;">
                 Nama: {{ $data['nama_anggota'] }}<br>
                 Alamat: {{ $data['alamat_nasabah'] ?? '-' }}<br>
-                Negara: Indonesia<br>
+                Negara: ID<br>
                 Kode Pos: {{ $data['kode_pos_nasabah'] ?? '-' }}
             </td>
         </tr>

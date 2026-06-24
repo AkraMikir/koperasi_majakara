@@ -143,11 +143,15 @@ class StrukController extends Controller
             $tanggal_jatuh_tempo = $tempos->last()->tgl_jatuh_tempo ? $tempos->last()->tgl_jatuh_tempo->format('d/m/Y') : '-';
         }
 
+        $alamat = $pinjaman->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
         $data = [
             'no_pinjaman' => $pinjaman->id,
-            'nama_anggota' => $pinjaman->nasabah->user->name ?? '-',
+            'nama_anggota' => $pinjaman->nasabah->user->nama ?? '-',
             'alamat_nasabah' => $pinjaman->nasabah->alamat ?? '-',
-            'kode_pos_nasabah' => $pinjaman->nasabah->kode_pos ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
             'tujuan_pinjaman' => $pinjaman->tujuanPinjaman->tujuan ?? 'Modal Usaha',
             'tanggal' => $pinjaman->tgl_pinjam ? $pinjaman->tgl_pinjam->format('d/m/Y') : now()->format('d/m/Y'),
             'bunga_rate' => (float)$pinjaman->bunga,
@@ -273,11 +277,15 @@ class StrukController extends Controller
             $totalTagihan += $gadai->extra_pinjaman_nominal;
         }
 
+        $alamat = $gadai->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
         $data = [
             'jenis_trans' => 'Gadai Awal',
-            'nama_anggota' => $gadai->nasabah->user->name ?? '-',
+            'nama_anggota' => $gadai->nasabah->user->nama ?? '-',
             'alamat_nasabah' => $gadai->nasabah->alamat ?? '-',
-            'kode_pos_nasabah' => $gadai->nasabah->kode_pos ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
             'kategori' => $gadai->kategori->nama_kategori ?? '-',
             'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
             'slot_kode' => $gadai->slot_kode,

@@ -113,7 +113,7 @@
 
         .perjanjian-text {
             font-size: 10px;
-            text-align: justify;
+            text-align: left;
             margin-bottom: 2px;
         }
 
@@ -126,7 +126,7 @@
 
         .perjanjian-list li {
             margin-bottom: 1px;
-            text-align: justify;
+            text-align: left;
         }
 
         .footer-section {
@@ -202,7 +202,7 @@
                 <td class="nasabah-info" style="width: 30%;">
                     Nama: {{ $data['nama_anggota'] }}<br>
                     Alamat: {{ $data['alamat_nasabah'] ?? '-' }}<br>
-                    Negara: Indonesia<br>
+                    Negara: ID<br>
                     Kode Pos: {{ $data['kode_pos_nasabah'] ?? '-' }}
                 </td>
             </tr>
@@ -220,14 +220,14 @@
             <tr>
                 <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">Tujuan
                     Pinjaman</td>
-                <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">:{{
+                <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">: {{ 
                     $data['tujuan_pinjaman'] ?? 'Modal Usaha' }}
                 </td>
                 <td style="width: 20%; border: none; padding: 2px 4px; text-align: left;">Tenor
                     Pinjaman
                 </td>
                 <td style="width: 20%; padding: 2px 4px; vertical-align: middle; text-align:left;">
-                    :{{ $data['lama_pinjam'] }} Bulan</td>
+                    : {{ $data['lama_pinjam'] }} Bulan</td>
             </tr>
             <!-- ROW 2 (Values for Params 1-3 & Nominal Harus Dibayarkan Row) -->
             <tr>
@@ -236,12 +236,12 @@
                     Tanggal Pencairan</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
-                    :{{ $data['tanggal'] }}</td>
+                    : {{ $data['tanggal'] }}</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Biaya Keterlambatan</td>
-                <td style="padding: 2px 4px; vertical-align: middle; text-align: left;">:
-                    {{ number_format($data['denda_rate'] ?? 0, 2) }}% Per Hari</td>
+                <td style="padding: 2px 4px; vertical-align: middle; text-align: left;">
+                    : {{ number_format($data['denda_rate'] ?? 0, 2) }}% Per Hari</td>
             </tr>
 
             <!-- ROW 3 (Values for Params 4-6 & Nominal Diterima Row) -->
@@ -251,12 +251,12 @@
                     Suku Bunga</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle; font-size: 11px;">
-                    :{{ number_format($data['bunga_rate'] ?? 0, 2) }}% Flat per bulan</td>
+                    : {{ number_format($data['bunga_rate'] ?? 0, 2) }}% Flat per bulan</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Jangka Waktu Pelunasan</td>
-                <td style=" padding: 2px 4px; vertical-align: middle; text-align: left;">:{{
-                    $data['tanggal'] }} s/d {{
+                <td style=" padding: 2px 4px; vertical-align: middle; text-align: left;">
+                    : {{ $data['tanggal'] }} s/d {{
                     $data['tanggal_jatuh_tempo'] ?? '-' }}</td>
             </tr>
             <!-- ROW 4 Pinjaman-->
@@ -266,13 +266,13 @@
                     Nominal Pokok Pinjaman</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
-                    :Rp {{ number_format($data['jumlah_pinjam'], 0, ',', '.') }},-</td>
+                    : Rp {{ number_format($data['jumlah_pinjam'], 0, ',', '.') }},-</td>
                 <td
                 style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                 Nominal wajib dibayarkan</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
-                    :Rp {{ number_format($data['nominal_total_bayar'], 0, ',', '.') }},-</td>
+                    : Rp {{ number_format($data['nominal_total_bayar'], 0, ',', '.') }},-</td>
             </tr>
         </table>
         @if(isset($data['jadwal_angsuran']) && count($data['jadwal_angsuran']) > 0)
@@ -301,6 +301,16 @@
 
         <!-- PERJANJIAN SYARAT KETENTUAN -->
         <div class="perjanjian-section">
+            @if(!empty($settings->syarat_ketentuan_pinjaman))
+            <div class="perjanjian-text" style="white-space: pre-line;">{!! str_replace(
+                ['{tanggal}', 'MAJAKARA'],
+                [
+                    $data['tanggal'] ?? now()->format('d/m/Y'),
+                    '<strong>MAJAKARA</strong>'
+                ],
+                e($settings->syarat_ketentuan_pinjaman)
+            ) !!}</div>
+            @else
             <div class="perjanjian-title">
                 Yang bertanda tangan dibawah ini:
             </div>
@@ -325,6 +335,7 @@
                 <li>Pihak Majakara berhak menolak barang yang tidak memenuhi syarat.</li>
                 <li>Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.</li>
             </ol>
+            @endif
         </div>
 
         <div style="text-align: right; font-size: 11px; margin-bottom: 4px; padding-right: 0;">
@@ -335,12 +346,10 @@
             <tr>
                 <!-- Info Box -->
                 <td style="width: 35%; text-align: left; vertical-align: middle;">
-                    <div class="info-box">
-                        <strong>PINJAMAN BISA DIANGSUR</strong><br>
-                        HARI BESAR DAN HARI MINGGU TETAP BUKA<br>
-                        Jam Pengambilan Barang: 08.00 - 18.00<br>
-                        Buka Jam: 08.00 - 20.00
-                    </div>
+                    <div class="info-box" style="white-space: pre-line;">@if(!empty($settings->info_box_pinjaman)){!! str_replace('MAJAKARA', '<strong>MAJAKARA</strong>', e($settings->info_box_pinjaman)) !!}@else<strong>PINJAMAN BISA DIANGSUR</strong>
+HARI BESAR DAN HARI MINGGU TETAP BUKA
+Jam Pengambilan Barang: 08.00 - 18.00
+Buka Jam: 08.00 - 20.00 @endif</div>
                 </td>
                 <!-- Signature: Nasabah -->
                 <td style="width: 20%; vertical-align: top; text-align: center;">
