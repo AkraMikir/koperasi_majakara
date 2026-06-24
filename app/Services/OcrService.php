@@ -15,25 +15,21 @@ class OcrService
      */
     private function getTesseractPath()
     {
-        // Check if Tesseract is in PATH
         $tesseractPath = null;
         
-        // Common Windows installation paths
         $possiblePaths = [
             'C:\\Program Files\\Tesseract-OCR\\tesseract.exe',
             'C:\\Program Files (x86)\\Tesseract-OCR\\tesseract.exe',
-            env('TESSERACT_PATH', null), // From .env file
+            env('TESSERACT_PATH', null),
         ];
         
-        // Check if tesseract is in PATH (Windows)
         $whereCommand = PHP_OS_FAMILY === 'Windows' ? 'where tesseract 2>nul' : 'which tesseract 2>/dev/null';
         $tesseractInPath = shell_exec($whereCommand);
         
         if ($tesseractInPath && trim($tesseractInPath)) {
-            return null; // Use default (in PATH)
+            return null;
         }
         
-        // Check common paths
         foreach ($possiblePaths as $path) {
             if ($path && file_exists($path)) {
                 $tesseractPath = $path;
@@ -52,25 +48,58 @@ class OcrService
      */
     public function extractKtpData($imagePath)
     {
+        $ocrInputPath = null;
+        $cleanFileCreated = false;
+        
         try {
-            // Get full path to image
             $fullPath = Storage::disk('public')->path($imagePath);
             
             if (!file_exists($fullPath)) {
                 throw new \Exception("Image file not found: {$fullPath}");
             }
 
-            // Run OCR with Indonesian language (fallback to English if ind.traineddata not installed)
-            $ocr = new TesseractOCR($fullPath);
+            $ocrInputPath = $fullPath;
+
+            // 1. Prapemrosesan Gambar dengan Imagick
+            if (class_exists('Imagick')) {
+                try {
+                    $imagick = new \Imagick($fullPath);
+                    
+                    // Grayscale
+                    $imagick->modulateImage(100, 0, 100);
+                    
+                    // Tambah Kontras
+                    $imagick->contrastImage(true);
+                    
+                    // Binarization/Thresholding
+                    $imagick->thresholdImage(0.6 * \Imagick::getQuantum());
+                    
+                    // Simpan gambar bersih ke temporary file baru
+                    $tempCleanName = 'clean_ktp_' . time() . '_' . basename($imagePath);
+                    $tempCleanPath = dirname($fullPath) . DIRECTORY_SEPARATOR . $tempCleanName;
+                    
+                    $imagick->writeImage($tempCleanPath);
+                    $imagick->clear();
+                    $imagick->destroy();
+                    
+                    $ocrInputPath = $tempCleanPath;
+                    $cleanFileCreated = true;
+                    Log::info("OCR: Imagick preprocessing success. Clean image saved to: {$ocrInputPath}");
+                } catch (\Exception $e) {
+                    Log::warning("OCR: Imagick preprocessing failed: " . $e->getMessage() . ". Proceeding with raw image.");
+                }
+            } else {
+                Log::warning("OCR: Imagick extension not loaded. Proceeding with raw image.");
+            }
+
+            // Run OCR
+            $ocr = new TesseractOCR($ocrInputPath);
             
-            // Set Tesseract path if not in PATH
             $tesseractPath = $this->getTesseractPath();
             if ($tesseractPath) {
                 $ocr->executable($tesseractPath);
             }
             
-            // Tessdata directory: folder that contains ind.traineddata / eng.traineddata
-            // Contoh: D:\NEW D\Tesseract-OCR\tessdata (unduh ind.traineddata dari https://github.com/tesseract-ocr/tessdata)
             $tessdataDir = null;
             $tessdataEnv = env('TESSDATA_DIR') ?: env('TESSDATA_PREFIX');
             if ($tessdataEnv) {
@@ -83,12 +112,8 @@ class OcrService
                 }
             }
             
-            // Page Segmentation Mode: 6 = Assume uniform block of text
-            try {
-                $ocr->psm(6);
-            } catch (\Exception $e) {
-                Log::warning('PSM mode not supported: ' . $e->getMessage());
-            }
+            // Tesseract PSM 4
+            $ocr->psm(4);
             
             try {
                 $ocr->dpi(300);
@@ -99,20 +124,22 @@ class OcrService
             $text = null;
             $usedLang = 'ind';
             $lastException = null;
+            
             foreach (['ind', 'eng'] as $lang) {
-                $ocrTry = new TesseractOCR($fullPath);
+                $ocrTry = new TesseractOCR($ocrInputPath);
                 if ($tesseractPath) {
                     $ocrTry->executable($tesseractPath);
                 }
                 if ($tessdataDir && is_dir($tessdataDir)) {
                     $ocrTry->tessdataDir($tessdataDir);
                 }
-                try {
-                    $ocrTry->psm(6);
-                } catch (\Exception $e) { /* ignore */ }
+                
+                $ocrTry->psm(4);
+                
                 try {
                     $ocrTry->dpi(300);
                 } catch (\Exception $e) { /* ignore */ }
+                
                 $ocrTry->lang($lang);
                 try {
                     $text = $ocrTry->run();
@@ -131,16 +158,14 @@ class OcrService
             
             if ($text === null) {
                 $hint = $lastException ? $lastException->getMessage() : '';
-                throw new \Exception('Tesseract tidak dapat memuat bahasa. Pastikan folder tessdata berisi ind.traineddata atau eng.traineddata. Unduh dari https://github.com/tesseract-ocr/tessdata dan letakkan di folder tessdata (contoh: D:\\NEW D\\Tesseract-OCR\\tessdata). Set TESSDATA_DIR di .env ke path folder tessdata Anda. ' . $hint);
+                throw new \Exception('Tesseract tidak dapat memuat bahasa. ' . $hint);
             }
 
-            // Log raw OCR text for debugging
             Log::info('OCR Raw Text:', ['text' => $text]);
 
-            // Parse extracted text to get KTP data
+            // Ekstraksi dan Pembersihan (Post-processing)
             $ktpData = $this->parseKtpText($text);
 
-            // Log parsed data for debugging
             Log::info('OCR Parsed Data:', $ktpData);
 
             return [
@@ -155,11 +180,17 @@ class OcrService
                 'error' => $e->getMessage(),
                 'data' => []
             ];
+        } finally {
+            // Bersihkan file temporary hasil preprocessing Imagick
+            if ($cleanFileCreated && $ocrInputPath && file_exists($ocrInputPath)) {
+                @unlink($ocrInputPath);
+                Log::info("OCR: Cleaned temporary preprocessed image: {$ocrInputPath}");
+            }
         }
     }
 
     /**
-     * Parse OCR text to extract KTP fields.
+     * Parse OCR text to extract KTP fields with fault-tolerant fuzzy matches.
      *
      * @param string $text Raw OCR text
      * @return array Parsed KTP data
@@ -172,309 +203,196 @@ class OcrService
             'tempat_lahir' => null,
             'tanggal_lahir' => null,
             'jenis_kelamin' => null,
-            'alamat' => null,
+            'alamat_lengkap' => null,
+            'rt_rw' => null,
+            'kelurahan_desa' => null,
+            'kecamatan' => null,
         ];
 
-        // Preprocess text: normalize whitespace but keep line breaks
-        $text = preg_replace('/[ \t]+/', ' ', $text); // Normalize spaces/tabs
-        $text = preg_replace('/\r\n|\r/', "\n", $text); // Normalize line breaks
+        // Normalisasi whitespace dan line break
+        $text = preg_replace('/[ \t]+/', ' ', $text);
+        $text = preg_replace('/\r\n|\r/', "\n", $text);
         
-        // Remove common OCR noise/watermarks
+        // Buang watermark/provinsi/republik
         $text = preg_replace('#(DUK\s*KEPENDUDUK|INDONESIA|ORTU|STU\s*T|PROVINSI|KABUPATEN|KOTA|REPUBLIK)#i', '', $text);
         
         $lines = explode("\n", $text);
         
-        // Clean each line - remove excessive dashes and special characters at start/end
         $cleanedLines = [];
         foreach ($lines as $line) {
             $line = trim($line);
-            // Remove lines that are just dashes or special characters
-            if (preg_match('#^[-:\s]+$#', $line)) {
+            if (empty($line) || preg_match('#^[-:\s]+$#', $line)) {
                 continue;
             }
-            // Remove excessive leading/trailing dashes and colons
-            $line = preg_replace('#^[-:\s]+#', '', $line);
-            $line = preg_replace('#[-:\s]+$#', '', $line);
-            if (!empty($line) && strlen($line) > 1) {
-                $cleanedLines[] = $line;
-            }
+            $cleanedLines[] = $line;
         }
         $lines = $cleanedLines;
 
-        // Step 1: Extract NIK (try multiple patterns)
+        // Translation table untuk membersihkan kesalahan baca karakter angka
+        $numTranslation = [
+            'O' => '0', 'o' => '0', 'D' => '0',
+            'I' => '1', 'l' => '1', '|' => '1',
+            'S' => '5', 's' => '5',
+            'B' => '8', 'b' => '8',
+            '?' => '7',
+            'Z' => '2'
+        ];
+
+        // 1. NIK (Fuzzy & aman dari auto-translate label NIK)
         foreach ($lines as $line) {
-            // Pattern 1: NIK: 3275021403080006
-            if (preg_match('#NIK[:\s]*(\d{16})#i', $line, $matches)) {
-                $data['nik'] = $matches[1];
-                break;
-            }
-            // Pattern 2: Just 16 digits at start of line
-            if (preg_match('#^(\d{16})#', $line, $matches)) {
-                $data['nik'] = $matches[1];
-                break;
-            }
-            // Pattern 3: 16 digits with possible spaces (OCR sometimes adds spaces)
-            if (preg_match('#(\d(?:\s?\d){15})#', $line, $matches)) {
-                $nik = preg_replace('/\s+/', '', $matches[1]);
-                if (strlen($nik) == 16) {
-                    $data['nik'] = $nik;
+            if (stripos($line, 'NIK') !== false) {
+                $parts = explode(':', $line, 2);
+                $valPart = trim(end($parts));
+                $cleanedVal = strtr($valPart, $numTranslation);
+                $digitsOnly = preg_replace('/\D/', '', $cleanedVal);
+                if (strlen($digitsOnly) >= 16) {
+                    $data['nik'] = substr($digitsOnly, 0, 16);
                     break;
                 }
             }
         }
-
-        // Fallback: Extract NIK from entire text (remove all non-digits first)
         if (empty($data['nik'])) {
-            $digitsOnly = preg_replace('/\D/', '', $text);
-            // Find first 16 consecutive digits
-            if (preg_match('#(\d{16})#', $digitsOnly, $matches)) {
-                $data['nik'] = $matches[1];
-            }
-        }
-
-        // Step 2: Extract Nama Lengkap (multiple strategies with better cleaning)
-        foreach ($lines as $index => $line) {
-            // Strategy 1: After "Nama" label
-            if (preg_match('#Nama(?:\s+Lengkap)?[:\s]*([A-Z][A-Z\s]{3,50}?)(?:\s+(?:Tempat|Tanggal|Lahir|Jenis|Kelamin|Agama|Pekerjaan)|$)#i', $line, $matches)) {
-                $nama = trim($matches[1]);
-                // Clean up: remove common prefixes and suffixes
-                $nama = preg_replace('#^(Nama|Nama\s+Lengkap|[-:\s]+)#i', '', $nama);
-                $nama = preg_replace('#([-:\s,]+)$#', '', $nama); // Remove trailing dashes, colons, commas
-                // Remove any remaining special characters at start/end
-                $nama = preg_replace('#^[-:\s,]+#', '', $nama);
-                $nama = preg_replace('#[-:\s,]+$#', '', $nama);
-                if (strlen($nama) > 3 && !preg_match('#^\d#', $nama) && !preg_match('#(Tempat|Tanggal|Lahir|Jenis|Kelamin|Agama|Pekerjaan)#i', $nama)) {
-                    $data['nama_lengkap'] = $nama;
-                    break;
-                }
-            }
-            
-            // Strategy 2: Line after NIK line (usually nama) - but check if it's actually a name
-            if (!empty($data['nik']) && $index > 0) {
-                $prevLine = isset($lines[$index - 1]) ? $lines[$index - 1] : '';
-                // Check if previous line contains NIK
-                if (preg_match('#\b' . preg_quote($data['nik'], '#') . '\b#', $prevLine) || 
-                    preg_match('#NIK#i', $prevLine)) {
-                    // This line might be nama if it's all caps, reasonable length, and doesn't contain KTP labels
-                    $cleanedLine = preg_replace('#^[-:\s]+#', '', $line);
-                    $cleanedLine = preg_replace('#[-:\s,]+$#', '', $cleanedLine);
-                    if (preg_match('#^[A-Z][A-Z\s]{4,50}$#', $cleanedLine) && 
-                        !preg_match('#\d#', $cleanedLine) &&
-                        !preg_match('#(NIK|KTP|PROVINSI|KABUPATEN|KOTA|KECAMATAN|KELURAHAN|REPUBLIK|INDONESIA|TEMPAT|TANGGAL|LAHIR|JENIS|KELAMIN|AGAMA|PEKERJAAN|KEWARGANEGARAAN|BERLAKU|RT|RW|Alamat)#i', $cleanedLine)) {
-                        $data['nama_lengkap'] = $cleanedLine;
-                        break;
-                    }
-                }
-            }
-        }
-
-        // Fallback: Find lines that look like names (all caps, 5-60 chars, no numbers, no KTP labels)
-        if (empty($data['nama_lengkap'])) {
             foreach ($lines as $line) {
-                $cleanedLine = preg_replace('#^[-:\s,]+#', '', $line);
-                $cleanedLine = preg_replace('#[-:\s,]+$#', '', $cleanedLine);
-                // All uppercase, 5-60 characters, no numbers, no KTP field labels
-                if (preg_match('#^[A-Z][A-Z\s]{4,59}$#', $cleanedLine) && 
-                    !preg_match('#\d#', $cleanedLine) &&
-                    !preg_match('#(NIK|KTP|PROVINSI|KABUPATEN|KOTA|KECAMATAN|KELURAHAN|REPUBLIK|INDONESIA|TEMPAT|TANGGAL|LAHIR|JENIS|KELAMIN|AGAMA|PEKERJAAN|KEWARGANEGARAAN|BERLAKU|RT|RW|Alamat|Nama)#i', $cleanedLine)) {
-                    $data['nama_lengkap'] = $cleanedLine;
+                $parts = explode(':', $line, 2);
+                $valPart = trim(end($parts));
+                $cleanedVal = strtr($valPart, $numTranslation);
+                $digitsOnly = preg_replace('/\D/', '', $cleanedVal);
+                if (strlen($digitsOnly) >= 16) {
+                    $data['nik'] = substr($digitsOnly, 0, 16);
                     break;
                 }
             }
         }
-        
-        // Final cleanup for nama: remove any remaining unwanted characters
-        if (!empty($data['nama_lengkap'])) {
-            $data['nama_lengkap'] = preg_replace('#^[-:\s,]+#', '', $data['nama_lengkap']);
-            $data['nama_lengkap'] = preg_replace('#[-:\s,]+$#', '', $data['nama_lengkap']);
-            $data['nama_lengkap'] = trim($data['nama_lengkap']);
-        }
 
-        // Step 3: Extract Tempat & Tanggal Lahir
-        foreach ($lines as $line) {
-            // Pattern: BEKASI, 14-03-2008 or BEKASI 14/03/2008 or BEKASI, 14/03/2008
-            if (preg_match('#([A-Z][A-Z\s]{2,30}?)[,\s]+(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})#i', $line, $matches)) {
-                if (empty($data['tempat_lahir'])) {
-                    $data['tempat_lahir'] = trim($matches[1]);
-                }
-                // Format tanggal: DD-MM-YYYY to YYYY-MM-DD
-                $day = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
-                $month = str_pad($matches[3], 2, '0', STR_PAD_LEFT);
-                $year = $matches[4];
-                $data['tanggal_lahir'] = $year . '-' . $month . '-' . $day;
-                break;
-            }
-        }
-
-        // Step 4: Extract Jenis Kelamin
-        foreach ($lines as $line) {
-            // Pattern: Jenis Kelamin: LAKI-LAKI or Jenis Kelamin: PEREMPUAN
-            if (preg_match('#Jenis\s+Kelamin[:\s]*(Laki[-\s]?laki|Perempuan|LAKI[-\s]?LAKI|PEREMPUAN|L\b|P\b)#i', $line, $matches)) {
-                $jk = strtoupper(trim($matches[1]));
-                if (preg_match('#^(L|LAKI)#', $jk)) {
-                    $data['jenis_kelamin'] = 'Laki-laki';
-                } elseif (preg_match('#^(P|PEREMPUAN)#', $jk)) {
-                    $data['jenis_kelamin'] = 'Perempuan';
-                }
-                break;
-            }
-        }
-
-        // Step 5: Extract Alamat (more robust - can be multi-line, but exclude non-address data)
-        $alamatLines = [];
-        $inAlamatSection = false;
-        $alamatFound = false;
-        
-        // Keywords that indicate end of address section
-        $endOfAddressKeywords = [
-            'Agama', 'AGAMA', 'Religion',
-            'Status', 'STATUS', 'Perkawinan', 'PERKAWINAN', 'Kawin', 'KAWIN', 'Belum', 'BELUM',
-            'Pekerjaan', 'PEKERJAAN', 'Job', 'JOB',
-            'Kewarganegaraan', 'KEWARGANEGARAAN', 'WNI', 'WNA',
-            'Berlaku', 'BERLAKU', 'Hingga', 'HINGGA', 'Seumur', 'SEUMUR', 'Hidup', 'HIDUP',
-            'Golongan', 'GOLONGAN', 'Darah', 'DARAH'
-        ];
-        
-        // Keywords that should NOT be in address
-        $excludeFromAddress = [
-            'Agama', 'AGAMA', 'Religion',
-            'Status', 'STATUS', 'Perkawinan', 'PERKAWINAN', 'Kawin', 'KAWIN', 'Belum', 'BELUM',
-            'Pekerjaan', 'PEKERJAAN', 'Job', 'JOB',
-            'Kewarganegaraan', 'KEWARGANEGARAAN', 'WNI', 'WNA',
-            'Berlaku', 'BERLAKU', 'Hingga', 'HINGGA', 'Seumur', 'SEUMUR', 'Hidup', 'HIDUP',
-            'Golongan', 'GOLONGAN', 'Darah', 'DARAH',
-            'ISLAM', 'KRISTEN', 'KATHOLIK', 'HINDU', 'BUDHA', 'KONGHUCU',
-            'BELUM KAWIN', 'KAWIN', 'CERAI', 'JANDA', 'DUDA'
-        ];
-        
+        // 2. Nama Lengkap (Fuzzy label + fallback line di bawah NIK jika label rusak total)
         foreach ($lines as $index => $line) {
-            $originalLine = $line;
-            $line = trim($line);
-            
-            // Check if this line starts alamat section
-            if (preg_match('#^Alamat#i', $line)) {
-                $inAlamatSection = true;
-                $alamatFound = true;
-                // Extract alamat after "Alamat" label
-                if (preg_match('#Alamat[:\s]+(.+)#i', $line, $matches)) {
-                    $alamatPart = trim($matches[1]);
-                    // Clean up the alamat part
-                    $alamatPart = preg_replace('#^[-:\s]+#', '', $alamatPart);
-                    $alamatPart = preg_replace('#[-:\s]+$#', '', $alamatPart);
-                    if (strlen($alamatPart) > 3 && !$this->containsExcludedKeywords($alamatPart, $excludeFromAddress)) {
-                        $alamatLines[] = $alamatPart;
-                    }
+            if (preg_match('/(?:Nama|Narn|Nema|Mama|Nara|Narna|Name|Nema)\s*[-:=.|!]*\s*(.*)/i', $line, $matches)) {
+                $candidate = trim($matches[1]);
+                if (strlen($candidate) > 2) {
+                    $data['nama_lengkap'] = $candidate;
+                    break;
                 }
-                continue;
             }
-            
-            // If in alamat section, collect lines until we hit another section
-            if ($inAlamatSection) {
-                // Check if this line indicates end of address section
-                $isEndOfAddress = false;
-                foreach ($endOfAddressKeywords as $keyword) {
-                    if (preg_match('#^' . preg_quote($keyword, '#') . '#i', $line) || 
-                        stripos($line, $keyword) === 0) {
-                        $isEndOfAddress = true;
-                        break;
-                    }
-                }
-                
-                if ($isEndOfAddress) {
-                    $inAlamatSection = false;
-                    break;
-                }
-                
-                // Clean the line
-                $cleanedLine = preg_replace('#^[-:\s]+#', '', $line);
-                $cleanedLine = preg_replace('#[-:\s]+$#', '', $cleanedLine);
-                
-                // Skip if line contains excluded keywords
-                if ($this->containsExcludedKeywords($cleanedLine, $excludeFromAddress)) {
-                    $inAlamatSection = false;
-                    break;
-                }
-                
-                // Skip if line is a date pattern (likely tanggal lahir)
-                if (preg_match('#^\d{1,2}[-\/]\d{1,2}[-\/]\d{4}#', $cleanedLine)) {
-                    continue;
-                }
-                
-                // Add line if it's substantial and doesn't contain excluded data
-                if (strlen($cleanedLine) > 3) {
-                    // Check for RT/RW, Kel/Desa, Kecamatan patterns (these are part of address)
-                    if (preg_match('#(RT|RW|Kel|Desa|Kecamatan|Kec)[:\s/]#i', $cleanedLine) || 
-                        preg_match('#^\d{3}/\d{3}#', $cleanedLine)) {
-                        $alamatLines[] = $cleanedLine;
-                    } elseif (strlen($cleanedLine) > 5 && !preg_match('#^\d{16}#', $cleanedLine)) {
-                        // Only add if it doesn't look like excluded data
-                        $alamatLines[] = $cleanedLine;
-                    }
-                }
-            } else {
-                // Try to find alamat without explicit label (but be more careful)
-                if (!$alamatFound && strlen($line) > 15 && !preg_match('#^\d#', $line)) {
-                    // Must not contain excluded keywords
-                    if (!$this->containsExcludedKeywords($line, $excludeFromAddress) &&
-                        !preg_match('#(NIK|Nama|Tempat|Tanggal|Lahir|Jenis|Kelamin|Agama|Pekerjaan|Kewarganegaraan|Berlaku)#i', $line)) {
-                        // Check if it looks like an address (contains location words or RT/RW pattern)
-                        if (preg_match('#(RT|RW|Kel|Desa|Kecamatan|Kec|Jalan|Jl|Gang|Gg|No|Blok|Blk)#i', $line) ||
-                            preg_match('#[A-Z\s]{5,40}#', $line)) {
-                            $cleanedLine = preg_replace('#^[-:\s]+#', '', $line);
-                            $cleanedLine = preg_replace('#[-:\s]+$#', '', $cleanedLine);
-                            $alamatLines[] = $cleanedLine;
-                            $alamatFound = true;
+        }
+        if (empty($data['nama_lengkap']) && !empty($data['nik'])) {
+            foreach ($lines as $index => $line) {
+                if (str_contains($line, $data['nik'])) {
+                    if (isset($lines[$index + 1])) {
+                        $candidate = trim($lines[$index + 1]);
+                        $parts = explode(':', $candidate);
+                        $candidateValue = trim(end($parts));
+                        if (strlen($candidateValue) > 3 && !preg_match('/(tempat|tgl|lahir|alamat|kelamin|nik)/i', $candidateValue)) {
+                            $data['nama_lengkap'] = $candidateValue;
+                            break;
                         }
                     }
                 }
             }
         }
-        
-        // Combine and clean alamat lines
-        if (!empty($alamatLines)) {
-            $combinedAlamat = implode(' ', $alamatLines);
-            // Remove excessive dashes and special characters
-            $combinedAlamat = preg_replace('#\s*[-]+\s*#', ' ', $combinedAlamat);
-            $combinedAlamat = preg_replace('#\s+-#', '', $combinedAlamat);
-            $combinedAlamat = preg_replace('#-\s+#', '', $combinedAlamat);
-            // Normalize spaces
-            $combinedAlamat = preg_replace('/\s+/', ' ', $combinedAlamat);
-            $combinedAlamat = trim($combinedAlamat);
+        if ($data['nama_lengkap']) {
+            $data['nama_lengkap'] = trim(preg_replace('/^[-:=.|!\s]+|[-:=.|!\s]+$/', '', $data['nama_lengkap']));
+        }
+
+        // 3 & 4. Tempat & Tanggal Lahir (Fuzzy label)
+        foreach ($lines as $line) {
+            if (preg_match('/(?:Tempat|Tempet|Tgl|Tanggal|Lahir|Lhr|Tgl\s*Lahir)[^:]*[-:=.|!]+\s*(.*)/i', $line, $matches)) {
+                $content = trim($matches[1]);
+                $parts = explode(',', $content);
+                if (count($parts) >= 2) {
+                    $data['tempat_lahir'] = trim(preg_replace('/^[-:=.|!\s]+/', '', $parts[0]));
+                    
+                    $datePartRaw = trim($parts[1]);
+                    $datePartClean = strtr($datePartRaw, $numTranslation);
+                    
+                    if (preg_match('/(\d{2})[-\/](\d{2})[-\/](\d{4})/', $datePartClean, $dateMatches)) {
+                        $day = $dateMatches[1];
+                        $month = $dateMatches[2];
+                        $year = $dateMatches[3];
+                        $data['tanggal_lahir'] = "{$year}-{$month}-{$day}";
+                    }
+                }
+                break;
+            }
+        }
+
+        // 5. Jenis Kelamin (Direct value scanning - lebih aman daripada regex label)
+        foreach ($lines as $line) {
+            $upperLine = strtoupper($line);
+            if (strpos($upperLine, 'LAKI') !== false || strpos($upperLine, 'LAKl') !== false) {
+                $data['jenis_kelamin'] = 'LAKI-LAKI';
+                break;
+            } elseif (strpos($upperLine, 'PEREMPUAN') !== false || strpos($upperLine, 'PEREMPUN') !== false || strpos($upperLine, 'PEREM') !== false) {
+                $data['jenis_kelamin'] = 'PEREMPUAN';
+                break;
+            }
+        }
+
+        // 6. Alamat Lengkap (Fuzzy label)
+        foreach ($lines as $index => $line) {
+            if (preg_match('/(?:Alamat|Alamet|Almat)\s*[-:=.|!]+\s*(.*)/i', $line, $matches)) {
+                $candidate = trim($matches[1]);
+                if (strlen($candidate) > 2) {
+                    $data['alamat_lengkap'] = $candidate;
+                    break;
+                }
+            }
+        }
+        if ($data['alamat_lengkap']) {
+            $data['alamat_lengkap'] = trim(preg_replace('/^[-:=.|!\s]+|[-:=.|!\s]+$/', '', $data['alamat_lengkap']));
+        }
+
+        // 7. RT/RW (Aman dari bentrokan kata RT dalam "JAKARTA")
+        foreach ($lines as $line) {
+            $parts = explode(':', $line, 2);
+            $label = trim($parts[0]);
+            $val = isset($parts[1]) ? trim($parts[1]) : '';
             
-            // Final check: remove any excluded keywords that might have slipped through
-            foreach ($excludeFromAddress as $keyword) {
-                $combinedAlamat = preg_replace('#\b' . preg_quote($keyword, '#') . '\b[:\s]*(.+?)(?:\s|$)#i', '', $combinedAlamat);
+            if (empty($val)) {
+                $val = $label;
             }
             
-            $combinedAlamat = preg_replace('/\s+/', ' ', $combinedAlamat);
-            $combinedAlamat = trim($combinedAlamat);
+            if (preg_match('/\b(?:RT|RW)\b/i', $label) || preg_match('/RT\s*[\/.\-_]\s*RW/i', $label) || (empty($parts[1]) && preg_match('/RT\s*[\/.\-_]\s*RW/i', $line))) {
+                $cleanedVal = strtr($val, $numTranslation);
+                if (preg_match('/(\d{3})\s*[\/-]\s*(\d{3})/', $cleanedVal, $rtrwMatches)) {
+                    $data['rt_rw'] = "{$rtrwMatches[1]}/{$rtrwMatches[2]}";
+                    break;
+                } elseif (preg_match('/(\d+)\s*[\/-]\s*(\d+)/', $cleanedVal, $rtrwMatches)) {
+                    $rt = str_pad($rtrwMatches[1], 3, '0', STR_PAD_LEFT);
+                    $rw = str_pad($rtrwMatches[2], 3, '0', STR_PAD_LEFT);
+                    $data['rt_rw'] = "{$rt}/{$rw}";
+                    break;
+                }
+            }
+        }
+
+        // 8. Kelurahan/Desa (Fuzzy label + exclude "Kelamin" & "Jenis")
+        foreach ($lines as $line) {
+            if (stripos($line, 'Kelamin') !== false || stripos($line, 'Jenis') !== false) {
+                continue;
+            }
+            $parts = explode(':', $line, 2);
+            $label = trim($parts[0]);
+            $val = isset($parts[1]) ? trim($parts[1]) : '';
             
-            // Only set if we have meaningful content
-            if (strlen($combinedAlamat) > 5) {
-                $data['alamat'] = $combinedAlamat;
+            if (preg_match('/(?:Kel\/Desa|Kel\/Dasa|KeliDesa|Kel\/Oesa|Kel\s*[\/.]?\s*Desa|Kelurahan|Desa)\b/i', $label)) {
+                $data['kelurahan_desa'] = trim(preg_replace('/^[-:=.|!\s]+|[-:=.|!\s]+$/', '', $val));
+                break;
+            }
+        }
+
+        // 9. Kecamatan (Fuzzy label dengan strict word boundaries)
+        foreach ($lines as $line) {
+            $parts = explode(':', $line, 2);
+            $label = trim($parts[0]);
+            $val = isset($parts[1]) ? trim($parts[1]) : '';
+            
+            if (preg_match('/\b(?:Kecamatan|Kecamaten|Kecamalan|Kec)\b/i', $label)) {
+                $data['kecamatan'] = trim(preg_replace('/^[-:=.|!\s]+|[-:=.|!\s]+$/', '', $val));
+                break;
             }
         }
 
         return $data;
-    }
-
-    /**
-     * Check if a line contains excluded keywords.
-     *
-     * @param string $line
-     * @param array $excludedKeywords
-     * @return bool
-     */
-    private function containsExcludedKeywords($line, $excludedKeywords)
-    {
-        foreach ($excludedKeywords as $keyword) {
-            // Check if keyword appears as a label (followed by colon or space and value)
-            if (preg_match('#\b' . preg_quote($keyword, '#') . '\s*[:\s]#i', $line) ||
-                stripos($line, $keyword) !== false) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -494,13 +412,13 @@ class OcrService
 
             $ocr = new TesseractOCR($fullPath);
             
-            // Set Tesseract path if not in PATH
             $tesseractPath = $this->getTesseractPath();
             if ($tesseractPath) {
                 $ocr->executable($tesseractPath);
             }
             
             $ocr->lang('ind');
+            $ocr->psm(4);
             return $ocr->run();
         } catch (\Exception $e) {
             Log::error('OCR Error: ' . $e->getMessage());
