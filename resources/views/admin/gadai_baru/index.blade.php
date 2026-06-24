@@ -203,7 +203,7 @@
                             return "{$sisa} hari";
                         };
                     @endphp
-                    <tr class="hover:brightness-95 transition-all group {{ $rowBg }}">
+                    <tr class="hover:bg-slate-50/80 transition-colors group {{ $rowBg }}">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-majakara-brown to-majakara-dark-gold text-white flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
@@ -222,8 +222,8 @@
                             <p class="font-semibold text-gray-800 text-sm">{{ $gadai->item->head_1 }}</p>
                         </td>
                         <td class="px-6 py-4">
-                            <div class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-900 text-white rounded-lg text-xs font-mono font-bold shadow-sm">
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-lg text-xs font-mono font-bold shadow-xs">
+                                <svg class="w-3.5 h-3.5 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
                                 {{ $gadai->slot_kode }}
                             </div>
                         </td>
@@ -274,9 +274,13 @@
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg> Lunas
                                 </span>
+                            @elseif($gadai->status == 'returned')
+                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                    <svg class="w-3 h-3 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 11m8 4V11m-8 0v10l8 4"/></svg> Telah Diambil
+                                </span>
                             @elseif($gadai->status == 'auctioned')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-amber-100 text-amber-700 border border-amber-200">
-                                    🔨 Dilelang
+                                    <svg class="w-3 h-3 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.121 14.121L19 19m-7-7l-2.828-2.828 4.242-4.242 2.828 2.828-4.242 4.242zm-5.656 5.656l-2.828-2.828 1.414-1.414 2.828 2.828-1.414 1.414z"/></svg> Dilelang
                                 </span>
                             @elseif($gadai->status == 'expired_final')
                                 <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-black bg-gray-100 text-gray-600 border border-gray-200">
@@ -362,9 +366,13 @@
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black bg-emerald-100 text-emerald-700 border border-emerald-200">
                                     <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg> Lunas
                                 </span>
+                            @elseif($gadai->status == 'returned')
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black bg-indigo-100 text-indigo-700 border border-indigo-200">
+                                    <svg class="w-2.5 h-2.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 11m8 4V11m-8 0v10l8 4"/></svg> Telah Diambil
+                                </span>
                             @elseif($gadai->status == 'auctioned')
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black bg-amber-100 text-amber-700 border border-amber-200">
-                                    🔨 Dilelang
+                                    <svg class="w-2.5 h-2.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14.121 14.121L19 19m-7-7l-2.828-2.828 4.242-4.242 2.828 2.828-4.242 4.242zm-5.656 5.656l-2.828-2.828 1.414-1.414 2.828 2.828-1.414 1.414z"/></svg> Dilelang
                                 </span>
                             @elseif($gadai->status == 'expired_final')
                                 <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-black bg-gray-100 text-gray-600 border border-gray-200">
@@ -381,9 +389,9 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Kode Slot</p>
-                            <div class="inline-flex items-center gap-1.5 mt-0.5">
-                                <svg class="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                                <span class="text-xs font-mono font-bold text-gray-900">{{ $gadai->slot_kode }}</span>
+                            <div class="inline-flex items-center gap-1.5 mt-0.5 px-2 py-0.5 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-md text-xs font-mono font-bold">
+                                <svg class="w-3 h-3 text-amber-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                                <span>{{ $gadai->slot_kode }}</span>
                             </div>
                         </div>
                         <div>

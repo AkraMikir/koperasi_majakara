@@ -30,67 +30,23 @@
 @php
     $strukSettings = \App\Models\SettingsStruk::getSettings();
     $tglCair = $pinjaman->pengajuan->tgl_cair ?? $pinjaman->tgl_pinjam ?? null;
+    
+    $mappedData = [
+        'jenis_trans' => 'PENCAIRAN',
+        'no_pinjaman' => $pinjaman->id,
+        'tanggal' => $tglCair ? $tglCair->format('d-m-Y H:i') : '-',
+        'nama_anggota' => $pinjaman->nasabah->user->nama ?? 'N/A',
+        'lama_pinjam' => $pinjaman->lama_pinjam ?? $pinjaman->pengajuan->durasi ?? '-',
+        'angsuran_pertama' => $pinjaman->ags_bulan ?? 0,
+        'metode' => $pinjaman->pengajuan->jenis_pencairan ? ucfirst(str_replace('_', ' ', $pinjaman->pengajuan->jenis_pencairan)) : '-',
+        'jumlah_pinjam' => $pinjaman->jumlah_pinjam ?? 0,
+        'angsuran_ke' => '',
+        'status' => '',
+        'nominal' => $pinjaman->jumlah_pinjam ?? 0,
+        'tanggal_cetak' => now()->format('d-m-Y H:i')
+    ];
 @endphp
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
-            {{ $strukSettings->nama_koperasi }}
-        </div>
-        <div class="center" style="font-size: 10px;">
-            {{ $strukSettings->alamat_koperasi }}<br>
-            Telp: {{ $strukSettings->no_telp }}
-        </div>
-    </div>
-    
-    <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
-        STRUK PENCAIRAN PINJAMAN
-    </div>
-    
-    <div class="dashed"></div>
-    
-    <table class="table-row">
-        <tr>
-            <td class="label">ID </td>
-            <td class="id-kecil">: {{ $pinjaman->id }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tanggal</td>
-            <td class="id-kecil">: {{ $tglCair ? $tglCair->format('d-m-Y H:i') : '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Anggota</td>
-            <td class="id-kecil">: {{ $pinjaman->nasabah->user->nama ?? 'N/A' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tenor</td>
-            <td class="id-kecil">: {{ $pinjaman->lama_pinjam ?? $pinjaman->pengajuan->durasi ?? '-' }} bulan</td>
-        </tr>
-        <tr>
-            <td class="label">Angsuran</td>
-            <td class="id-kecil">: Rp {{ number_format($pinjaman->ags_bulan ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td class="label">Metode</td>
-            <td class="id-kecil">: {{ $pinjaman->pengajuan->jenis_pencairan ? ucfirst(str_replace('_', ' ', $pinjaman->pengajuan->jenis_pencairan)) : '-' }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <table class="table-row">
-        <tr>
-            <td class="bold label">NOMINAL</td>
-            <td class="bold id-kecil">: Rp {{ number_format($pinjaman->jumlah_pinjam ?? 0, 0, ',', '.') }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <!-- FOOTER -->
-    <div class="footer center">
-        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
-    </div>
+    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData])
 </body>
 </html>

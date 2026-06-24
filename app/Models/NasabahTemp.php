@@ -21,6 +21,8 @@ class NasabahTemp extends Model
         'tanggal_lahir',
         'jenis_kelamin',
         'alamat',
+        'alamat_domisili',
+        'kode_pos',
         'foto_ktp',
         'foto_kk',
         'foto_selfie',

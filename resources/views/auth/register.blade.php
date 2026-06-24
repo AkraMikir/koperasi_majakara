@@ -154,9 +154,10 @@
                 {{-- Global alerts are handled by sweetalert2 component --}}
 
                         <form method="POST" action="{{ route('register.submit') }}" enctype="multipart/form-data"
-                            id="registerForm">
+                            id="registerForm" onsubmit="return validatePasswordSubmit(event)">
                             @csrf
                             <input type="hidden" name="step" value="{{ $step }}">
+                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                             @if($step == 1)
                                 <input type="hidden" name="substep" value="{{ $subStep }}">
                                 {{-- Bawa data kritis Langkah 1 (Data Diri) di setiap submit substep 2–6 agar nomor HP tidak
@@ -276,48 +277,55 @@
                                             </div>
 
                             <div>
-                                <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil
-                                    </label>
-                                <label for="foto" class="cursor-pointer">
-                                    <div
-                                        class="px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-[#674c1d] transition-all text-center">
-                                        <span class="text-sm text-gray-600">Pilih Foto</span>
-                                    </div>
+                                <label for="foto" class="block text-sm font-medium text-gray-700 mb-2">Foto Profil</label>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                                    <button type="button" onclick="openWebcam('foto', 'fotoPreview', 'Ambil Foto Profil')"
+                                        class="w-full px-3 py-2 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:shadow-md transition-all text-xs font-semibold flex items-center justify-center gap-1.5">
+                                        Buka Kamera
+                                    </button>
+                                    <!-- <label for="foto" class="w-full px-3 py-2 border border-[#674c1d] text-[#674c1d] hover:bg-amber-50/30 rounded-lg transition-all text-xs font-semibold flex items-center justify-center gap-1.5 cursor-pointer text-center">
+                                        Pilih File
+                                    </label> -->
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
-                                </label>
-                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }}">
+                                </div>
+                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? 'inline-block' : 'hidden' }} relative">
                                     <img id="fotoPreviewImg" 
                                         src="{{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? asset('storage/' . $formData['foto']) : '' }}" 
                                         alt="Preview"
                                         class="h-20 w-20 rounded-lg object-cover">
+                                    <button type="button" onclick="removeImage('foto', '', 'fotoPreview')" class="absolute -top-1 -right-1 bg-red-500 hover:bg-red-600 text-white rounded-full p-1 shadow transition-all">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                     @elseif($subStep == 2)
-                    <!-- Sub-step 2: Data KTP dengan OCR (Moved from Substep 5) -->
+                    <!-- Sub-step 2: Data KTP (Isi Otomatis) -->
                     <div class="space-y-6 animate-fade-in">
-                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data KTP (dengan OCR)</h3>
+                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data KTP (Pindai Otomatis)</h3>
                         
-                        <!-- Notes untuk OCR KTP -->
+                        <!-- Notes untuk Pindai KTP -->
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <h4 class="text-sm font-semibold text-blue-900 mb-2">📋 Petunjuk Foto KTP untuk OCR:</h4>
+                            <h4 class="text-sm font-semibold text-blue-900 mb-2">📋 Petunjuk Foto KTP:</h4>
                             <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
                                 <li>Foto harus <strong>landscape</strong> (mendatar)</li>
                                 <li>Foto harus <strong>jelas</strong> dan tidak gelap</li>
                                 <li>Foto tidak boleh <strong>over pencahayaan</strong> (terlalu terang)</li>
-                                <li><strong>Mohon di check ulang</strong> setelah OCR jika ada data yang tidak terprocess dengan benar</li>
+                                <li><strong>Mohon di check ulang</strong> setelah pengisian otomatis jika ada data yang tidak terisi dengan benar</li>
                             </ul>
                         </div>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ambil/Upload Foto KTP</label>
-
+ 
                                 <!-- Camera/Upload Options -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <button type="button" onclick="openWebcam('file_ktp_upload', 'ktpPreview', 'Ambil Foto KTP (OCR)')"
+                                    <button type="button" onclick="openWebcam('file_ktp_upload', 'ktpPreview', 'Ambil Foto KTP')"
                                         class="w-full px-2 py-3 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-all font-semibold flex items-center justify-center gap-2">
                                         <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -336,11 +344,11 @@
                                         Upload dari File
                                     </label>
                                 </div>
-
+ 
                                 <!-- Hidden file input for upload -->
                                 <input type="file" name="file_ktp_upload" id="file_ktp_upload" accept="image/*"
                                     class="hidden" onchange="handleKtpUpload(this)">
-
+ 
                                 <!-- Preview Area -->
                                 <div class="mt-4">
                                     <div id="ktpPreview" class="hidden">
@@ -358,18 +366,18 @@
                                             </button>
                                         </div>
                                     </div>
-
-                                    <!-- OCR Button -->
+ 
+                                    <!-- Scan/Pindai Button -->
                                     <div class="mt-4">
                                         <button type="button" onclick="processOcr()" id="btnOcr" disabled
                                             class="w-full px-6 py-3 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-all font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg">
-                                            <span id="ocrText">Proses OCR</span>
+                                            <span id="ocrText">Pindai KTP & Isi Otomatis</span>
                                             <span id="ocrLoading" class="hidden flex items-center gap-2">
                                                 <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
-                                                Memproses OCR...
+                                                Memproses Pemindaian KTP...
                                             </span>
                                         </button>
                                     </div>
@@ -522,6 +530,22 @@
                                                 <textarea name="alamat" id="alamat" rows="3"
                                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
                                                     placeholder="Alamat lengkap tempat tinggal">{{ old('alamat', $formData['alamat'] ?? '') }}</textarea>
+                                            </div>
+
+                                            <div>
+                                                <label for="alamat_domisili" class="block text-sm font-medium text-gray-700 mb-2">Alamat Domisili</label>
+                                                <textarea name="alamat_domisili" id="alamat_domisili" rows="3"
+                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none resize-none"
+                                                    placeholder="Alamat domisili saat ini (isi sama dengan KTP jika sesuai KTP)">{{ old('alamat_domisili', $formData['alamat_domisili'] ?? '') }}</textarea>
+                                            </div>
+
+                                            <div>
+                                                <label for="kode_pos" class="block text-sm font-medium text-gray-700 mb-2">Kode Pos</label>
+                                                <input type="text" name="kode_pos" id="kode_pos"
+                                                    value="{{ old('kode_pos', $formData['kode_pos'] ?? '') }}"
+                                                    maxlength="5" pattern="[0-9]{5}"
+                                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
+                                                    placeholder="5 digit Kode Pos" oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                                             </div>
 
                             <!-- Upload section: 3 documents -->
@@ -1083,7 +1107,7 @@
                                                         </svg>
                                                         <span class="text-sm">Kirim Ulang Kode OTP</span>
                                                     </button>
-                                                @endif
+                                                </div>
                                             </div>
 
                                             {{-- Info Bantuan --}}
@@ -1354,18 +1378,66 @@
         <div class="bg-white/95 backdrop-blur-md rounded-2xl p-6 max-w-md w-full border border-white/20 shadow-2xl relative">
             <div class="flex justify-between items-center mb-4">
                 <h3 id="cameraModalTitle" class="text-lg font-bold text-[#674c1d]">Ambil Foto</h3>
-                <button type="button" onclick="closeCamera()"
-                    class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="switchCamera()" id="btnSwitchCamera"
+                        class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50 hidden"
+                        title="Ganti Kamera">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 1121.21 7.89H18v3z"></path>
+                        </svg>
+                    </button>
+                    <button type="button" onclick="closeCamera()"
+                        class="text-gray-500 hover:text-[#674c1d] transition-colors p-1.5 rounded-full hover:bg-gray-100/50">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-video mb-4 flex items-center justify-center">
                 <video id="cameraVideo" autoplay playsinline
                     class="w-full h-full object-cover rounded-xl hidden"></video>
                 <canvas id="cameraCanvas" class="hidden"></canvas>
+
+                <!-- KTP Grid Overlay -->
+                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center">
+                    <!-- Semi-transparent overlay with a clear cutout in the middle for KTP card format (~85.6mm x 53.98mm, ratio 1.58) -->
+                    <div class="absolute inset-0 bg-black/50"></div>
+                    <div class="relative z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
+                        <!-- Corner markers -->
+                        <div class="absolute -top-1.5 -left-1.5 w-4 h-4 border-t-4 border-l-4 border-yellow-400"></div>
+                        <div class="absolute -top-1.5 -right-1.5 w-4 h-4 border-t-4 border-r-4 border-yellow-400"></div>
+                        <div class="absolute -bottom-1.5 -left-1.5 w-4 h-4 border-b-4 border-l-4 border-yellow-400"></div>
+                        <div class="absolute -bottom-1.5 -right-1.5 w-4 h-4 border-b-4 border-r-4 border-yellow-400"></div>
+                        
+                        <!-- Left Side: Text Guidelines -->
+                        <div class="w-[60%] flex flex-col justify-center gap-2.5 opacity-40">
+                            <!-- NIK line -->
+                            <div class="h-3 bg-white/60 rounded-xs w-[85%]"></div>
+                            <!-- Detail lines -->
+                            <div class="h-2 bg-white/40 rounded-xs w-[65%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[75%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[70%]"></div>
+                            <div class="h-2 bg-white/40 rounded-xs w-[50%]"></div>
+                        </div>
+
+                        <!-- Right Side: Photo Guideline -->
+                        <div class="w-[30%] flex items-center justify-center">
+                            <div class="w-full aspect-[3/4] border border-dashed border-white/60 rounded flex flex-col items-center justify-center gap-1 bg-white/5 opacity-55">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span class="text-[8px] text-white font-semibold">FOTO KTP</span>
+                            </div>
+                        </div>
+
+                        <!-- Instruction text inside the box -->
+                        <div class="absolute inset-0 flex items-end justify-center pb-2">
+                            <span class="text-[10px] text-white bg-black/75 px-2.5 py-1 rounded-full font-medium text-center shadow-md">Posisikan KTP di dalam bingkai</span>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="cameraPreview" class="w-full h-full hidden">
                     <img id="cameraPreviewImg" src="" alt="Preview"
@@ -1429,6 +1501,7 @@
     let capturedPhotoBlob = null;
     let activeInputId = null;
     let activePreviewId = null;
+    let currentFacingMode = 'environment'; // Default to back camera for document capture
 
     // Open Camera Webcam
     function openWebcam(inputId, previewId, title) {
@@ -1443,6 +1516,13 @@
         activeInputId = inputId;
         activePreviewId = previewId;
 
+        // Set default facing mode based on capture type: selfie vs document
+        if (inputId === 'foto' || inputId === 'foto_selfie_upload') {
+            currentFacingMode = 'user'; // Camera selfie
+        } else {
+            currentFacingMode = 'environment'; // Camera belakang untuk KTP/KK
+        }
+
         const modal = document.getElementById('cameraModal');
         const video = document.getElementById('cameraVideo');
         const btnCapture = document.getElementById('btnCapture');
@@ -1450,59 +1530,102 @@
         const btnUsePhoto = document.getElementById('btnUsePhoto');
         const preview = document.getElementById('cameraPreview');
         const titleEl = document.getElementById('cameraModalTitle');
+        const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+        const ktpOverlay = document.getElementById('cameraKtpOverlay');
 
         if (titleEl) {
             titleEl.textContent = title;
         }
 
-            modal.classList.remove('hidden');
-            preview.classList.add('hidden');
-            btnRetake.classList.add('hidden');
-            btnUsePhoto.classList.add('hidden');
-            btnCapture.classList.remove('hidden');
+        modal.classList.remove('hidden');
+        preview.classList.add('hidden');
+        btnRetake.classList.add('hidden');
+        btnUsePhoto.classList.add('hidden');
+        btnCapture.classList.remove('hidden');
 
-            // Request camera access
-            navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: 'environment', // Use back camera on mobile
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            })
-            .then(function(stream) {
-                cameraStream = stream;
-                video.srcObject = stream;
-                video.classList.remove('hidden');
-            })
-            .catch(function(err) {
-                console.error('Error accessing camera:', err);
-                let errorMsg = 'Tidak dapat mengakses kamera. ';
-                if (err.name === 'NotAllowedError') {
-                    errorMsg += 'Pastikan browser mengizinkan akses kamera.';
-                } else if (err.name === 'NotFoundError') {
-                    errorMsg += 'Kamera tidak ditemukan.';
-                } else {
-                    errorMsg += 'Silakan gunakan opsi Upload dari File.';
-                }
-                showErrorAlert(errorMsg);
-                closeCamera();
-            });
+        // Show KTP Overlay only for KTP uploads
+        if (ktpOverlay) {
+            if (inputId === 'file_ktp_upload' || inputId === 'foto_ktp_upload') {
+                ktpOverlay.classList.remove('hidden');
+            } else {
+                ktpOverlay.classList.add('hidden');
+            }
+        }
+
+        // Check if device has multiple cameras to show switch button
+        if (btnSwitchCamera) {
+            btnSwitchCamera.classList.add('hidden'); // Hide by default
+            navigator.mediaDevices.enumerateDevices()
+                .then(function(devices) {
+                    const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                    if (videoDevices.length > 1) {
+                        btnSwitchCamera.classList.remove('hidden');
+                    }
+                })
+                .catch(function(err) {
+                    console.warn('Error listing media devices:', err);
+                });
+        }
+
+        startCameraStream();
     }
 
-        // Close Camera
-        function closeCamera() {
-            const modal = document.getElementById('cameraModal');
-            const video = document.getElementById('cameraVideo');
-            const preview = document.getElementById('cameraPreview');
-            const btnCapture = document.getElementById('btnCapture');
-            const btnRetake = document.getElementById('btnRetake');
-            const btnUsePhoto = document.getElementById('btnUsePhoto');
+    function startCameraStream() {
+        const video = document.getElementById('cameraVideo');
 
-            // Stop camera stream
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-                cameraStream = null;
+        // Stop current stream if running
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+        }
+
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: currentFacingMode,
+                width: { ideal: 1280 },
+                height: { ideal: 720 }
             }
+        })
+        .then(function(stream) {
+            cameraStream = stream;
+            video.srcObject = stream;
+            video.classList.remove('hidden');
+        })
+        .catch(function(err) {
+            console.error('Error accessing camera:', err);
+            let errorMsg = 'Tidak dapat mengakses kamera. ';
+            if (err.name === 'NotAllowedError') {
+                errorMsg += 'Pastikan browser mengizinkan akses kamera.';
+            } else if (err.name === 'NotFoundError') {
+                errorMsg += 'Kamera tidak ditemukan.';
+            } else {
+                errorMsg += 'Silakan gunakan opsi Upload dari File.';
+            }
+            showErrorAlert(errorMsg);
+            closeCamera();
+        });
+    }
+
+    function switchCamera() {
+        // Toggle facing mode
+        currentFacingMode = (currentFacingMode === 'user') ? 'environment' : 'user';
+        startCameraStream();
+    }
+
+    // Close Camera
+    function closeCamera() {
+        const modal = document.getElementById('cameraModal');
+        const video = document.getElementById('cameraVideo');
+        const preview = document.getElementById('cameraPreview');
+        const btnCapture = document.getElementById('btnCapture');
+        const btnRetake = document.getElementById('btnRetake');
+        const btnUsePhoto = document.getElementById('btnUsePhoto');
+        const btnSwitchCamera = document.getElementById('btnSwitchCamera');
+
+        // Stop camera stream
+        if (cameraStream) {
+            cameraStream.getTracks().forEach(track => track.stop());
+            cameraStream = null;
+        }
 
         video.srcObject = null;
         video.classList.add('hidden');
@@ -1510,6 +1633,9 @@
         btnRetake.classList.add('hidden');
         btnUsePhoto.classList.add('hidden');
         btnCapture.classList.remove('hidden');
+        if (btnSwitchCamera) {
+            btnSwitchCamera.classList.add('hidden');
+        }
         modal.classList.add('hidden');
         capturedPhotoBlob = null;
         activeInputId = null;
@@ -1541,6 +1667,12 @@
                 btnRetake.classList.remove('hidden');
                 btnUsePhoto.classList.remove('hidden');
 
+                // Hide KTP Overlay during preview
+                const ktpOverlay = document.getElementById('cameraKtpOverlay');
+                if (ktpOverlay) {
+                    ktpOverlay.classList.add('hidden');
+                }
+
                 // Stop video stream
                 if (cameraStream) {
                     cameraStream.getTracks().forEach(track => track.stop());
@@ -1563,11 +1695,17 @@
             btnCapture.classList.remove('hidden');
             capturedPhotoBlob = null;
 
+            // Show KTP overlay again if it is KTP input
+            const ktpOverlay = document.getElementById('cameraKtpOverlay');
+            if (ktpOverlay && (activeInputId === 'file_ktp_upload' || activeInputId === 'foto_ktp_upload')) {
+                ktpOverlay.classList.remove('hidden');
+            }
+
             // Restart camera
             if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                 navigator.mediaDevices.getUserMedia({
                     video: {
-                        facingMode: 'environment',
+                        facingMode: currentFacingMode,
                         width: { ideal: 1280 },
                         height: { ideal: 720 }
                     }
@@ -1651,6 +1789,7 @@
         if (hiddenInput) hiddenInput.value = '';
         if (preview) {
             preview.classList.add('hidden');
+            preview.classList.remove('inline-block');
             const previewImg = document.getElementById(previewId + 'Img');
             if (previewImg) previewImg.src = '';
         }
@@ -1727,15 +1866,22 @@
                     if (data.success) {
                         // Auto-fill form dengan data OCR
                         if (data.data.nik) document.getElementById('nik').value = data.data.nik;
-                        if (data.data.nama_lengkap) document.getElementById('nama_lengkap_ktp').value = data.data
-                            .nama_lengkap;
-                        if (data.data.tempat_lahir) document.getElementById('tempat_lahir_ktp').value = data.data
-                            .tempat_lahir;
-                        if (data.data.tanggal_lahir) document.getElementById('tanggal_lahir_ktp').value = data.data
-                            .tanggal_lahir;
-                        if (data.data.alamat) document.getElementById('alamat_ktp').value = data.data.alamat;
-                        if (data.data.jenis_kelamin) document.getElementById('jenis_kelamin_ktp').value = data.data
-                            .jenis_kelamin;
+                        if (data.data.nama_lengkap) document.getElementById('nama_lengkap_ktp').value = data.data.nama_lengkap;
+                        if (data.data.tempat_lahir) document.getElementById('tempat_lahir_ktp').value = data.data.tempat_lahir;
+                        if (data.data.tanggal_lahir) document.getElementById('tanggal_lahir_ktp').value = data.data.tanggal_lahir;
+                        if (data.data.alamat_lengkap) document.getElementById('alamat_ktp').value = data.data.alamat_lengkap;
+                        if (data.data.rt_rw) document.getElementById('rt_rw').value = data.data.rt_rw;
+                        if (data.data.kelurahan_desa) document.getElementById('kel_desa').value = data.data.kelurahan_desa;
+                        if (data.data.kecamatan) document.getElementById('kecamatan').value = data.data.kecamatan;
+                        if (data.data.jenis_kelamin) {
+                            // Petakan format LAKI-LAKI / PEREMPUAN ke Laki-laki / Perempuan untuk dropdown UI
+                            const jk = data.data.jenis_kelamin.toUpperCase();
+                            if (jk.includes('LAKI')) {
+                                document.getElementById('jenis_kelamin_ktp').value = 'Laki-laki';
+                            } else if (jk.includes('PEREMPUAN')) {
+                                document.getElementById('jenis_kelamin_ktp').value = 'Perempuan';
+                            }
+                        }
                         if (data.file_path) {
                             document.getElementById('file_ktp').value = data.file_path;
                             // Update file input with the uploaded file path
@@ -1747,11 +1893,11 @@
 
                         // Show success message
                         ocrResult.innerHTML =
-                            '<div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">Data KTP berhasil diekstrak! Silakan periksa dan lengkapi jika ada yang kurang.</div>';
+                            '<div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">Data KTP berhasil dipindai! Silakan periksa dan lengkapi jika ada yang kurang.</div>';
                         ocrResult.classList.remove('hidden');
                     } else {
                         ocrResult.innerHTML =
-                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">OCR gagal: ' +
+                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">Gagal memindai KTP: ' +
                             (data.message || 'Unknown error') + '. Silakan isi manual.</div>';
                         ocrResult.classList.remove('hidden');
                         if (data.file_path) document.getElementById('file_ktp').value = data.file_path;
@@ -1770,36 +1916,39 @@
 
         // Set send_otp=1 dan kirim form sekali saja (cegah double submit yang bikin OTP ke-invalidate)
         function setSendOtpAndLoading(button) {
+            if (isFormSubmitting) return;
             const sendOtpInput = document.getElementById('send_otp_input');
             if (!sendOtpInput) return;
             if (button.disabled) return; // Sudah diklik, jangan proses lagi
+            
+            isFormSubmitting = true;
             sendOtpInput.value = '1';
 
-        // Loading state
-        const iconSend = document.getElementById('iconSend');
-        const iconLoading = document.getElementById('iconLoading');
-        const textSendOtp = document.getElementById('textSendOtp');
-        if (iconSend && iconLoading && textSendOtp) {
-            iconSend.classList.add('hidden');
-            iconLoading.classList.remove('hidden');
-            textSendOtp.textContent = 'Mengirim OTP...';
-        }
-        button.disabled = true;
-
-        // Show SweetAlert2 loading popup
-        Swal.fire({
-            title: 'Mengirim OTP...',
-            html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            customClass: {
-                popup: 'rounded-2xl shadow-2xl',
-                title: 'text-lg font-bold text-gray-900 font-display'
+            // Loading state
+            const iconSend = document.getElementById('iconSend');
+            const iconLoading = document.getElementById('iconLoading');
+            const textSendOtp = document.getElementById('textSendOtp');
+            if (iconSend && iconLoading && textSendOtp) {
+                iconSend.classList.add('hidden');
+                iconLoading.classList.remove('hidden');
+                textSendOtp.textContent = 'Mengirim OTP...';
             }
-        });
+            button.disabled = true;
+
+            // Show SweetAlert2 loading popup
+            Swal.fire({
+                title: 'Mengirim OTP...',
+                html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
+                allowOutsideClick: false,
+                showConfirmButton: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                customClass: {
+                    popup: 'rounded-2xl shadow-2xl',
+                    title: 'text-lg font-bold text-gray-900 font-display'
+                }
+            });
 
             // Submit form sekali (programmatic submit = hanya satu request, tidak double)
             const form = button.form || document.getElementById('registerForm');
@@ -1875,6 +2024,7 @@
             }
 
             function checkAutoSubmit() {
+                if (isFormSubmitting) return;
                 let allFilled = true;
                 otpInputs.forEach(input => {
                     if (input.value === '') {
@@ -1918,7 +2068,11 @@
 
             let remainingSeconds = parseInt(cooldownElement.textContent) || 0;
 
-            if (remainingSeconds <= 0) return;
+            if (remainingSeconds <= 0) {
+                document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
+                return;
+            }
 
             const countdown = setInterval(function () {
                 remainingSeconds--;
@@ -1929,8 +2083,9 @@
 
                 if (remainingSeconds <= 0) {
                     clearInterval(countdown);
-                    // Refresh page untuk enable resend button
-                    window.location.reload();
+                    // Enable resend button
+                    document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                    document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
                 }
             }, 1000);
         }
@@ -2061,9 +2216,12 @@
                 
                 const sendOtpInput = document.getElementById('send_otp_input');
                 if (sendOtpInput && sendOtpInput.value === '1') {
+                    isFormSubmitting = true;
                     registerForm.submit();
                     return; // Skip client-side check if sending OTP
                 }
+                
+                isFormSubmitting = true;
 
                 let isValid = true;
                 let errorMsg = '';
@@ -2390,6 +2548,7 @@
                     window.isRegisterFormSubmitting = false;
                     showErrorAlert(errorMsg);
                     if (focusEl) focusEl.focus();
+                    isFormSubmitting = false;
                     return;
                 }
 
@@ -2441,6 +2600,7 @@
                         if (failedCheck.element) {
                             failedCheck.element.focus();
                         }
+                        isFormSubmitting = false;
                         return;
                     }
                     
@@ -2458,6 +2618,7 @@
                     Swal.close();
                     console.error('Error in uniqueness validation:', error);
                     showErrorAlert('Terjadi kesalahan koneksi saat memverifikasi data. Silakan coba lagi.');
+                    isFormSubmitting = false;
                 }
             });
         }
@@ -2472,6 +2633,9 @@
                     if (preview && previewImg) {
                         previewImg.src = e.target.result;
                         preview.classList.remove('hidden');
+                        if (previewId === 'fotoPreview') {
+                            preview.classList.add('inline-block');
+                        }
                     }
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -2487,6 +2651,7 @@
                 if (fotoPreview && fotoPreviewImg) {
                     fotoPreviewImg.src = '{{ asset("storage/" . $formData["foto"]) }}';
                     fotoPreview.classList.remove('hidden');
+                    fotoPreview.classList.add('inline-block');
                 }
             @endif
 

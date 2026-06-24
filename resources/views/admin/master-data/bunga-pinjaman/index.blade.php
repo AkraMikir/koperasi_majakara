@@ -53,6 +53,7 @@
                     <tr>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">No</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Durasi (Bulan)</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Durasi Pilihan</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Bunga (%)</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Keterangan</th>
@@ -68,6 +69,9 @@
                                 <span class="text-sm font-semibold text-gray-900">{{ $item->durasi_min }} - {{ $item->durasi_max }}</span>
                                 <span class="ml-2 text-xs text-gray-500">bulan</span>
                             </div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm text-gray-900">{{ $item->durasi_pilihan ? $item->durasi_pilihan . ' bulan' : 'Otomatis' }}</span>
                         </td>
                         <td class="px-6 py-4">
                             <span class="text-sm font-bold text-[#674c1d]">{{ $item->bunga_persen }}%</span>

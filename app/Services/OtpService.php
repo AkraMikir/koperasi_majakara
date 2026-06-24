@@ -80,9 +80,9 @@ class OtpService
                 'session_id' => $sessionId,
                 'type' => $type,
                 'channel' => 'whatsapp',
-                'expired_at' => $expiredAt->format('Y-m-d H:i:s'), // Convert to string
+                'expired_at' => $expiredAt, 
                 'is_verified' => 0,
-                'created_at' => now()->format('Y-m-d H:i:s'), // Add created_at manually
+                'created_at' => now(), 
             ]);
 
             Log::info('OTP saved to database', ['otp_id' => $otp->id]);
@@ -231,7 +231,7 @@ class OtpService
             return true; // Tidak ada OTP sebelumnya
         }
 
-        $secondsSinceLastOtp = Carbon::now()->diffInSeconds($lastOtp->created_at);
+        $secondsSinceLastOtp = abs(Carbon::now()->diffInSeconds($lastOtp->created_at));
 
         return $secondsSinceLastOtp >= $this->cooldownSeconds;
     }

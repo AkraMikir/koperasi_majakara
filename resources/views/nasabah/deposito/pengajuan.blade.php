@@ -241,10 +241,10 @@
                     <p class="text-xs text-gray-400 mb-4" id="min-nominal-helper">Pilih paket terlebih dahulu untuk melihat
                         batas minimum</p>
                     {{-- Shortcut buttons --}}
-                    <div class="grid grid-cols-4 gap-2 mb-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-4">
                         @foreach([1000000, 5000000, 10000000, 50000000] as $amt)
                             <button type="button" onclick="setNominal({{ $amt }})"
-                                class="py-2 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:border-[#674c1d] hover:text-[#674c1d] hover:bg-amber-50 transition-all">
+                                class="py-2.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-600 hover:border-[#674c1d] hover:text-[#674c1d] hover:bg-amber-50 transition-all">
                                 {{ number_format($amt / 1000000, 0) }}jt
                             </button>
                         @endforeach
@@ -352,7 +352,7 @@
                                         <p class="text-xs text-gray-800 font-bold uppercase tracking-wider">{{ $bank->bank }}
                                         </p>
                                     </div>
-                                    <p class="text-xl text-[#674c1d] font-mono font-black mb-1">{{ $bank->no_rek }}</p>
+                                    <p class="text-xl text-[#674c1d] font-mono font-black mb-1 break-all">{{ $bank->no_rek }}</p>
                                     <div class="space-y-0.5">
                                         <p class="text-xs text-gray-600">a.n. <span
                                                 class="font-bold text-gray-800">{{ $bank->pemilik }}</span></p>

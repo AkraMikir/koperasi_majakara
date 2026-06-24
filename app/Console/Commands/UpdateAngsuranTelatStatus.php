@@ -38,7 +38,8 @@ class UpdateAngsuranTelatStatus extends Command
 
         foreach ($models as $modelClass) {
             $type = $modelClass === TempoPinjamanB::class ? 'Bulanan' : 'Mingguan';
-            $angsurans = $modelClass::where('status_bayar', '!=', 'lunas')
+            $angsurans = $modelClass::with('pinjaman')
+                ->where('status_bayar', '!=', 'lunas')
                 ->where('tgl_jatuh_tempo', '<', $now)
                 ->get();
 

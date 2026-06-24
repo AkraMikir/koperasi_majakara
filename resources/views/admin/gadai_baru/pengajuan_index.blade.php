@@ -381,28 +381,7 @@
                         placeholder="Tambahkan catatan untuk nasabah jika ada..."></textarea>
                 </div>
 
-                <!-- Extra Pinjaman Section (Only for LUNAS) -->
-                <div id="approve-extra-section" class="hidden space-y-4 pt-2 border-t border-gray-100">
-                    <div>
-                        <h4 class="text-sm font-bold text-gray-900">Biaya Tambahan / Denda (Opsional)</h4>
-                        <p class="text-[10px] text-gray-500">Nominal Pengajuan Lunas: <span id="approve-nominal-display" class="font-bold text-gray-800"></span></p>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Nominal Extra (Rp)</label>
-                            <input type="text" name="extra_pinjaman_nominal" id="extra_pinjaman_nominal" value="0"
-                                class="w-full px-5 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 transition-all text-sm font-bold text-gray-900"
-                                oninput="formatCurrency(this); checkExtraReasonRequired();">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Alasan Extra</label>
-                            <input type="text" name="extra_pinjaman_reason" id="extra_pinjaman_reason"
-                                class="w-full px-5 py-3 bg-gray-50 border-2 border-gray-100 rounded-2xl focus:border-green-500 focus:bg-white focus:ring-4 focus:ring-green-500/10 transition-all text-sm font-medium text-gray-700 placeholder:text-gray-400"
-                                placeholder="Contoh: Denda struk hilang">
-                        </div>
-                    </div>
-                </div>
+
 
                 <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100 flex gap-3">
                     <svg class="w-5 h-5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -736,16 +715,6 @@
         }
     }
 
-    function checkExtraReasonRequired() {
-        const nominal = document.getElementById('extra_pinjaman_nominal').value.replace(/[^0-9]/g, '');
-        const reasonInput = document.getElementById('extra_pinjaman_reason');
-        if (parseFloat(nominal) > 0) {
-            reasonInput.setAttribute('required', 'required');
-        } else {
-            reasonInput.removeAttribute('required');
-        }
-    }
-
     function openApproveModal(id, name, jenis) {
         const data = pengajuanData[id];
         const modal = document.getElementById('approve-modal');
@@ -756,21 +725,6 @@
         form.action = "{{ route('admin.gadai_baru.pengajuan.approve', ':id') }}".replace(':id', id);
         nameDisplay.textContent = name;
         jenisDisplay.textContent = jenis;
-        
-        // Handle Extra Pinjaman display
-        const extraSection = document.getElementById('approve-extra-section');
-        const nominalDisplay = document.getElementById('approve-nominal-display');
-        if (jenis === 'LUNAS') {
-            extraSection.classList.remove('hidden');
-            nominalDisplay.textContent = data.nominal;
-        } else {
-            extraSection.classList.add('hidden');
-        }
-        
-        // Reset extra inputs
-        document.getElementById('extra_pinjaman_nominal').value = 0;
-        document.getElementById('extra_pinjaman_reason').value = '';
-        checkExtraReasonRequired();
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');

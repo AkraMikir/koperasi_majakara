@@ -6,7 +6,7 @@
 <div class="w-full pb-6 space-y-6">
     <!-- Hero Section -->
     <div class="mx-4 mt-4">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
@@ -41,10 +41,23 @@
                         @endphp
                         <p class="text-white/90 text-sm mt-1">Sisa Pembayaran: <span class="font-semibold">Rp {{ number_format($sisaPinjamanTotal, 0, ',', '.') }}</span></p>
                     </div>
-                    <div class="w-16 h-16 bg-white/20 rounded-2xl flex items-center justify-center shadow-inner">
-                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
+                </div>
+                
+                @php
+                    $limitPercent = $limitNominal > 0 ? min(100, max(0, ($nominalTerpakai / $limitNominal) * 100)) : 0;
+                @endphp
+                <!-- Progress Bar Limit Pinjaman -->
+                <div class="bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/20 mb-6">
+                    <div class="flex items-center justify-between flex-wrap gap-1 mb-2">
+                        <span class="text-xs font-semibold text-white/90">Limit Terpakai ({{ number_format($limitPercent, 1) }}%)</span>
+                        <span class="text-xs font-semibold text-white/95">Rp {{ number_format($nominalTerpakai, 0, ',', '.') }} / Rp {{ number_format($limitNominal, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="w-full bg-white/20 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-red-400 to-orange-400 h-3 rounded-full transition-all duration-500" style="width: {{ $limitPercent }}%"></div>
+                    </div>
+                    <div class="flex justify-between flex-wrap gap-1 text-[11px] text-white/80 mt-1">
+                        <span>Sisa Limit Tersedia: Rp {{ number_format($sisaLimit, 0, ',', '.') }}</span>
+                        <span>Sisa limit dapat digunakan untuk pengajuan baru</span>
                     </div>
                 </div>
                 
@@ -110,7 +123,7 @@
             
             <div class="space-y-3">
                 @if(($totalAngsuranTelat ?? 0) > 0)
-                <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl border border-red-100">
+                <div class="flex items-center justify-between flex-wrap gap-2 p-3 bg-red-50 rounded-xl border border-red-100">
                     <div>
                         <p class="text-sm font-bold text-red-800">Anda memiliki {{ $totalAngsuranTelat }} angsuran telat.</p>
                         <p class="text-xs text-red-600 mt-1">Mohon segera lakukan pembayaran untuk menghindari denda tambahan.</p>
@@ -125,7 +138,7 @@
                     $jenisAngsuran = $angsuran->pinjaman->jenis ?? 'bulanan';
                     $urlDetail = route('nasabah.pinjaman.detail-angsuran', ['id' => $angsuran->id, 'jenis' => $jenisAngsuran]);
                 @endphp
-                <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer" onclick="window.location.href='{{ $urlDetail }}'">
+                <div class="flex items-center justify-between flex-wrap gap-2 p-3 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer" onclick="window.location.href='{{ $urlDetail }}'">
                     <div>
                         <p class="text-sm font-bold text-orange-800">Angsuran Rp {{ number_format($angsuran->jumlah_tagihan, 0, ',', '.') }}</p>
                         <p class="text-xs text-orange-600 mt-1">Jatuh tempo: {{ $angsuran->tgl_jatuh_tempo->format('d M Y') }} ({{ $angsuran->tgl_jatuh_tempo->diffForHumans() }})</p>
@@ -250,4 +263,152 @@
     </div>
     @endif
 </div>
+
+@if(isset($hasAgreed) && !$hasAgreed)
+<!-- Syarat & Ketentuan Modal -->
+<div id="terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" style="z-index: 100;">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 md:p-8 flex flex-col max-h-[90vh] border border-gray-100">
+        <div class="flex items-center gap-3 pb-4 border-b border-gray-100 mb-5">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 font-display">Syarat & Ketentuan Pinjaman</h3>
+                <p class="text-xs text-gray-500">Koperasi Majakara</p>
+            </div>
+        </div>
+
+        <!-- Scrollable T&C Content Box -->
+        <div id="terms-content-box" class="flex-1 overflow-y-auto max-h-[45vh] sm:max-h-[350px] border border-gray-200 rounded-2xl p-4 bg-gray-50 text-sm text-gray-700 leading-relaxed space-y-4 mb-5">
+            {!! $syaratPinjaman !!}
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="pt-4 border-t border-gray-100 space-y-4">
+            <!-- Checkbox -->
+            <label class="flex items-start gap-3 cursor-pointer group">
+                <input type="checkbox" id="terms-checkbox" disabled
+                    class="mt-1 w-4 h-4 text-[#8b6f2f] border-gray-300 rounded focus:ring-[#8b6f2f] focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="terms-checkbox-label" class="text-xs text-gray-500 select-none group-hover:text-gray-700 font-medium">
+                    Harap gulir syarat dan ketentuan sampai ke bagian paling bawah untuk menyetujui.
+                </span>
+            </label>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button type="button" id="btn-agree-terms" disabled
+                    class="flex-1 py-3 px-5 bg-gray-300 text-gray-500 rounded-xl font-bold transition-all text-center cursor-not-allowed shadow-md">
+                    Setuju & Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initTermsModal();
+});
+
+document.addEventListener('turbo:load', function() {
+    initTermsModal();
+});
+
+function initTermsModal() {
+    const termsBox = document.getElementById('terms-content-box');
+    const checkbox = document.getElementById('terms-checkbox');
+    const label = document.getElementById('terms-checkbox-label');
+    const btnAgree = document.getElementById('btn-agree-terms');
+    const modal = document.getElementById('terms-modal');
+
+    if (!termsBox || !checkbox || !btnAgree) return;
+
+    // Check if content height is less than client height (fully visible without scroll)
+    if (termsBox.scrollHeight <= termsBox.clientHeight) {
+        enableCheckbox();
+    } else {
+        // Detect scroll to bottom
+        termsBox.addEventListener('scroll', function() {
+            // Give 10px buffer to prevent precision issues on mobile zoom
+            if (termsBox.scrollHeight - termsBox.scrollTop - termsBox.clientHeight < 15) {
+                enableCheckbox();
+            }
+        });
+    }
+
+    function enableCheckbox() {
+        checkbox.removeAttribute('disabled');
+        label.textContent = "Saya telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan di atas.";
+        label.classList.remove('text-gray-500');
+        label.classList.add('text-gray-800');
+    }
+
+    checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+            btnAgree.removeAttribute('disabled');
+            btnAgree.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.add('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'pointer';
+        } else {
+            btnAgree.setAttribute('disabled', 'true');
+            btnAgree.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.remove('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'not-allowed';
+        }
+    });
+
+    btnAgree.addEventListener('click', function() {
+        if (btnAgree.getAttribute('disabled') === 'true' || !checkbox.checked) return;
+
+        btnAgree.setAttribute('disabled', 'true');
+        btnAgree.textContent = 'Menyimpan...';
+
+        fetch('{{ route("nasabah.pinjaman.agree-terms") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modal.classList.add('hidden');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Persetujuan Disimpan',
+                    text: 'Syarat & Ketentuan telah disetujui.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Gagal menyimpan persetujuan.',
+                    confirmButtonText: 'Coba Lagi'
+                });
+                btnAgree.removeAttribute('disabled');
+                btnAgree.textContent = 'Setuju & Lanjutkan';
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan jaringan.',
+                confirmButtonText: 'Coba Lagi'
+            });
+            btnAgree.removeAttribute('disabled');
+            btnAgree.textContent = 'Setuju & Lanjutkan';
+        });
+    });
+}
+</script>
+@endpush
+@endif
 @endsection

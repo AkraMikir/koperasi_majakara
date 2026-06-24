@@ -354,6 +354,18 @@ class ActivityLogService
         );
     }
 
+    public function logUpdateLimitPinjaman(int $nasabahId, string $nasabahNama, float $sebelum, float $sesudah): void
+    {
+        $this->log(
+            'update_limit_pinjaman',
+            'pinjaman',
+            "Mengubah limit pinjaman nasabah {$nasabahNama} dari Rp " . number_format($sebelum, 0, ',', '.') . " menjadi Rp " . number_format($sesudah, 0, ',', '.'),
+            ['nasabah' => $nasabahNama, 'limit_sebelum' => $sebelum, 'limit_sesudah' => $sesudah],
+            'Nasabah',
+            $nasabahId
+        );
+    }
+
     // --- NASABAH ---
 
     public function logSubmitPerubahanData(int $pengajuanId): void

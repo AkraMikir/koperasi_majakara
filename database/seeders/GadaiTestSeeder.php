@@ -39,8 +39,14 @@ class GadaiTestSeeder extends Seeder
 
         $now = Carbon::now();
 
-        // 1. GADAI AWAL (AKTIF)
-        $gAwal = GadaiActive::create([
+        // RESET ALL SLOTS
+        DB::table('tbl_gadai_grid_electronic')->update([
+            'is_occupied' => false,
+            'active_gadai_id' => null
+        ]);
+
+        // 1. GADAI: SUDAH PENGAJUAN LUNAS TRANSFER (status pengajuan = pending, metode = transfer)
+        $gLunasTfPending = GadaiActive::create([
             'nasabah_id' => $nasabahId,
             'kategori_id' => $kategoriId,
             'item_id' => $itemId,
@@ -49,18 +55,28 @@ class GadaiTestSeeder extends Seeder
             'slot_table' => 'electronic',
             'nominal_deal' => 1000000,
             'biaya_jasa' => 50000,
-            'tgl_mulai' => $now->copy()->subDays(5),
-            'tgl_jatuh_tempo' => $now->copy()->addDays(25)->endOfDay(),
-            'tgl_tenggang' => $now->copy()->addDays(40)->endOfDay(),
+            'tgl_mulai' => $now->copy()->subDays(20),
+            'tgl_jatuh_tempo' => $now->copy()->addDays(10)->endOfDay(),
+            'tgl_tenggang' => $now->copy()->addDays(25)->endOfDay(),
             'status' => 'active',
             'admin_id' => $adminId,
             'denda_aktif' => 0,
             'biaya_inap' => 0
         ]);
-        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0101')->update(['is_occupied' => true, 'active_gadai_id' => $gAwal->id]);
+        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0101')->update(['is_occupied' => true, 'active_gadai_id' => $gLunasTfPending->id]);
 
-        // 2. GADAI DENGAN PERPANJANGAN
-        $gPerpanjang = GadaiActive::create([
+        GadaiPengajuan::create([
+            'nasabah_id' => $nasabahId,
+            'gadai_active_id' => $gLunasTfPending->id,
+            'jenis_pengajuan' => 'lunas',
+            'metode' => 'transfer',
+            'nominal' => 1050000,
+            'status' => 'pending',
+            'created_at' => $now->copy()->subHours(2)
+        ]);
+
+        // 2. GADAI: SUDAH PENGAJUAN LUNAS CASH (status pengajuan = pending, metode = cash)
+        $gLunasCashPending = GadaiActive::create([
             'nasabah_id' => $nasabahId,
             'kategori_id' => $kategoriId,
             'item_id' => $itemId,
@@ -69,60 +85,89 @@ class GadaiTestSeeder extends Seeder
             'slot_table' => 'electronic',
             'nominal_deal' => 2000000,
             'biaya_jasa' => 100000,
-            'tgl_mulai' => $now->copy()->subDays(35),
-            'tgl_jatuh_tempo' => $now->copy()->addDays(25)->endOfDay(),
-            'tgl_tenggang' => $now->copy()->addDays(40)->endOfDay(),
+            'tgl_mulai' => $now->copy()->subDays(20),
+            'tgl_jatuh_tempo' => $now->copy()->addDays(10)->endOfDay(),
+            'tgl_tenggang' => $now->copy()->addDays(25)->endOfDay(),
             'status' => 'active',
             'admin_id' => $adminId,
             'denda_aktif' => 0,
-            'biaya_inap' => 0,
-            'jumlah_perpanjangan' => 1
+            'biaya_inap' => 0
         ]);
-        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0102')->update(['is_occupied' => true, 'active_gadai_id' => $gPerpanjang->id]);
+        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0102')->update(['is_occupied' => true, 'active_gadai_id' => $gLunasCashPending->id]);
 
-        // Pengajuan perpanjangan approved
-        $pPerpanjang = GadaiPengajuan::create([
+        GadaiPengajuan::create([
             'nasabah_id' => $nasabahId,
-            'gadai_active_id' => $gPerpanjang->id,
-            'jenis_pengajuan' => 'perpanjang',
-            'metode' => 'transfer',
-            'nominal' => 100000,
-            'status' => 'approved',
-            'admin_id' => $adminId,
-            'processed_at' => $now->copy()->subDays(5)
+            'gadai_active_id' => $gLunasCashPending->id,
+            'jenis_pengajuan' => 'lunas',
+            'metode' => 'cash',
+            'nominal' => 2100000,
+            'status' => 'pending',
+            'created_at' => $now->copy()->subHours(1)
         ]);
 
-        GadaiPaymentLog::create([
-            'gadai_active_id' => $gPerpanjang->id,
-            'jenis_pembayaran' => 'perpanjangan',
-            'nominal' => 100000,
-            'metode' => 'transfer'
-        ]);
-
-        // 3. GADAI SELESAI CASH (Lunas tunai & barang dikembalikan)
-        $gSelesaiCash = GadaiActive::create([
+        // 3. GADAI: COUNTDOWN PENGAMBILAN BARANG TRANSFER (status gadai = lunas, metode pengajuan lunas = transfer)
+        $gCountdownTf = GadaiActive::create([
             'nasabah_id' => $nasabahId,
             'kategori_id' => $kategoriId,
             'item_id' => $itemId,
             'lokasi_id' => $lokasiId,
             'slot_kode' => 'EL-0103',
             'slot_table' => 'electronic',
+            'nominal_deal' => 3000000,
+            'biaya_jasa' => 150000,
+            'tgl_mulai' => $now->copy()->subDays(30),
+            'tgl_jatuh_tempo' => $now->copy()->subDays(2)->endOfDay(),
+            'tgl_tenggang' => $now->copy()->addDays(13)->endOfDay(),
+            'status' => 'lunas',
+            'tgl_ambil_limit' => $now->copy()->addDays(12)->endOfDay(),
+            'admin_id' => $adminId,
+            'denda_aktif' => 0,
+            'biaya_inap' => 0
+        ]);
+        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0103')->update(['is_occupied' => true, 'active_gadai_id' => $gCountdownTf->id]);
+
+        GadaiPengajuan::create([
+            'nasabah_id' => $nasabahId,
+            'gadai_active_id' => $gCountdownTf->id,
+            'jenis_pengajuan' => 'lunas',
+            'metode' => 'transfer',
+            'nominal' => 3150000,
+            'status' => 'approved',
+            'admin_id' => $adminId,
+            'processed_at' => $now->copy()->subDays(1)
+        ]);
+
+        GadaiPaymentLog::create([
+            'gadai_active_id' => $gCountdownTf->id,
+            'jenis_pembayaran' => 'tebus',
+            'nominal' => 3150000,
+            'metode' => 'transfer'
+        ]);
+
+        // 4. GADAI: COUNTDOWN PENGAMBILAN BARANG CASH (status gadai = lunas, metode pengajuan lunas = cash)
+        $gCountdownCash = GadaiActive::create([
+            'nasabah_id' => $nasabahId,
+            'kategori_id' => $kategoriId,
+            'item_id' => $itemId,
+            'lokasi_id' => $lokasiId,
+            'slot_kode' => 'EL-0104',
+            'slot_table' => 'electronic',
             'nominal_deal' => 1500000,
             'biaya_jasa' => 75000,
             'tgl_mulai' => $now->copy()->subDays(30),
             'tgl_jatuh_tempo' => $now->copy()->subDays(2)->endOfDay(),
             'tgl_tenggang' => $now->copy()->addDays(13)->endOfDay(),
-            'status' => 'returned',
+            'status' => 'lunas',
+            'tgl_ambil_limit' => $now->copy()->addDays(12)->endOfDay(),
             'admin_id' => $adminId,
             'denda_aktif' => 0,
             'biaya_inap' => 0
         ]);
-        // Slot is freed (is_occupied = false)
+        DB::table('tbl_gadai_grid_electronic')->where('kode_slot', 'EL-0104')->update(['is_occupied' => true, 'active_gadai_id' => $gCountdownCash->id]);
 
-        // Pengajuan lunas cash approved
         GadaiPengajuan::create([
             'nasabah_id' => $nasabahId,
-            'gadai_active_id' => $gSelesaiCash->id,
+            'gadai_active_id' => $gCountdownCash->id,
             'jenis_pengajuan' => 'lunas',
             'metode' => 'cash',
             'nominal' => 1575000,
@@ -132,49 +177,10 @@ class GadaiTestSeeder extends Seeder
         ]);
 
         GadaiPaymentLog::create([
-            'gadai_active_id' => $gSelesaiCash->id,
+            'gadai_active_id' => $gCountdownCash->id,
             'jenis_pembayaran' => 'tebus',
             'nominal' => 1575000,
             'metode' => 'cash'
-        ]);
-
-        // 4. GADAI SELESAI TRANSFER & BARANG SUDAH DIAMBIL
-        $gSelesaiTf = GadaiActive::create([
-            'nasabah_id' => $nasabahId,
-            'kategori_id' => $kategoriId,
-            'item_id' => $itemId,
-            'lokasi_id' => $lokasiId,
-            'slot_kode' => 'EL-0104',
-            'slot_table' => 'electronic',
-            'nominal_deal' => 3000000,
-            'biaya_jasa' => 150000,
-            'tgl_mulai' => $now->copy()->subDays(30),
-            'tgl_jatuh_tempo' => $now->copy()->subDays(2)->endOfDay(),
-            'tgl_tenggang' => $now->copy()->addDays(13)->endOfDay(),
-            'status' => 'returned', // returned means barang sudah diambil
-            'admin_id' => $adminId,
-            'denda_aktif' => 0,
-            'biaya_inap' => 0
-        ]);
-        // Slot is freed
-
-        // Pengajuan lunas transfer approved
-        $pLunasTf = GadaiPengajuan::create([
-            'nasabah_id' => $nasabahId,
-            'gadai_active_id' => $gSelesaiTf->id,
-            'jenis_pengajuan' => 'lunas',
-            'metode' => 'transfer',
-            'nominal' => 3150000,
-            'status' => 'approved',
-            'admin_id' => $adminId,
-            'processed_at' => $now->copy()->subDays(2)
-        ]);
-
-        GadaiPaymentLog::create([
-            'gadai_active_id' => $gSelesaiTf->id,
-            'jenis_pembayaran' => 'tebus',
-            'nominal' => 3150000,
-            'metode' => 'transfer'
         ]);
     }
 }

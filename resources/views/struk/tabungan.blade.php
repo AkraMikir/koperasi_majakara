@@ -10,9 +10,9 @@
         .bold { font-weight: bold; }
         .underline { text-decoration: underline; }
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
-        .table-row { width: 100%; margin-bottom: 3px; }
-        .table-row td { vertical-align: top; font-size:8px }
-        .label { font-weight: normal; width: 45%; font-size:12px }
+        .table-row td { vertical-align: top; }
+        .label { font-weight: normal; width: 45%; font-size: 12px; }
+        .id-kecil { font-size: 12px; }
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -24,116 +24,32 @@
         .nominal-table td { padding: 2px 0; }
         .slot-title { font-size: 32px; font-weight: bold; margin: 10px 0; text-align: center; }
         .approver { margin-top: 10px; font-size: 10px; }
-        .id-kecil{font-size:12px}
     </style>
 </head>
 @php
     $strukSettings = \App\Models\SettingsStruk::getSettings();
+    
+    $pengajuanSetor = $transaksi->pengajuanSetor ?? null;
+    $approver = $pengajuanSetor && $pengajuanSetor->relationLoaded('approvedBy') ? $pengajuanSetor->approvedBy : null;
+    $roleLabel = $approver ? (($approver->role === 'admin_utama' ? 'Admin Utama' : ($approver->role === 'admin_operasional' ? 'Admin Operasional' : 'Admin'))) : null;
+
+    $mappedData = [
+        'jenis_trans' => $transaksi->jenis,
+        'no_struk' => $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT),
+        'tanggal' => $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d-m-Y H:i') : '-',
+        'nama_anggota' => $transaksi->nasabah->user->nama ?? 'N/A',
+        'nik' => $transaksi->nasabah->dataKtp->nik ?? '-',
+        'via' => ucfirst($transaksi->via ?? '-'),
+        'nominal' => $transaksi->nominal ?? 0,
+        'nominal_murni' => $transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik ? ($transaksi->pengajuanTarik->nominal ?? 0) : ($transaksi->nominal ?? 0),
+        'biaya_transfer' => $transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik ? ($transaksi->pengajuanTarik->biaya_transfer ?? 0) : 0,
+        'keterangan' => $transaksi->keterangan ?? '',
+        'approver_name' => $approver ? ($approver->nama ?? 'N/A') : '',
+        'approver_role' => $roleLabel ?? '',
+        'tanggal_cetak' => now()->format('d-m-Y H:i')
+    ];
 @endphp
 <body>
-    <!-- HEADER -->
-    <div class="header">
-        <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
-            {{ $strukSettings->nama_koperasi }}
-        </div>
-        <div class="center" style="font-size: 10px;">
-            {{ $strukSettings->alamat_koperasi }}<br>
-            Telp: {{ $strukSettings->no_telp }}
-        </div>
-    </div>
-    
-    <div class="center bold" style="margin-bottom: 9px; font-size: 13px;">
-        STRUK TRANSAKSI TABUNGAN
-    </div>
-    
-    <div class="center bold" style="margin-bottom: 4px; font-size: 9px; text-transform: uppercase;">
-        {{ $transaksi->jenis === 'setoran' ? 'SETORAN' : 'PENARIKAN' }}
-    </div>
-
-    <div class="dashed"></div>
-    
-    <table class="table-row">
-        <tr>
-            <td class="label">ID</td>
-            <td class="id-kecil">: {{ $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT) }}</td>
-        </tr>
-        <tr>
-            <td class="label">Tanggal</td>
-            <td class="id-kecil">: {{ $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d-m-Y H:i') : '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Nama</td>
-            <td class="id-kecil">: {{ $transaksi->nasabah->user->nama ?? 'N/A' }}</td>
-        </tr>
-        <tr>
-            <td class="label">NIK</td>
-            <td class="id-kecil">: {{ $transaksi->nasabah->dataKtp->nik ?? '-' }}</td>
-        </tr>
-        <tr>
-            <td class="label">Transaksi</td>
-            <td class="id-kecil">: {{ ucfirst($transaksi->jenis) }}</td>
-        </tr>
-        <tr>
-            <td class="label">Via</td>
-            <td class="id-kecil">: {{ ucfirst($transaksi->via ?? '-') }}</td>
-        </tr>
-    </table>
-    
-    <div class="dashed"></div>
-    
-    <!-- DETAIL KEUANGAN -->
-    <table class="table-row">
-        @if($transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik && (float)($transaksi->pengajuanTarik->biaya_transfer ?? 0) > 0)
-        <tr>
-            <td class="label">Nominal Penarikan</td>
-            <td class="text-right">: Rp {{ number_format($transaksi->pengajuanTarik->nominal ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        <tr>
-            <td class="label">Biaya Transfer</td>
-            <td class="text-right">: Rp {{ number_format($transaksi->pengajuanTarik->biaya_transfer ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        <div class="dashed"></div>
-        <tr>
-            <td class="bold">TOTAL DIDEBET</td>
-            <td class="bold text-right">: Rp {{ number_format($transaksi->nominal ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        @else
-        <tr>
-            <td class="bold">NOMINAL</td>
-            <td class="bold text-right">: Rp {{ number_format($transaksi->nominal ?? 0, 0, ',', '.') }}</td>
-        </tr>
-        @endif
-    </table>
-
-    @if(!empty($transaksi->keterangan))
-    <div class="dashed"></div>
-    <table class="table-row">
-        <tr>
-            <td class="label">Keterangan</td>
-            <td class="text-right">: {{ $transaksi->keterangan }}</td>
-        </tr>
-    </table>
-    @endif
-
-    @php
-        $pengajuanSetor = $transaksi->pengajuanSetor ?? null;
-        $approver = $pengajuanSetor && $pengajuanSetor->relationLoaded('approvedBy') ? $pengajuanSetor->approvedBy : null;
-        $roleLabel = $approver ? (($approver->role === 'admin_utama' ? 'Admin Utama' : ($approver->role === 'admin_operasional' ? 'Admin Operasional' : 'Admin'))) : null;
-    @endphp
-    @if($approver && $roleLabel)
-    <div class="dashed"></div>
-    <div class="approver center">
-        <span class="bold">Disetujui oleh:</span><br />
-        <span>{{ $roleLabel }} – {{ $approver->nama ?? 'N/A' }}</span>
-    </div>
-    @endif
-
-    <div class="dashed"></div>
-    
-    <!-- FOOTER -->
-    <div class="footer center">
-        <div>Dicetak : {{ now()->format('d-m-Y H:i') }}</div>
-        <div class="bold" style="margin-top: 4px;">Dicetak dari {{ $strukSettings->nama_pt }}</div>
-    </div>
+    @include('admin.settings.partials.components.tabungan-body', ['settings' => $strukSettings, 'data' => $mappedData])
 </body>
 </html>

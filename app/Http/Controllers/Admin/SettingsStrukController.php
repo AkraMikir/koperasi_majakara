@@ -105,6 +105,42 @@ class SettingsStrukController extends Controller
         return redirect()->back()->with('success', 'Syarat & ketentuan gadai berhasil diupdate.');
     }
 
+    public function updateSyaratPinjaman(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'syarat_ketentuan_pinjaman' => 'required|string|max:5000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'syarat_ketentuan_pinjaman' => $request->syarat_ketentuan_pinjaman,
+        ]);
+
+        return redirect()->back()->with('success', 'Syarat & ketentuan pinjaman berhasil diupdate.');
+    }
+
+    public function updateInfoBoxPinjaman(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'info_box_pinjaman' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'info_box_pinjaman' => $request->info_box_pinjaman,
+        ]);
+
+        return redirect()->back()->with('success', 'Info box pinjaman berhasil diupdate.');
+    }
+
     /**
      * Update Extra Nilai Kehilangan (SAJA yang tersisa dari settings gadai)
      */
@@ -148,7 +184,7 @@ class SettingsStrukController extends Controller
     public function previewPinjaman(Request $request)
     {
         $settings = new SettingsStruk($request->only([
-            'nama_koperasi', 'alamat_koperasi', 'no_telp', 'email', 'website', 'nama_pt', 'format_no_struk'
+            'nama_koperasi', 'alamat_koperasi', 'no_telp', 'email', 'website', 'nama_pt', 'format_no_struk', 'syarat_ketentuan_pinjaman', 'info_box_pinjaman'
         ]));
 
         $jenisTrans = $request->input('jenis_trans', 'PENCAIRAN');

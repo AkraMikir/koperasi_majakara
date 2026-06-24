@@ -164,34 +164,32 @@
             <span class="text-sm text-[#674c1d] font-medium">{{ $depositoAktif->count() }} berjalan</span>
         </div>
 
-        @if($depositoAktif->isNotEmpty())
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @foreach($depositoAktif as $dep)
-            @php
-                $persen = 0;
-                $now = now();
-                if ($dep->tgl_mulai && $dep->tgl_jatuh_tempo) {
-                    $total = $dep->tgl_mulai->diffInDays($dep->tgl_jatuh_tempo);
-                    $lewat = $dep->tgl_mulai->diffInDays($now);
-                    $persen = $total > 0 ? min(100, round(($lewat / $total) * 100)) : 0;
-                }
-                $diff = $now->diff($dep->tgl_jatuh_tempo);
-                $bulanSisa = $diff->y * 12 + $diff->m;
-                $hariSisaCount = $diff->d;
-                $isPast = $now->gt($dep->tgl_jatuh_tempo);
-            @endphp
-            <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white rounded-2xl shadow-sm border border-gray-100 p-5 hover:shadow-md hover:border-[#d4af37]/50 transition-all group">
-                <div class="flex justify-between items-start mb-4">
-                    <div>
-                        <p class="text-xs text-gray-400 font-mono">{{ $dep->nomor_deposito }}</p>
-                        <p class="font-bold text-gray-800 text-sm mt-0.5">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="bg-green-100 text-green-700 text-xs font-bold px-2.5 py-1 rounded-full">Aktif</span>
-                        <div class="w-7 h-7 rounded-full bg-[#674c1d]/10 flex items-center justify-center group-hover:bg-[#674c1d] transition-colors">
-                            <svg class="w-3.5 h-3.5 text-[#674c1d] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                            </svg>
+            <div class="space-y-3">
+                @foreach($depositoAktif as $dep)
+                @php
+                    $persen = 0;
+                    $now = now();
+                    if ($dep->tgl_mulai && $dep->tgl_jatuh_tempo) {
+                        $total = $dep->tgl_mulai->diffInDays($dep->tgl_jatuh_tempo);
+                        $lewat = $dep->tgl_mulai->diffInDays($now);
+                        $persen = $total > 0 ? min(100, round(($lewat / $total) * 100)) : 0;
+                    }
+
+                    // Hitung sisa waktu (Bulan & Hari)
+                    $diff = $now->diff($dep->tgl_jatuh_tempo);
+                    $bulanSisa = $diff->y * 12 + $diff->m;
+                    $hariSisaCount = $diff->d;
+                    $isPast = $now->gt($dep->tgl_jatuh_tempo);
+                @endphp
+                <a href="{{ route('nasabah.deposito.detail', $dep->id) }}" class="block bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-4 hover:bg-white/15 transition">
+                    <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                        <div>
+                            <p class="text-white/60 text-xs font-mono">{{ $dep->nomor_deposito }}</p>
+                            <p class="text-white font-bold text-sm">Deposito {{ $dep->tenor?->tenor_bulan ?? '-' }} Bulan</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-[#f0d060] font-black text-xl leading-none">{{ number_format($dep->bunga * 100, 2) }}%</p>
+                            <p class="text-white/60 text-xs">p.a.</p>
                         </div>
                     </div>
                 </div>
@@ -275,7 +273,7 @@
                 </div>
                 <div>
                     <label class="text-xs font-semibold text-gray-700 block mb-1">Pilih Tenor</label>
-                    <div class="grid grid-cols-4 gap-2">
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         @php
                             $uniqueTenors = $pakets->unique('tenor_bulan')->values();
                         @endphp

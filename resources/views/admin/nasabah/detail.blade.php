@@ -53,9 +53,9 @@
     <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-2xl shadow-2xl p-8 border-2 border-[#d4af37]/30">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div class="flex items-center gap-6">
-                <div class="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white/30 shrink-0">
+                <div onclick="{{ !$pinVerified ? 'openAdminPinModal()' : '' }}" class="w-24 h-24 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden shadow-2xl ring-4 ring-white/30 shrink-0 {{ !$pinVerified ? 'cursor-pointer' : '' }}">
                     @if($nasabah->user->foto && $nasabah->user->foto !== 'default-avatar.jpg')
-                        <img src="{{ asset('storage/' . $nasabah->user->foto) }}" alt="Foto Profil" class="w-full h-full object-cover">
+                        <img src="{{ asset('storage/' . $nasabah->user->foto) }}" alt="Foto Profil" class="w-full h-full object-cover secure-blur {{ !$pinVerified ? 'blur-md select-none pointer-events-none' : '' }}">
                     @else
                         <span class="text-5xl font-bold text-white">{{ strtoupper(substr($nasabah->user->nama ?? 'N', 0, 1)) }}</span>
                     @endif
@@ -332,6 +332,149 @@
             </div>
         </div>
         @endif
+
+        <!-- Dokumen Foto Nasabah -->
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden lg:col-span-2">
+            <div class="bg-linear-to-r from-gray-700 to-gray-800 px-6 py-4 flex items-center justify-between">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                    </svg>
+                    Dokumen Foto Nasabah
+                </h3>
+                @if(!$pinVerified)
+                    <button type="button" onclick="openAdminPinModal()" id="btn-unlock-photos" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white rounded-lg text-xs font-bold shadow-md transition-all flex items-center gap-1">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                        </svg>
+                        Buka Kunci Foto
+                    </button>
+                @endif
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <!-- Foto KTP -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-semibold text-gray-700 mb-2">Foto KTP</span>
+                        <div class="relative w-full h-48 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-inner flex items-center justify-center group">
+                            @if($nasabah->foto_ktp)
+                                <img src="{{ asset('storage/' . $nasabah->foto_ktp) }}" alt="Foto KTP" class="w-full h-full object-cover secure-blur {{ !$pinVerified ? 'blur-xl select-none pointer-events-none' : '' }}" id="img-foto-ktp">
+                                @if(!$pinVerified)
+                                    <div class="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center secure-overlay">
+                                        <div onclick="openAdminPinModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all mb-2 shadow-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs text-white font-medium">Klik untuk Melihat</span>
+                                    </div>
+                                @endif
+                                <a href="{{ asset('storage/' . $nasabah->foto_ktp) }}" target="_blank" class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg text-xs font-semibold backdrop-blur-xs transition-all shadow-md view-link-button {{ !$pinVerified ? 'hidden' : '' }}">
+                                    Lihat Detail
+                                </a>
+                            @else
+                                <div class="text-center p-4">
+                                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500">Tidak ada dokumen</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Foto KK -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-semibold text-gray-700 mb-2">Foto KK</span>
+                        <div class="relative w-full h-48 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-inner flex items-center justify-center group">
+                            @if($nasabah->foto_kk)
+                                <img src="{{ asset('storage/' . $nasabah->foto_kk) }}" alt="Foto KK" class="w-full h-full object-cover secure-blur {{ !$pinVerified ? 'blur-xl select-none pointer-events-none' : '' }}" id="img-foto-kk">
+                                @if(!$pinVerified)
+                                    <div class="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center secure-overlay">
+                                        <div onclick="openAdminPinModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all mb-2 shadow-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs text-white font-medium">Klik untuk Melihat</span>
+                                    </div>
+                                @endif
+                                <a href="{{ asset('storage/' . $nasabah->foto_kk) }}" target="_blank" class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg text-xs font-semibold backdrop-blur-xs transition-all shadow-md view-link-button {{ !$pinVerified ? 'hidden' : '' }}">
+                                    Lihat Detail
+                                </a>
+                            @else
+                                <div class="text-center p-4">
+                                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500">Tidak ada dokumen</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Foto Selfie -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-semibold text-gray-700 mb-2">Foto Selfie</span>
+                        <div class="relative w-full h-48 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-inner flex items-center justify-center group">
+                            @if($nasabah->foto_selfie)
+                                <img src="{{ asset('storage/' . $nasabah->foto_selfie) }}" alt="Foto Selfie" class="w-full h-full object-cover secure-blur {{ !$pinVerified ? 'blur-xl select-none pointer-events-none' : '' }}" id="img-foto-selfie">
+                                @if(!$pinVerified)
+                                    <div class="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center secure-overlay">
+                                        <div onclick="openAdminPinModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all mb-2 shadow-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs text-white font-medium">Klik untuk Melihat</span>
+                                    </div>
+                                @endif
+                                <a href="{{ asset('storage/' . $nasabah->foto_selfie) }}" target="_blank" class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg text-xs font-semibold backdrop-blur-xs transition-all shadow-md view-link-button {{ !$pinVerified ? 'hidden' : '' }}">
+                                    Lihat Detail
+                                </a>
+                            @else
+                                <div class="text-center p-4">
+                                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500">Tidak ada dokumen</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Foto KTP Kontak Darurat -->
+                    <div class="flex flex-col items-center">
+                        <span class="text-sm font-semibold text-gray-700 mb-2">Foto KTP Darurat</span>
+                        <div class="relative w-full h-48 bg-gray-100 rounded-xl border border-gray-200 overflow-hidden shadow-inner flex items-center justify-center group">
+                            @if($nasabah->darurat && $nasabah->darurat->foto_ktp)
+                                <img src="{{ asset('storage/' . $nasabah->darurat->foto_ktp) }}" alt="Foto KTP Darurat" class="w-full h-full object-cover secure-blur {{ !$pinVerified ? 'blur-xl select-none pointer-events-none' : '' }}" id="img-foto-ktp-darurat">
+                                @if(!$pinVerified)
+                                    <div class="absolute inset-0 bg-black/40 backdrop-blur-xs flex flex-col items-center justify-center p-3 text-center secure-overlay">
+                                        <div onclick="openAdminPinModal()" class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center cursor-pointer hover:bg-white/30 transition-all mb-2 shadow-lg">
+                                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                                            </svg>
+                                        </div>
+                                        <span class="text-xs text-white font-medium">Klik untuk Melihat</span>
+                                    </div>
+                                @endif
+                                <a href="{{ asset('storage/' . $nasabah->darurat->foto_ktp) }}" target="_blank" class="absolute bottom-2 right-2 bg-black/60 hover:bg-black/80 text-white p-2 rounded-lg text-xs font-semibold backdrop-blur-xs transition-all shadow-md view-link-button {{ !$pinVerified ? 'hidden' : '' }}">
+                                    Lihat Detail
+                                </a>
+                            @else
+                                <div class="text-center p-4">
+                                    <svg class="w-10 h-10 text-gray-400 mx-auto mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <span class="text-xs text-gray-500">Tidak ada dokumen</span>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Reset PIN Nasabah - Only for Admin Utama -->
@@ -445,6 +588,59 @@
         </div>
     </div>
     @endif
+
+    <!-- Admin PIN Verification Modal -->
+    <div id="adminPinModal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 fade-in-up">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto bg-linear-to-br from-gray-700 to-gray-800 rounded-full flex items-center justify-center mb-4 pulse-glow">
+                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                    </svg>
+                </div>
+                <h3 class="text-2xl font-bold text-gray-900 mb-2 font-display">Verifikasi PIN Admin</h3>
+                <p class="text-gray-600">Masukkan 6 digit PIN Admin Anda untuk melihat dokumen foto nasabah</p>
+            </div>
+
+            <form id="adminPinForm" onsubmit="submitAdminPin(event)">
+                @csrf
+                <div class="space-y-4">
+                    <div>
+                        <label for="admin_pin" class="block text-sm font-semibold text-gray-700 mb-2">PIN Admin</label>
+                        <input type="password" name="pin" id="admin_pin" maxlength="6" required
+                            class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-gray-700 focus:border-gray-700 transition-all outline-none text-center text-2xl tracking-widest font-mono bg-gray-50"
+                            placeholder="••••••" autocomplete="off" inputmode="numeric">
+                        <div id="adminPinError" class="mt-2 p-3 bg-red-50 border border-red-200 rounded-lg hidden">
+                            <div class="flex items-start gap-2">
+                                <svg class="w-5 h-5 text-red-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <p class="text-sm text-red-700 font-medium" id="adminPinErrorMessage"></p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <button type="button" onclick="closeAdminPinModal()" 
+                            class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all font-semibold">
+                            Batal
+                        </button>
+                        <button type="submit" id="adminPinSubmitBtn"
+                            class="flex-1 px-4 py-3 bg-linear-to-r from-gray-700 to-gray-800 text-white rounded-xl hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2">
+                            <span id="adminPinSubmitBtnText">Verifikasi</span>
+                            <span id="adminPinSubmitBtnLoading" class="hidden flex items-center justify-center gap-2">
+                                <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Memproses...
+                            </span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
@@ -479,6 +675,92 @@ async function generateRandomPinAdmin() {
         }
     } catch (error) {
         alert('Gagal generate PIN. Silakan coba lagi.');
+    }
+}
+
+// Admin PIN Modal
+function openAdminPinModal() {
+    document.getElementById('adminPinModal').classList.remove('hidden');
+    document.getElementById('admin_pin').value = '';
+    document.getElementById('adminPinError').classList.add('hidden');
+    document.getElementById('admin_pin').focus();
+}
+
+function closeAdminPinModal() {
+    document.getElementById('adminPinModal').classList.add('hidden');
+}
+
+async function submitAdminPin(event) {
+    event.preventDefault();
+    
+    const pinInput = document.getElementById('admin_pin');
+    const submitBtn = document.getElementById('adminPinSubmitBtn');
+    const btnText = document.getElementById('adminPinSubmitBtnText');
+    const btnLoading = document.getElementById('adminPinSubmitBtnLoading');
+    const errorDiv = document.getElementById('adminPinError');
+    const errorMessage = document.getElementById('adminPinErrorMessage');
+    
+    errorDiv.classList.add('hidden');
+    submitBtn.disabled = true;
+    btnText.classList.add('hidden');
+    btnLoading.classList.remove('hidden');
+    
+    try {
+        const response = await fetch('{{ route("admin.nasabah.verify-admin-pin") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}'
+            },
+            body: JSON.stringify({ pin: pinInput.value })
+        });
+        
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            // Unblur all secure images
+            document.querySelectorAll('.secure-blur').forEach(img => {
+                img.classList.remove('blur-xl', 'blur-md', 'select-none', 'pointer-events-none');
+            });
+            
+            // Hide overlays
+            document.querySelectorAll('.secure-overlay').forEach(overlay => {
+                overlay.classList.add('hidden');
+            });
+            
+            // Show view link buttons
+            document.querySelectorAll('.view-link-button').forEach(btn => {
+                btn.classList.remove('hidden');
+            });
+            
+            // Hide unlock button in card header
+            const unlockBtn = document.getElementById('btn-unlock-photos');
+            if (unlockBtn) unlockBtn.remove();
+            
+            closeAdminPinModal();
+            
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Dokumen foto berhasil dibuka.',
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            errorDiv.classList.remove('hidden');
+            errorMessage.innerText = data.message || 'Terjadi kesalahan.';
+            pinInput.value = '';
+            pinInput.focus();
+        }
+    } catch (error) {
+        errorDiv.classList.remove('hidden');
+        errorMessage.innerText = 'Gagal memproses verifikasi PIN. Silakan coba lagi.';
+        pinInput.value = '';
+        pinInput.focus();
+    } finally {
+        submitBtn.disabled = false;
+        btnText.classList.remove('hidden');
+        btnLoading.classList.add('hidden');
     }
 }
 </script>

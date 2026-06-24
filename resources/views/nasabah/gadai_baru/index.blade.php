@@ -12,7 +12,7 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-white rounded-full -ml-24 -mb-24"></div>
             </div>
-            <div class="relative z-10 flex items-center justify-between gap-4">
+            <div class="relative z-10 flex items-center justify-between flex-wrap gap-4">
                 <div>
                     <p class="text-white/80 text-xs font-black uppercase tracking-widest mb-1">Layanan Cepat & Aman</p>
                     <h1 class="text-3xl font-black text-white font-display leading-tight">Gadai Majakara</h1>
@@ -94,7 +94,7 @@
                     <div class="p-6">
                         {{-- Header card --}}
                         <div class="flex justify-between items-start mb-4">
-                            <div>
+                            <div class="min-w-0">
                                 <div class="flex items-center gap-2 mb-1">
                                     <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest">{{ $gadai->kategori->nama_kategori }}</span>
                                     <span class="w-1 h-1 rounded-full bg-gray-300"></span>
@@ -160,7 +160,7 @@
                         <div class="mb-5">
                             <div class="flex justify-between text-[9px] font-bold text-gray-400 mb-1.5">
                                 <span>{{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d M Y') }}</span>
-                                <span class="{{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
+                                <span class="hidden sm:inline {{ $progressPct >= 80 ? 'text-red-500' : 'text-gray-400' }}">{{ $progressPct }}% berlalu</span>
                                 <span>{{ $jatuhTempo->format('d M Y') }}</span>
                             </div>
                             <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
@@ -177,13 +177,13 @@
                         {{-- CTA Buttons --}}
                         <div class="grid grid-cols-2 gap-3">
                             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'lunas']) }}"
-                               class="flex items-center justify-center gap-2 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
+                               class="flex items-center justify-center gap-2 py-3 min-h-[44px] bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-emerald-600/20 active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                 Tebus
                             </a>
                             @if($gadai->jumlah_perpanjangan < $gadai->kategori->max_extend_default)
                             <a href="{{ route('nasabah.gadai_baru.create-pengajuan', ['id' => $gadai->id, 'jenis' => 'perpanjang']) }}"
-                               class="flex items-center justify-center gap-2 py-3.5 bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
+                               class="flex items-center justify-center gap-2 py-3 min-h-[44px] bg-amber-500 hover:bg-amber-600 text-white font-black rounded-2xl text-xs uppercase tracking-widest shadow-md shadow-amber-500/20 active:scale-95 transition-all">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                 Perpanjang
                             </a>
@@ -440,4 +440,155 @@
     });
 </script>
 @endpush
+
+@if(isset($hasAgreed) && !$hasAgreed)
+<!-- Syarat & Ketentuan Gadai Modal -->
+<div id="gadai-terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4" style="z-index: 100;">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 md:p-8 flex flex-col max-h-[90vh] border border-gray-100">
+        <div class="flex items-center gap-3 pb-4 border-b border-gray-100 mb-5">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 font-display">Syarat & Ketentuan Gadai</h3>
+                <p class="text-xs text-gray-500">Koperasi Majakara</p>
+            </div>
+        </div>
+
+        <!-- Scrollable T&C Content Box -->
+        <div id="gadai-terms-content-box" class="flex-1 overflow-y-auto max-h-[45vh] sm:max-h-[350px] border border-gray-200 rounded-2xl p-4 bg-gray-50 text-sm text-gray-700 leading-relaxed space-y-4 mb-5">
+            {!! $syaratGadai !!}
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="pt-4 border-t border-gray-100 space-y-4">
+            <!-- Checkbox -->
+            <label class="flex items-start gap-3 cursor-pointer group">
+                <input type="checkbox" id="gadai-terms-checkbox" disabled
+                    class="mt-1 w-4 h-4 text-[#8b6f2f] border-gray-300 rounded focus:ring-[#8b6f2f] focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="gadai-terms-checkbox-label" class="text-xs text-gray-500 select-none group-hover:text-gray-700 font-medium">
+                    Harap gulir syarat dan ketentuan sampai ke bagian paling bawah untuk menyetujui.
+                </span>
+            </label>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button type="button" id="btn-agree-gadai-terms" disabled
+                    class="flex-1 py-3 px-5 bg-gray-300 text-gray-500 rounded-xl font-bold transition-all text-center cursor-not-allowed shadow-md">
+                    Setuju & Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initGadaiTermsModal();
+});
+
+document.addEventListener('turbo:load', function() {
+    initGadaiTermsModal();
+});
+
+function initGadaiTermsModal() {
+    const termsBox = document.getElementById('gadai-terms-content-box');
+    const checkbox = document.getElementById('gadai-terms-checkbox');
+    const label = document.getElementById('gadai-terms-checkbox-label');
+    const btnAgree = document.getElementById('btn-agree-gadai-terms');
+    const modal = document.getElementById('gadai-terms-modal');
+
+    if (!termsBox || !checkbox || !btnAgree) return;
+
+    // Check if content height is less than client height (fully visible without scroll)
+    if (termsBox.scrollHeight <= termsBox.clientHeight) {
+        enableCheckbox();
+    } else {
+        // Detect scroll to bottom
+        termsBox.addEventListener('scroll', function scrollHandler() {
+            // Give 10px buffer to prevent precision issues on mobile zoom
+            if (termsBox.scrollHeight - termsBox.scrollTop - termsBox.clientHeight < 15) {
+                enableCheckbox();
+                termsBox.removeEventListener('scroll', scrollHandler);
+            }
+        });
+    }
+
+    function enableCheckbox() {
+        checkbox.removeAttribute('disabled');
+        if (label) {
+            label.textContent = "Saya telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan di atas.";
+            label.classList.remove('text-gray-500');
+            label.classList.add('text-gray-800');
+        }
+    }
+
+    checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+            btnAgree.removeAttribute('disabled');
+            btnAgree.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.add('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'pointer';
+        } else {
+            btnAgree.setAttribute('disabled', 'true');
+            btnAgree.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.remove('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'not-allowed';
+        }
+    });
+
+    btnAgree.addEventListener('click', function() {
+        if (btnAgree.getAttribute('disabled') === 'true' || !checkbox.checked) return;
+
+        btnAgree.setAttribute('disabled', 'true');
+        btnAgree.textContent = 'Menyimpan...';
+
+        fetch('{{ route("nasabah.gadai_baru.agree-terms") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                modal.classList.add('hidden');
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Persetujuan Disimpan',
+                    text: 'Syarat & Ketentuan telah disetujui.',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Gagal menyimpan persetujuan.',
+                    confirmButtonText: 'Coba Lagi'
+                });
+                btnAgree.removeAttribute('disabled');
+                btnAgree.textContent = 'Setuju & Lanjutkan';
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan jaringan.',
+                confirmButtonText: 'Coba Lagi'
+            });
+            btnAgree.removeAttribute('disabled');
+            btnAgree.textContent = 'Setuju & Lanjutkan';
+        });
+    });
+}
+</script>
+@endpush
+@endif
 @endsection

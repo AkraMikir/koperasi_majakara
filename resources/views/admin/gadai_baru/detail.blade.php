@@ -135,6 +135,32 @@
                             <p class="text-xs text-gray-500 font-medium mb-1">Nama Item</p>
                             <p class="font-bold text-gray-900 text-lg">{{ $gadai->item->head_1 }}</p>
                         </div>
+
+                        @if($gadai->kategori->kode_kategori === 'vehicle')
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">No Mesin/Rangka</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->no_mesin_rangka ?? '-' }}</p>
+                        </div>
+                        @elseif($gadai->kategori->kode_kategori === 'electronic')
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">No IMEI/SN</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->no_imei_sn ?? '-' }}</p>
+                        </div>
+                        @endif
+
+                        @if($gadai->kelengkapan)
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Kelengkapan</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->kelengkapan }}</p>
+                        </div>
+                        @endif
+
+                        @if($gadai->catatan)
+                        <div>
+                            <p class="text-xs text-gray-500 font-medium mb-1">Catatan</p>
+                            <p class="font-bold text-gray-900 text-sm">{{ $gadai->catatan }}</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -247,6 +273,10 @@
                                 <a href="{{ route('admin.gadai_baru.struk-detail.awal', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
                                     <span>Struk Detail Gadai</span>
                                     <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                </a>
+                                <a href="{{ route('admin.gadai_baru.struk-detail.awal-b5', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-amber-50/50 border border-amber-100 rounded-xl hover:bg-amber-100/70 transition-colors text-xs font-bold text-amber-800">
+                                    <span>Surat Bukti Gadai (B5)</span>
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                                 </a>
                                 <a href="{{ route('admin.gadai_baru.struk-detail.syarat', $gadai->id) }}" class="flex items-center justify-between px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-colors text-xs font-bold text-gray-700">
                                     <span>Syarat & Ketentuan</span>

@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\LandingPageController;
 use App\Http\Controllers\Nasabah\DashboardController as NasabahDashboardController;
 use App\Http\Controllers\Nasabah\TabunganController;
@@ -38,6 +39,14 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login'])->name('login.submit');
 Route::post('/login/verify-pin', [LoginController::class, 'verifyPin'])->name('login.verify-pin');
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+// Guest Forgot Password Routes
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendOtp'])->name('password.email');
+Route::get('/forgot-password/verify', [ForgotPasswordController::class, 'showVerifyForm'])->name('password.verify');
+Route::post('/forgot-password/verify', [ForgotPasswordController::class, 'verifyOtpAndResetPassword'])->name('password.update');
+Route::post('/forgot-password/resend-otp', [ForgotPasswordController::class, 'resendOtp'])->name('password.resend-otp');
+Route::get('/forgot-password/otp-cooldown', [ForgotPasswordController::class, 'getOtpCooldown'])->name('password.otp-cooldown');
 
 // Nasabah Routes (Protected with Auth Middleware)
 Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function () {
@@ -117,6 +126,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         // Pinjaman Routes
         Route::prefix('pinjaman')->middleware('emergency_contact')->name('pinjaman.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'index'])->name('index');
+            Route::post('/agree-terms', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'agreeTerms'])->name('agree-terms');
             Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
             Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
             Route::post('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPengajuanTransfer'])->name('submit-pengajuan-transfer');
@@ -162,6 +172,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         // Gadai Baru Routes
         Route::prefix('gadai_baru')->middleware('emergency_contact')->name('gadai_baru.')->group(function () {
             Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
+            Route::post('/agree-terms', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'agreeTerms'])->name('agree-terms');
             Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
             Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');
             Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
@@ -195,6 +206,8 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/struk', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'index'])->name('struk');
         Route::post('/struk/update-header', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateHeader'])->name('struk.update-header');
         Route::post('/struk/update-syarat-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadai'])->name('struk.update-syarat-gadai');
+        Route::post('/struk/update-syarat-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratPinjaman'])->name('struk.update-syarat-pinjaman');
+        Route::post('/struk/update-info-box-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxPinjaman'])->name('struk.update-info-box-pinjaman');
         Route::post('/struk/update-extra-kehilangan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateExtraKehilangan'])->name('struk.update-extra-kehilangan');
         Route::post('/struk/preview-tabungan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewTabungan'])->name('struk.preview-tabungan');
         Route::post('/struk/preview-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewPinjaman'])->name('struk.preview-pinjaman');
@@ -263,6 +276,9 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pengajuan', [\App\Http\Controllers\Admin\PinjamanController::class, 'pengajuan'])->name('pengajuan');
         Route::get('/pengajuan/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPengajuan'])->name('detail-pengajuan');
         Route::get('/pinjaman-aktif', [\App\Http\Controllers\Admin\PinjamanController::class, 'pinjamanAktif'])->name('pinjaman-aktif');
+        Route::get('/limit', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitIndex'])->name('limit.index');
+        Route::get('/limit/{id_nasabah}/logs', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitLogs'])->name('limit.logs');
+        Route::post('/limit/{id_nasabah}/update', [\App\Http\Controllers\Admin\PinjamanController::class, 'limitUpdate'])->name('limit.update');
         // CRUD Pinjaman - MUST be before /pinjaman-aktif/{id} agar 'create' tidak tertangkap sebagai {id}
         Route::middleware('admin.permission:crud-pinjaman')->group(function () {
             Route::get('/pinjaman-aktif/create', [\App\Http\Controllers\Admin\PinjamanController::class, 'createPinjaman'])->name('create-pinjaman');
@@ -279,6 +295,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
         Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
         Route::get('/pinjaman-aktif/{id}/struk-pencairan', [\App\Http\Controllers\Admin\StrukController::class, 'pencairanPinjaman'])->name('struk-pencairan');
+        Route::get('/pinjaman-aktif/{id}/struk-pencairan-b5', [\App\Http\Controllers\Admin\StrukController::class, 'pencairanPinjamanB5'])->name('struk-pencairan-b5');
         Route::get('/angsuran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'angsuran'])->name('struk-angsuran');
 
         // Approval & Cairkan routes - accessible by all admins (Admin Utama & Admin Operasional)
@@ -343,6 +360,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanDestroy'])->name('destroy');
                 Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bungaPinjamanToggleStatus'])->name('toggle-status');
             });
+        });
+
+        // Tujuan Pinjaman - CRUD (Admin Utama & Operasional)
+        Route::prefix('tujuan-pinjaman')->name('tujuan-pinjaman.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanIndex'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanCreate'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanStore'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanEdit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanUpdate'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanDestroy'])->name('destroy');
+            Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'tujuanPinjamanToggleStatus'])->name('toggle-status');
         });
         
         // Denda Pinjaman
@@ -554,6 +582,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/fitur', [\App\Http\Controllers\Admin\MasterDataController::class, 'fiturIndex'])->name('fitur.index');
         Route::get('/via', [\App\Http\Controllers\Admin\MasterDataController::class, 'viaIndex'])->name('via.index');
         Route::get('/transaksi', [\App\Http\Controllers\Admin\MasterDataController::class, 'transaksiIndex'])->name('transaksi.index');
+
+        // Syarat & Ketentuan Layanan (T&C Jangka Panjang)
+        Route::prefix('syarat-ketentuan-layanan')->name('syarat-ketentuan-layanan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananUpdate'])->name('update');
+            });
+        });
+
+        // Syarat & Ketentuan Layanan Gadai (T&C Jangka Panjang Gadai)
+        Route::prefix('syarat-ketentuan-layanan-gadai')->name('syarat-ketentuan-layanan-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiUpdate'])->name('update');
+            });
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
@@ -563,6 +607,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pending-changes/list', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'pendingChanges'])->name('pending-changes');
         Route::get('/change/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'showChangeDetail'])->name('change-detail');
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
+        Route::post('/verify-admin-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyAdminPin'])->name('verify-admin-pin');
         
         // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
         Route::middleware('admin.permission:manage-nasabah')->group(function () {
@@ -620,6 +665,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pinjaman', [\App\Http\Controllers\Admin\BungaController::class, 'pinjaman'])->name('pinjaman');
         Route::get('/deposito', [\App\Http\Controllers\Admin\BungaController::class, 'deposito'])->name('deposito');
         Route::get('/gadai', [\App\Http\Controllers\Admin\BungaController::class, 'gadai'])->name('gadai');
+
+        // Pembayaran Pajak (PPh) CRUD
+        Route::prefix('pajak')->name('pajak.')->group(function () {
+            Route::get('/hitung', [\App\Http\Controllers\Admin\PajakBungaController::class, 'hitung'])->name('hitung');
+            Route::get('/', [\App\Http\Controllers\Admin\PajakBungaController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\PajakBungaController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\PajakBungaController::class, 'store'])->name('store');
+            Route::get('/{id}/edit', [\App\Http\Controllers\Admin\PajakBungaController::class, 'edit'])->name('edit');
+            Route::put('/{id}', [\App\Http\Controllers\Admin\PajakBungaController::class, 'update'])->name('update');
+            Route::delete('/{id}', [\App\Http\Controllers\Admin\PajakBungaController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // ── Deposito ──
@@ -688,6 +744,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         // Struk Gadai Detail Routes
         Route::prefix('struk-detail')->name('struk-detail.')->group(function () {
             Route::get('/{id}/awal', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwal'])->name('awal');
+            Route::get('/{id}/awal-b5', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiAwalB5'])->name('awal-b5');
             Route::get('/{id}/syarat', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiSyarat'])->name('syarat');
             Route::get('/{id}/loker', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiLoker'])->name('loker');
             Route::get('/{id}/perpanjangan/{pengajuan_id}', [\App\Http\Controllers\Admin\StrukController::class, 'gadaiPerpanjangan'])->name('perpanjangan');
@@ -772,3 +829,4 @@ Route::get('/test-whatsapp', function () {
         echo "<pre>" . $e->getTraceAsString() . "</pre>";
     }
 });
+Route::post('/fonnte-webhook', [\App\Http\Controllers\FonnteWebhookController::class, 'handle']);

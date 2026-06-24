@@ -45,6 +45,17 @@
                 </div>
             </div>
 
+            <!-- Durasi Pilihan (Choose Option) -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Durasi Pilihan (Opsional)</label>
+                <input type="number" name="durasi_pilihan" value="{{ old('durasi_pilihan') }}" min="1" placeholder="Masukkan durasi eksak jika ingin membatasi pilihan (misal: 1 atau 3)"
+                    class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none transition-all">
+                <p class="text-xs text-gray-500 mt-1">Kosongkan jika ingin mengambil otomatis dari durasi maksimum</p>
+                @error('durasi_pilihan')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Bunga Persen -->
             <div>
                 <label class="block text-sm font-semibold text-gray-700 mb-2">Persentase Bunga (%) *</label>

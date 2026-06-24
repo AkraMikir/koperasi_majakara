@@ -66,6 +66,13 @@ class NasabahGadaiBaruController extends Controller
                 ->get();
         }
 
+        $hasAgreed = false;
+        $syaratGadai = '';
+        if ($nasabah) {
+            $hasAgreed = \App\Models\PersetujuanSyaratGadai::where('nasabah_id', $nasabah->id)->exists();
+            $syaratGadai = \App\Models\SyaratKetentuanLayananGadai::first()->konten ?? '';
+        }
+
         return view('nasabah.gadai_baru.index', compact(
             'kategoriElektronik', 
             'kategoriKendaraan', 
@@ -73,7 +80,9 @@ class NasabahGadaiBaruController extends Controller
             'gadaiAktif',
             'pengajuanLunas',
             'pengajuanPerpanjang',
-            'gadaiSelesai'
+            'gadaiSelesai',
+            'hasAgreed',
+            'syaratGadai'
         ));
     }
 
@@ -94,7 +103,14 @@ class NasabahGadaiBaruController extends Controller
         }
         // ──────────────────────────────────────────────────────────
 
-        return view('nasabah.gadai_baru.show', compact('kategori', 'item', 'lokasi', 'nasabah'));
+        $hasAgreed = false;
+        $syaratGadai = '';
+        if ($nasabah) {
+            $hasAgreed = \App\Models\PersetujuanSyaratGadai::where('nasabah_id', $nasabah->id)->exists();
+            $syaratGadai = \App\Models\SyaratKetentuanLayananGadai::first()->konten ?? '';
+        }
+
+        return view('nasabah.gadai_baru.show', compact('kategori', 'item', 'lokasi', 'nasabah', 'hasAgreed', 'syaratGadai'));
     }
 
     public function showActiveDetail($id)
@@ -307,5 +323,35 @@ class NasabahGadaiBaruController extends Controller
             ->get();
             
         return view('nasabah.gadai_baru.status_pengajuan', compact('pengajuan'));
+    }
+
+    /**
+     * Store customer agreement to Gadai terms.
+     */
+    public function agreeTerms(Request $request)
+    {
+        try {
+            $nasabah = Auth::user()->nasabah;
+            if (!$nasabah) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Profil nasabah tidak ditemukan.'
+                ], 404);
+            }
+            \App\Models\PersetujuanSyaratGadai::updateOrCreate(
+                ['nasabah_id' => $nasabah->id],
+                ['agreed_at' => now()]
+            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Syarat dan ketentuan gadai berhasil disetujui.'
+            ]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error saving Gadai T&C agreement: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan persetujuan.'
+            ], 500);
+        }
     }
 }

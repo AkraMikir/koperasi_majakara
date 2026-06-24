@@ -3,7 +3,7 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="w-full pb-20 px-4 lg:px-8 max-w-[1600px] mx-auto animate-fade-in" x-data="{ showBalance: false }">
+    <div class="w-full pb-20 px-4 sm:px-6 lg:px-8 max-w-[1600px] mx-auto animate-fade-in" x-data="{ showBalance: false }">
         <!-- Personalized Greeting / Premium Member Card -->
         <div class="relative w-full rounded-[2rem] overflow-hidden mb-6 shadow-2xl mt-4 group">
             <!-- Background Gradients & Effects -->
@@ -39,6 +39,21 @@
                         <p class="text-[10px] md:text-xs text-white/50 mt-1 font-mono tracking-widest">NO. ANGGOTA : {{ auth()->user()->id }}</p>
                     </div>
                 </div>
+
+                @if(is_null(auth()->user()->verified))
+                <!-- Verification Status Notice -->
+                <div class="flex-1 max-w-sm w-full bg-yellow-500/10 backdrop-blur-md border border-yellow-500/30 rounded-2xl p-4 flex gap-3 shadow-lg my-2 lg:my-0">
+                    <div class="w-8 h-8 rounded-full bg-yellow-500/20 flex items-center justify-center shrink-0">
+                        <svg class="w-4 h-4 text-yellow-300 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-yellow-200 uppercase tracking-wider mb-0.5">Akun Sedang Diverifikasi</h4>
+                        <p class="text-[10.5px] text-white/80 leading-normal">
+                            Akun Anda saat ini berstatus <strong class="text-red-300 font-bold">Non-Aktif</strong> karena sedang dalam proses verifikasi oleh Admin.
+                        </p>
+                    </div>
+                </div>
+                @endif
                 
                 <!-- Financial Summary Container -->
                 <div class="bg-white/10 backdrop-blur-xl rounded-[1.5rem] border border-white/20 p-5 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 divide-y sm:divide-y-0 sm:divide-x divide-white/10 shadow-[inset_0_1px_1px_rgba(255,255,255,0.2)] w-full lg:w-auto relative group-hover:bg-white/15 transition-colors duration-500">
@@ -214,7 +229,7 @@
                             <i class="fas fa-lock text-gray-600 drop-shadow-md text-lg"></i>
                         </div>
                     </div>
-                    <span class="text-[10px] md:text-xs font-bold text-gray-400 text-center leading-tight">{{ $item['label'] }}</span>
+                    <span class="text-[10px] md:text-xs font-bold text-gray-400 text-center leading-tight truncate w-full">{{ $item['label'] }}</span>
                 </div>
                 @else
                 <a href="{{ route($item['route'], $item['params'] ?? []) }}" class="flex flex-col items-center gap-2 group">
@@ -224,7 +239,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" d="{{ $item['icon'] }}"></path>
                         </svg>
                     </div>
-                    <span class="text-[10px] md:text-xs font-bold text-gray-600 group-hover:text-majakara-dark-gold transition-colors text-center leading-tight">{{ $item['label'] }}</span>
+                    <span class="text-[10px] md:text-xs font-bold text-gray-600 group-hover:text-majakara-dark-gold transition-colors text-center leading-tight truncate w-full">{{ $item['label'] }}</span>
                 </a>
                 @endif
                 @endforeach
@@ -310,7 +325,7 @@
                     </a>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto pr-1 space-y-4" style="max-height: 280px;">
+                <div class="flex-1 overflow-y-auto pr-1 space-y-4 max-h-[280px]">
                     @forelse(collect($transaksiTerbaru ?? [])->take(5) as $transaksi)
                         @php
                             $isInflow = $transaksi->is_inflow;
@@ -368,7 +383,7 @@
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                             </div>
                             <h3 class="text-sm font-bold text-gray-700">Belum Ada Transaksi</h3>
-                            <p class="text-[10px] text-gray-400 mt-1 max-w-[200px]">Mulai bertransaksi untuk melihat riwayat aktivitas Anda di sini.</p>
+                            <p class="text-[10px] text-gray-400 mt-1 max-w-xs">Mulai bertransaksi untuk melihat riwayat aktivitas Anda di sini.</p>
                         </div>
                     @endforelse
                 </div>

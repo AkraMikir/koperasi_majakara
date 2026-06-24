@@ -144,6 +144,52 @@ class WhatsAppService
     }
 
     /**
+     * Kirim pesan bebas via WhatsApp menggunakan Fonnte API
+     * 
+     * @param string $phoneNumber Nomor telepon tujuan
+     * @param string $message Isi pesan
+     * @return array
+     */
+    public function sendMessage($phoneNumber, $message)
+    {
+        try {
+            if (empty($this->apiKey)) {
+                return ['success' => false, 'message' => 'API Key belum di-set.'];
+            }
+
+            $formattedPhone = $this->formatPhoneNumber($phoneNumber);
+            $target = (substr($formattedPhone, 0, 2) === '62')
+                ? '0' . substr($formattedPhone, 2)
+                : $formattedPhone;
+
+            Log::info('Sending message via Fonnte WhatsApp', [
+                'target' => $target,
+            ]);
+
+            $response = $this->fonnteHttp()->post($this->apiUrl, [
+                'target' => $target,
+                'message' => $message,
+                'countryCode' => '62',
+            ]);
+
+            $responseBody = $response->json() ?? [];
+            $statusVal = $responseBody['status'] ?? $responseBody['success'] ?? false;
+            
+            if ($response->successful() && ($statusVal === true || $statusVal === 1)) {
+                return ['success' => true, 'message' => 'Pesan terkirim', 'data' => $responseBody];
+            }
+
+            return ['success' => false, 'message' => 'Gagal mengirim pesan', 'data' => $responseBody];
+        } catch (\Exception $e) {
+            Log::error('WhatsApp Service Error (sendMessage)', [
+                'error' => $e->getMessage()
+            ]);
+            return ['success' => false, 'message' => $e->getMessage()];
+        }
+    }
+
+
+    /**
      * Format nomor telepon ke format internasional
      * Contoh: 08123456789 -> 628123456789
      *         +628123456789 -> 628123456789

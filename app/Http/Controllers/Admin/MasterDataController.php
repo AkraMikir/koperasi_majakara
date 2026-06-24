@@ -15,6 +15,8 @@ use App\Models\AdminOperasional;
 use App\Models\JnsBank;
 use App\Models\LogoBank;
 use App\Models\User;
+use App\Models\MasterTujuanPinjaman;
+use App\Models\SyaratKetentuanLayanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -53,6 +55,7 @@ class MasterDataController extends Controller
             'total_rekening_perusahaan' => JnsBank::count(),
             'total_inap_kendaraan' => \App\Models\GadaiMasterInapKendaraan::count(),
             'total_denda_deposito' => MasterDendaDeposito::where('status_aktif', true)->count(),
+            'total_tujuan_pinjaman' => MasterTujuanPinjaman::count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
@@ -78,6 +81,7 @@ class MasterDataController extends Controller
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
+            'durasi_pilihan' => 'nullable|integer|min:1',
             'bunga_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
         ]);
@@ -101,6 +105,7 @@ class MasterDataController extends Controller
         $request->validate([
             'durasi_min' => 'required|integer|min:1',
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
+            'durasi_pilihan' => 'nullable|integer|min:1',
             'bunga_persen' => 'required|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
         ]);
@@ -1044,5 +1049,150 @@ class MasterDataController extends Controller
     {
         $data = DB::table('jns_transaksi')->paginate(15);
         return view('admin.master-data.transaksi.index', compact('data'));
+    }
+
+    // ==================== MASTER TUJUAN PINJAMAN ====================
+
+    protected function checkTujuanPermission()
+    {
+        $user = auth()->user();
+        if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData($user) && $user->role !== 'operasional') {
+            abort(403, 'Anda tidak memiliki akses untuk mengelola data ini. Hanya Admin Utama dan Operasional yang diizinkan.');
+        }
+    }
+
+    public function tujuanPinjamanIndex()
+    {
+        $data = MasterTujuanPinjaman::latest()->paginate(15);
+        return view('admin.master-data.tujuan-pinjaman.index', compact('data'));
+    }
+
+    public function tujuanPinjamanCreate()
+    {
+        $this->checkTujuanPermission();
+        return view('admin.master-data.tujuan-pinjaman.create');
+    }
+
+    public function tujuanPinjamanStore(Request $request)
+    {
+        $this->checkTujuanPermission();
+        $request->validate([
+            'tujuan' => 'required|string|max:255',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        MasterTujuanPinjaman::create([
+            'tujuan' => $request->tujuan,
+            'keterangan' => $request->keterangan,
+            'status' => $request->has('status') ? (bool) $request->status : true,
+        ]);
+
+        return redirect()->route('admin.master-data.tujuan-pinjaman.index')
+            ->with('success', 'Tujuan pinjaman berhasil ditambahkan');
+    }
+
+    public function tujuanPinjamanEdit($id)
+    {
+        $this->checkTujuanPermission();
+        $data = MasterTujuanPinjaman::findOrFail($id);
+        return view('admin.master-data.tujuan-pinjaman.edit', compact('data'));
+    }
+
+    public function tujuanPinjamanUpdate(Request $request, $id)
+    {
+        $this->checkTujuanPermission();
+        $request->validate([
+            'tujuan' => 'required|string|max:255',
+            'keterangan' => 'nullable|string|max:500',
+        ]);
+
+        $data = MasterTujuanPinjaman::findOrFail($id);
+        $data->update([
+            'tujuan' => $request->tujuan,
+            'keterangan' => $request->keterangan,
+            'status' => $request->has('status') ? (bool) $request->status : true,
+        ]);
+
+        return redirect()->route('admin.master-data.tujuan-pinjaman.index')
+            ->with('success', 'Tujuan pinjaman berhasil diperbarui');
+    }
+
+    public function tujuanPinjamanDestroy($id)
+    {
+        $this->checkTujuanPermission();
+        $data = MasterTujuanPinjaman::findOrFail($id);
+        $data->delete();
+
+        return redirect()->route('admin.master-data.tujuan-pinjaman.index')
+            ->with('success', 'Tujuan pinjaman berhasil dihapus');
+    }
+
+    public function tujuanPinjamanToggleStatus($id)
+    {
+        $this->checkTujuanPermission();
+        $data = MasterTujuanPinjaman::findOrFail($id);
+        $data->status = !$data->status;
+        $data->save();
+        return redirect()->back()->with('success', 'Status tujuan pinjaman berhasil diubah');
+    }
+
+    // ==================== SYARAT & KETENTUAN LAYANAN ====================
+
+    public function syaratKetentuanLayananIndex()
+    {
+        $data = SyaratKetentuanLayanan::first();
+        if (!$data) {
+            $data = SyaratKetentuanLayanan::create([
+                'konten' => '<h3>KETENTUAN PENGGUNAAN LAYANAN MAJAKARAPINJAM</h3><p>Tulis syarat ketentuan di sini...</p>'
+            ]);
+        }
+        return view('admin.master-data.syarat-ketentuan-layanan.index', compact('data'));
+    }
+
+    public function syaratKetentuanLayananUpdate(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'konten' => 'required|string',
+        ]);
+
+        $data = SyaratKetentuanLayanan::first();
+        if (!$data) {
+            SyaratKetentuanLayanan::create(['konten' => $request->konten]);
+        } else {
+            $data->update(['konten' => $request->konten]);
+        }
+
+        return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan berhasil diperbarui.');
+    }
+
+    // ==================== SYARAT & KETENTUAN LAYANAN GADAI ====================
+
+    public function syaratKetentuanLayananGadaiIndex()
+    {
+        $data = \App\Models\SyaratKetentuanLayananGadai::first();
+        if (!$data) {
+            $data = \App\Models\SyaratKetentuanLayananGadai::create([
+                'konten' => '<h3>KETENTUAN PENGGUNAAN LAYANAN MAJAKARAGADAI</h3><p>Tulis syarat ketentuan gadai di sini...</p>'
+            ]);
+        }
+        return view('admin.master-data.syarat-ketentuan-layanan-gadai.index', compact('data'));
+    }
+
+    public function syaratKetentuanLayananGadaiUpdate(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'konten' => 'required|string',
+        ]);
+
+        $data = \App\Models\SyaratKetentuanLayananGadai::first();
+        if (!$data) {
+            \App\Models\SyaratKetentuanLayananGadai::create(['konten' => $request->konten]);
+        } else {
+            $data->update(['konten' => $request->konten]);
+        }
+
+        return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan Gadai berhasil diperbarui.');
     }
 }

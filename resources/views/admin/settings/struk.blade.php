@@ -6,12 +6,16 @@
 <div class="max-w-7xl mx-auto space-y-6" x-data="{
     tab: 'tabungan',
     // Header properties for live preview
-    nama_koperasi: '{{ $settings->nama_koperasi }}',
-    alamat_koperasi: '{{ $settings->alamat_koperasi }}',
-    no_telp: '{{ $settings->no_telp }}',
-    nama_pt: '{{ $settings->nama_pt }}',
-    format_no_struk: '{{ $settings->format_no_struk }}',
-    syarat_ketentuan_gadai: `{!! addslashes($settings->syarat_ketentuan_gadai) !!}`,
+    nama_koperasi: {{ json_encode($settings->nama_koperasi) }},
+    alamat_koperasi: {{ json_encode($settings->alamat_koperasi) }},
+    no_telp: {{ json_encode($settings->no_telp) }},
+    nama_pt: {{ json_encode($settings->nama_pt) }},
+    format_no_struk: {{ json_encode($settings->format_no_struk) }},
+    email: {{ json_encode($settings->email) }},
+    website: {{ json_encode($settings->website) }},
+    syarat_ketentuan_gadai: {{ json_encode($settings->syarat_ketentuan_gadai) }},
+    syarat_ketentuan_pinjaman: {{ json_encode($settings->syarat_ketentuan_pinjaman) }},
+    info_box_pinjaman: {{ json_encode($settings->info_box_pinjaman) }},
     bunga_admin_gadai: '1.2',
     
     // Preview properties
@@ -62,6 +66,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.tabungan_jenis,
                 nominal: this.tabungan_nominal,
                 saldo_sebelum: this.tabungan_saldo_sebelum
@@ -88,10 +94,14 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.pinjaman_jenis,
                 jumlah_pinjam: this.pinjaman_jumlah,
                 lama_pinjam: this.pinjaman_tenor,
-                bunga: this.pinjaman_bunga
+                bunga: this.pinjaman_bunga,
+                syarat_ketentuan_pinjaman: this.syarat_ketentuan_pinjaman,
+                info_box_pinjaman: this.info_box_pinjaman
             })
         })
         .then(res => res.text())
@@ -115,6 +125,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 jenis_trans: this.deposito_jenis,
                 nominal_awal: this.deposito_nominal,
                 jangka_waktu: this.deposito_tenor,
@@ -142,6 +154,8 @@
                 no_telp: this.no_telp,
                 nama_pt: this.nama_pt,
                 format_no_struk: this.format_no_struk,
+                email: this.email,
+                website: this.website,
                 syarat_ketentuan_gadai: this.syarat_ketentuan_gadai,
                 bunga_admin_gadai: this.bunga_admin_gadai,
                 jenis_trans: this.gadai_jenis,
@@ -217,6 +231,8 @@
                                  no_telp = $event.target.form.no_telp.value;
                                  nama_pt = $event.target.form.nama_pt.value;
                                  format_no_struk = $event.target.form.format_no_struk.value;
+                                 email = $event.target.form.email.value;
+                                 website = $event.target.form.website.value;
                                  updateTabungan(); updatePinjaman(); updateDeposito(); updateGadai();">
                         @include('admin.settings.partials.header-settings')
                     </div>
@@ -259,6 +275,46 @@
                 <div class="p-6">
                     <div @input="updateGadai();">
                         @include('admin.settings.partials.settings-gadai')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syarat & Ketentuan Pinjaman Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Syarat & Ketentuan Pinjaman</h2>
+                        <p class="text-xs text-gray-500 font-sans">Dicetak di bagian tengah khusus lembar struk pinjaman B5</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="syarat_ketentuan_pinjaman = $event.target.form.syarat_ketentuan_pinjaman.value; updatePinjaman();">
+                        @include('admin.settings.partials.syarat-ketentuan-pinjaman')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box Pinjaman Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Info Box Pinjaman</h2>
+                        <p class="text-xs text-gray-500 font-sans">Kotak informasi jam operasional dan ketentuan angsuran (kiri bawah B5)</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="info_box_pinjaman = $event.target.form.info_box_pinjaman.value; updatePinjaman();">
+                        @include('admin.settings.partials.info-box-pinjaman')
                     </div>
                 </div>
             </div>

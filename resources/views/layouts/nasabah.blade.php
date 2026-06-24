@@ -23,7 +23,7 @@
         body {
             font-family: 'Inter', sans-serif;
             background-color: var(--bg-light);
-            padding-bottom: 80px; /* Space for bottom navbar */
+            padding-bottom: calc(80px + env(safe-area-inset-bottom)); /* Space for bottom navbar */
         }
         
         .font-display {

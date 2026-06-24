@@ -72,7 +72,7 @@
 
     <!-- Profile Header -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <!-- Background Pattern -->
             <div class="absolute inset-0 opacity-10">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white rounded-full -mr-32 -mt-32"></div>
@@ -92,41 +92,44 @@
                         </div>
                         
                         <!-- Info Profil -->
-                        <div class="flex-1 text-center md:text-left">
+                        <div class="flex-1 text-center md:text-left break-words min-w-0">
                             <h1 class="text-3xl md:text-4xl font-bold text-white mb-2 font-display">{{ $nasabah->user->nama ?? 'N/A' }}</h1>
                             <p class="text-white/90 text-sm mb-4">{{ $nasabah->user->email ?? 'N/A' }}</p>
                         
                         <!-- Status Badge -->
                         <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                            @if(is_null($nasabah->user->verified))
-                                <span class="px-4 py-2 bg-amber-500/20 backdrop-blur-sm rounded-full text-amber-200 text-sm font-semibold border border-amber-500/30 flex items-center gap-1.5 shadow-sm">
-                                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                                    Menunggu Verifikasi Admin
+                            @if(is_null(auth()->user()->verified))
+                                <span class="px-4 py-2 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-semibold border border-yellow-500/30 flex items-center gap-1.5 animate-pulse">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Menunggu Verifikasi
+                                </span>
+                                <span class="px-4 py-2 bg-red-500/20 backdrop-blur-sm rounded-full text-red-200 text-sm font-semibold border border-red-500/30 flex items-center gap-1.5">
+                                    Status: Non-Aktif
                                 </span>
                             @else
-                                <span class="px-4 py-2 bg-emerald-500/20 backdrop-blur-sm rounded-full text-emerald-200 text-sm font-semibold border border-emerald-500/30 flex items-center gap-1.5 shadow-sm">
-                                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                                    Terverifikasi
+                                <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                    Nasabah Aktif
                                 </span>
                             @endif
-                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30">
+                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 truncate max-w-[10rem]">
                                 Saldo: Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}
                             </span>
                         </div>
                         
                         <!-- Quick Info -->
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. HP</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-sm truncate">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">NIK</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. KK</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                             </div>
                         </div>
                         </div>
@@ -157,7 +160,7 @@
                     <p class="text-sm text-yellow-700 mb-3">Anda memiliki {{ $pendingRequests->count() }} pengajuan perubahan data yang menunggu persetujuan admin.</p>
                     <div class="space-y-2">
                         @foreach($pendingRequests as $request)
-                        <div class="flex items-center justify-between bg-white rounded-lg p-3 border border-yellow-200">
+                        <div class="flex flex-wrap gap-2 items-center justify-between bg-white rounded-lg p-3 border border-yellow-200">
                             <div class="flex items-center gap-2">
                                 <span class="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs font-semibold rounded">
                                     {{ $request->jenis_data_label }}
@@ -222,7 +225,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->user->email ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->user->email ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Nomor HP</p>
@@ -230,11 +233,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. KK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Tempat, Tanggal Lahir</p>
@@ -330,7 +333,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. Rekening</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Nama Pemilik Rekening</p>
@@ -389,7 +392,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->email ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->darurat->email ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Pekerjaan</p>
@@ -397,7 +400,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
@@ -422,15 +425,15 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-linear-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
                     <p class="text-sm text-green-700 mb-1">Saldo Tabungan</p>
-                    <p class="text-2xl font-bold text-green-800">Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-green-800 break-words">Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-linear-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                     <p class="text-sm text-blue-700 mb-1">Total Setoran</p>
-                    <p class="text-2xl font-bold text-blue-800">Rp {{ number_format((float)($nasabah->transTabungan->where('jenis', 'setoran')->sum('nominal') ?? 0), 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-blue-800 break-words">Rp {{ number_format((float)($nasabah->transTabungan->where('jenis', 'setoran')->sum('nominal') ?? 0), 0, ',', '.') }}</p>
                 </div>
                 <div class="bg-linear-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200">
                     <p class="text-sm text-red-700 mb-1">Total Penarikan</p>
-                    <p class="text-2xl font-bold text-red-800">Rp {{ number_format((float)($nasabah->transTabungan->where('jenis', 'penarikan')->sum('nominal') ?? 0), 0, ',', '.') }}</p>
+                    <p class="text-2xl font-bold text-red-800 break-words">Rp {{ number_format((float)($nasabah->transTabungan->where('jenis', 'penarikan')->sum('nominal') ?? 0), 0, ',', '.') }}</p>
                 </div>
             </div>
         </div>
@@ -439,7 +442,7 @@
     <!-- Keamanan & Privasi - Link ke Setting -->
     <div class="mx-4 mb-6">
         <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-2xl shadow-lg p-6 border-2 border-[#d4af37]/30">
-            <div class="flex items-center justify-between">
+            <div class="flex flex-wrap gap-2 items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
                         <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -521,7 +524,7 @@
 
 <!-- Modal PIN Verification untuk Edit Profile -->
 <div id="modalPinVerification" class="fixed inset-0 bg-black bg-opacity-50 hidden z-[1000] flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-8 max-h-[calc(100vh-6rem)] overflow-y-auto overflow-hidden">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-8 max-h-[calc(100vh-6rem)] overflow-y-auto overflow-hidden">
         <div class="text-center mb-6">
             <div class="w-16 h-16 mx-auto bg-linear-to-br from-[#674c1d] to-[#8b6f2f] rounded-full flex items-center justify-center mb-4">
                 <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">

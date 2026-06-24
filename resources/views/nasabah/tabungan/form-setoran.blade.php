@@ -85,7 +85,7 @@
                     <label class="block text-sm font-semibold text-gray-700 mb-3">Upload Bukti Transfer *</label>
                     <div id="bukti-container" class="space-y-3"></div>
                     <button type="button" onclick="addBuktiField()" 
-                        class="mt-3 inline-flex items-center gap-2 px-4 py-2 bg-[#674c1d] hover:bg-[#4a3514] text-white text-sm font-semibold rounded-lg transition-colors">
+                        class="mt-3 inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] hover:bg-[#4a3514] text-white text-sm font-semibold rounded-lg transition-colors">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                         </svg>

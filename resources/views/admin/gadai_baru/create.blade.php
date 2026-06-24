@@ -185,6 +185,34 @@
                                     <option value="">Pilih Kategori Dulu</option>
                                 </select>
                             </div>
+
+                            <div id="col_no_mesin_rangka" class="hidden">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">No Mesin/Rangka</label>
+                                <input type="text" name="no_mesin_rangka" id="no_mesin_rangka"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] text-gray-900"
+                                    placeholder="Contoh: 1km2jh9nmd/awsdasd">
+                            </div>
+
+                            <div id="col_no_imei_sn" class="hidden">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">No IMEI/SN</label>
+                                <input type="text" name="no_imei_sn" id="no_imei_sn"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] text-gray-900"
+                                    placeholder="Contoh: 1km2jh9nmd">
+                            </div>
+
+                            <div id="col_kelengkapan" class="hidden">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Kelengkapan</label>
+                                <input type="text" name="kelengkapan" id="kelengkapan"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] text-gray-900"
+                                    placeholder="Contoh: Fullset, Charger, Dus">
+                            </div>
+
+                            <div id="col_catatan" class="hidden">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Catatan</label>
+                                <input type="text" name="catatan" id="catatan"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] text-gray-900"
+                                    placeholder="Catatan tambahan barang gadai">
+                            </div>
                         </div>
                     </div>
 
@@ -391,9 +419,9 @@
             katSelect.addEventListener('change', function () {
                 const val = this.value;
                 const selectedOpt = this.options[this.selectedIndex];
-                const kode = selectedOpt.dataset.kode;
-                const jasa = selectedOpt.dataset.jasa || '0.00';
-                const inap = selectedOpt.dataset.inap || '0.00';
+                const kode = selectedOpt ? selectedOpt.dataset.kode : '';
+                const jasa = selectedOpt ? (selectedOpt.dataset.jasa || '0.00') : '0.00';
+                const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
 
                 document.getElementById('rate_jasa').value = jasa;
                 document.getElementById('rate_inap_persen').value = inap;
@@ -401,6 +429,30 @@
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
                 tInfoBox.classList.add('hidden');
+
+                // Dynamic field toggle
+                document.getElementById('no_mesin_rangka').value = '';
+                document.getElementById('no_imei_sn').value = '';
+                document.getElementById('kelengkapan').value = '';
+                document.getElementById('catatan').value = '';
+
+                document.getElementById('col_no_mesin_rangka').classList.add('hidden');
+                document.getElementById('col_no_imei_sn').classList.add('hidden');
+                document.getElementById('col_kelengkapan').classList.add('hidden');
+                document.getElementById('col_catatan').classList.add('hidden');
+
+                if (kode === 'vehicle') {
+                    document.getElementById('col_no_mesin_rangka').classList.remove('hidden');
+                    document.getElementById('col_kelengkapan').classList.remove('hidden');
+                    document.getElementById('col_catatan').classList.remove('hidden');
+                } else if (kode === 'electronic') {
+                    document.getElementById('col_no_imei_sn').classList.remove('hidden');
+                    document.getElementById('col_kelengkapan').classList.remove('hidden');
+                    document.getElementById('col_catatan').classList.remove('hidden');
+                } else if (kode === 'gold') {
+                    document.getElementById('col_kelengkapan').classList.remove('hidden');
+                    document.getElementById('col_catatan').classList.remove('hidden');
+                }
 
                 if (!val) return;
 

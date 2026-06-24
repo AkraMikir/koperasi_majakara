@@ -14,6 +14,7 @@ use App\Models\Darurat;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class NasabahManagementController extends Controller
 {
@@ -277,7 +278,45 @@ class NasabahManagementController extends Controller
             ->where('status', 'pending')
             ->get();
 
-        return view('admin.nasabah.detail', compact('nasabah', 'pendingChanges'));
+        $pinVerified = session('admin_pin_verified', false);
+
+        return view('admin.nasabah.detail', compact('nasabah', 'pendingChanges', 'pinVerified'));
+    }
+
+    /**
+     * Verifikasi PIN Admin untuk melihat dokumen foto
+     */
+    public function verifyAdminPin(Request $request)
+    {
+        $request->validate([
+            'pin' => 'required|string|size:6',
+        ]);
+
+        $user = auth()->user();
+
+        if (!$user->pin) {
+            return response()->json([
+                'success' => false,
+                'message' => 'PIN Anda belum diatur. Silakan atur PIN Anda terlebih dahulu di Pengaturan.',
+            ], 400);
+        }
+
+        // Clean up separators if any
+        $inputPin = str_replace(['.', ','], '', $request->pin);
+
+        if (Hash::check($inputPin, $user->pin)) {
+            session(['admin_pin_verified' => true]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'PIN berhasil diverifikasi.',
+            ]);
+        }
+
+        return response()->json([
+            'success' => false,
+            'message' => 'PIN yang Anda masukkan salah.',
+        ], 422);
     }
 
     /**

@@ -109,7 +109,11 @@ class AdminGadaiBaruController extends Controller
             'foto_transaksi' => 'required|array|min:1',
             'foto_transaksi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
             'foto_administrasi' => 'required|array|min:1',
-            'foto_administrasi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048'
+            'foto_administrasi.*' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'no_mesin_rangka' => 'nullable|string|max:255',
+            'no_imei_sn' => 'nullable|string|max:255',
+            'kelengkapan' => 'nullable|string|max:255',
+            'catatan' => 'nullable|string',
         ]);
 
         $item = GadaiMasterItem::findOrFail($request->item_id);
@@ -154,6 +158,10 @@ class AdminGadaiBaruController extends Controller
                 'lokasi_id' => $request->lokasi_id,
                 'slot_kode' => $slotData->kode_slot,
                 'slot_table' => $kategori->kode_kategori,
+                'no_mesin_rangka' => $request->no_mesin_rangka,
+                'no_imei_sn' => $request->no_imei_sn,
+                'kelengkapan' => $request->kelengkapan,
+                'catatan' => $request->catatan,
                 'nominal_deal' => $request->nominal_deal,
                 'rate_jasa' => $request->rate_jasa,
                 'biaya_jasa' => $biayaJasa,

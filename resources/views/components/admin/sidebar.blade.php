@@ -148,6 +148,10 @@
                         class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.pinjaman.pembayaran') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
                         Pembayaran
                     </a>
+                    <a href="{{ route('admin.pinjaman.limit.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ str_starts_with($currentRoute, 'admin.pinjaman.limit') ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        Limit Pinjaman
+                    </a>
                 </div>
             </div>
 
@@ -468,6 +472,13 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
                         </svg>
                         Biaya Gadai
+                    </a>
+                    <a href="{{ route('admin.bunga.pajak.index') }}"
+                        class="flex items-center px-3 py-2 rounded-lg text-sm transition-colors {{ $currentRoute === 'admin.bunga.pajak.index' ? 'bg-[#674c1d]/10 text-[#674c1d] font-semibold' : 'text-gray-600 hover:bg-gray-100' }}">
+                        <svg class="w-4 h-4 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+                        </svg>
+                        Pembayaran Pajak
                     </a>
                 </div>
             </div>

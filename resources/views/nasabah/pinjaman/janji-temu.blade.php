@@ -53,7 +53,7 @@
 
     <!-- Header Section -->
     <div class="mx-4 mt-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-6 border-2 border-[#d4af37]/30">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 border-2 border-[#d4af37]/30">
             <div class="flex items-center gap-4">
                 <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
                     <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -168,23 +168,23 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominal">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Estimasi Bunga (5%):</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBunga">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Yang Diterima:</span>
                             <span class="font-semibold whitespace-nowrap text-right sm:text-left" id="estimasiDiterima">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0 border-t border-gray-300 pt-3">
+                        <div class="border-t border-gray-300 pt-3 flex flex-wrap justify-between gap-1 items-start">
                             <span class="font-semibold text-[#8b6f2f]">Total yang Harus Dibayar:</span>
                             <span class="text-xl font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotal">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per periode:</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuran">Rp 0</span>
                         </div>
@@ -223,7 +223,7 @@
                     <p class="text-sm text-gray-600">Masukkan PIN Anda untuk melanjutkan</p>
                 </div>
             </div>
-            <button onclick="closePinModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+            <button onclick="closePinModal()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

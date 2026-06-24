@@ -24,7 +24,7 @@
             </div>
             
             <!-- Welcome Text -->
-            <div class="flex-1 flex flex-col justify-center items-center text-center mx-2 md:mx-4">
+            <div class="flex-1 min-w-0 overflow-hidden flex flex-col justify-center items-center text-center mx-2 md:mx-4">
                 <h1 class="text-sm sm:text-lg md:text-xl font-black text-gray-900 uppercase tracking-widest leading-tight">
                     KOPERASI MAJAKARA
                 </h1>
@@ -42,8 +42,8 @@
                     $nasabahNotificationsUnreadCount = $nasabahNotificationsUnreadCount ?? 0;
                     $nasabahNotificationsRecent = $nasabahNotificationsRecent ?? collect([]);
                 @endphp
-                <div class="relative" id="notif-dropdown-wrap">
-                    <button id="notif-btn" onclick="toggleDropdown('notif-menu', 'notif-btn')" class="relative inline-flex p-2 text-gray-500 hover:text-[#674c1d] transition-colors rounded-xl hover:bg-amber-50 focus:outline-none">
+                <div class="relative group">
+                    <a href="{{ route('nasabah.notifications.index') }}" class="relative inline-flex p-2.5 text-gray-500 hover:text-[#674c1d] transition-colors rounded-xl hover:bg-amber-50">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
                         </svg>
@@ -52,9 +52,9 @@
                                 {{ $nasabahNotificationsUnreadCount > 99 ? '99+' : $nasabahNotificationsUnreadCount }}
                             </span>
                         @endif
-                    </button>
-                    <!-- Dropdown preview -->
-                    <div id="notif-menu" class="absolute right-[-40px] sm:right-0 mt-2 w-[260px] sm:w-[320px] bg-white rounded-3xl shadow-2xl border border-gray-100 py-2 sm:py-3 z-[100] hidden transition-all duration-300 origin-top-right">
+                    </a>
+                    <!-- Dropdown preview on hover -->
+                    <div class="absolute right-0 mt-2 w-[260px] sm:w-[320px] bg-white rounded-3xl shadow-2xl border border-gray-100 py-2 sm:py-3 z-[100] opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 transform group-hover:translate-y-0 -translate-y-2 origin-top-right">
                         <div class="px-4 sm:px-5 py-2 sm:py-3 border-b border-gray-100 flex items-center justify-between">
                             <span class="font-black text-xs sm:text-sm text-gray-900 tracking-tight">Notifikasi</span>
                             @if($nasabahNotificationsUnreadCount > 0)
@@ -99,8 +99,8 @@
                 </div>
                 
                 <!-- Profile Dropdown -->
-                <div class="relative" id="profile-dropdown-wrap">
-                    <button id="profile-btn" onclick="toggleDropdown('profile-menu', 'profile-btn')" class="p-2 text-gray-500 hover:text-[#674c1d] transition-colors focus:outline-none rounded-xl hover:bg-amber-50">
+                <div class="relative group">
+                    <button class="p-2.5 text-gray-500 hover:text-[#674c1d] transition-colors focus:outline-none rounded-xl hover:bg-amber-50">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                         </svg>

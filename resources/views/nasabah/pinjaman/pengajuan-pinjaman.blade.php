@@ -60,9 +60,35 @@
     </div>
     @endif
 
+    <!-- Limit Pinjaman Info -->
+    <div class="mx-4 mb-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-linear-to-br from-green-500 to-emerald-600 rounded-xl flex items-center justify-center text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Limit Pinjaman Anda</p>
+                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($sisaLimit, 0, ',', '.') }}</p>
+            </div>
+        </div>
+        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+            <div class="w-12 h-12 bg-linear-to-br from-red-500 to-rose-600 rounded-xl flex items-center justify-center text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 font-medium">Limit Terpakai</p>
+                <p class="text-lg font-bold text-gray-900">Rp {{ number_format($nominalTerpakai, 0, ',', '.') }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- Hero Section -->
     <div class="mx-4 mb-6">
-        <div class="bg-linear-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
+        <div class="bg-gradient-to-br from-[#8b6f2f] via-[#a0824d] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
             <div class="relative z-10">
                 <h1 class="text-3xl font-bold text-white mb-2 font-display">Ajukan Pinjaman</h1>
                 <p class="text-white/90 text-sm">Pilih metode pencairan pinjaman Anda</p>
@@ -156,12 +182,24 @@
                     <select name="durasi" id="durasi-transfer" required
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
                         <option value="">Pilih durasi</option>
-                        @foreach($durasiList ?? [] as $d)
-                        <option value="{{ $d->bulan ?? $d->ket }}" {{ old('durasi') == ($d->bulan ?? $d->ket) ? 'selected' : '' }}>{{ $d->bulan ?? $d->ket }} bulan</option>
+                        @foreach($durasiList as $val)
+                            <option value="{{ $val }}" {{ old('durasi') == $val ? 'selected' : '' }}>{{ $val }} bulan</option>
                         @endforeach
                     </select>
-                    <p class="text-xs text-gray-500 mt-2">Pilih jangka waktu pinjaman (1-24 bulan)</p>
+                    <p class="text-xs text-gray-500 mt-2">Pilih jangka waktu pinjaman</p>
                     @error('durasi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Pinjaman *</label>
+                    <select name="id_tujuan" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        <option value="">Pilih tujuan pinjaman</option>
+                        @foreach($tujuanList as $tujuan)
+                            <option value="{{ $tujuan->id }}" {{ old('id_tujuan') == $tujuan->id ? 'selected' : '' }}>{{ $tujuan->tujuan }}</option>
+                        @endforeach
+                    </select>
+                    @error('id_tujuan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
 
@@ -176,19 +214,22 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTransfer">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBungaTransfer">-</span>
+                            <div class="text-right">
+                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>
+                            </div>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
                             <span class="text-lg font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotalTransfer">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuranTransfer">Rp 0</span>
                         </div>
@@ -251,11 +292,23 @@
                         class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none"
                         onchange="updateEstimasiTunai()">
                         <option value="">Pilih durasi</option>
-                        @foreach($durasiList ?? [] as $d)
-                        <option value="{{ $d->bulan ?? $d->ket }}" {{ old('durasi') == ($d->bulan ?? $d->ket) ? 'selected' : '' }}>{{ $d->bulan ?? $d->ket }} bulan</option>
+                        @foreach($durasiList as $val)
+                            <option value="{{ $val }}" {{ old('durasi') == $val ? 'selected' : '' }}>{{ $val }} bulan</option>
                         @endforeach
                     </select>
                     @error('durasi')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">Tujuan Pinjaman *</label>
+                    <select name="id_tujuan" required
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none">
+                        <option value="">Pilih tujuan pinjaman</option>
+                        @foreach($tujuanList as $tujuan)
+                            <option value="{{ $tujuan->id }}" {{ old('id_tujuan') == $tujuan->id ? 'selected' : '' }}>{{ $tujuan->tujuan }}</option>
+                        @endforeach
+                    </select>
+                    @error('id_tujuan')<p class="text-xs text-red-600 mt-1">{{ $message }}</p>@enderror
                 </div>
 
                 <div>
@@ -295,19 +348,22 @@
                 <div class="p-6 bg-linear-to-br from-[#8b6f2f]/10 to-[#d4af37]/10 rounded-xl border border-[#8b6f2f]/20">
                     <h3 class="text-sm font-semibold text-[#8b6f2f] mb-4">Estimasi Pinjaman</h3>
                     <div class="space-y-3" id="estimasiSectionTunai">
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominalTunai">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBungaTunai">-</span>
+                            <div class="text-right">
+                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="text-sm text-gray-500 block" id="estimasiBungaTunai">-</span>
+                            </div>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Total yang Harus Dibayar:</span>
                             <span class="text-lg font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotalTunai">Rp 0</span>
                         </div>
-                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-0 border-b border-gray-100/50 pb-2 last:border-0 last:pb-0">
+                        <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per bulan (contoh):</span>
                             <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuranTunai">Rp 0</span>
                         </div>
@@ -397,7 +453,7 @@
 </div>
 
 <!-- PIN Modal Transfer -->
-<div id="pin-modal-transfer" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+<div id="pin-modal-transfer" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4" style="z-index: 100;">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
@@ -411,7 +467,7 @@
                     <p class="text-sm text-gray-600">Masukkan PIN Anda</p>
                 </div>
             </div>
-            <button type="button" onclick="closePinModalTransfer()" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closePinModalTransfer()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -429,7 +485,7 @@
 </div>
 
 <!-- PIN Modal Tunai -->
-<div id="pin-modal-tunai" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+<div id="pin-modal-tunai" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[100] hidden items-center justify-center p-4" style="z-index: 100;">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
         <div class="flex items-center justify-between mb-6">
             <div class="flex items-center gap-3">
@@ -443,7 +499,7 @@
                     <p class="text-sm text-gray-600">Masukkan PIN Anda</p>
                 </div>
             </div>
-            <button type="button" onclick="closePinModalTunai()" class="text-gray-400 hover:text-gray-600">
+            <button type="button" onclick="closePinModalTunai()" class="p-2 -mr-2 text-gray-400 hover:text-gray-600">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -459,6 +515,53 @@
         <button type="button" onclick="submitFormTunai()" class="w-full py-3 bg-linear-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-xl font-bold hover:shadow-lg transition-all">Konfirmasi</button>
     </div>
 </div>
+
+@if(isset($hasAgreed) && !$hasAgreed)
+<!-- Syarat & Ketentuan Modal sebelum PIN -->
+<div id="apply-terms-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] hidden items-center justify-center p-4" style="z-index: 100;">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-xl w-full p-6 md:p-8 flex flex-col max-h-[90vh] border border-gray-100 animate-fade-in">
+        <div class="flex items-center gap-3 pb-4 border-b border-gray-100 mb-5">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#8b6f2f] to-[#d4af37] rounded-xl flex items-center justify-center shadow-md">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-xl font-bold text-gray-900 font-display">Syarat & Ketentuan Pinjaman</h3>
+                <p class="text-xs text-gray-500">Koperasi Majakara</p>
+            </div>
+        </div>
+
+        <!-- Scrollable T&C Content Box -->
+        <div id="apply-terms-content-box" class="flex-1 overflow-y-auto max-h-[45vh] sm:max-h-[300px] border border-gray-200 rounded-2xl p-4 bg-gray-50 text-sm text-gray-700 leading-relaxed space-y-4 mb-5 font-sans">
+            {!! $syaratPinjaman !!}
+        </div>
+
+        <!-- Bottom Actions -->
+        <div class="pt-4 border-t border-gray-100 space-y-4">
+            <!-- Checkbox -->
+            <label class="flex items-start gap-3 cursor-pointer group">
+                <input type="checkbox" id="apply-terms-checkbox" disabled
+                    class="mt-1 w-4 h-4 text-[#8b6f2f] border-gray-300 rounded focus:ring-[#8b6f2f] focus:ring-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <span id="apply-terms-checkbox-label" class="text-xs text-gray-500 select-none group-hover:text-gray-700 font-medium">
+                    Harap gulir syarat dan ketentuan sampai ke bagian paling bawah untuk menyetujui.
+                </span>
+            </label>
+
+            <!-- Buttons -->
+            <div class="flex gap-3">
+                <button type="button" onclick="closeApplyTermsModal()" class="flex-1 py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-colors">
+                    Batal
+                </button>
+                <button type="button" id="btn-apply-agree-terms" disabled
+                    class="flex-1 py-3 px-4 bg-gray-300 text-gray-500 rounded-xl font-bold transition-all text-center cursor-not-allowed shadow-md">
+                    Setuju & Lanjutkan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 
 @push('scripts')
 <script>
@@ -589,9 +692,20 @@ function updateEstimasiTunai() {
 function showPinModalTransfer() {
     const form = document.getElementById('form-transfer');
     if (!form.checkValidity()) { form.reportValidity(); return; }
-    document.getElementById('pin-modal-transfer').classList.remove('hidden');
-    document.getElementById('pin-modal-transfer').classList.add('flex');
-    document.getElementById('pin-input-transfer').focus();
+    
+    @if(isset($hasAgreed) && !$hasAgreed)
+        if (window.hasAgreedToTerms) {
+            document.getElementById('pin-modal-transfer').classList.remove('hidden');
+            document.getElementById('pin-modal-transfer').classList.add('flex');
+            document.getElementById('pin-input-transfer').focus();
+        } else {
+            showApplyTermsModal('transfer');
+        }
+    @else
+        document.getElementById('pin-modal-transfer').classList.remove('hidden');
+        document.getElementById('pin-modal-transfer').classList.add('flex');
+        document.getElementById('pin-input-transfer').focus();
+    @endif
 }
 
 function closePinModalTransfer() {
@@ -640,9 +754,20 @@ function submitFormTransfer() {
 function showPinModalTunai() {
     const form = document.getElementById('form-tunai');
     if (!form.checkValidity()) { form.reportValidity(); return; }
-    document.getElementById('pin-modal-tunai').classList.remove('hidden');
-    document.getElementById('pin-modal-tunai').classList.add('flex');
-    document.getElementById('pin-input-tunai').focus();
+    
+    @if(isset($hasAgreed) && !$hasAgreed)
+        if (window.hasAgreedToTerms) {
+            document.getElementById('pin-modal-tunai').classList.remove('hidden');
+            document.getElementById('pin-modal-tunai').classList.add('flex');
+            document.getElementById('pin-input-tunai').focus();
+        } else {
+            showApplyTermsModal('tunai');
+        }
+    @else
+        document.getElementById('pin-modal-tunai').classList.remove('hidden');
+        document.getElementById('pin-modal-tunai').classList.add('flex');
+        document.getElementById('pin-input-tunai').focus();
+    @endif
 }
 
 function closePinModalTunai() {
@@ -694,6 +819,122 @@ document.getElementById('durasi-tunai').addEventListener('change', updateEstimas
 const openMetode = '{{ $openMetode ?? "" }}';
 if (openMetode === 'transfer') selectMethod('transfer');
 else if (openMetode === 'tunai') selectMethod('tunai');
+
+// T&C helper variables & functions
+window.hasAgreedToTerms = false;
+let pendingLoanMethod = null;
+
+function showApplyTermsModal(method) {
+    pendingLoanMethod = method;
+    const modal = document.getElementById('apply-terms-modal');
+    if (!modal) return;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+
+    const termsBox = document.getElementById('apply-terms-content-box');
+    const checkbox = document.getElementById('apply-terms-checkbox');
+    const label = document.getElementById('apply-terms-checkbox-label');
+    const btnAgree = document.getElementById('btn-apply-agree-terms');
+
+    if (!termsBox || !checkbox || !btnAgree) return;
+
+    // Detect scroll to bottom
+    if (termsBox.scrollHeight <= termsBox.clientHeight) {
+        enableApplyCheckbox();
+    } else {
+        termsBox.addEventListener('scroll', function scrollHandler() {
+            if (termsBox.scrollHeight - termsBox.scrollTop - termsBox.clientHeight < 15) {
+                enableApplyCheckbox();
+                termsBox.removeEventListener('scroll', scrollHandler);
+            }
+        });
+    }
+
+    function enableApplyCheckbox() {
+        checkbox.removeAttribute('disabled');
+        if (label) {
+            label.textContent = "Saya telah membaca, memahami, dan menyetujui seluruh Syarat & Ketentuan di atas.";
+            label.classList.remove('text-gray-500');
+            label.classList.add('text-gray-800');
+        }
+    }
+
+    checkbox.addEventListener('change', function() {
+        if (checkbox.checked) {
+            btnAgree.removeAttribute('disabled');
+            btnAgree.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.add('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'pointer';
+        } else {
+            btnAgree.setAttribute('disabled', 'true');
+            btnAgree.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            btnAgree.classList.remove('bg-gradient-to-r', 'from-[#674c1d]', 'to-[#8b6f2f]', 'text-white', 'hover:shadow-lg');
+            btnAgree.style.cursor = 'not-allowed';
+        }
+    });
+
+    btnAgree.onclick = function() {
+        if (btnAgree.getAttribute('disabled') === 'true' || !checkbox.checked) return;
+
+        btnAgree.setAttribute('disabled', 'true');
+        btnAgree.textContent = 'Menyimpan...';
+
+        fetch('{{ route("nasabah.pinjaman.agree-terms") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeApplyTermsModal();
+                window.hasAgreedToTerms = true;
+
+                if (pendingLoanMethod === 'transfer') {
+                    document.getElementById('pin-modal-transfer').classList.remove('hidden');
+                    document.getElementById('pin-modal-transfer').classList.add('flex');
+                    document.getElementById('pin-input-transfer').focus();
+                } else if (pendingLoanMethod === 'tunai') {
+                    document.getElementById('pin-modal-tunai').classList.remove('hidden');
+                    document.getElementById('pin-modal-tunai').classList.add('flex');
+                    document.getElementById('pin-input-tunai').focus();
+                }
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Gagal menyimpan persetujuan.',
+                    confirmButtonText: 'Coba Lagi'
+                });
+                btnAgree.removeAttribute('disabled');
+                btnAgree.textContent = 'Setuju & Lanjutkan';
+            }
+        })
+        .catch(err => {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Terjadi kesalahan jaringan.',
+                confirmButtonText: 'Coba Lagi'
+            });
+            btnAgree.removeAttribute('disabled');
+            btnAgree.textContent = 'Setuju & Lanjutkan';
+        });
+    };
+}
+
+function closeApplyTermsModal() {
+    const modal = document.getElementById('apply-terms-modal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+}
 </script>
 @endpush
 @endsection

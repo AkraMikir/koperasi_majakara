@@ -18,6 +18,9 @@ use App\Models\JanjiTemuPembayaranPinjaman;
 use App\Models\BuktiFoto;
 use App\Models\MasterBungaPinjaman;
 use App\Models\MasterDendaPinjaman;
+use App\Models\PersetujuanSyaratPinjaman;
+use App\Models\SettingsStruk;
+use App\Models\SyaratKetentuanLayanan;
 use App\Helpers\IdGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -130,6 +133,15 @@ class PinjamanController extends Controller
                 $p->total_terbayar = $terbayar;
                 return $p;
             });
+        // Get limit pinjaman
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        $syaratPinjaman = SyaratKetentuanLayanan::first()->konten ?? '';
 
         return view('nasabah.pinjaman.index', [
             'pinjamanAktif' => $pinjamanAktif,
@@ -139,7 +151,36 @@ class PinjamanController extends Controller
             'angsuranTerdekat' => $angsuranTerdekat,
             'totalAngsuranTelat' => $totalAngsuranTelat,
             'semuaAngsuran' => $semuaAngsuran,
+            'limitNominal' => $limitNominal,
+            'nominalTerpakai' => $nominalTerpakai,
+            'sisaLimit' => $sisaLimit,
+            'hasAgreed' => $hasAgreed,
+            'syaratPinjaman' => $syaratPinjaman,
         ]);
+    }
+
+    /**
+     * Store customer agreement to terms.
+     */
+    public function agreeTerms(Request $request)
+    {
+        try {
+            $idAnggota = $this->getIdAnggota();
+            PersetujuanSyaratPinjaman::updateOrCreate(
+                ['nasabah_id' => $idAnggota],
+                ['agreed_at' => now()]
+            );
+            return response()->json([
+                'success' => true,
+                'message' => 'Syarat dan ketentuan berhasil disetujui.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error saving T&C agreement: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan persetujuan.'
+            ], 500);
+        }
     }
 
     /**
@@ -164,18 +205,30 @@ class PinjamanController extends Controller
             ->get();
 
         $masterBunga = MasterBungaPinjaman::where('status_aktif', true)->orderBy('durasi_min')->get();
-        $durasiList = \App\Models\JnsAngsuranBulan::where('aktif', 'y')->orderBy('bulan')->get();
-        if ($durasiList->isEmpty()) {
-            $durasiList = collect(range(1, 24))->map(fn ($b) => (object)['bulan' => $b, 'ket' => (string)$b]);
-        }
+        $durasiList = MasterBungaPinjaman::getOpsiDurasi();
         $lokasi = JnsLokasiPerusahaan::where('status_aktif', true)->get();
+        $tujuanList = \App\Models\MasterTujuanPinjaman::where('status', true)->orderBy('tujuan')->get();
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        $syaratPinjaman = SyaratKetentuanLayanan::first()->konten ?? '';
 
         return view('nasabah.pinjaman.pengajuan-pinjaman', [
             'riwayatPengajuan' => $riwayatPengajuan,
             'masterBunga' => $masterBunga,
             'durasiList' => $durasiList,
             'lokasi' => $lokasi,
+            'tujuanList' => $tujuanList,
             'openMetode' => $request->get('metode'), // 'transfer' | 'tunai'
+            'limitNominal' => $limitNominal,
+            'nominalTerpakai' => $nominalTerpakai,
+            'sisaLimit' => $sisaLimit,
+            'hasAgreed' => $hasAgreed,
+            'syaratPinjaman' => $syaratPinjaman,
         ]);
     }
 
@@ -283,6 +336,7 @@ class PinjamanController extends Controller
         $rules = [
             'nominal' => 'required|numeric|min:100000',
             'durasi' => 'required|integer|min:1|max:24',
+            'id_tujuan' => 'required|exists:master_tujuan_pinjaman,id',
             'pin' => 'required|numeric|digits:6',
             'keterangan' => 'nullable|string|max:500',
         ];
@@ -296,6 +350,13 @@ class PinjamanController extends Controller
             ]);
             return redirect()->back()
                 ->withErrors($e->errors())
+                ->withInput($request->except('pin'));
+        }
+        $idAnggota = $this->getIdAnggota();
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        if (!$hasAgreed) {
+            return redirect()->back()
+                ->with('error', 'Anda harus membaca dan menyetujui Syarat & Ketentuan terlebih dahulu.')
                 ->withInput($request->except('pin'));
         }
 
@@ -316,8 +377,21 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $idAnggota = $this->getIdAnggota();
         $jenisPencairan = 'transfer'; // Auto set to transfer for this form
+
+        // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        if ((float)$request->nominal > $sisaLimit) {
+            return redirect()->back()
+                ->with('error', 'Nominal pengajuan melebihi sisa limit pinjaman Anda. Sisa limit Anda: Rp ' . number_format($sisaLimit, 0, ',', '.'))
+                ->withInput($request->except('pin'));
+        }
+        // ──────────────────────────────────────────────────────────
 
         // ── BANK ACCESS GUARD (server-side double check) ───────────
         $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
@@ -342,6 +416,7 @@ class PinjamanController extends Controller
             $pengajuan = PengajuanPinjaman::create([
                 'id' => $idPengajuan,
                 'id_anggota' => $idAnggota,
+                'id_tujuan' => $request->id_tujuan,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
                 'jenis' => 'bulanan', // Auto set to bulanan for transfer
@@ -457,6 +532,7 @@ class PinjamanController extends Controller
             $validated = $request->validate([
                 'nominal' => 'required|numeric|min:100000',
                 'durasi' => 'required|integer|min:1|max:24',
+                'id_tujuan' => 'required|exists:master_tujuan_pinjaman,id',
                 'pin' => 'required|numeric|digits:6',
                 'lokasi_temu' => 'required|exists:jns_lokasi_perusahaan,id',
                 'tanggal_janji_temu' => 'required|date|after:today',
@@ -473,6 +549,16 @@ class PinjamanController extends Controller
                 'keterangan' => $request->keterangan ?? '',
             ])
                 ->withErrors($e->errors())
+                ->withInput($request->except('pin'));
+        }
+        $idAnggota = $this->getIdAnggota();
+        $hasAgreed = PersetujuanSyaratPinjaman::where('nasabah_id', $idAnggota)->exists();
+        if (!$hasAgreed) {
+            return redirect()->route('nasabah.pinjaman.janji-temu', [
+                'nominal' => $request->nominal ?? '',
+                'keterangan' => $request->keterangan ?? '',
+            ])
+                ->with('error', 'Anda harus membaca dan menyetujui Syarat & Ketentuan terlebih dahulu.')
                 ->withInput($request->except('pin'));
         }
 
@@ -498,7 +584,19 @@ class PinjamanController extends Controller
                 ->withInput($request->except('pin'));
         }
 
-        $idAnggota = $this->getIdAnggota();
+        // ── LIMIT PINJAMAN GUARD ───────────────────────────────────
+        $nasabah = \App\Models\Nasabah::with('limitPinjaman')->findOrFail($idAnggota);
+        $limit = $nasabah->limitPinjaman;
+        $limitNominal = $limit ? (float) $limit->limit_nominal : 1000000.00;
+        $nominalTerpakai = $limit ? (float) $limit->nominal_terpakai : 0.00;
+        $sisaLimit = max(0, $limitNominal - $nominalTerpakai);
+
+        if ((float)$request->nominal > $sisaLimit) {
+            return redirect()->back()
+                ->with('error', 'Nominal pengajuan melebihi sisa limit pinjaman Anda. Sisa limit Anda: Rp ' . number_format($sisaLimit, 0, ',', '.'))
+                ->withInput($request->except('pin'));
+        }
+        // ──────────────────────────────────────────────────────────
 
         // ── BANK ACCESS GUARD (server-side double check) ───────────
         $access = app(BankAccessService::class)->checkPremiumAccess($idAnggota);
@@ -544,6 +642,7 @@ class PinjamanController extends Controller
             $pengajuan = PengajuanPinjaman::create([
                 'id' => $idPengajuan,
                 'id_anggota' => $idAnggota,
+                'id_tujuan' => $request->id_tujuan,
                 'tgl_pengajuan' => now(),
                 'nominal' => $request->nominal,
                 'jenis' => 'bulanan',

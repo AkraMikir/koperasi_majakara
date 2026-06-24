@@ -144,7 +144,7 @@
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 @if($item['detail_url'] != '#')
-                                <a href="{{ $item['detail_url'] }}" class="text-[#674c1d] hover:text-[#8b6f2f] font-semibold inline-flex items-center gap-1">
+                                <a href="{{ $item['detail_url'] }}" class="text-[#674c1d] hover:text-[#8b6f2f] font-semibold inline-flex items-center gap-1 py-2 px-3 rounded hover:bg-[#674c1d]/10 transition-colors">
                                     Detail
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>

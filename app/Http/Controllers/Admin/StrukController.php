@@ -104,6 +104,73 @@ class StrukController extends Controller
     }
 
     /**
+     * Cetak surat bukti pinjaman (B5 Landscape).
+     */
+    public function pencairanPinjamanB5(string $id)
+    {
+        $pinjaman = PinjamanH::with([
+            'nasabah.user',
+            'nasabah.dataKtp',
+            'pengajuan',
+            'tujuanPinjaman',
+            'tempoBulanan',
+            'tempoMingguan'
+        ])->findOrFail($id);
+
+        $settings = SettingsStruk::getSettings();
+
+        // Build the $data array
+        $jadwal_angsuran = [];
+        $tempos = $pinjaman->jenis === 'bulanan' ? $pinjaman->tempoBulanan : $pinjaman->tempoMingguan;
+        foreach ($tempos as $t) {
+            $jadwal_angsuran[] = [
+                'no' => $t->no_urut,
+                'jatuh_tempo' => $t->tgl_jatuh_tempo ? $t->tgl_jatuh_tempo->format('d/m/Y') : '-',
+                'tagihan' => (float)$t->jumlah_tagihan,
+            ];
+        }
+
+        // Hitung angsuran pertama
+        $angsuran_pertama = 0;
+        if (count($jadwal_angsuran) > 0) {
+            $angsuran_pertama = $jadwal_angsuran[0]['tagihan'];
+        } else {
+            $angsuran_pertama = $pinjaman->ags_bulan;
+        }
+
+        $tanggal_jatuh_tempo = '-';
+        if (count($tempos) > 0) {
+            $tanggal_jatuh_tempo = $tempos->last()->tgl_jatuh_tempo ? $tempos->last()->tgl_jatuh_tempo->format('d/m/Y') : '-';
+        }
+
+        $alamat = $pinjaman->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
+        $data = [
+            'no_pinjaman' => $pinjaman->id,
+            'nama_anggota' => $pinjaman->nasabah->user->nama ?? '-',
+            'alamat_nasabah' => $pinjaman->nasabah->alamat ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
+            'tujuan_pinjaman' => $pinjaman->tujuanPinjaman->tujuan ?? 'Modal Usaha',
+            'tanggal' => $pinjaman->tgl_pinjam ? $pinjaman->tgl_pinjam->format('d/m/Y') : now()->format('d/m/Y'),
+            'bunga_rate' => (float)$pinjaman->bunga,
+            'lama_pinjam' => $pinjaman->lama_pinjam,
+            'tanggal_jatuh_tempo' => $tanggal_jatuh_tempo,
+            'denda_rate' => (float)$pinjaman->denda_persen,
+            'angsuran_pertama' => $angsuran_pertama,
+            'jadwal_angsuran' => $jadwal_angsuran,
+            'nominal_total_bayar' => (float)$pinjaman->jumlah_pinjam + (float)$pinjaman->bunga_rp,
+            'bunga_rp' => (float)$pinjaman->bunga_rp,
+            'jumlah_pinjam' => (float)$pinjaman->jumlah_pinjam,
+        ];
+
+        $pdf = Pdf::loadView('struk.surat-bukti-pinjaman-b5', compact('data', 'settings'));
+        $pdf->setPaper('b5', 'landscape');
+        return $pdf->download('Surat-Bukti-Pinjaman-' . $pinjaman->id . '.pdf');
+    }
+
+    /**
      * Cetak struk per angsuran (bukti bayar angsuran ke-n).
      */
     public function angsuran(Request $request, string $id)
@@ -202,6 +269,71 @@ class StrukController extends Controller
         $pdf = Pdf::loadView('struk.gadai-awal', $data);
         $pdf->setPaper([0, 0, 164.4, 841.89], 'portrait');
         return $pdf->download('Struk-Gadai-Awal-' . $gadai->slot_kode . '.pdf');
+    }
+
+    public function gadaiAwalB5(string $id)
+    {
+        $gadai = GadaiActive::with(['nasabah.user', 'nasabah.dataKtp', 'kategori', 'item', 'lokasi', 'admin'])
+            ->findOrFail($id);
+        
+        $settings = SettingsStruk::getSettings();
+        
+        $totalTagihan = $gadai->nominal_deal + $gadai->biaya_jasa + $gadai->biaya_inap + $gadai->denda_aktif;
+        if ($gadai->extra_pinjaman_nominal) {
+            $totalTagihan += $gadai->extra_pinjaman_nominal;
+        }
+
+        $alamat = $gadai->nasabah->alamat ?? '';
+        preg_match('/\b\d{5}\b/', $alamat, $matches);
+        $kode_pos = $matches[0] ?? '-';
+
+        $formatIndoDate = function ($date) {
+            if (!$date) return '-';
+            $months = [
+                'January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret',
+                'April' => 'April', 'May' => 'Mei', 'June' => 'Juni',
+                'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September',
+                'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'
+            ];
+            $engDate = $date->format('d F Y');
+            return strtr($engDate, $months);
+        };
+
+        $data = [
+            'jenis_trans' => 'Gadai Awal',
+            'nama_anggota' => $gadai->nasabah->user->nama ?? '-',
+            'nomor_hp' => $gadai->nasabah->user->nomor_hp ?? '-',
+            'alamat_nasabah' => $gadai->nasabah->alamat ?? '-',
+            'kode_pos_nasabah' => $kode_pos,
+            'nik' => $gadai->nasabah->dataKtp->nik ?? '-',
+            'kategori' => $gadai->kategori->nama_kategori ?? '-',
+            'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
+            'merk_type' => ($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-'),
+            'no_mesin_rangka' => $gadai->no_mesin_rangka ?? '-',
+            'no_imei_sn' => $gadai->no_imei_sn ?? '-',
+            'kelengkapan' => $gadai->kelengkapan ?? '-',
+            'catatan' => $gadai->catatan ?? '-',
+            'status' => $gadai->status === 'active' ? 'Gadai' : ($gadai->status === 'grace_period' ? 'Tenggang' : $gadai->status),
+            'admin_nama' => $gadai->admin->nama ?? '-',
+            'slot_kode' => $gadai->slot_kode,
+            'tgl_mulai' => $formatIndoDate($gadai->tgl_mulai),
+            'jatuh_tempo' => $formatIndoDate($gadai->tgl_jatuh_tempo),
+            'nominal_deal' => (float)$gadai->nominal_deal,
+            'biaya_jasa' => (float)$gadai->biaya_jasa,
+            'biaya_inap' => (float)$gadai->biaya_inap,
+            'denda_aktif' => (float)$gadai->denda_aktif,
+            'extra_pinjaman_nominal' => (float)$gadai->extra_pinjaman_nominal,
+            'total_tagihan' => (float)$totalTagihan,
+        ];
+
+        $view = 'struk.surat-bukti-gadai-elektronik-b5';
+        if ($gadai->kategori->kode_kategori === 'vehicle') {
+            $view = 'struk.surat-bukti-gadai-kendaraan-b5';
+        }
+
+        $pdf = Pdf::loadView($view, compact('data', 'settings'));
+        $pdf->setPaper('b5', 'landscape');
+        return $pdf->download('Surat-Bukti-Gadai-' . $gadai->slot_kode . '.pdf');
     }
 
     public function gadaiSyarat(string $id)
