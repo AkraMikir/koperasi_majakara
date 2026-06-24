@@ -133,7 +133,7 @@
 
                         <div>
                             <p class="text-xs text-gray-500 font-medium mb-1">Nama Item</p>
-                            <p class="font-bold text-gray-900 text-lg">{{ $gadai->item->head_1 }}</p>
+                            <p class="font-bold text-gray-900 text-lg">{{ $gadai->nama_barang_display }}</p>
                         </div>
 
                         @if($gadai->kategori->kode_kategori === 'vehicle')

@@ -231,6 +231,7 @@ class PinjamanController extends Controller
                 'jenis' => 'bulanan',
                 'bunga' => $bungaPersen,
                 'bunga_rp' => $bungaRp,
+                'bunga_flat_hari' => $pengajuan->bunga_flat_hari ?? $masterBunga->bunga_flat_hari ?? round((float) $bungaPersen / 30, 2),
                 'denda_persen' => $masterDenda->denda_persen,
                 'tgl_pinjam' => now(), // Tanggal approval
                 'lunas' => 'belum',
@@ -239,6 +240,7 @@ class PinjamanController extends Controller
             $pengajuan->update([
                 'status' => '3',
                 'bunga_persen' => $masterBunga->bunga_persen,
+                'bunga_flat_hari' => $pengajuan->bunga_flat_hari ?? $masterBunga->bunga_flat_hari ?? round((float) $bungaPersen / 30, 2),
                 'keterangan_admin' => $request->keterangan_admin,
             ]);
             // Update nominal terpakai limit nasabah
@@ -559,6 +561,7 @@ class PinjamanController extends Controller
                     'jenis' => 'bulanan',
                     'bunga' => $bungaPersen,
                     'bunga_rp' => $bungaRp,
+                    'bunga_flat_hari' => $pengajuan->bunga_flat_hari ?? $masterBunga->bunga_flat_hari ?? round((float) $bungaPersen / 30, 2),
                     'denda_persen' => $masterDenda->denda_persen,
                     'tgl_pinjam' => $request->tgl_cair,
                     'lunas' => 'belum',
@@ -566,6 +569,7 @@ class PinjamanController extends Controller
                  $pengajuan->update([
                      'status' => '3',
                      'bunga_persen' => $bungaPersen,
+                     'bunga_flat_hari' => $pengajuan->bunga_flat_hari ?? $masterBunga->bunga_flat_hari ?? round((float) $bungaPersen / 30, 2),
                      'keterangan_admin' => $request->keterangan_admin,
                  ]);
 
@@ -1538,6 +1542,7 @@ class PinjamanController extends Controller
                 'jenis' => 'bulanan',
                 'bunga' => $bungaPersen,
                 'bunga_rp' => $bungaRp,
+                'bunga_flat_hari' => $masterBunga->bunga_flat_hari !== null ? (float) $masterBunga->bunga_flat_hari : round((float) $bungaPersen / 30, 2),
                 'denda_persen' => $masterDenda->denda_persen,
                 'tgl_pinjam' => $request->tgl_pinjam,
                 'status' => 'telaksana', // Langsung terlaksana karena ketemu langsung

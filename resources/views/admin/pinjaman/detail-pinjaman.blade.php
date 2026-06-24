@@ -81,7 +81,7 @@
                     </div>
                     <div>
                         <p class="text-sm text-gray-600">Bunga</p>
-                        <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga, 2) }}%</p>
+                        <p class="font-semibold text-gray-900">{{ number_format($pinjaman->bunga, 2) }}% (flat {{ number_format($pinjaman->bunga_flat_hari ?? ($pinjaman->bunga / 30), 2) }}% per hari)</p>
                         <p class="text-xs text-gray-500">Rp {{ number_format($pinjaman->bunga_rp, 0, ',', '.') }}</p>
                     </div>
                     <div>

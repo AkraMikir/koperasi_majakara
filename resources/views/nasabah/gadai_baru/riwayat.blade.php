@@ -58,9 +58,9 @@
                                 <span class="text-[9px] font-black text-[#674c1d] uppercase tracking-widest">SLOT {{ $gadai->slot_kode }}</span>
                             </div>
                             <a href="{{ route('nasabah.gadai_baru.aktif-detail', $gadai->id) }}" class="group/title flex items-center gap-1.5">
-                                <h3 class="font-black text-gray-900 text-xl tracking-tight leading-tight group-hover/title:text-[#674c1d] transition-colors line-clamp-1">{{ $gadai->item->head_1 ?? $gadai->item->nama_item }}</h3>
+                                <h3 class="font-black text-gray-900 text-xl tracking-tight leading-tight group-hover/title:text-[#674c1d] transition-colors line-clamp-1">{{ $gadai->nama_barang_display }}</h3>
                             </a>
-                            @if($gadai->item->head_2)
+                            @if(!$gadai->nama_barang_manual && $gadai->item->head_2)
                                 <p class="text-xs text-gray-400 mt-1 font-medium">{{ $gadai->item->head_2 }}</p>
                             @endif
                         </div>
@@ -147,7 +147,7 @@
                         <!-- Content -->
                         <div class="flex-1">
                             <div class="flex items-start justify-between sm:justify-start gap-3 mb-1">
-                                <h4 class="font-black text-gray-900 text-base sm:text-lg tracking-tight leading-none group-hover:text-[#674c1d] transition-colors">{{ $selesai->item->head_1 ?? $selesai->item->nama_item }}</h4>
+                                <h4 class="font-black text-gray-900 text-base sm:text-lg tracking-tight leading-none group-hover:text-[#674c1d] transition-colors">{{ $selesai->nama_barang_display }}</h4>
                                 <div class="sm:hidden">{!! $badge !!}</div>
                             </div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">

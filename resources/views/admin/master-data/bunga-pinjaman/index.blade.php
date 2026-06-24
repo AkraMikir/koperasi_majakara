@@ -55,6 +55,7 @@
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Durasi (Bulan)</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Durasi Pilihan</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Bunga (%)</th>
+                        <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Bunga Flat / Hari (%)</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Status</th>
                         <th class="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Keterangan</th>
                         <th class="px-6 py-4 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider">Aksi</th>
@@ -75,6 +76,9 @@
                         </td>
                         <td class="px-6 py-4">
                             <span class="text-sm font-bold text-[#674c1d]">{{ $item->bunga_persen }}%</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            <span class="text-sm font-bold text-[#674c1d]">{{ $item->bunga_flat_hari ?? '-' }}%</span>
                         </td>
                         <td class="px-6 py-4">
                             @canCrudMasterData
