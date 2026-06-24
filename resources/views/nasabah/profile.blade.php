@@ -88,18 +88,18 @@
                         </div>
                         
                         <!-- Quick Info -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. HP</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-sm truncate">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">NIK</p>
-                                <p class="text-white font-semibold text-sm break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. KK</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                             </div>
                         </div>
                         </div>
@@ -195,7 +195,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->user->email ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->user->email ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Nomor HP</p>
@@ -203,11 +203,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. KK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Tempat, Tanggal Lahir</p>
@@ -303,7 +303,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. Rekening</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Nama Pemilik Rekening</p>
@@ -362,7 +362,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->email ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->darurat->email ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Pekerjaan</p>
@@ -370,7 +370,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
