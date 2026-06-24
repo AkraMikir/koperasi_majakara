@@ -16,6 +16,7 @@ use App\Models\JnsBank;
 use App\Models\LogoBank;
 use App\Models\User;
 use App\Models\MasterTujuanPinjaman;
+use App\Models\SyaratKetentuanLayanan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -1132,7 +1133,66 @@ class MasterDataController extends Controller
         $data = MasterTujuanPinjaman::findOrFail($id);
         $data->status = !$data->status;
         $data->save();
-
         return redirect()->back()->with('success', 'Status tujuan pinjaman berhasil diubah');
+    }
+
+    // ==================== SYARAT & KETENTUAN LAYANAN ====================
+
+    public function syaratKetentuanLayananIndex()
+    {
+        $data = SyaratKetentuanLayanan::first();
+        if (!$data) {
+            $data = SyaratKetentuanLayanan::create([
+                'konten' => '<h3>KETENTUAN PENGGUNAAN LAYANAN MAJAKARAPINJAM</h3><p>Tulis syarat ketentuan di sini...</p>'
+            ]);
+        }
+        return view('admin.master-data.syarat-ketentuan-layanan.index', compact('data'));
+    }
+
+    public function syaratKetentuanLayananUpdate(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'konten' => 'required|string',
+        ]);
+
+        $data = SyaratKetentuanLayanan::first();
+        if (!$data) {
+            SyaratKetentuanLayanan::create(['konten' => $request->konten]);
+        } else {
+            $data->update(['konten' => $request->konten]);
+        }
+
+        return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan berhasil diperbarui.');
+    }
+
+    // ==================== SYARAT & KETENTUAN LAYANAN GADAI ====================
+
+    public function syaratKetentuanLayananGadaiIndex()
+    {
+        $data = \App\Models\SyaratKetentuanLayananGadai::first();
+        if (!$data) {
+            $data = \App\Models\SyaratKetentuanLayananGadai::create([
+                'konten' => '<h3>KETENTUAN PENGGUNAAN LAYANAN MAJAKARAGADAI</h3><p>Tulis syarat ketentuan gadai di sini...</p>'
+            ]);
+        }
+        return view('admin.master-data.syarat-ketentuan-layanan-gadai.index', compact('data'));
+    }
+
+    public function syaratKetentuanLayananGadaiUpdate(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'konten' => 'required|string',
+        ]);
+
+        $data = \App\Models\SyaratKetentuanLayananGadai::first();
+        if (!$data) {
+            \App\Models\SyaratKetentuanLayananGadai::create(['konten' => $request->konten]);
+        } else {
+            $data->update(['konten' => $request->konten]);
+        }
+
+        return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan Gadai berhasil diperbarui.');
     }
 }

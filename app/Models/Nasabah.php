@@ -162,6 +162,16 @@ class Nasabah extends Model
     {
         return $this->hasMany(LogLimitPinjaman::class, 'id_nasabah');
     }
+
+    public function persetujuanSyaratPinjaman(): HasOne
+    {
+        return $this->hasOne(PersetujuanSyaratPinjaman::class, 'nasabah_id');
+    }
+
+    public function persetujuanSyaratGadai(): HasOne
+    {
+        return $this->hasOne(PersetujuanSyaratGadai::class, 'nasabah_id');
+    }
 }
 
 

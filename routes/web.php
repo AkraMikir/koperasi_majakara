@@ -125,6 +125,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         // Pinjaman Routes
         Route::prefix('pinjaman')->middleware('emergency_contact')->name('pinjaman.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'index'])->name('index');
+            Route::post('/agree-terms', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'agreeTerms'])->name('agree-terms');
             Route::get('/pengajuan', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanPinjaman'])->name('pengajuan');
             Route::get('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'pengajuanTransfer'])->name('pengajuan-transfer');
             Route::post('/pengajuan-transfer', [\App\Http\Controllers\Nasabah\PinjamanController::class, 'submitPengajuanTransfer'])->name('submit-pengajuan-transfer');
@@ -169,6 +170,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
         // Gadai Baru Routes
         Route::prefix('gadai_baru')->middleware('emergency_contact')->name('gadai_baru.')->group(function () {
             Route::get('/', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'index'])->name('index');
+            Route::post('/agree-terms', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'agreeTerms'])->name('agree-terms');
             Route::get('/riwayat', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'riwayat'])->name('riwayat');
             Route::get('/aktif/{id}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'showActiveDetail'])->name('aktif-detail');
             Route::get('/{kategori}/{item}', [\App\Http\Controllers\NasabahGadaiBaruController::class, 'show'])->name('show');
@@ -578,6 +580,22 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/fitur', [\App\Http\Controllers\Admin\MasterDataController::class, 'fiturIndex'])->name('fitur.index');
         Route::get('/via', [\App\Http\Controllers\Admin\MasterDataController::class, 'viaIndex'])->name('via.index');
         Route::get('/transaksi', [\App\Http\Controllers\Admin\MasterDataController::class, 'transaksiIndex'])->name('transaksi.index');
+
+        // Syarat & Ketentuan Layanan (T&C Jangka Panjang)
+        Route::prefix('syarat-ketentuan-layanan')->name('syarat-ketentuan-layanan.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananUpdate'])->name('update');
+            });
+        });
+
+        // Syarat & Ketentuan Layanan Gadai (T&C Jangka Panjang Gadai)
+        Route::prefix('syarat-ketentuan-layanan-gadai')->name('syarat-ketentuan-layanan-gadai.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiUpdate'])->name('update');
+            });
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama

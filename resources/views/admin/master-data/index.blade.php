@@ -138,6 +138,33 @@
                     </span>
                 </div>
             </a>
+
+            {{-- Syarat & Ketentuan Layanan --}}
+            <a href="{{ route('admin.master-data.syarat-ketentuan-layanan.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-amber-600/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold border border-amber-100">
+                            Pengaturan
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-amber-700 transition-colors">Syarat & Ketentuan</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed font-sans">Kelola dokumen syarat & ketentuan persetujuan pinjaman jangka panjang nasabah secara dinamis.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-amber-700 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
         </div>
     </div>
 
@@ -408,6 +435,33 @@
                 </div>
             </a>
             @endisAdminUtama
+
+            {{-- Syarat & Ketentuan Layanan Gadai --}}
+            <a href="{{ route('admin.master-data.syarat-ketentuan-layanan-gadai.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-amber-600/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg text-xs font-bold border border-amber-100">
+                            Pengaturan
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-amber-700 transition-colors">Syarat & Ketentuan Gadai</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed font-sans">Kelola dokumen syarat & ketentuan persetujuan transaksi gadai barang nasabah secara dinamis.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-amber-700 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
         </div>
     </div>
 
