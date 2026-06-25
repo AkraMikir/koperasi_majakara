@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Struk Pembayaran Angsuran - {{ $pengajuan->id ?? '-' }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
@@ -33,7 +34,7 @@
     $mappedData = [
         'jenis_trans' => 'BAYAR_ANGSURAN',
         'no_pinjaman' => $pengajuan->pinjaman->id ?? '-',
-        'tanggal' => $pengajuan->tgl_pembayaran ? $pengajuan->tgl_pembayaran->format('d-m-Y H:i') : '-',
+        'tanggal' => ($pengajuan->tgl_pembayaran ?? $pengajuan->created_at ?? now())->format('d-m-Y H:i'),
         'nama_anggota' => $pengajuan->nasabah->user->nama ?? 'N/A',
         'lama_pinjam' => '',
         'angsuran_pertama' => 0,
@@ -46,6 +47,6 @@
     ];
 @endphp
 <body>
-    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData])
+    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData, 'isPdf' => true])
 </body>
 </html>

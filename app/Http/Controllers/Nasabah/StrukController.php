@@ -42,7 +42,7 @@ class StrukController extends Controller
             ])
             ->findOrFail($id);
 
-        $logoPath = public_path('images/logo-koperasi-majakara.png');
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
         $hasLogo = is_file($logoPath);
 
         $pdf = Pdf::loadView('struk.tabungan', compact('transaksi', 'hasLogo', 'logoPath'));
