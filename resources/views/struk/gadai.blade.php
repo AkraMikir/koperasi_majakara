@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Struk Gadai - {{ $gadai->slot_kode }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
@@ -48,6 +49,6 @@
     ];
 @endphp
 <body>
-    @include('admin.settings.partials.components.gadai-body', ['settings' => $settings, 'data' => $mappedData])
+    @include('admin.settings.partials.components.gadai-body', ['settings' => $settings, 'data' => $mappedData, 'isPdf' => true])
 </body>
 </html>

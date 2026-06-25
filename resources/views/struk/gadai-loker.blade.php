@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Label Loker - {{ $gadai->slot_kode }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
@@ -41,11 +42,11 @@
     
     <table>
         <tr>
-            <td class="label">ID Gadai</td>
+            <td class="label">ID</td>
             <td>: {{ $gadai->id }}</td>
         </tr>
         <tr>
-            <td class="label">Nasabah</td>
+            <td class="label">Nama</td>
             <td>: {{ $gadai->nasabah->user->nama ?? '-' }}</td>
         </tr>
         <tr>
@@ -53,7 +54,7 @@
             <td>: {{ $gadai->item->head_1 ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Tgl Masuk</td>
+            <td class="label">Masuk</td>
             <td>: {{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d/m/Y') }}</td>
         </tr>
     </table>

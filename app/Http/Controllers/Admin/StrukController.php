@@ -30,7 +30,7 @@ class StrukController extends Controller
             'pengajuanTarik'
         ])->findOrFail($id);
 
-        $logoPath = public_path('images/logo-koperasi-majakara.png');
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
         $hasLogo = is_file($logoPath);
 
         $pdf = Pdf::loadView('struk.tabungan', compact('transaksi', 'hasLogo', 'logoPath'));
@@ -54,7 +54,7 @@ class StrukController extends Controller
             'adminPengelola'
         ])->findOrFail($id);
 
-        $logoPath = public_path('images/logo-koperasi-majakara.png');
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
         $hasLogo = is_file($logoPath);
 
         return view('struk.tabungan-html', compact('transaksi', 'hasLogo', 'logoPath'));
@@ -305,7 +305,6 @@ class StrukController extends Controller
             'nomor_hp' => $gadai->nasabah->user->nomor_hp ?? '-',
             'alamat_nasabah' => $gadai->nasabah->alamat ?? '-',
             'kode_pos_nasabah' => $kode_pos,
-            'nik' => $gadai->nasabah->dataKtp->nik ?? '-',
             'kategori' => $gadai->kategori->nama_kategori ?? '-',
             'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
             'merk_type' => ($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-'),

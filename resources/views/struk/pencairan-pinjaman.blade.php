@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Struk Pencairan Pinjaman - {{ $pinjaman->id ?? '-' }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 14px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
@@ -29,12 +30,12 @@
 </head>
 @php
     $strukSettings = \App\Models\SettingsStruk::getSettings();
-    $tglCair = $pinjaman->pengajuan->tgl_cair ?? $pinjaman->tgl_pinjam ?? null;
+    $tglCair = $pinjaman->pengajuan->tgl_cair ?? $pinjaman->tgl_pinjam ?? $pinjaman->created_at ?? now();
     
     $mappedData = [
         'jenis_trans' => 'PENCAIRAN',
         'no_pinjaman' => $pinjaman->id,
-        'tanggal' => $tglCair ? $tglCair->format('d-m-Y H:i') : '-',
+        'tanggal' => $tglCair->format('d-m-Y H:i'),
         'nama_anggota' => $pinjaman->nasabah->user->nama ?? 'N/A',
         'lama_pinjam' => $pinjaman->lama_pinjam ?? $pinjaman->pengajuan->durasi ?? '-',
         'angsuran_pertama' => $pinjaman->ags_bulan ?? 0,
@@ -47,6 +48,6 @@
     ];
 @endphp
 <body>
-    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData])
+    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $strukSettings, 'data' => $mappedData, 'isPdf' => true])
 </body>
 </html>

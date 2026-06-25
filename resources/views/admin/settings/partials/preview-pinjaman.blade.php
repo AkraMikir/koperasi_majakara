@@ -1,4 +1,4 @@
-<div class="bg-white p-[4px] border border-gray-300 rounded-lg max-w-[240px] mx-auto text-[12px] font-mono text-black shadow-md relative leading-[1.5]" style="font-family: 'Courier', monospace;">
+<div class="bg-white p-[4px] border border-gray-300 rounded-lg max-w-[240px] mx-auto text-[11px] font-bold font-mono text-black shadow-md relative leading-[1.4]" style="font-family: 'Courier', monospace; font-weight: bold;">
     <div class="absolute -top-2 left-1/2 -translate-x-1/2 bg-gray-200 text-gray-500 px-2 py-0.5 rounded-full text-[9px] font-sans font-bold uppercase tracking-wider">Pinjaman Struk</div>
     
     @php
@@ -18,5 +18,5 @@
         ];
     @endphp
 
-    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $settings, 'data' => $mappedData])
+    @include('admin.settings.partials.components.pinjaman-body', ['settings' => $settings, 'data' => $mappedData, 'isPdf' => false])
 </div>

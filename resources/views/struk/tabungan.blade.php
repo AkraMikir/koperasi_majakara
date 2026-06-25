@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Struk Transaksi Tabungan - Koperasi Majakara</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }
@@ -36,9 +37,8 @@
     $mappedData = [
         'jenis_trans' => $transaksi->jenis,
         'no_struk' => $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT),
-        'tanggal' => $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d-m-Y H:i') : '-',
+        'tanggal' => ($transaksi->tgl_transaksi ?? $transaksi->created_at ?? now())->format('d-m-Y H:i'),
         'nama_anggota' => $transaksi->nasabah->user->nama ?? 'N/A',
-        'nik' => $transaksi->nasabah->dataKtp->nik ?? '-',
         'via' => ucfirst($transaksi->via ?? '-'),
         'nominal' => $transaksi->nominal ?? 0,
         'nominal_murni' => $transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik ? ($transaksi->pengajuanTarik->nominal ?? 0) : ($transaksi->nominal ?? 0),
@@ -50,6 +50,6 @@
     ];
 @endphp
 <body>
-    @include('admin.settings.partials.components.tabungan-body', ['settings' => $strukSettings, 'data' => $mappedData])
+    @include('admin.settings.partials.components.tabungan-body', ['settings' => $strukSettings, 'data' => $mappedData, 'isPdf' => true])
 </body>
 </html>
