@@ -179,8 +179,9 @@
                     @endif
                 </td>
                 <!-- Koperasi Info -->
-                <td class="koperasi-info" style="width: 40%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
-                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
+                <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
+                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br>
+                     <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <!-- Nasabah Info -->
                 <td class="nasabah-info" style="width: 30%;">

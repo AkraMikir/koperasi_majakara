@@ -13,12 +13,11 @@
 
         @page {
             size: 9.5in 5.5in;
-            margin: 0.17in 0.51in;
         }
 
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 9px;
+            font-size: 12px;
             line-height: 1.25;
             color: #000;
             background-color: #fff;
@@ -38,19 +37,19 @@
         }
 
         .logo-img {
-            max-height: 60px;
+            max-height: 90px;
             width: auto;
             display: inline-block;
             vertical-align: middle;
         }
 
         .koperasi-info {
-            font-size: 8.5px;
+            font-size: 12px;
             padding-left: 10px !important;
         }
 
         .nasabah-info {
-            font-size: 8.5px;
+            font-size: 12px;
             text-align: right;
         }
 
@@ -59,7 +58,7 @@
             color: #fff;
             text-align: center;
             font-weight: bold;
-            font-size: 10.5px;
+            font-size: 13.5px;
             padding: 4px 10px;
             letter-spacing: 1px;
             margin-bottom: 8px;
@@ -70,13 +69,13 @@
 
         .params-title {
             font-weight: bold;
-            font-size: 8.5px;
+            font-size: 11px;
             color: #111;
             margin-bottom: 1px;
         }
 
         .params-value {
-            font-size: 8.5px;
+            font-size: 11px;
             color: #333;
         }
 
@@ -85,7 +84,7 @@
         }
 
         .perjanjian-text {
-            font-size: 7.5px;
+            font-size: 10px;
             text-align: left;
             margin-bottom: 2px;
         }
@@ -99,17 +98,17 @@
         .footer-section td {
             vertical-align: top;
             text-align: center;
-            font-size: 8px;
+            font-size: 11px;
         }
 
         .info-box {
             border: 1px solid #935a16;
             padding: 4px 6px;
             text-align: left;
-            font-size: 7.5px;
+            font-size: 10px;
             color: #935a16;
             border-radius: 4px;
-            width: 190px;
+            width: 250px;
             line-height: 1.2;
         }
 
@@ -132,16 +131,17 @@
     <table class="header-table">
         <tr>
             <!-- Logo -->
-            <td style="width: 18%; text-align: right; padding-right: 10px;">
+            <td style="width: 10%; text-align: right; padding-right: 10px;">
                 @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
                 <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
                 @else
-                <div style="font-weight: bold; font-size: 14px; color: #935a16;">MAJAKARA</div>
+                <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                 @endif
             </td>
             <!-- Koperasi Info -->
-            <td class="koperasi-info" style="width: 52%; font-size: 8.5px; line-height: 1.35; padding-left: 10px;">
-                <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
+            <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
+                <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br> 
+                <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
             </td>
             <!-- Nasabah Info -->
             <td class="nasabah-info" style="width: 30%;">
@@ -168,7 +168,7 @@
             <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: center;">Deskripsi Barang</td>
             <td style="width: 20%; border: none; padding: 4px; font-weight: bold; text-align: center;">Slot Kode</td>
             <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Nominal Deal:</td>
-            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; vertical-align: middle;">Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }},-</td>
         </tr>
         <!-- ROW 2 -->
         <tr>
@@ -176,7 +176,7 @@
             <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['barang'] }}</td>
             <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['slot_kode'] }}</td>
             <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Biaya Jasa:</td>
-            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; vertical-align: middle;">Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }},-</td>
         </tr>
         <!-- ROW 3 -->
         <tr>
@@ -184,7 +184,7 @@
             <td style="border: none; padding: 4px; font-weight: bold; text-align: center;">Jatuh Tempo</td>
             <td style="border: none; padding: 4px; font-weight: bold; text-align: center;">Status Transaksi</td>
             <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Biaya Inap:</td>
-            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; vertical-align: middle;">Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }},-</td>
         </tr>
         <!-- ROW 4 -->
         <tr>
@@ -192,19 +192,19 @@
             <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['jatuh_tempo'] }}</td>
             <td style="border: none; padding: 6px 4px; text-align: center; vertical-align: middle; font-weight: bold;">{{ $data['jenis_trans'] }}</td>
             <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Denda Aktif:</td>
-            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['denda_aktif'] ?? 0, 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; vertical-align: middle;">Rp {{ number_format($data['denda_aktif'] ?? 0, 0, ',', '.') }},-</td>
         </tr>
         <!-- ROW 5 -->
         <tr>
             <td colspan="3" style="border: none; padding: 4px;"></td>
             <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Extra Pinjaman:</td>
-            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; vertical-align: middle;">Rp {{ number_format($data['extra_pinjaman_nominal'] ?? 0, 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; vertical-align: middle;">Rp {{ number_format($data['extra_pinjaman_nominal'] ?? 0, 0, ',', '.') }},-</td>
         </tr>
         <!-- ROW 6 -->
         <tr>
             <td colspan="3" style="border: none; padding: 4px;"></td>
             <td style="border: 1px solid #000; padding: 4px 6px; font-weight: bold; vertical-align: middle;">Total Tagihan:</td>
-            <td style="border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 8.5px; color: #935a16; vertical-align: middle;">Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }},-</td>
+            <td style="width: 20%; border: 1px solid #000; padding: 4px 6px; text-align: right; font-weight: bold; font-size: 11px; color: #935a16; vertical-align: middle;">Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }},-</td>
         </tr>
     </table>
 
@@ -215,7 +215,7 @@
                 <td style="width: 33%; vertical-align: middle;">
                     <div style="border-bottom: 1px dashed #935a16;"></div>
                 </td>
-                <td style="text-align: center; white-space: nowrap; padding: 0 8px; font-weight: bold; font-size: 8.5px; color: #935a16; text-transform: uppercase; vertical-align: middle;">
+                <td style="text-align: center; white-space: nowrap; padding: 0 8px; font-weight: bold; font-size: 11px; color: #935a16; text-transform: uppercase; vertical-align: middle;">
                     SYARAT &amp; KETENTUAN GADAI
                 </td>
                 <td style="width: 33%; vertical-align: middle;">
@@ -235,7 +235,7 @@
     </div>
 
     <!-- BEKASI DATE - section tersendiri di atas tanda tangan -->
-    <div style="text-align: right; font-size: 8px; margin-bottom: 4px; padding-right: 0;">
+    <div style="text-align: right; font-size: 11px; margin-bottom: 4px; padding-right: 0;">
         Bekasi, .....................................
     </div>
 

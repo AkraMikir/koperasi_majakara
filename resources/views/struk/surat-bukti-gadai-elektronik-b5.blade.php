@@ -11,11 +11,10 @@
         }
         @page {
             size: 9.5in 5.5in;
-            margin: 0.15in 0.4in;
         }
         body {
             font-family: 'Arial', sans-serif;
-            font-size: 10px;
+            font-size: 12px;
             line-height: 1.25;
             color: #000;
             background-color: #fff;
@@ -36,18 +35,18 @@
             vertical-align: middle;
         }
         .logo-img {
-            max-height: 50px;
+            max-height: 90px;
             width: auto;
             display: inline-block;
             vertical-align: middle;
         }
         .koperasi-info {
-            font-size: 9.5px;
+            font-size: 12px;
             line-height: 1.35;
-            padding-left: 10px;
+            padding-left: 10px !important;
         }
         .nasabah-info {
-            font-size: 9.5px;
+            font-size: 12px;
             text-align: right;
             line-height: 1.35;
         }
@@ -56,7 +55,7 @@
             color: #fff;
             text-align: center;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 13.5px;
             padding: 4px 10px;
             letter-spacing: 0.5px;
             margin-bottom: 8px;
@@ -70,7 +69,7 @@
         .detail-table td {
             padding: 4px 6px;
             vertical-align: middle;
-            font-size: 10px;
+            font-size: 12px;
             border-bottom: 1px solid #f3f4f6;
         }
         .detail-table td.label {
@@ -92,14 +91,14 @@
             padding: 3px 0;
         }
         .perjanjian-text {
-            font-size: 8.5px;
+            font-size: 10px;
             line-height: 1.3;
             text-align: justify;
             margin-bottom: 6px;
         }
         .perjanjian-list {
             margin-left: 12px;
-            font-size: 8.5px;
+            font-size: 10px;
             line-height: 1.3;
             margin-bottom: 8px;
             list-style-type: decimal;
@@ -118,7 +117,7 @@
             border: 1.5px solid #2c4a24;
             padding: 5px;
             border-radius: 4px;
-            font-size: 7.5px;
+            font-size: 10px;
             line-height: 1.35;
             color: #2c4a24;
             font-weight: bold;
@@ -126,7 +125,7 @@
         }
         .signature-area {
             text-align: center;
-            font-size: 9px;
+            font-size: 11px;
         }
         .signature-space {
             height: 38px;
@@ -139,15 +138,16 @@
     <div class="page">
         <table class="header-table">
             <tr>
-                <td style="width: 10%; text-align: left;">
+                <td style="width: 10%; text-align: right; padding-right: 10px;">
                     @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
                     <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
                     @else
-                    <div style="font-weight: bold; font-size: 16px; color: #935a16;">MAJAKARA</div>
+                    <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
                 </td>
-                <td class="koperasi-info" style="width: 60%;">
-                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
+                <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
+                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br>
+                    <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <td class="nasabah-info" style="width: 30%;">
                     Nama: {{ $data['nama_anggota'] }}<br>
@@ -240,14 +240,14 @@
     <div class="page">
         <table class="header-table">
             <tr>
-                <td style="width: 10%; text-align: left;">
+                <td style="width: 10%; text-align: right; padding-right: 10px;">
                     @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
                     <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
                     @else
-                    <div style="font-weight: bold; font-size: 16px; color: #935a16;">MAJAKARA</div>
+                    <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
                 </td>
-                <td class="koperasi-info" style="width: 60%;">
+                <td class="koperasi-info" style="width: 60%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
                     <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <td class="nasabah-info" style="width: 30%;">
