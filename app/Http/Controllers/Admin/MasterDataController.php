@@ -32,7 +32,7 @@ class MasterDataController extends Controller
     protected function checkCrudPermission()
     {
         if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData(auth()->user())) {
-            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengelola Master Data.');
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat mengelola Master Data.');
         }
     }
 

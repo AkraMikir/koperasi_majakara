@@ -74,14 +74,14 @@
                             <p class="text-[10px] text-amber-600 font-bold mt-0.5">Batas Ambil: {{ $kat->countdown_ambil_hari }} Hari</p>
                         </td>
                         <td class="px-6 py-4 text-right">
-                            @isAdminUtama
+                            @canCrudMasterData
                             <a href="{{ route('admin.master-data.kategori-gadai.edit', $kat->id) }}" class="inline-flex items-center gap-1 px-3 py-1.5 bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 Edit Aturan
                             </a>
                             @else
                             <span class="text-xs text-gray-400 italic">Read Only</span>
-                            @endisAdminUtama
+                            @endcanCrudMasterData
                         </td>
                     </tr>
                     @endforeach

@@ -39,6 +39,7 @@ class CheckAdminPermission
             case 'crud-pinjaman':
                 $hasPermission = $this->permissionService->canCrudPinjamanAktif($user);
                 break;
+            case 'crud-biaya-transfer':
             case 'crud-master-data':
                 $hasPermission = $this->permissionService->canCrudMasterData($user);
                 break;

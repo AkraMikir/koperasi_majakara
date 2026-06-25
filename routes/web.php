@@ -528,7 +528,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferIndex'])->name('index');
             
-            Route::middleware('admin.permission:crud-biaya-transfer')->group(function () {
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');

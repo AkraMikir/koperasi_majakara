@@ -144,11 +144,11 @@ class AdminPermissionService
 
     /**
      * Check if user can CRUD Master Data
-     * Admin Utama: YES | Admin Operasional: NO
+     * Admin Utama: YES | Admin Operasional: YES
      */
     public function canCrudMasterData(?User $user): bool
     {
-        return $this->isAdminUtama($user);
+        return $this->isAdmin($user);
     }
 
     /**
