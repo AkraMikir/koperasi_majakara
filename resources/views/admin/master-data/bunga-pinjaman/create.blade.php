@@ -70,6 +70,20 @@
                 @enderror
             </div>
 
+            <!-- Bunga Flat Hari -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">Bunga Flat / Hari (%) (Opsional)</label>
+                <div class="relative">
+                    <input type="number" name="bunga_flat_hari" value="{{ old('bunga_flat_hari') }}" min="0" max="100" step="0.01" placeholder="Kosongkan untuk menghitung otomatis (Bunga % / 30)"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none transition-all">
+                    <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">%</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Contoh: 0.33 untuk 0.33% per hari</p>
+                @error('bunga_flat_hari')
+                    <p class="text-xs text-red-600 mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
             <!-- Status Aktif -->
             <div>
                 <label class="flex items-center space-x-3">

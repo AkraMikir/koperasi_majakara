@@ -221,7 +221,7 @@
                         <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
                             <div class="text-right">
-                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="font-semibold text-gray-900 block" id="estimasiFlatPerHariTransfer">flat - per hari</span>
                                 <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>
                             </div>
                         </div>
@@ -355,7 +355,7 @@
                         <div class="flex justify-between items-start">
                             <span class="text-sm text-gray-600">Bunga:</span>
                             <div class="text-right">
-                                <span class="font-semibold text-gray-900 block">flat 0,2% per hari</span>
+                                <span class="font-semibold text-gray-900 block" id="estimasiFlatPerHariTunai">flat - per hari</span>
                                 <span class="text-sm text-gray-500 block" id="estimasiBungaTunai">-</span>
                             </div>
                         </div>
@@ -614,6 +614,7 @@ function updateEstimasiTransfer() {
     if (nominal < 100000 || durasi < 1) {
         document.getElementById('estimasiNominalTransfer').textContent = 'Rp 0';
         document.getElementById('estimasiBungaTransfer').textContent = '-';
+        document.getElementById('estimasiFlatPerHariTransfer').textContent = 'flat - per hari';
         document.getElementById('estimasiTotalTransfer').textContent = 'Rp 0';
         document.getElementById('estimasiAngsuranTransfer').textContent = 'Rp 0';
         document.getElementById('simulasiTableSectionTransfer').style.display = 'none';
@@ -632,6 +633,7 @@ function updateEstimasiTransfer() {
             const d = data.data;
             document.getElementById('estimasiNominalTransfer').textContent = 'Rp ' + d.nominal.toLocaleString('id-ID');
             document.getElementById('estimasiBungaTransfer').textContent = d.bunga_persen + '% (Rp ' + d.bunga_total.toLocaleString('id-ID') + ')';
+            document.getElementById('estimasiFlatPerHariTransfer').textContent = 'flat ' + (d.bunga_flat_hari !== undefined ? d.bunga_flat_hari.toLocaleString('id-ID') : '0') + '% per hari';
             document.getElementById('estimasiTotalTransfer').textContent = 'Rp ' + d.total_yang_harus_dibayar.toLocaleString('id-ID');
             document.getElementById('estimasiAngsuranTransfer').textContent = 'Rp ' + d.angsuran_per_bulan.toLocaleString('id-ID');
             const tbody = document.getElementById('simulasiTableBodyTransfer');
@@ -655,6 +657,7 @@ function updateEstimasiTunai() {
     if (nominal < 100000 || durasi < 1) {
         document.getElementById('estimasiNominalTunai').textContent = 'Rp 0';
         document.getElementById('estimasiBungaTunai').textContent = '-';
+        document.getElementById('estimasiFlatPerHariTunai').textContent = 'flat - per hari';
         document.getElementById('estimasiTotalTunai').textContent = 'Rp 0';
         document.getElementById('estimasiAngsuranTunai').textContent = 'Rp 0';
         document.getElementById('simulasiTableSectionTunai').style.display = 'none';
@@ -673,6 +676,7 @@ function updateEstimasiTunai() {
             const d = data.data;
             document.getElementById('estimasiNominalTunai').textContent = 'Rp ' + d.nominal.toLocaleString('id-ID');
             document.getElementById('estimasiBungaTunai').textContent = d.bunga_persen + '% (Rp ' + d.bunga_total.toLocaleString('id-ID') + ')';
+            document.getElementById('estimasiFlatPerHariTunai').textContent = 'flat ' + (d.bunga_flat_hari !== undefined ? d.bunga_flat_hari.toLocaleString('id-ID') : '0') + '% per hari';
             document.getElementById('estimasiTotalTunai').textContent = 'Rp ' + d.total_yang_harus_dibayar.toLocaleString('id-ID');
             document.getElementById('estimasiAngsuranTunai').textContent = 'Rp ' + d.angsuran_per_bulan.toLocaleString('id-ID');
             const tbody = document.getElementById('simulasiTableBodyTunai');

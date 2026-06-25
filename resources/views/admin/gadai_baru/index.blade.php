@@ -219,7 +219,7 @@
                             <span class="inline-flex items-center px-2 py-0.5 rounded-lg text-[9px] font-black uppercase bg-amber-100 text-amber-800 mb-1">
                                 {{ $gadai->kategori->nama_kategori }}
                             </span>
-                            <p class="font-semibold text-gray-800 text-sm">{{ $gadai->item->head_1 }}</p>
+                            <p class="font-semibold text-gray-800 text-sm">{{ $gadai->nama_barang_display }}</p>
                         </td>
                         <td class="px-6 py-4">
                             <div class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-amber-50 text-amber-900 border border-amber-200/80 rounded-lg text-xs font-mono font-bold shadow-xs">
@@ -385,7 +385,7 @@
                     <div class="grid grid-cols-2 gap-y-2 gap-x-4 mb-3 p-3 bg-white/60 rounded-xl border border-gray-100">
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Item Gadai</p>
-                            <p class="font-medium text-gray-800 text-sm mt-0.5 line-clamp-1">{{ $gadai->item->head_1 }}</p>
+                            <p class="font-medium text-gray-800 text-sm mt-0.5 line-clamp-1">{{ $gadai->nama_barang_display }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wide">Kode Slot</p>

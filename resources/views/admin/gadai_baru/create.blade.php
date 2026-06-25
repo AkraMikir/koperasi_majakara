@@ -129,6 +129,13 @@
                             </div>
 
                             <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Merk/Type</label>
+                                <input type="text" name="nama_barang_manual" id="nama_barang_manual"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900 placeholder-gray-400"
+                                    placeholder="Nama...">
+                            </div>
+
+                            <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nominal Deal (Rp) <span
                                         class="text-red-500">*</span></label>
                                 <div class="relative">

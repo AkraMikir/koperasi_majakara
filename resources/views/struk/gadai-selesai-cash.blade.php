@@ -65,7 +65,7 @@
         </tr>
         <tr>
             <td class="label">Barang Jaminan</td>
-            <td>: {{ $gadai->item->head_1 ?? '-' }}</td>
+            <td>: {{ $gadai->nama_barang_display }}</td>
         </tr>
     </table>
     

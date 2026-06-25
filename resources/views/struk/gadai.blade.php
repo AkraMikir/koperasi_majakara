@@ -33,7 +33,7 @@
         'nama_anggota' => $gadai->nasabah->user->nama ?? '-',
         'no_anggota' => $gadai->nasabah->id ?? '-',
         'kategori' => $gadai->kategori->nama_kategori ?? '-',
-        'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
+        'barang' => $gadai->nama_barang_display,
         'slot_kode' => $gadai->slot_kode,
         'tgl_mulai' => \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d/m/Y'),
         'jatuh_tempo' => \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->format('d/m/Y'),

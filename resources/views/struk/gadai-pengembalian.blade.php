@@ -69,7 +69,7 @@
         </tr>
         <tr>
             <td class="label">Nama Item Barang</td>
-            <td>: {{ $gadai->item->head_1 ?? '-' }}</td>
+            <td>: {{ $gadai->nama_barang_display }}</td>
         </tr>
     </table>
     

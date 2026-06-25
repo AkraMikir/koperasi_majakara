@@ -297,12 +297,17 @@ class PinjamanController extends Controller
 
         $displayAngsuran = $durasi > 1 ? $angsuranBulanan : (int) $totalKewajiban;
 
+        $bungaFlatHari = $masterBunga->bunga_flat_hari !== null 
+            ? (float) $masterBunga->bunga_flat_hari 
+            : round((float) $bungaPersen / 30, 2);
+
         return response()->json([
             'success' => true,
             'data' => [
                 'nominal' => (float) $nominal,
                 'durasi' => $durasi,
                 'bunga_persen' => $bungaPersen,
+                'bunga_flat_hari' => $bungaFlatHari,
                 'bunga_total' => $bungaRp,
                 'total_yang_harus_dibayar' => (int) round($totalKewajiban, 0),
                 'angsuran_per_bulan' => $displayAngsuran,
@@ -408,6 +413,7 @@ class PinjamanController extends Controller
             ->where('durasi_max', '>=', $durasi)
             ->first();
         $bungaPersen = $bungaMaster ? (float) $bungaMaster->bunga_persen : 10.00;
+        $bungaFlatHari = $bungaMaster ? ($bungaMaster->bunga_flat_hari !== null ? (float) $bungaMaster->bunga_flat_hari : round((float) $bungaPersen / 30, 2)) : 0.33;
 
         // ID dari 3 master: P (pinjaman), TF (transfer), PNJ (pengajuan)
         $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', 'TF', 'PNJ');
@@ -425,6 +431,7 @@ class PinjamanController extends Controller
                 'status' => '1', // Status 1 = pending
                 'keterangan' => $request->keterangan,
                 'bunga_persen' => $bungaPersen,
+                'bunga_flat_hari' => $bungaFlatHari,
             ]);
 
             \App\Models\AdminNotification::notify(
@@ -626,6 +633,7 @@ class PinjamanController extends Controller
             ->where('durasi_max', '>=', $durasi)
             ->first();
         $bungaPersen = $bungaMaster ? (float) $bungaMaster->bunga_persen : 10.00;
+        $bungaFlatHari = $bungaMaster ? ($bungaMaster->bunga_flat_hari !== null ? (float) $bungaMaster->bunga_flat_hari : round((float) $bungaPersen / 30, 2)) : 0.33;
 
         // ID dari 3 master: P (pinjaman), TN (tunai), PNJ (pengajuan)
         $idPengajuan = IdGenerator::generate('tbl_pengajuan_pinjaman', 'P', 'TN', 'PNJ');
@@ -651,6 +659,7 @@ class PinjamanController extends Controller
                 'status' => '1', // Pending
                 'keterangan' => $request->keterangan,
                 'bunga_persen' => $bungaPersen,
+                'bunga_flat_hari' => $bungaFlatHari,
             ]);
 
             // Create janji temu pinjaman (muncul di halaman Janji Temu Universal, bukan Pengajuan Terbaru)

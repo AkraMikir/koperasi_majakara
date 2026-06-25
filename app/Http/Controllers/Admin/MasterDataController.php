@@ -85,10 +85,16 @@ class MasterDataController extends Controller
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
             'durasi_pilihan' => 'nullable|integer|min:1',
             'bunga_persen' => 'required|numeric|min:0|max:100',
+            'bunga_flat_hari' => 'nullable|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
         ]);
 
-        MasterBungaPinjaman::create($request->all());
+        $input = $request->all();
+        if (!isset($input['bunga_flat_hari']) || $input['bunga_flat_hari'] === null || $input['bunga_flat_hari'] === '') {
+            $input['bunga_flat_hari'] = round((float) $request->bunga_persen / 30, 2);
+        }
+
+        MasterBungaPinjaman::create($input);
 
         return redirect()->route('admin.master-data.bunga-pinjaman.index')
             ->with('success', 'Data berhasil ditambahkan');
@@ -109,11 +115,16 @@ class MasterDataController extends Controller
             'durasi_max' => 'required|integer|min:1|gte:durasi_min',
             'durasi_pilihan' => 'nullable|integer|min:1',
             'bunga_persen' => 'required|numeric|min:0|max:100',
+            'bunga_flat_hari' => 'nullable|numeric|min:0|max:100',
             'keterangan' => 'nullable|string|max:500',
         ]);
 
         $data = MasterBungaPinjaman::findOrFail($id);
-        $data->update($request->all());
+        $input = $request->all();
+        if (!isset($input['bunga_flat_hari']) || $input['bunga_flat_hari'] === null || $input['bunga_flat_hari'] === '') {
+            $input['bunga_flat_hari'] = round((float) $request->bunga_persen / 30, 2);
+        }
+        $data->update($input);
 
         return redirect()->route('admin.master-data.bunga-pinjaman.index')
             ->with('success', 'Data berhasil diupdate');

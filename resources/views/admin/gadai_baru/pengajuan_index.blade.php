@@ -57,7 +57,7 @@
                             </div>
                             <div>
                                 <div class="font-bold text-gray-900 leading-tight">{{ $item->nasabah->user->nama }}</div>
-                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->item->head_1 }}</div>
+                                <div class="text-[11px] text-gray-500 mt-0.5">{{ $item->gadaiActive->nama_barang_display }}</div>
                             </div>
                         </div>
                         <div class="flex flex-col items-end gap-1">
@@ -148,7 +148,7 @@
                                 </div>
                                 <div>
                                     <div class="font-bold text-gray-900 leading-none mb-1">{{ $item->nasabah->user->nama }}</div>
-                                    <div class="text-[11px] text-gray-500">{{ $item->gadaiActive->item->head_1 }} • <span class="font-mono bg-gray-100 px-1 rounded">{{ $item->gadaiActive->slot_kode }}/{{ $item->gadaiActive->slot_table }}</span></div>
+                                    <div class="text-[11px] text-gray-500">{{ $item->gadaiActive->nama_barang_display }} • <span class="font-mono bg-gray-100 px-1 rounded">{{ $item->gadaiActive->slot_kode }}/{{ $item->gadaiActive->slot_table }}</span></div>
                                 </div>
                             </div>
                         </td>
@@ -454,7 +454,7 @@
                 gadaiActiveId: {{ $item->gadai_active_id }},
                 status: "{{ $item->status }}",
                 nasabahName: "{{ addslashes($item->nasabah->user->nama) }}",
-                barangName: "{{ addslashes($item->gadaiActive->item->head_1) }}",
+                barangName: "{{ addslashes($item->gadaiActive->nama_barang_display) }}",
                 slotCode: "{{ $item->gadaiActive->slot_kode }} / {{ $item->gadaiActive->slot_table }}",
                 jenis: "{{ strtoupper($item->jenis_pengajuan) }}",
                 metode: "{{ strtoupper($item->metode) }}",

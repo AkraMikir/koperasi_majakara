@@ -29,6 +29,7 @@ class PengajuanPinjaman extends Model
         'keterangan_admin',
         'tgl_cair',
         'bunga_persen',
+        'bunga_flat_hari',
     ];
 
     // ID digenerate di controller via IdGenerator (format: DDMMYYYY + SEQ + P + TF/TN + PNJ)
@@ -38,6 +39,7 @@ class PengajuanPinjaman extends Model
         'tgl_cair' => 'datetime',
         'nominal' => 'decimal:2',
         'bunga_persen' => 'decimal:2',
+        'bunga_flat_hari' => 'decimal:2',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
