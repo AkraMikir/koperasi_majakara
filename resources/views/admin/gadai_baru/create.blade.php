@@ -176,7 +176,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Bunga Inap (%) <span
+                                <label id="label_rate_inap" class="block text-sm font-bold text-gray-700 mb-2">Bunga Inap (%) <span
                                         class="text-red-500">*</span></label>
                                 <input type="number" step="0.01" name="rate_inap_persen" id="rate_inap_persen"
                                     class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
@@ -431,7 +431,24 @@
                 const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
 
                 document.getElementById('rate_jasa').value = jasa;
-                document.getElementById('rate_inap_persen').value = inap;
+                
+                const rateInapInput = document.getElementById('rate_inap_persen');
+                const labelInap = document.getElementById('label_rate_inap');
+                
+                rateInapInput.value = inap;
+                if (kode === 'vehicle') {
+                    rateInapInput.readOnly = true;
+                    rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
+                    }
+                } else {
+                    rateInapInput.readOnly = false;
+                    rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
+                    }
+                }
                 
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
@@ -470,6 +487,7 @@
                     opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
                     opt.dataset.min = item.nominal_low;
                     opt.dataset.max = item.nominal_high;
+                    opt.dataset.inap = item.nominal_inap || 0;
                     itemSelect.appendChild(opt);
                 });
 
@@ -492,6 +510,14 @@
                 const selectedOpt = this.options[this.selectedIndex];
                 const min = parseFloat(selectedOpt.dataset.min) || 0;
                 const max = parseFloat(selectedOpt.dataset.max) || 0;
+
+                // Set nominal inap if category is vehicle
+                const katSelectedOpt = katSelect.options[katSelect.selectedIndex];
+                const kode = katSelectedOpt ? katSelectedOpt.dataset.kode : '';
+                if (kode === 'vehicle') {
+                    const inapNominal = parseFloat(selectedOpt.dataset.inap) || 0;
+                    document.getElementById('rate_inap_persen').value = inapNominal;
+                }
 
                 // Format to IDR
                 document.getElementById('min_taksiran_text').textContent = new Intl.NumberFormat('id-ID').format(min);
@@ -667,6 +693,7 @@
             
             // Initial run
             validateBalances();
+            katSelect.dispatchEvent(new Event('change'));
         });
     </script>
 @endsection

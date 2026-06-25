@@ -12,7 +12,7 @@
         }
 
         @page {
-            size: 9.5in 5.5in;
+            size: 9.5in 6.5in;
         }
 
         body {
@@ -26,7 +26,7 @@
 
         .header-table {
             width: 100%;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
 
         .header-table td {
@@ -154,7 +154,7 @@
 
         .signature-title {
             font-weight: bold;
-            margin-bottom: 35px;
+            padding-bottom: 65px;
         }
 
         .signature-line {
@@ -179,8 +179,9 @@
                     @endif
                 </td>
                 <!-- Koperasi Info -->
-                <td class="koperasi-info" style="width: 40%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
-                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
+                <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
+                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br>
+                     <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <!-- Nasabah Info -->
                 <td class="nasabah-info" style="width: 30%;">
@@ -338,19 +339,19 @@ Buka Jam: 08.00 - 20.00 @endif</div>
                 <!-- Signature: Nasabah -->
                 <td style="width: 20%; vertical-align: top; text-align: center;">
                     <div class="signature-title">Nasabah/yang dikuasakan,</div>
-                    <div style=" padding-top: 2px;">(...................................)</div>
+                    <div style=" padding-top: 10px;">(...................................)</div>
                 </td>
                 <!-- Conditional Emergency Contact -->
                 @if((float)$data['jumlah_pinjam'] >= 1000000)
                 <td style="width: 20%; vertical-align: top; text-align: center;">
                     <div class="signature-title">Kontak Darurat,</div>
-                    <div style=" padding-top: 2px;">(...................................)</div>
+                    <div style=" padding-top: 10px;">(...................................)</div>
                 </td>
                 @endif
                 <!-- Signature: Petugas -->
                 <td style="width: 25%; vertical-align: top; text-align: center;">
                     <div class="signature-title">Petugas,</div>
-                    <div style=" padding-top: 2px;">(...................................)</div>
+                    <div style=" padding-top: 10px;">(...................................)</div>
                 </td>
             </tr>
         </table>
