@@ -1401,10 +1401,10 @@
                 <canvas id="cameraCanvas" class="hidden"></canvas>
 
                 <!-- KTP Grid Overlay -->
-                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center">
+                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden">
                     <!-- Semi-transparent overlay with a clear cutout in the middle for KTP card format (~85.6mm x 53.98mm, ratio 1.58) -->
                     <div class="absolute inset-0 bg-black/50"></div>
-                    <div class="relative z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
                         <!-- Corner markers -->
                         <div class="absolute -top-1.5 -left-1.5 w-4 h-4 border-t-4 border-l-4 border-yellow-400"></div>
                         <div class="absolute -top-1.5 -right-1.5 w-4 h-4 border-t-4 border-r-4 border-yellow-400"></div>
@@ -1923,8 +1923,8 @@
                         ocrResult.classList.remove('hidden');
                     } else {
                         ocrResult.innerHTML =
-                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">Gagal memindai KTP: ' +
-                            (data.message || 'Unknown error') + '. Silakan isi manual.</div>';
+                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">' +
+                            (data.message || 'Gagal memindai KTP. Silakan isi data secara manual.') + '</div>';
                         ocrResult.classList.remove('hidden');
                         if (data.file_path) document.getElementById('file_ktp').value = data.file_path;
                     }
@@ -1934,8 +1934,7 @@
                     ocrLoading.classList.add('hidden');
                     btnOcr.disabled = false;
                     ocrResult.innerHTML =
-                        '<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">Error: ' +
-                        error.message + '</div>';
+                        '<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">Terjadi kesalahan koneksi atau server. Silakan coba lagi atau isi data secara manual.</div>';
                     ocrResult.classList.remove('hidden');
                 });
         }

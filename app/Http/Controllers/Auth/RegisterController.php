@@ -401,7 +401,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'Gagal mengekstrak data KTP: ' . ($ocrResult['error'] ?? 'Unknown error'),
+            'message' => 'Gagal memproses foto KTP. Silakan coba lagi dengan foto yang lebih jelas, atau isi data secara manual.',
             'file_path' => $fileKtpPath // Tetap return file path untuk digunakan manual
         ], 500);
     }
