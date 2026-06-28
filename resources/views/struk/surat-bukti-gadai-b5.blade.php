@@ -105,10 +105,9 @@
             border: 1px solid #935a16;
             padding: 4px 6px;
             text-align: left;
-            font-size: 10px;
+            font-size: 8px;
             color: #935a16;
             border-radius: 4px;
-            width: 250px;
             line-height: 1.2;
         }
 
@@ -243,7 +242,7 @@
     <table class="footer-section">
         <tr>
             <!-- Info Box -->
-            <td style="width: 35%; text-align: left; vertical-align: middle;">
+            <td style="width: 25%; text-align: left; vertical-align: middle;">
                 <div class="info-box">
                     <strong>GADAI NYAMAN &amp; AMAN</strong><br>
                     HARI BESAR DAN HARI MINGGU TETAP BUKA<br>
@@ -252,7 +251,7 @@
                 </div>
             </td>
             <!-- Signature: Nasabah -->
-            <td style="width: 20%; vertical-align: top; text-align: center;">
+            <td style="width: 25%; vertical-align: top; text-align: center;">
                 <div class="signature-title" style="margin-bottom: 48px;">Nasabah/yang dikuasakan,</div>
                 <div style="border-top: 1px solid #000; padding-top: 10px;">(...................................)</div>
             </td>
