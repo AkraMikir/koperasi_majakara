@@ -48,7 +48,7 @@
                                 </div>
                                 <div class="flex justify-between items-center pb-2 border-b border-gray-50">
                                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Biaya Jasa</span>
-                                    <span class="font-black text-[#674c1d]">{{ $item->bunga_low }}% - {{ $item->bunga_high }}%</span>
+                                    <span class="font-black text-[#674c1d]">{{ number_format($kategori->rate_jasa, 2) }}%</span>
                                 </div>
                                 <div class="flex justify-between items-center pb-2 border-b border-gray-50">
                                     <span class="text-xs font-bold text-gray-400 uppercase tracking-widest">Denda Terlambat</span>

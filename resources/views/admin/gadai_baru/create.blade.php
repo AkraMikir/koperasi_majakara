@@ -227,6 +227,13 @@
                             </div>
 
                             <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Merk/Type</label>
+                                <input type="text" name="nama_barang_manual" id="nama_barang_manual"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900 placeholder-gray-400"
+                                    placeholder="Nama...">
+                            </div> 
+
+                            <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Nominal Deal (Rp) <span
                                         class="text-red-500">*</span></label>
                                 <div class="relative">
@@ -267,7 +274,7 @@
                             </div>
 
                             <div>
-                                <label class="block text-sm font-bold text-gray-700 mb-2">Bunga Inap (%) <span
+                                <label id="label_rate_inap" class="block text-sm font-bold text-gray-700 mb-2">Bunga Inap (%) <span
                                         class="text-red-500">*</span></label>
                                 <input type="number" step="0.01" name="rate_inap_persen" id="rate_inap_persen"
                                     class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] font-bold text-gray-900"
@@ -500,8 +507,14 @@
             input.value = value;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', initGadaiForm);
+        document.addEventListener('turbo:load', initGadaiForm);
+
+        function initGadaiForm() {
             const katSelect = document.getElementById('kategori_id');
+            if (!katSelect || katSelect.dataset.initialized) return;
+            katSelect.dataset.initialized = 'true';
+
             const itemSelect = document.getElementById('item_id');
             const nominalInput = document.getElementById('nominal_deal');
             const errorNominal = document.getElementById('error_nominal');
@@ -509,23 +522,70 @@
             const taksiranInfo = document.getElementById('taksiranInfo');
             const maxTaksiranText = document.getElementById('max_taksiran_text');
             const tInfoBox = document.getElementById('taksiran_info');
+            const slotSelect = document.getElementById('slot_kode');
+            const namaBarangManual = document.getElementById('nama_barang_manual');
 
             const allItems = @json($itemList);
             const availableSlots = @json($availableSlots);
-            const slotSelect = document.getElementById('slot_kode');
+
+            function updateFormState() {
+                const val = katSelect.value;
+                const selectedOpt = katSelect.options[katSelect.selectedIndex];
+                const kode = selectedOpt ? selectedOpt.dataset.kode : '';
+                const jasa = selectedOpt ? (selectedOpt.dataset.jasa || '0.00') : '0.00';
+                const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
+
+                const rateJasaInput = document.getElementById('rate_jasa');
+                if (rateJasaInput) rateJasaInput.value = jasa;
+                
+                const rateInapInput = document.getElementById('rate_inap_persen');
+                const labelInap = document.getElementById('label_rate_inap');
+                
+                if (rateInapInput) {
+                if (kode === 'vehicle') {
+                    rateInapInput.readOnly = true;
+                    rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
+                    }
+                        
+                        // Set the value based on the selected item's flat nominal inap fee
+                        const selectedItemOpt = itemSelect.options[itemSelect.selectedIndex];
+                        const itemInap = selectedItemOpt ? parseFloat(selectedItemOpt.dataset.inap) || 0 : 0;
+                        rateInapInput.value = itemInap;
+                } else {
+                    rateInapInput.readOnly = false;
+                    rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    if (labelInap) {
+                        labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
+                    }
+                        rateInapInput.value = inap;
+                    }
+                }
+
+                // Update placeholder of nama_barang_manual
+                if (namaBarangManual) {
+                    if (kode === 'electronic') {
+                        namaBarangManual.placeholder = 'Iphone, Macbook / 128 gb hitam';
+                    } else if (kode === 'vehicle') {
+                        namaBarangManual.placeholder = 'Beat / 125 Merah';
+                    } else {
+                        namaBarangManual.placeholder = 'Nama...';
+                    }
+                }
+            }
 
             katSelect.addEventListener('change', function () {
                 const val = this.value;
                 const selectedOpt = this.options[this.selectedIndex];
                 const kode = selectedOpt ? selectedOpt.dataset.kode : '';
-                const jasa = selectedOpt ? (selectedOpt.dataset.jasa || '0.00') : '0.00';
-                const inap = selectedOpt ? (selectedOpt.dataset.inap || '0.00') : '0.00';
 
-                document.getElementById('rate_jasa').value = jasa;
-                document.getElementById('rate_inap_persen').value = inap;
+                const currentItemVal = itemSelect.value;
+                const currentSlotVal = slotSelect.value;
                 
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
+                if (tInfoBox) tInfoBox.classList.add('hidden');
                 $(itemSelect).trigger('change');
                 $(slotSelect).trigger('change');
                 tInfoBox.classList.add('hidden');
@@ -554,6 +614,7 @@
                     document.getElementById('col_catatan').classList.remove('hidden');
                 }
 
+                if (val) {
                 if (!val) {
                     $(itemSelect).trigger('change');
                     $(slotSelect).trigger('change');
@@ -567,8 +628,10 @@
                     opt.textContent = item.head_1 + (item.head_2 ? ` (${item.head_2})` : '');
                     opt.dataset.min = item.nominal_low;
                     opt.dataset.max = item.nominal_high;
+                    opt.dataset.inap = item.nominal_inap || 0;
                     itemSelect.appendChild(opt);
                 });
+                }
 
                 if (kode && availableSlots[kode]) {
                     const slots = availableSlots[kode];
@@ -579,6 +642,16 @@
                         slotSelect.appendChild(opt);
                     });
                 }
+
+                if (currentItemVal) {
+                    itemSelect.value = currentItemVal;
+                    itemSelect.dispatchEvent(new Event('change'));
+                }
+                if (currentSlotVal) {
+                    slotSelect.value = currentSlotVal;
+                }
+
+                updateFormState();
                 
                 $(itemSelect).trigger('change');
                 $(slotSelect).trigger('change');
@@ -586,7 +659,7 @@
 
             itemSelect.addEventListener('change', function () {
                 if (!this.value) {
-                    tInfoBox.classList.add('hidden');
+                    if (tInfoBox) tInfoBox.classList.add('hidden');
                     return;
                 }
                 const selectedOpt = this.options[this.selectedIndex];
@@ -595,8 +668,10 @@
 
                 // Format to IDR
                 document.getElementById('min_taksiran_text').textContent = new Intl.NumberFormat('id-ID').format(min);
-                maxTaksiranText.textContent = new Intl.NumberFormat('id-ID').format(max);
-                tInfoBox.classList.remove('hidden');
+                if (maxTaksiranText) maxTaksiranText.textContent = new Intl.NumberFormat('id-ID').format(max);
+                if (tInfoBox) tInfoBox.classList.remove('hidden');
+
+                updateFormState();
 
                 // Trigger nominal validation if already filled
                 if (nominalInput.value) {
@@ -683,8 +758,10 @@
                     pettyLabel = 'Saldo Petty Cash (Transfer) Anda';
                 }
                 
-                document.getElementById('petty-cash-label').innerText = pettyLabel;
-                document.getElementById('petty-cash-value').innerText = 'Rp ' + adminSaldoAvailable.toLocaleString('id-ID');
+                const pLabel = document.getElementById('petty-cash-label');
+                if (pLabel) pLabel.innerText = pettyLabel;
+                const pVal = document.getElementById('petty-cash-value');
+                if (pVal) pVal.innerText = 'Rp ' + adminSaldoAvailable.toLocaleString('id-ID');
                 
                 // Calculate Transfer Fee
                 let biayaAdmin = 0;
@@ -810,6 +887,7 @@
             
             // Initial run
             validateBalances();
-        });
+            katSelect.dispatchEvent(new Event('change'));
+        }
     </script>
 @endsection

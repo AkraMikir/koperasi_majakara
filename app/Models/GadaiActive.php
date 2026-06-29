@@ -15,6 +15,7 @@ class GadaiActive extends Model
         'nasabah_id',
         'kategori_id',
         'item_id',
+        'nama_barang_manual',
         'lokasi_id',
         'slot_kode',
         'slot_table',
@@ -49,6 +50,11 @@ class GadaiActive extends Model
         'extra_pinjaman_nominal' => 'decimal:2',
         'extra_pinjaman_set_at' => 'datetime',
     ];
+
+    public function getNamaBarangDisplayAttribute()
+    {
+        return $this->nama_barang_manual ?: ($this->item->head_1 ?? '-');
+    }
 
     public function nasabah()
     {

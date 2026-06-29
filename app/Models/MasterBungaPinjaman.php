@@ -16,6 +16,7 @@ class MasterBungaPinjaman extends Model
         'durasi_max',
         'durasi_pilihan',
         'bunga_persen',
+        'bunga_flat_hari',
         'status_aktif',
         'keterangan',
     ];
@@ -25,6 +26,7 @@ class MasterBungaPinjaman extends Model
         'durasi_max' => 'integer',
         'durasi_pilihan' => 'integer',
         'bunga_persen' => 'decimal:2',
+        'bunga_flat_hari' => 'decimal:2',
         'status_aktif' => 'boolean',
     ];
 

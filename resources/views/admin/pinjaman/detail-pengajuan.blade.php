@@ -168,7 +168,7 @@
                             <h4 class="font-semibold text-blue-900 mb-2">Informasi Bunga & Denda</h4>
                             @if($masterBunga)
                                 <p class="text-sm text-blue-800 mb-1">
-                                    <strong>Bunga:</strong> {{ $masterBunga->bunga_persen }}%
+                                    <strong>Bunga:</strong> {{ $masterBunga->bunga_persen }}% (flat {{ $masterBunga->bunga_flat_hari ?? round((float) $masterBunga->bunga_persen / 30, 2) }}% per hari)
                                     (Durasi {{ $masterBunga->durasi_min }}-{{ $masterBunga->durasi_max }} bulan)
                                 </p>
                                 <p class="text-sm text-blue-800 mb-1">
@@ -237,7 +237,7 @@
                                 </p>
                             @endif
                             <p class="text-sm text-blue-800 mb-1">
-                                <strong>Bunga:</strong> {{ $pengajuan->bunga_persen }}%
+                                <strong>Bunga:</strong> {{ $pengajuan->bunga_persen }}% (flat {{ $pengajuan->bunga_flat_hari ?? round((float) $pengajuan->bunga_persen / 30, 2) }}% per hari)
                             </p>
                             <p class="text-sm text-blue-800 mb-1">
                                 <strong>Total Bunga:</strong> Rp

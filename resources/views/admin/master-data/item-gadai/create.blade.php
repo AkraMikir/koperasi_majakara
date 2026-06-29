@@ -127,15 +127,14 @@
                         <div>
                             <label for="nominal_low"
                                 class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal
-                                Taksir Min (Auto % Min)</label>
+                                Taksir Min</label>
                             <input type="text" name="nominal_low" id="nominal_low"
                                 class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm"
                                 value="{{ old('nominal_low') ? number_format(old('nominal_low'), 0, ',', '.') : '' }}" readonly>
                         </div>
                         <div>
                             <label for="bunga_low"
-                                class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Bunga/Jasa
-                                Min (%) <span class="text-red-500">*</span></label>
+                                class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Persentase Taksiran Low (%) <span class="text-red-500">*</span></label>
                             <input type="number" name="bunga_low" id="bunga_low" step="0.01"
                                 class="w-full px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm"
                                 value="{{ old('bunga_low') }}" min="0" required placeholder="Contoh: 40">
@@ -144,15 +143,14 @@
                         <div>
                             <label for="nominal_high"
                                 class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Nominal
-                                Taksir Max (Auto % Max)</label>
+                                Taksir Max</label>
                             <input type="text" name="nominal_high" id="nominal_high"
                                 class="w-full px-3 py-2 bg-gray-100 border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-500 text-sm"
                                 value="{{ old('nominal_high') ? number_format(old('nominal_high'), 0, ',', '.') : '' }}" readonly>
                         </div>
                         <div>
                             <label for="bunga_high"
-                                class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Bunga/Jasa
-                                Max (%) <span class="text-red-500">*</span></label>
+                                class="block text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-1">Persentase Taksiran High (%) <span class="text-red-500">*</span></label>
                             <input type="number" name="bunga_high" id="bunga_high" step="0.01"
                                 class="w-full px-3 py-2 bg-white border border-emerald-100 rounded-lg focus:ring-2 focus:ring-emerald-500 transition-all font-bold text-gray-700 text-sm"
                                 value="{{ old('bunga_high') }}" min="0" required placeholder="Contoh: 60">

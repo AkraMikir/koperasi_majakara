@@ -133,7 +133,7 @@
 
                         <div>
                             <p class="text-xs text-gray-500 font-medium mb-1">Nama Item</p>
-                            <p class="font-bold text-gray-900 text-lg">{{ $gadai->item->head_1 }}</p>
+                            <p class="font-bold text-gray-900 text-lg">{{ $gadai->nama_barang_display }}</p>
                         </div>
 
                         @if($gadai->kategori->kode_kategori === 'vehicle')
@@ -180,7 +180,7 @@
                         </div>
                         <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
                             <div class="flex flex-col">
-                                <span class="text-gray-600 font-medium">Biaya Jasa Admin</span>
+                                <span class="text-gray-600 font-medium">Bunga (%)</span>
                                 <span class="text-[10px] text-blue-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_jasa, 2) }}%</span>
                             </div>
                             <span class="font-bold text-gray-900">Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</span>

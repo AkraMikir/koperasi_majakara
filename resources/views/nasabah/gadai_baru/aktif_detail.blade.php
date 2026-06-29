@@ -60,7 +60,7 @@
                     @else 🔒 AKTIF & AMAN
                     @endif
                 </h1>
-                <p class="text-white/80 text-sm mt-1.5 font-medium drop-shadow-md">{{ $gadai->item->head_1 }} &bull; {{ $gadai->kategori->nama_kategori }}</p>
+                <p class="text-white/80 text-sm mt-1.5 font-medium drop-shadow-md">{{ $gadai->nama_barang_display }} &bull; {{ $gadai->kategori->nama_kategori }}</p>
             </div>
 
             {{-- Countdown --}}
@@ -225,7 +225,7 @@
                     </div>
                     <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                         <span class="text-xs text-gray-500 font-bold">Nama Item</span>
-                        <span class="text-sm font-black text-gray-900 text-right max-w-[60%] leading-tight truncate">{{ $gadai->item->head_1 }}</span>
+                        <span class="text-sm font-black text-gray-900 text-right max-w-[60%] leading-tight truncate">{{ $gadai->nama_barang_display }}</span>
                     </div>
                     <div class="flex justify-between items-center border-b border-gray-50 pb-2">
                         <span class="text-xs text-gray-500 font-bold">Lokasi Simpan</span>

@@ -143,9 +143,12 @@ class StrukController extends Controller
             $tanggal_jatuh_tempo = $tempos->last()->tgl_jatuh_tempo ? $tempos->last()->tgl_jatuh_tempo->format('d/m/Y') : '-';
         }
 
-        $alamat = $pinjaman->nasabah->alamat ?? '';
-        preg_match('/\b\d{5}\b/', $alamat, $matches);
-        $kode_pos = $matches[0] ?? '-';
+        $kode_pos = $pinjaman->nasabah->kode_pos ?? '-';
+        if ($kode_pos === '-' || empty($kode_pos)) {
+            $alamat = $pinjaman->nasabah->alamat ?? '';
+            preg_match('/\b\d{5}\b/', $alamat, $matches);
+            $kode_pos = $matches[0] ?? '-';
+        }
 
         $data = [
             'no_pinjaman' => $pinjaman->id,
@@ -283,9 +286,12 @@ class StrukController extends Controller
             $totalTagihan += $gadai->extra_pinjaman_nominal;
         }
 
-        $alamat = $gadai->nasabah->alamat ?? '';
-        preg_match('/\b\d{5}\b/', $alamat, $matches);
-        $kode_pos = $matches[0] ?? '-';
+        $kode_pos = $gadai->nasabah->kode_pos ?? '-';
+        if ($kode_pos === '-' || empty($kode_pos)) {
+            $alamat = $gadai->nasabah->alamat ?? '';
+            preg_match('/\b\d{5}\b/', $alamat, $matches);
+            $kode_pos = $matches[0] ?? '-';
+        }
 
         $formatIndoDate = function ($date) {
             if (!$date) return '-';
@@ -307,8 +313,8 @@ class StrukController extends Controller
             'kode_pos_nasabah' => $kode_pos,
             'nik' => $gadai->nasabah->dataKtp->nik ?? '-',
             'kategori' => $gadai->kategori->nama_kategori ?? '-',
-            'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
-            'merk_type' => ($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-'),
+            'barang' => $gadai->nama_barang_manual ?: (($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? '')),
+            'merk_type' => $gadai->nama_barang_manual ?: (($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-')),
             'no_mesin_rangka' => $gadai->no_mesin_rangka ?? '-',
             'no_imei_sn' => $gadai->no_imei_sn ?? '-',
             'kelengkapan' => $gadai->kelengkapan ?? '-',
