@@ -41,7 +41,7 @@ class MasterItemGadaiController extends Controller
             'kategori_id' => 'required|exists:tbl_gadai_master_kategori,id',
             'head_1' => 'required|string|max:255',
             'head_2' => 'nullable|string|max:255',
-            'file_pic' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_pic' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10000',
             'nominal_real' => 'required|numeric|min:0',
             'bunga_low' => 'required|numeric|min:0',
             'nominal_low' => 'required|numeric|min:0',
@@ -52,7 +52,7 @@ class MasterItemGadaiController extends Controller
         ]);
 
         $data = $request->except('file_pic');
-        
+
         if ($request->hasFile('file_pic')) {
             $path = $request->file('file_pic')->store('master-item', 'public');
             $data['file_pic'] = $path;
@@ -80,7 +80,7 @@ class MasterItemGadaiController extends Controller
             'kategori_id' => 'required|exists:tbl_gadai_master_kategori,id',
             'head_1' => 'required|string|max:255',
             'head_2' => 'nullable|string|max:255',
-            'file_pic' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'file_pic' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:10000',
             'nominal_real' => 'required|numeric|min:0',
             'bunga_low' => 'required|numeric|min:0',
             'nominal_low' => 'required|numeric|min:0',
