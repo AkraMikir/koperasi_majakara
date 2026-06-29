@@ -141,6 +141,78 @@ class SettingsStrukController extends Controller
         return redirect()->back()->with('success', 'Info box pinjaman berhasil diupdate.');
     }
 
+    public function updateSyaratGadaiElektronik(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'syarat_ketentuan_gadai_elektronik' => 'required|string|max:5000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'syarat_ketentuan_gadai_elektronik' => $request->syarat_ketentuan_gadai_elektronik,
+        ]);
+
+        return redirect()->back()->with('success', 'Syarat & ketentuan gadai elektronik berhasil diupdate.');
+    }
+
+    public function updateSyaratGadaiKendaraan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'syarat_ketentuan_gadai_kendaraan' => 'required|string|max:5000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'syarat_ketentuan_gadai_kendaraan' => $request->syarat_ketentuan_gadai_kendaraan,
+        ]);
+
+        return redirect()->back()->with('success', 'Syarat & ketentuan gadai kendaraan berhasil diupdate.');
+    }
+
+    public function updateInfoBoxGadaiElektronik(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'info_box_gadai_elektronik' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'info_box_gadai_elektronik' => $request->info_box_gadai_elektronik,
+        ]);
+
+        return redirect()->back()->with('success', 'Info box gadai elektronik berhasil diupdate.');
+    }
+
+    public function updateInfoBoxGadaiKendaraan(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'info_box_gadai_kendaraan' => 'required|string|max:1000',
+        ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+
+        $settings = SettingsStruk::getSettings();
+        $settings->update([
+            'info_box_gadai_kendaraan' => $request->info_box_gadai_kendaraan,
+        ]);
+
+        return redirect()->back()->with('success', 'Info box gadai kendaraan berhasil diupdate.');
+    }
+
     /**
      * Update Extra Nilai Kehilangan (SAJA yang tersisa dari settings gadai)
      */

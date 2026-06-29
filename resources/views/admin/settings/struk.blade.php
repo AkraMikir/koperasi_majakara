@@ -16,6 +16,10 @@
     syarat_ketentuan_gadai: {{ json_encode($settings->syarat_ketentuan_gadai) }},
     syarat_ketentuan_pinjaman: {{ json_encode($settings->syarat_ketentuan_pinjaman) }},
     info_box_pinjaman: {{ json_encode($settings->info_box_pinjaman) }},
+    syarat_ketentuan_gadai_elektronik: {{ json_encode($settings->syarat_ketentuan_gadai_elektronik) }},
+    syarat_ketentuan_gadai_kendaraan: {{ json_encode($settings->syarat_ketentuan_gadai_kendaraan) }},
+    info_box_gadai_elektronik: {{ json_encode($settings->info_box_gadai_elektronik) }},
+    info_box_gadai_kendaraan: {{ json_encode($settings->info_box_gadai_kendaraan) }},
     bunga_admin_gadai: '1.2',
     
     // Preview properties
@@ -315,6 +319,86 @@
                 <div class="p-6">
                     <div @input="info_box_pinjaman = $event.target.form.info_box_pinjaman.value; updatePinjaman();">
                         @include('admin.settings.partials.info-box-pinjaman')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syarat & Ketentuan Gadai Elektronik Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Syarat & Ketentuan Gadai Elektronik</h2>
+                        <p class="text-xs text-gray-500 font-sans">Dicetak di halaman 2 khusus lembar B5 Gadai Elektronik</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="syarat_ketentuan_gadai_elektronik = $event.target.form.syarat_ketentuan_gadai_elektronik.value; updateGadai();">
+                        @include('admin.settings.partials.syarat-ketentuan-gadai-elektronik')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Syarat & Ketentuan Gadai Kendaraan Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Syarat & Ketentuan Gadai Kendaraan</h2>
+                        <p class="text-xs text-gray-500 font-sans">Dicetak di halaman 2 khusus lembar B5 Gadai Kendaraan</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="syarat_ketentuan_gadai_kendaraan = $event.target.form.syarat_ketentuan_gadai_kendaraan.value; updateGadai();">
+                        @include('admin.settings.partials.syarat-ketentuan-gadai-kendaraan')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box Gadai Elektronik Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Info Box Gadai Elektronik</h2>
+                        <p class="text-xs text-gray-500 font-sans">Kotak informasi jam operasional dan ketentuan B5 Gadai Elektronik (kiri bawah)</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="info_box_gadai_elektronik = $event.target.form.info_box_gadai_elektronik.value; updateGadai();">
+                        @include('admin.settings.partials.info-box-gadai-elektronik')
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box Gadai Kendaraan Card -->
+            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div class="p-5 border-b border-gray-100 flex items-center space-x-3 bg-gray-50/50">
+                    <div class="p-2.5 bg-amber-50 text-[#674c1d] rounded-xl">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div>
+                        <h2 class="text-lg font-bold text-gray-900">Info Box Gadai Kendaraan</h2>
+                        <p class="text-xs text-gray-500 font-sans">Kotak informasi jam operasional dan ketentuan B5 Gadai Kendaraan (kiri bawah)</p>
+                    </div>
+                </div>
+                <div class="p-6">
+                    <div @input="info_box_gadai_kendaraan = $event.target.form.info_box_gadai_kendaraan.value; updateGadai();">
+                        @include('admin.settings.partials.info-box-gadai-kendaraan')
                     </div>
                 </div>
             </div>

@@ -206,6 +206,10 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::post('/struk/update-syarat-gadai', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadai'])->name('struk.update-syarat-gadai');
         Route::post('/struk/update-syarat-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratPinjaman'])->name('struk.update-syarat-pinjaman');
         Route::post('/struk/update-info-box-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxPinjaman'])->name('struk.update-info-box-pinjaman');
+        Route::post('/struk/update-syarat-gadai-elektronik', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadaiElektronik'])->name('struk.update-syarat-gadai-elektronik');
+        Route::post('/struk/update-syarat-gadai-kendaraan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateSyaratGadaiKendaraan'])->name('struk.update-syarat-gadai-kendaraan');
+        Route::post('/struk/update-info-box-gadai-elektronik', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxGadaiElektronik'])->name('struk.update-info-box-gadai-elektronik');
+        Route::post('/struk/update-info-box-gadai-kendaraan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateInfoBoxGadaiKendaraan'])->name('struk.update-info-box-gadai-kendaraan');
         Route::post('/struk/update-extra-kehilangan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'updateExtraKehilangan'])->name('struk.update-extra-kehilangan');
         Route::post('/struk/preview-tabungan', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewTabungan'])->name('struk.preview-tabungan');
         Route::post('/struk/preview-pinjaman', [\App\Http\Controllers\Admin\SettingsStrukController::class, 'previewPinjaman'])->name('struk.preview-pinjaman');

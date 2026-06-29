@@ -92,14 +92,12 @@
         }
         .perjanjian-text {
             font-size: 10px;
-            line-height: 1.3;
-            text-align: justify;
-            margin-bottom: 6px;
+            margin-bottom: 2px;
         }
         .perjanjian-list {
             margin-left: 12px;
+            padding-left: 5px;
             font-size: 10px;
-            line-height: 1.3;
             margin-bottom: 8px;
             list-style-type: decimal;
         }
@@ -316,16 +314,27 @@
             Bekasi, ......................... Petugas bagian kredit bertindak untuk dan atas nama <strong>MAJAKARA</strong> dengan nasabah membuat perjanjian sebagai berikut :
         </div>
 
-        <ol class="perjanjian-list">
-            <li>Barang yang dijaminkan adalah <strong>milik pribadi dan bukan hasil tindak kejahatan</strong>, jika dikemudian hari saya terbukti bersalah maka saya akan mempertanggung jawabkan sendiri.</li>
-            <li>Untuk menebus barang gadai, nasabah harus datang sendiri atau dengan mengalihkan hak kepada orang lain dengan melampirkan Surat Kuasa Asli dan KTP peminjam dan KTP penerima kuasa.</li>
-            <li>Nasabah wajib menyimpan <strong>Surat Bukti Gadai MAJAKARA</strong> sebagai syarat penebusan.</li>
-            <li>Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya <strong>LALAI/tidak melakukan pembayaran bunga</strong> sampai tanggal jatuh tempo dan <strong>BARANG KENDARAAN YANG SAYA GADAI AKAN HANGUS/DIJUAL</strong> oleh pihak <strong>MAJAKARA</strong>.</li>
-            <li>Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.</li>
-            <li>Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan <strong>hari ke 16 barang kendaraan yang saya gadaikan dianggap HANGUS</strong>.</li>
-            <li>Pihak Majakara Gadai berhak menolak barang yang tidak memenuhi syarat.</li>
-            <li>Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.</li>
-        </ol>
+        <!-- PERJANJIAN SYARAT KETENTUAN -->
+        <div class="perjanjian-section">
+            @if(!empty($settings->syarat_ketentuan_gadai_kendaraan))
+            <div class="perjanjian-text" style="white-space: pre-line;">{!! str_replace(
+                'MAJAKARA',
+                '<strong>MAJAKARA</strong>',
+                e($settings->syarat_ketentuan_gadai_kendaraan)
+            ) !!}</div>
+            @else
+            <ol class="perjanjian-list">
+                <li>Barang yang dijaminkan adalah <strong>milik pribadi dan bukan hasil tindak kejahatan</strong>, jika dikemudian hari saya terbukti bersalah maka saya akan mempertanggung jawabkan sendiri.</li>
+                <li>Untuk menebus barang gadai, nasabah harus datang sendiri atau dengan mengalihkan hak kepada orang lain dengan melampirkan Surat Kuasa Asli dan KTP peminjam dan KTP penerima kuasa.</li>
+                <li>Nasabah wajib menyimpan <strong>Surat Bukti Gadai MAJAKARA</strong> sebagai syarat penebusan.</li>
+                <li>Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya <strong>LALAI/tidak melakukan pembayaran bunga</strong> sampai tanggal jatuh tempo dan <strong>BARANG KENDARAAN YANG SAYA GADAI AKAN HANGUS/DIJUAL</strong> oleh pihak <strong>MAJAKARA</strong>.</li>
+                <li>Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.</li>
+                <li>Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan <strong>hari ke 16 barang kendaraan yang saya gadaikan dianggap HANGUS</strong>.</li>
+                <li>Pihak Majakara Gadai berhak menolak barang yang tidak memenuhi syarat.</li>
+                <li>Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.</li>
+            </ol>
+            @endif
+        </div>
 
         <div style="font-size: 8px; font-style: italic; margin-bottom: 12px; color: #444;">
             Dasar hukum: Pasal 1150 KUHPerdata tentang gadai, Pasal 1155 KUHPerdata tentang hak menjual barang gadai, dan Pasal 1238 KUHPerdata tentang wanprestasi.
@@ -335,12 +344,10 @@
         <table class="footer-table">
             <tr>
                 <td style="width: 25%;">
-                    <div class="info-box">
-                        PINJAMAN BISA DIANGSUR HARI BESAR DAN HARI MINGGU TETAP BUKA.<br>
-                        Jam Operasional : Senin - Minggu<br>
-                        Buka Jam: 08.00 - 20.00<br>
-                        Jam Pengambilan Barang: 08.00 - 18.00
-                    </div>
+                    <div class="info-box" style="white-space: pre-line;">@if(!empty($settings->info_box_gadai_kendaraan)){!! str_replace('MAJAKARA', '<strong>MAJAKARA</strong>', e($settings->info_box_gadai_kendaraan)) !!}@else PINJAMAN BISA DIANGSUR HARI BESAR DAN HARI MINGGU TETAP BUKA.
+Jam Operasional : Senin - Minggu
+Buka Jam: 08.00 - 20.00
+Jam Pengambilan Barang: 08.00 - 18.00 @endif</div>
                 </td>
                 <td style="width: 55%;">
                     <div style="text-align: right; font-size: 9px; margin-bottom: 5px; font-weight: bold; padding-right: 20px;">
