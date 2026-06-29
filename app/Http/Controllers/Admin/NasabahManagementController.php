@@ -400,9 +400,9 @@ class NasabahManagementController extends Controller
      */
     public function verifyNasabah(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can verify nasabah
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat memverifikasi nasabah.');
+        // Authorization: Admin Utama & Admin Operasional can verify nasabah
+        if (!app(\App\Services\AdminPermissionService::class)->canVerifyNasabah(auth()->user())) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat memverifikasi nasabah.');
         }
 
         $nasabah = Nasabah::with('user')->findOrFail($id);

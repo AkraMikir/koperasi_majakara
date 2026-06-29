@@ -104,7 +104,7 @@
                 </div>
             </div>
             
-            @if(!$nasabah->user->verified && auth()->check() && app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user()))
+            @if(!$nasabah->user->verified && auth()->check() && app(\App\Services\AdminPermissionService::class)->canVerifyNasabah(auth()->user()))
                 <div class="flex items-center shrink-0">
                     <form action="{{ route('admin.nasabah.verify', $nasabah->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin memverifikasi akun nasabah ini?')">
                         @csrf

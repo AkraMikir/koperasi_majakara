@@ -626,13 +626,17 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
         Route::post('/verify-admin-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyAdminPin'])->name('verify-admin-pin');
         
+        // Verification route - Admin Utama & Admin Operasional
+        Route::post('/{id}/verify', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyNasabah'])
+            ->middleware('admin.permission:verify-nasabah')
+            ->name('verify');
+
         // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
         Route::middleware('admin.permission:manage-nasabah')->group(function () {
             Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
             Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
             Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
             Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
-            Route::post('/{id}/verify', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyNasabah'])->name('verify');
         });
     });
     
