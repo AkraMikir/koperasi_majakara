@@ -23,6 +23,10 @@ class SettingsStruk extends Model
         'extra_nilai_kehilangan',
         'syarat_ketentuan_pinjaman',
         'info_box_pinjaman',
+        'syarat_ketentuan_gadai_elektronik',
+        'syarat_ketentuan_gadai_kendaraan',
+        'info_box_gadai_elektronik',
+        'info_box_gadai_kendaraan',
     ];
 
     protected $casts = [
@@ -39,6 +43,12 @@ class SettingsStruk extends Model
         $defaultSyaratPinjaman = "Yang bertanda tangan dibawah ini:\nBekasi, {tanggal}\nPetugas bagian kredit bertindak untuk dan atas nama MAJAKARA dengan nasabah membuat perjanjian sebagai berikut:\n\n1. Saya bersedia memberikan informasi data pribadi dan kontak darurat kepada PIHAK MAJAKARA.\n2. Nasabah wajib menyimpan Surat Bukti Pinjam MAJAKARA.\n3. Saya bersedia dan tidak ada TUNTUTAN DALAM BENTUK APAPUN, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya LALAI/tidak melakukan pembayaran sampai Tanggal Jatuh Tempo Saya Bersedia disita barang saya senilai pinjaman dan bunga oleh pihak MAJAKARA.\n4. Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.\n5. Pihak Majakara berhak menolak barang yang tidak memenuhi syarat.\n6. Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.";
         $defaultInfoBoxPinjaman = "PINJAMAN BISA DIANGSUR\nHARI BESAR DAN HARI MINGGU TETAP BUKA\nJam Pengambilan Barang: 08.00 - 18.00\nBuka Jam: 08.00 - 20.00";
 
+        $defaultSyaratGadaiElektronik = "1. Barang yang dijaminkan adalah milik pribadi dan bukan hasil tindak kejahatan, jika dikemudian hari saya terbukti bersalah maka saya akan mempertanggung jawabkan sendiri.\n2. Untuk menebus barang gadai, nasabah harus datang sendiri atau dengan mengalihkan hak kepada orang lain dengan melampirkan Surat Kuasa Asli dan KTP peminjam dan KTP penerima kuasa.\n3. Nasabah wajib menyimpan Surat Bukti Gadai MAJAKARA sebagai syarat penebusan.\n4. Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya LALAI/tidak melakukan pembayaran bunga sampai tanggal jatuh tempo dan BARANG ELEKTRONIK YANG SAYA GADAI AKAN HANGUS/DIJUAL oleh pihak MAJAKARA.\n5. Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.\n6. Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan hari ke 16 barang elektronik yang saya gadaikan dianggap HANGUS.\n7. Pihak Majakara Gadai berhak menolak barang yang tidak memenuhi syarat.\n8. Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.";
+        
+        $defaultSyaratGadaiKendaraan = "1. Barang yang dijaminkan adalah milik pribadi dan bukan hasil tindak kejahatan, jika dikemudian hari saya terbukti bersalah maka saya akan mempertanggung jawabkan sendiri.\n2. Untuk menebus barang gadai, nasabah harus datang sendiri atau dengan mengalihkan hak kepada orang lain dengan melampirkan Surat Kuasa Asli dan KTP peminjam dan KTP penerima kuasa.\n3. Nasabah wajib menyimpan Surat Bukti Gadai MAJAKARA sebagai syarat penebusan.\n4. Saya bersedia dan tidak ada tuntutan dalam bentuk apapun, baik secara PIDANA/PERDATA kepada Pihak MAJAKARA, jika saya LALAI/tidak melakukan pembayaran bunga sampai tanggal jatuh tempo dan BARANG KENDARAAN YANG SAYA GADAI AKAN HANGUS/DIJUAL oleh pihak MAJAKARA.\n5. Bunga dan biaya administrasi mengikuti ketentuan yang berlaku.\n6. Saya bersedia membayar denda keterlambatan 1 s/d 15 hari sebesar 5%/hari dan juga bunga berjalan sebesar 5% dari jumlah pinjaman. Dan hari ke 16 barang kendaraan yang saya gadaikan dianggap HANGUS.\n7. Pihak Majakara Gadai berhak menolak barang yang tidak memenuhi syarat.\n8. Segala bentuk wanprestasi akan diselesaikan sesuai hukum yang berlaku.";
+
+        $defaultInfoBoxGadai = "PINJAMAN BISA DIANGSUR HARI BESAR DAN HARI MINGGU TETAP BUKA.\nJam Operasional : Senin - Minggu\nBuka Jam: 08.00 - 20.00\nJam Pengambilan Barang: 08.00 - 18.00";
+
         if (!$settings) {
             $settings = self::create([
                 'nama_koperasi' => 'Koperasi Majakara',
@@ -52,6 +62,10 @@ class SettingsStruk extends Model
                 'extra_nilai_kehilangan' => 50000,
                 'syarat_ketentuan_pinjaman' => $defaultSyaratPinjaman,
                 'info_box_pinjaman' => $defaultInfoBoxPinjaman,
+                'syarat_ketentuan_gadai_elektronik' => $defaultSyaratGadaiElektronik,
+                'syarat_ketentuan_gadai_kendaraan' => $defaultSyaratGadaiKendaraan,
+                'info_box_gadai_elektronik' => $defaultInfoBoxGadai,
+                'info_box_gadai_kendaraan' => $defaultInfoBoxGadai,
             ]);
         } else {
             $needsUpdate = false;
@@ -61,6 +75,22 @@ class SettingsStruk extends Model
             }
             if (is_null($settings->info_box_pinjaman)) {
                 $settings->info_box_pinjaman = $defaultInfoBoxPinjaman;
+                $needsUpdate = true;
+            }
+            if (is_null($settings->syarat_ketentuan_gadai_elektronik)) {
+                $settings->syarat_ketentuan_gadai_elektronik = $defaultSyaratGadaiElektronik;
+                $needsUpdate = true;
+            }
+            if (is_null($settings->syarat_ketentuan_gadai_kendaraan)) {
+                $settings->syarat_ketentuan_gadai_kendaraan = $defaultSyaratGadaiKendaraan;
+                $needsUpdate = true;
+            }
+            if (is_null($settings->info_box_gadai_elektronik)) {
+                $settings->info_box_gadai_elektronik = $defaultInfoBoxGadai;
+                $needsUpdate = true;
+            }
+            if (is_null($settings->info_box_gadai_kendaraan)) {
+                $settings->info_box_gadai_kendaraan = $defaultInfoBoxGadai;
                 $needsUpdate = true;
             }
             if ($needsUpdate) {
