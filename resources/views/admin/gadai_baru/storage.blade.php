@@ -149,13 +149,13 @@
                                  @endphp
                                  <div class="w-40 h-44 {{ $cardClass }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
                                       x-data="{}" 
-                                      title="{{ $slot->nasabah_nama }} — {{ $slot->item_nama }}">
+                                      title="{{ $slot->nasabah_nama }} — {{ $slot->nama_barang_manual ?: $slot->item_nama }}">
                                       <div class="flex justify-between items-start">
                                           <div class="font-mono font-black text-sm {{ $textClass }}">{{ $slot->kode_slot }}</div>
                                           <span class="px-1.5 py-0.5 {{ $badgeClass }} text-[9px] font-black rounded uppercase tracking-wide">{{ $statusText }}</span>
                                       </div>
                                       <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
-                                          <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
+                                          <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->nama_barang_manual ?: $slot->item_nama }}">{{ $slot->nama_barang_manual ?: $slot->item_nama }}</div>
                                           <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
                                           @if($isLunas && $slot->tgl_ambil_limit)
                                               @php
@@ -170,12 +170,12 @@
                                           @endif
                                       </div>
                                       @if($isExpired)
-                                          <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                          <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->nama_barang_manual ?: $slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
                                               Kosongkan & Lelang
                                           </button>
                                       @elseif($isLunas)
-                                          <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                          <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->nama_barang_manual ?: $slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
                                               Serahkan Barang
                                           </button>

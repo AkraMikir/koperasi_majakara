@@ -181,7 +181,7 @@
                         <div class="flex justify-between items-center py-2.5 border-b border-dashed border-gray-100">
                             <div class="flex flex-col">
                                 <span class="text-gray-600 font-medium">Bunga (%)</span>
-                                <span class="text-[10px] text-blue-600 font-bold">Tarif Kategori: {{ number_format($gadai->kategori->rate_jasa, 2) }}%</span>
+                                <span class="text-[10px] text-blue-600 font-bold">Tarif: {{ number_format($gadai->rate_jasa, 2) }}%</span>
                             </div>
                             <span class="font-bold text-gray-900">Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</span>
                         </div>

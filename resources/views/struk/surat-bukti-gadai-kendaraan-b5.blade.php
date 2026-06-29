@@ -183,10 +183,6 @@
                             <td class="value">: {{ $data['alamat_nasabah'] }}</td>
                         </tr>
                         <tr>
-                            <td class="label">No KTP</td>
-                            <td class="value">: {{ $data['nik'] }}</td>
-                        </tr>
-                        <tr>
                             <td class="label">Tanggal Kredit</td>
                             <td class="value">: {{ $data['tgl_mulai'] }}</td>
                         </tr>
