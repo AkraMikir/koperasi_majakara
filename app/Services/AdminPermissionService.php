@@ -198,11 +198,11 @@ class AdminPermissionService
 
     /**
      * Check if user can approve Nasabah profile changes
-     * Admin Utama: YES | Admin Operasional: NO
+     * Admin Utama: YES | Admin Operasional: YES
      */
     public function canApproveNasabahChanges(?User $user): bool
     {
-        return $this->isAdminUtama($user);
+        return $this->isAdmin($user);
     }
 
     /**

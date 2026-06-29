@@ -631,10 +631,14 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             ->middleware('admin.permission:verify-nasabah')
             ->name('verify');
 
-        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
-        Route::middleware('admin.permission:manage-nasabah')->group(function () {
+        // Approve/Reject Nasabah Changes - Admin Utama & Admin Operasional
+        Route::middleware('admin.permission:approve-nasabah-changes')->group(function () {
             Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
             Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
+        });
+
+        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
+        Route::middleware('admin.permission:manage-nasabah')->group(function () {
             Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
             Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
         });

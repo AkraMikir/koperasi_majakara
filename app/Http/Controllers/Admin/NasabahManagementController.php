@@ -72,11 +72,11 @@ class NasabahManagementController extends Controller
      */
     public function approveChange(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can approve nasabah changes
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        // Authorization: Admin Utama & Admin Operasional can approve nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canApproveNasabahChanges(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menyetujui perubahan data nasabah.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat menyetujui perubahan data nasabah.'
             ], 403);
         }
 
@@ -211,11 +211,11 @@ class NasabahManagementController extends Controller
      */
     public function rejectChange(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can reject nasabah changes
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        // Authorization: Admin Utama & Admin Operasional can reject nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canApproveNasabahChanges(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menolak perubahan data nasabah.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat menolak perubahan data nasabah.'
             ], 403);
         }
 

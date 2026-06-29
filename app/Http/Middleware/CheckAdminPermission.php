@@ -52,6 +52,9 @@ class CheckAdminPermission
             case 'verify-nasabah':
                 $hasPermission = $this->permissionService->canVerifyNasabah($user);
                 break;
+            case 'approve-nasabah-changes':
+                $hasPermission = $this->permissionService->canApproveNasabahChanges($user);
+                break;
             case 'pelunasan-dipercepat':
                 $hasPermission = $this->permissionService->canPelunasanDipercepat($user);
                 break;
