@@ -59,7 +59,7 @@ class AdminGadaiBaruController extends Controller
 
     public function create()
     {
-        $nasabahs = Nasabah::with(['user', 'dataRek'])->get();
+        $nasabahs = Nasabah::with(['user', 'dataRek', 'dataKtp'])->get();
         $bankService = app(\App\Services\BankAccessService::class);
         $nasabahs->each(function ($n) use ($bankService) {
             $n->saldo_tabungan = $bankService->getSaldoTabungan($n->id);

@@ -305,6 +305,7 @@ class StrukController extends Controller
             'nomor_hp' => $gadai->nasabah->user->nomor_hp ?? '-',
             'alamat_nasabah' => $gadai->nasabah->alamat ?? '-',
             'kode_pos_nasabah' => $kode_pos,
+            'nik' => $gadai->nasabah->dataKtp->nik ?? '-',
             'kategori' => $gadai->kategori->nama_kategori ?? '-',
             'barang' => ($gadai->item->head_1 ?? '-') . ' ' . ($gadai->item->head_2 ?? ''),
             'merk_type' => ($gadai->item->head_1 ?? '-') . '/' . ($gadai->item->head_2 ?? '-'),

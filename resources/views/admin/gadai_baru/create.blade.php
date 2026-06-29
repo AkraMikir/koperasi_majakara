@@ -2,6 +2,86 @@
 
 @section('title', 'Terima Gadai Baru')
 
+@push('styles')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        /* Custom Select2 Styling to match Koperasi Majakara aesthetics */
+        .select2-container--default .select2-selection--single {
+            background-color: rgba(255, 255, 255, 0.5) !important;
+            border: 1px solid rgba(255, 255, 255, 0.6) !important;
+            border-radius: 0.75rem !important;
+            height: 3rem !important;
+            display: flex !important;
+            align-items: center !important;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !important;
+            backdrop-filter: blur(4px) !important;
+            -webkit-backdrop-filter: blur(4px) !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            color: #111827 !important;
+            font-size: 0.875rem !important;
+            font-weight: 500 !important;
+            padding-left: 1rem !important;
+            padding-right: 2.5rem !important;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 3rem !important;
+            right: 0.75rem !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        .select2-container--default .select2-selection--single:focus,
+        .select2-container--default.select2-container--open .select2-selection--single {
+            border-color: #674c1d !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 1px #674c1d !important;
+        }
+        .select2-dropdown {
+            border-color: rgba(0, 0, 0, 0.08) !important;
+            border-radius: 0.75rem !important;
+            overflow: hidden !important;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+            background-color: #ffffff !important;
+            z-index: 9999 !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field {
+            border: 1px solid #e5e7eb !important;
+            border-radius: 0.5rem !important;
+            padding: 0.5rem 0.75rem !important;
+            outline: none !important;
+        }
+        .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+            border-color: #674c1d !important;
+            box-shadow: 0 0 0 1px #674c1d !important;
+        }
+        .select2-container--default .select2-results__option--highlighted[aria-selected] {
+            background-color: #674c1d !important;
+            color: #ffffff !important;
+        }
+        .select2-container--default .select2-results__option {
+            padding: 0.625rem 1rem !important;
+            font-size: 0.875rem !important;
+        }
+        /* Custom inputs styling to match Select2 height and border */
+        .grid input[type="text"]:not([name="foto_barang[]"]):not([name="foto_transaksi[]"]):not([name="foto_administrasi[]"]),
+        .grid input[type="number"] {
+            height: 3rem !important;
+            padding-left: 1rem !important;
+            padding-right: 1rem !important;
+            border-radius: 0.75rem !important;
+            font-size: 0.875rem !important;
+        }
+        .grid input#nominal_deal {
+            padding-left: 2.5rem !important; /* Keep room for Rp icon */
+        }
+    </style>
+@endpush
+
+@push('scripts')
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+@endpush
+
 @section('content')
     <div class="space-y-8 max-w-5xl mx-auto">
 
@@ -62,7 +142,11 @@
                                     required>
                                     <option value="">Pilih Nasabah...</option>
                                     @foreach($nasabahs as $n)
-                                        <option value="{{ $n->id }}" data-bank="{{ $n->dataRek?->nama_bank ?? '' }}" data-saldo="{{ $n->saldo_tabungan ?? 0 }}">
+                                        <option value="{{ $n->id }}" 
+                                                data-bank="{{ $n->dataRek?->nama_bank ?? '' }}" 
+                                                data-saldo="{{ $n->saldo_tabungan ?? 0 }}"
+                                                data-nik="{{ $n->dataKtp?->nik ?? '-' }}"
+                                                data-rekening="{{ $n->dataRek?->no_rekening ?? '-' }}">
                                             {{ $n->user->nama ?? 'Tanpa Nama' }} ({{ $n->user->nomor_hp ?? 'Tanpa HP' }})
                                         </option>
                                     @endforeach
@@ -72,14 +156,28 @@
                             <div>
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Cabang Penyimpanan <span
                                         class="text-red-500">*</span></label>
-                                <select name="lokasi_id"
-                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                <select name="lokasi_id" id="lokasi_id"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Cabang...</option>
                                     @foreach($lokasiList as $l)
                                         <option value="{{ $l->id }}">{{ $l->nama_lokasi }}</option>
                                     @endforeach
                                 </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">NIK Nasabah</label>
+                                <input type="text" id="nasabah_nik" 
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-gray-50 backdrop-blur-sm text-gray-500 font-medium focus:ring-0 focus:border-white/60 cursor-not-allowed" 
+                                    readonly value="-" placeholder="-">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">No. Rekening Nasabah</label>
+                                <input type="text" id="nasabah_rekening" 
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-gray-50 backdrop-blur-sm text-gray-500 font-medium focus:ring-0 focus:border-white/60 cursor-not-allowed" 
+                                    readonly value="-" placeholder="-">
                             </div>
                         </div>
                     </div>
@@ -101,7 +199,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Kategori <span
                                         class="text-red-500">*</span></label>
                                 <select name="kategori_id" id="kategori_id"
-                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Kategori</option>
                                     @foreach($kategoriList as $k)
@@ -114,7 +212,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Item Barang <span
                                         class="text-red-500">*</span></label>
                                 <select name="item_id" id="item_id"
-                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Item</option>
                                     @foreach($itemList as $item)
@@ -153,7 +251,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Metode Pencairan <span
                                         class="text-red-500">*</span></label>
                                 <select name="metode_pencairan" id="metode_pencairan"
-                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="cash">Tunai (Cash)</option>
                                     <option value="transfer">Transfer Bank</option>
@@ -180,7 +278,7 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2">Slot Storage <span
                                         class="text-red-500">*</span></label>
                                 <select name="slot_kode" id="slot_kode"
-                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d]"
+                                    class="w-full border-white/60 shadow-sm rounded-xl bg-white/50 backdrop-blur-sm focus:bg-white focus:ring-[#674c1d] focus:border-[#674c1d] select2"
                                     required>
                                     <option value="">Pilih Kategori Dulu</option>
                                 </select>
@@ -428,6 +526,8 @@
                 
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
+                $(itemSelect).trigger('change');
+                $(slotSelect).trigger('change');
                 tInfoBox.classList.add('hidden');
 
                 // Dynamic field toggle
@@ -454,7 +554,11 @@
                     document.getElementById('col_catatan').classList.remove('hidden');
                 }
 
-                if (!val) return;
+                if (!val) {
+                    $(itemSelect).trigger('change');
+                    $(slotSelect).trigger('change');
+                    return;
+                }
 
                 const filtered = allItems.filter(item => item.kategori_id == val);
                 filtered.forEach(item => {
@@ -475,6 +579,9 @@
                         slotSelect.appendChild(opt);
                     });
                 }
+                
+                $(itemSelect).trigger('change');
+                $(slotSelect).trigger('change');
             });
 
             itemSelect.addEventListener('change', function () {
@@ -646,15 +753,58 @@
             }
 
             // Bind change events
-            selectNasabah.addEventListener('change', validateBalances);
+            selectNasabah.addEventListener('change', function() {
+                validateBalances();
+                const selectedOpt = this.options[this.selectedIndex];
+                if (selectedOpt) {
+                    document.getElementById('nasabah_nik').value = selectedOpt.dataset.nik || '-';
+                    document.getElementById('nasabah_rekening').value = selectedOpt.dataset.rekening || '-';
+                }
+            });
             selectMetode.addEventListener('change', validateBalances);
             nominalInput.addEventListener('input', validateBalances);
             nominalInput.addEventListener('keyup', validateBalances);
             
             // For Select2 integration (it triggers 'change' event on jquery)
             $(document).ready(function() {
-                if ($('.select2').length) {
-                    $('.select2').on('change', validateBalances);
+                // Initialize selects with search enabled
+                $('#nasabah_id').select2({
+                    placeholder: 'Pilih Nasabah...',
+                    allowClear: true,
+                    width: '100%'
+                });
+                
+                $('#item_id').select2({
+                    placeholder: 'Pilih Item...',
+                    width: '100%'
+                });
+
+                $('#slot_kode').select2({
+                    placeholder: 'Pilih Slot...',
+                    width: '100%'
+                });
+
+                // Initialize selects with search disabled (for simple selects)
+                $('#lokasi_id, #kategori_id, #metode_pencairan').select2({
+                    minimumResultsForSearch: Infinity,
+                    width: '100%'
+                });
+
+                // Event listener specifically for nasabah select change
+                $('#nasabah_id').on('change', function() {
+                    validateBalances();
+                    const selectedOpt = $(this).find(':selected');
+                    if (selectedOpt.length) {
+                        $('#nasabah_nik').val(selectedOpt.data('nik') || '-');
+                        $('#nasabah_rekening').val(selectedOpt.data('rekening') || '-');
+                    }
+                });
+
+                // Trigger initial populate for nasabah
+                const selectedOpt = $('#nasabah_id').find(':selected');
+                if (selectedOpt.length && selectedOpt.val()) {
+                    $('#nasabah_nik').val(selectedOpt.data('nik') || '-');
+                    $('#nasabah_rekening').val(selectedOpt.data('rekening') || '-');
                 }
             });
             
