@@ -10,6 +10,7 @@ use App\Models\TempoPinjamanM;
 use App\Models\PengajuanPembayaranPinjaman;
 use App\Models\GadaiActive;
 use App\Models\SettingsStruk;
+use App\Models\StrukNo;
 use App\Models\DepositoH;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
@@ -168,7 +169,17 @@ class StrukController extends Controller
             'jumlah_pinjam' => (float)$pinjaman->jumlah_pinjam,
         ];
 
-        $pdf = Pdf::loadView('struk.surat-bukti-pinjaman-b5', compact('data', 'settings'));
+        $noStruk = StrukNo::getOrCreate('pinjaman', $pinjaman->id);
+
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+
+        $data['no_struk'] = StrukNo::formatDisplay($noStruk);
+
+        $pdf = Pdf::loadView('struk.surat-bukti-pinjaman-b5', compact('data', 'settings', 'logoBase64'));
         $pdf->setPaper('b5', 'landscape');
         return $pdf->download('Surat-Bukti-Pinjaman-' . $pinjaman->id . '.pdf');
     }
@@ -332,12 +343,22 @@ class StrukController extends Controller
             'total_tagihan' => (float)$totalTagihan,
         ];
 
+        $noStruk = StrukNo::getOrCreate('gadai', $gadai->id);
+
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
+        $logoBase64 = null;
+        if (file_exists($logoPath)) {
+            $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+        }
+
+        $data['no_struk'] = StrukNo::formatDisplay($noStruk);
+
         $view = 'struk.surat-bukti-gadai-elektronik-b5';
         if ($gadai->kategori->kode_kategori === 'vehicle') {
             $view = 'struk.surat-bukti-gadai-kendaraan-b5';
         }
 
-        $pdf = Pdf::loadView($view, compact('data', 'settings'));
+        $pdf = Pdf::loadView($view, compact('data', 'settings', 'logoBase64'));
         $pdf->setPaper('b5', 'landscape');
         return $pdf->download('Surat-Bukti-Gadai-' . $gadai->slot_kode . '.pdf');
     }

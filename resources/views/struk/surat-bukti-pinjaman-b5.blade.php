@@ -12,7 +12,7 @@
         }
 
         @page {
-            size: 9.5in 6.5in;
+            size: 9.5in 7.5in;
         }
 
         body {
@@ -26,7 +26,7 @@
 
         .header-table {
             width: 100%;
-            margin-bottom: 2px;
+            border-collapse: collapse;
         }
 
         .header-table td {
@@ -34,15 +34,14 @@
         }
 
         .logo-img {
-            max-height: 90px;
-            width:auto;
+            max-height: 70px;
+            width:90px;
             display: inline-block;
             vertical-align: middle;
         }
 
         .koperasi-info {
             font-size: 12px;
-            padding-left: 10px !important;
         }
 
         .koperasi-info td {
@@ -145,10 +144,9 @@
             border: 1px solid #935a16;
             padding: 3px 5px;
             text-align: left;
-            font-size: 10px;
+            font-size: 8px;
             color: #935a16;
             border-radius: 4px;
-            width: 250px;
             line-height: 1.2;
         }
 
@@ -168,12 +166,16 @@
 <body>
     <div class="content-pad">
         <!-- HEADER KOP -->
+         <!-- NO. STRUK (tengah) -->
+                <div style="padding-left: 10px;">
+                    <div style="font-size: 8px; font-weight: bold; letter-spacing: 1px;">{{ $data['no_struk'] ?? '' }}</div>
+                </div>
         <table class="header-table">
             <tr>
                 <!-- Logo -->
                 <td style="width: 10%; text-align: right; padding-right: 10px;">
-                    @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
-                    <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
+                    @if(!empty($logoBase64))
+                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
                     @else
                     <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
@@ -330,14 +332,14 @@
         <table class="footer-section">
             <tr>
                 <!-- Info Box -->
-                <td style="width: 35%; text-align: left; vertical-align: middle;">
+                <td style="width: 25%; text-align: left; vertical-align: middle;">
                     <div class="info-box" style="white-space: pre-line;">@if(!empty($settings->info_box_pinjaman)){!! str_replace('MAJAKARA', '<strong>MAJAKARA</strong>', e($settings->info_box_pinjaman)) !!}@else<strong>PINJAMAN BISA DIANGSUR</strong>
 HARI BESAR DAN HARI MINGGU TETAP BUKA
 Jam Pengambilan Barang: 08.00 - 18.00
 Buka Jam: 08.00 - 20.00 @endif</div>
                 </td>
                 <!-- Signature: Nasabah -->
-                <td style="width: 20%; vertical-align: top; text-align: center;">
+                <td style="width: 25%; vertical-align: top; text-align: center;">
                     <div class="signature-title">Nasabah/yang dikuasakan,</div>
                     <div style=" padding-top: 10px;">(...................................)</div>
                 </td>

@@ -10,7 +10,7 @@
             box-sizing: border-box;
         }
         @page {
-            size: 9.5in 6.5in;
+            size: 9.5in 7.5in;
         }
         body {
             font-family: 'Arial', sans-serif;
@@ -35,8 +35,8 @@
             vertical-align: middle;
         }
         .logo-img {
-            max-height: 90px;
-            width: auto;
+            max-height: 70px;
+            width: 90px;
             display: inline-block;
             vertical-align: middle;
         }
@@ -67,7 +67,7 @@
             margin-bottom: 10px;
         }
         .detail-table td {
-            padding: 8px 6px;
+            padding: 4px 6px;
             vertical-align: middle;
             font-size: 12px;
             border-bottom: 1px solid #f3f4f6;
@@ -114,14 +114,13 @@
             vertical-align: top;
         }
         .info-box {
-            border: 1.5px solid #2c4a24;
-            padding: 5px;
-            border-radius: 4px;
-            font-size: 10px;
-            line-height: 1.35;
+            border: 1px solid #2c4a24;
+            padding: 3px 5px;
+            text-align: left;
+            font-size: 8px;
             color: #2c4a24;
-            font-weight: bold;
-            width: 250px;
+            border-radius: 4px;
+            line-height: 1.2;
         }
         .signature-area {
             text-align: center;
@@ -136,11 +135,15 @@
 
     <!-- HALAMAN 1: SURAT BUKTI GADAI KENDARAAN -->
     <div class="page">
+        <!-- NO. STRUK (tengah) -->
+        <div style="padding-left: 10px;">
+            <div style="font-size: 8px; font-weight: bold; letter-spacing: 1px;">{{ $data['no_struk'] ?? '' }}</div>
+        </div>
         <table class="header-table">
             <tr>
                 <td style="width: 10%; text-align: right; padding-right: 10px;">
-                    @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
-                    <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
+                    @if(!empty($logoBase64))
+                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
                     @else
                     <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
@@ -281,17 +284,19 @@
 
     <!-- HALAMAN 2: PERJANJIAN PINJAMAN DENGAN JAMINAN BARANG BERGERAK (KENDARAAN) -->
     <div class="page">
+        <div style="font-size: 8px; font-weight: bold; padding-left: 20px;">{{ $data['no_struk'] ?? '' }}</div>
         <table class="header-table">
             <tr>
                 <td style="width: 10%; text-align: right; padding-right: 10px;">
-                    @if(file_exists(public_path('images/logo/674c1d MAJAKARA.png')))
-                    <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" class="logo-img" alt="Logo">
+                    @if(!empty($logoBase64))
+                    <img src="{{ $logoBase64 }}" class="logo-img" alt="Logo">
                     @else
                     <div style="font-weight: bold; font-size: 18px; color: #935a16;">MAJAKARA</div>
                     @endif
                 </td>
-                <td class="koperasi-info" style="width: 60%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
-                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} | <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
+                <td class="koperasi-info" style="width: 30%; font-size: 10px; line-height: 1.35; padding-left: 15px;">
+                    <strong>Kantor Perwakilan</strong> : {{ $settings->alamat_koperasi }} |<br>
+                    <strong>Nomor Tlp Kantor</strong> : {{ $settings->no_telp }} | <strong>Email</strong>: {{ $settings->email }}
                 </td>
                 <td class="nasabah-info" style="width: 30%;">
                     Nama: {{ $data['nama_anggota'] }}<br>
@@ -329,7 +334,7 @@
         <!-- Footer containing Jam Operasional & Signatures -->
         <table class="footer-table">
             <tr>
-                <td style="width: 45%;">
+                <td style="width: 25%;">
                     <div class="info-box">
                         PINJAMAN BISA DIANGSUR HARI BESAR DAN HARI MINGGU TETAP BUKA.<br>
                         Jam Operasional : Senin - Minggu<br>
