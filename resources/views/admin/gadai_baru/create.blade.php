@@ -218,7 +218,9 @@
                                     @foreach($itemList as $item)
                                         <option value="{{ $item->id }}" data-kategori="{{ $item->kategori_id }}"
                                             data-min="{{ $item->nominal_low }}"
-                                            data-max="{{ $item->nominal_high }}" class="item-option hidden">{{ $item->head_1 }}
+                                            data-max="{{ $item->nominal_high }}"
+                                            data-inap="{{ $item->nominal_inap ?? 0 }}"
+                                            class="item-option hidden">{{ $item->head_1 }}
                                             @if($item->head_2)({{ $item->head_2 }})@endif</option>
                                     @endforeach
                                 </select>
@@ -423,7 +425,7 @@
                                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
                                 </svg>
                             </div>
-                            <h3 class="text-lg font-bold text-gray-800">Verifikasi & Petty Cash</h3>
+                            <h3 class="text-lg font-bold text-indigo-600">Verifikasi & Petty Cash</h3>
                         </div>
 
                         <!-- Petty Cash Card -->
@@ -528,6 +530,28 @@
             const allItems = @json($itemList);
             const availableSlots = @json($availableSlots);
 
+            // Initialize Select2 on all selects immediately
+            $('#nasabah_id').select2({
+                placeholder: 'Pilih Nasabah...',
+                allowClear: true,
+                width: '100%'
+            });
+
+            $('#item_id').select2({
+                placeholder: 'Pilih Item...',
+                width: '100%'
+            });
+
+            $('#slot_kode').select2({
+                placeholder: 'Pilih Slot...',
+                width: '100%'
+            });
+
+            $('#lokasi_id, #kategori_id, #metode_pencairan').select2({
+                minimumResultsForSearch: Infinity,
+                width: '100%'
+            });
+
             function updateFormState() {
                 const val = katSelect.value;
                 const selectedOpt = katSelect.options[katSelect.selectedIndex];
@@ -542,23 +566,23 @@
                 const labelInap = document.getElementById('label_rate_inap');
                 
                 if (rateInapInput) {
-                if (kode === 'vehicle') {
-                    rateInapInput.readOnly = true;
-                    rateInapInput.classList.add('bg-gray-100', 'cursor-not-allowed');
-                    if (labelInap) {
-                        labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
-                    }
+                    if (kode === 'vehicle') {
+                        rateInapInput.readOnly = true;
+                        rateInapInput.classList.add('bg-gray-50', 'cursor-not-allowed');
+                        if (labelInap) {
+                            labelInap.innerHTML = 'Biaya Inap (Nominal) <span class="text-red-500">*</span>';
+                        }
                         
                         // Set the value based on the selected item's flat nominal inap fee
                         const selectedItemOpt = itemSelect.options[itemSelect.selectedIndex];
                         const itemInap = selectedItemOpt ? parseFloat(selectedItemOpt.dataset.inap) || 0 : 0;
                         rateInapInput.value = itemInap;
-                } else {
-                    rateInapInput.readOnly = false;
-                    rateInapInput.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                    if (labelInap) {
-                        labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
-                    }
+                    } else {
+                        rateInapInput.readOnly = false;
+                        rateInapInput.classList.remove('bg-gray-50', 'cursor-not-allowed');
+                        if (labelInap) {
+                            labelInap.innerHTML = 'Bunga Inap (%) <span class="text-red-500">*</span>';
+                        }
                         rateInapInput.value = inap;
                     }
                 }
@@ -575,7 +599,8 @@
                 }
             }
 
-            katSelect.addEventListener('change', function () {
+            // Bind change events using jQuery to ensure Select2 triggers work
+            $(katSelect).on('change', function () {
                 const val = this.value;
                 const selectedOpt = this.options[this.selectedIndex];
                 const kode = selectedOpt ? selectedOpt.dataset.kode : '';
@@ -586,9 +611,12 @@
                 itemSelect.innerHTML = '<option value="">Pilih Item</option>';
                 slotSelect.innerHTML = '<option value="">Pilih Slot</option>';
                 if (tInfoBox) tInfoBox.classList.add('hidden');
+                
+                // Re-initialize select2 for item and slot when cleared
+                $('#item_id').select2({ placeholder: 'Pilih Item...', width: '100%' });
+                $('#slot_kode').select2({ placeholder: 'Pilih Slot...', width: '100%' });
                 $(itemSelect).trigger('change');
                 $(slotSelect).trigger('change');
-                tInfoBox.classList.add('hidden');
 
                 // Dynamic field toggle
                 document.getElementById('no_mesin_rangka').value = '';
@@ -614,10 +642,7 @@
                     document.getElementById('col_catatan').classList.remove('hidden');
                 }
 
-                if (val) {
                 if (!val) {
-                    $(itemSelect).trigger('change');
-                    $(slotSelect).trigger('change');
                     return;
                 }
 
@@ -631,7 +656,6 @@
                     opt.dataset.inap = item.nominal_inap || 0;
                     itemSelect.appendChild(opt);
                 });
-                }
 
                 if (kode && availableSlots[kode]) {
                     const slots = availableSlots[kode];
@@ -643,21 +667,21 @@
                     });
                 }
 
+                // Re-initialize Select2 with new options BEFORE setting value
+                $('#item_id').select2({ placeholder: 'Pilih Item...', width: '100%' });
+                $('#slot_kode').select2({ placeholder: 'Pilih Slot...', width: '100%' });
+
                 if (currentItemVal) {
-                    itemSelect.value = currentItemVal;
-                    itemSelect.dispatchEvent(new Event('change'));
+                    $(itemSelect).val(currentItemVal).trigger('change');
                 }
                 if (currentSlotVal) {
-                    slotSelect.value = currentSlotVal;
+                    $(slotSelect).val(currentSlotVal).trigger('change');
                 }
 
                 updateFormState();
-                
-                $(itemSelect).trigger('change');
-                $(slotSelect).trigger('change');
             });
 
-            itemSelect.addEventListener('change', function () {
+            $(itemSelect).on('change', function () {
                 if (!this.value) {
                     if (tInfoBox) tInfoBox.classList.add('hidden');
                     return;
@@ -675,11 +699,11 @@
 
                 // Trigger nominal validation if already filled
                 if (nominalInput.value) {
-                    nominalInput.dispatchEvent(new Event('keyup'));
+                    $(nominalInput).trigger('keyup');
                 }
             });
 
-            nominalInput.addEventListener('keyup', function () {
+            $(nominalInput).on('keyup', function () {
                 if (!itemSelect.value) return;
                 const selectedOpt = itemSelect.options[itemSelect.selectedIndex];
                 const max = parseFloat(selectedOpt.dataset.max);
@@ -829,8 +853,8 @@
                 }
             }
 
-            // Bind change events
-            selectNasabah.addEventListener('change', function() {
+            // Bind change events using jQuery
+            $(selectNasabah).on('change', function() {
                 validateBalances();
                 const selectedOpt = this.options[this.selectedIndex];
                 if (selectedOpt) {
@@ -838,56 +862,29 @@
                     document.getElementById('nasabah_rekening').value = selectedOpt.dataset.rekening || '-';
                 }
             });
-            selectMetode.addEventListener('change', validateBalances);
-            nominalInput.addEventListener('input', validateBalances);
-            nominalInput.addEventListener('keyup', validateBalances);
-            
-            // For Select2 integration (it triggers 'change' event on jquery)
-            $(document).ready(function() {
-                // Initialize selects with search enabled
-                $('#nasabah_id').select2({
-                    placeholder: 'Pilih Nasabah...',
-                    allowClear: true,
-                    width: '100%'
-                });
-                
-                $('#item_id').select2({
-                    placeholder: 'Pilih Item...',
-                    width: '100%'
-                });
+            $(selectMetode).on('change', validateBalances);
+            $(nominalInput).on('input keyup', validateBalances);
 
-                $('#slot_kode').select2({
-                    placeholder: 'Pilih Slot...',
-                    width: '100%'
-                });
-
-                // Initialize selects with search disabled (for simple selects)
-                $('#lokasi_id, #kategori_id, #metode_pencairan').select2({
-                    minimumResultsForSearch: Infinity,
-                    width: '100%'
-                });
-
-                // Event listener specifically for nasabah select change
-                $('#nasabah_id').on('change', function() {
-                    validateBalances();
-                    const selectedOpt = $(this).find(':selected');
-                    if (selectedOpt.length) {
-                        $('#nasabah_nik').val(selectedOpt.data('nik') || '-');
-                        $('#nasabah_rekening').val(selectedOpt.data('rekening') || '-');
-                    }
-                });
-
-                // Trigger initial populate for nasabah
-                const selectedOpt = $('#nasabah_id').find(':selected');
-                if (selectedOpt.length && selectedOpt.val()) {
+            // Specific Select2 change handler for nasabah
+            $('#nasabah_id').on('change', function() {
+                validateBalances();
+                const selectedOpt = $(this).find(':selected');
+                if (selectedOpt.length) {
                     $('#nasabah_nik').val(selectedOpt.data('nik') || '-');
                     $('#nasabah_rekening').val(selectedOpt.data('rekening') || '-');
                 }
             });
+
+            // Trigger initial populate for nasabah
+            const selectedOpt = $('#nasabah_id').find(':selected');
+            if (selectedOpt.length && selectedOpt.val()) {
+                $('#nasabah_nik').val(selectedOpt.data('nik') || '-');
+                $('#nasabah_rekening').val(selectedOpt.data('rekening') || '-');
+            }
             
             // Initial run
             validateBalances();
-            katSelect.dispatchEvent(new Event('change'));
+            $(katSelect).trigger('change');
         }
     </script>
 @endsection
