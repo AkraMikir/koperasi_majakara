@@ -859,6 +859,7 @@ class MasterDataController extends Controller
             'email'                 => 'required|email|unique:users,email',
             'nomor_hp'              => 'required|string|max:20',
             'password'              => 'required|string|min:8|confirmed',
+            'pin'                   => 'required|digits:6|confirmed',
         ], [
             'nama.required'                 => 'Nama wajib diisi.',
             'email.required'                => 'Email wajib diisi.',
@@ -868,6 +869,9 @@ class MasterDataController extends Controller
             'password.required'             => 'Password wajib diisi.',
             'password.min'                  => 'Password minimal 8 karakter.',
             'password.confirmed'            => 'Konfirmasi password tidak cocok.',
+            'pin.required'                  => 'PIN wajib diisi.',
+            'pin.digits'                    => 'PIN harus 6 digit angka.',
+            'pin.confirmed'                 => 'Konfirmasi PIN tidak cocok.',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -876,7 +880,7 @@ class MasterDataController extends Controller
                 'email'             => $request->email,
                 'nomor_hp'          => $request->nomor_hp,
                 'password'          => Hash::make($request->password),
-                'pin'               => null,
+                'pin'               => $request->pin,
                 'foto'              => 'default-avatar.jpg',
                 'role'              => 'admin_operasional',
                 'email_verified_at' => now(),
@@ -913,6 +917,7 @@ class MasterDataController extends Controller
             'email'     => 'required|email|unique:users,email,' . $adminOp->user_id,
             'nomor_hp'  => 'required|string|max:20',
             'password'  => 'nullable|string|min:8|confirmed',
+            'pin'       => 'nullable|digits:6|confirmed',
         ], [
             'nama.required'         => 'Nama wajib diisi.',
             'email.required'        => 'Email wajib diisi.',
@@ -921,6 +926,8 @@ class MasterDataController extends Controller
             'nomor_hp.required'     => 'Nomor HP wajib diisi.',
             'password.min'          => 'Password minimal 8 karakter.',
             'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+            'pin.digits'            => 'PIN harus 6 digit angka.',
+            'pin.confirmed'         => 'Konfirmasi PIN tidak cocok.',
         ]);
 
         DB::transaction(function () use ($request, $adminOp) {
@@ -932,6 +939,10 @@ class MasterDataController extends Controller
 
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
+            }
+
+            if ($request->filled('pin')) {
+                $userData['pin'] = $request->pin;
             }
 
             $adminOp->user->update($userData);
