@@ -18,6 +18,8 @@ use App\Models\LogoBank;
 use App\Models\User;
 use App\Models\MasterTujuanPinjaman;
 use App\Models\SyaratKetentuanLayanan;
+use App\Models\MasterDefaultOtp;
+use App\Models\LogDefaultOtpUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -61,6 +63,56 @@ class MasterDataController extends Controller
         ];
 
         return view('admin.master-data.index', compact('stats'));
+    }
+
+    // ==================== MASTER OTP DEFAULT ====================
+
+    public function otpDefaultIndex()
+    {
+        $permissionService = app(\App\Services\AdminPermissionService::class);
+        $user = auth()->user();
+
+        if (!$permissionService->isAdmin($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk halaman ini.');
+        }
+
+        $isAdminUtama = $permissionService->isAdminUtama($user);
+        $masterOtp = MasterDefaultOtp::first();
+
+        // All admins can see logs
+        $logs = LogDefaultOtpUsage::with('user')->orderBy('created_at', 'desc')->paginate(15);
+
+        return view('admin.master-data.otp-default.index', compact('masterOtp', 'logs', 'isAdminUtama'));
+    }
+
+    public function otpDefaultUpdate(Request $request)
+    {
+        if (!app(\App\Services\AdminPermissionService::class)->isAdmin(auth()->user())) {
+            abort(403, 'Hanya Admin yang dapat mengubah kode OTP Default.');
+        }
+
+        $request->validate([
+            'otp_code' => 'required|numeric|digits:6',
+        ], [
+            'otp_code.required' => 'Kode OTP default harus diisi.',
+            'otp_code.numeric' => 'Kode OTP default harus berupa angka.',
+            'otp_code.digits' => 'Kode OTP default harus 6 digit.',
+        ]);
+
+        $masterOtp = MasterDefaultOtp::first();
+        if ($masterOtp) {
+            $masterOtp->update([
+                'otp_code_hashed' => Hash::make($request->otp_code),
+            ]);
+        } else {
+            MasterDefaultOtp::create([
+                'otp_code_hashed' => Hash::make($request->otp_code),
+                'used' => 0,
+            ]);
+        }
+
+        return redirect()->route('admin.master-data.otp-default.index')
+            ->with('success', 'Kode OTP Default berhasil diperbarui.');
     }
 
     // ==================== MASTER BUNGA PINJAMAN ====================

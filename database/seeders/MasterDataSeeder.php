@@ -127,6 +127,15 @@ class MasterDataSeeder extends Seeder
             'updated_at' => now()
         ]);
 
+        // 6. Default Fallback OTP
+        DB::table('master_default_otp')->truncate();
+        DB::table('master_default_otp')->insert([
+            'otp_code_hashed' => \Illuminate\Support\Facades\Hash::make('341234'),
+            'used' => 0,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 }

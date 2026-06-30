@@ -327,6 +327,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'index'])->name('index');
         
+        // Master OTP Default
+        Route::prefix('otp-default')->name('otp-default.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'otpDefaultIndex'])->name('index');
+            Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'otpDefaultUpdate'])->name('update');
+        });
+
         // Item Gadai Baru
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
