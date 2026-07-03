@@ -169,9 +169,17 @@
                             @endif
                         </span>
                     </div>
-                    <div class="flex justify-between py-2">
+                    <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-sm text-gray-600 font-semibold">Alamat</span>
                         <span class="text-sm text-gray-900 text-right max-w-xs">{{ $nasabah->alamat ?? '-' }}</span>
+                    </div>
+                    <div class="flex justify-between py-2 border-b border-gray-100">
+                        <span class="text-sm text-gray-600 font-semibold">Alamat Domisili</span>
+                        <span class="text-sm text-gray-900 text-right max-w-xs">{{ $nasabah->alamat_domisili ?? '-' }}</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-sm text-gray-600 font-semibold">Kode Pos</span>
+                        <span class="text-sm text-gray-900 font-mono">{{ $nasabah->kode_pos ?? '-' }}</span>
                     </div>
                 </div>
             </div>
@@ -248,9 +256,13 @@
                         <span class="text-sm text-gray-600 font-semibold">Bidang Usaha</span>
                         <span class="text-sm text-gray-900">{{ $nasabah->pekerjaan->bidang_usaha ?? '-' }}</span>
                     </div>
-                    <div class="flex justify-between py-2">
+                    <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-sm text-gray-600 font-semibold">Alamat Perusahaan</span>
                         <span class="text-sm text-gray-900 text-right max-w-xs">{{ $nasabah->pekerjaan->alamat ?? '-' }}</span>
+                    </div>
+                    <div class="flex justify-between py-2">
+                        <span class="text-sm text-gray-600 font-semibold">Penghasilan</span>
+                        <span class="text-sm text-gray-900 font-semibold text-[#674c1d]">{{ $nasabah->pekerjaan->penghasilan ?? '-' }}</span>
                     </div>
                 </div>
             </div>
@@ -280,7 +292,7 @@
                     </div>
                     <div class="flex justify-between py-2">
                         <span class="text-sm text-gray-600 font-semibold">Atas Nama</span>
-                        <span class="text-sm text-gray-900">{{ $nasabah->dataRek->atas_nama ?? '-' }}</span>
+                        <span class="text-sm text-gray-900">{{ $nasabah->dataRek->nama_pemilik_rekening ?? '-' }}</span>
                     </div>
                 </div>
             </div>
