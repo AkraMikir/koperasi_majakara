@@ -22,3 +22,9 @@ Schedule::command('gadai:check-status')
     ->withoutOverlapping()
     ->appendOutputTo(storage_path('logs/gadai-check-status.log'));
 
+// Cleanup data registrasi temp yang tidak aktif > 20 menit
+Schedule::command('registrasi:cleanup-temp')
+    ->cron('*/20 * * * *')
+    ->withoutOverlapping()
+    ->appendOutputTo(storage_path('logs/registrasi-cleanup.log'));
+

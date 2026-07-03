@@ -418,11 +418,8 @@ class RegisterController extends Controller
 
         if ($type === 'email') {
             $existsInUsers = \App\Models\User::where('email', $value)->exists();
-            $existsInTemp = \App\Models\UserTemp::where('email', $value)
-                ->where('id', '!=', $userTempId)
-                ->exists();
 
-            if ($existsInUsers || $existsInTemp) {
+            if ($existsInUsers) {
                 return response()->json([
                     'unique' => false,
                     'message' => 'Email sudah terdaftar. Silakan gunakan email lain.'
@@ -434,11 +431,8 @@ class RegisterController extends Controller
                 $normalized = $value;
             }
             $existsInUsers = \App\Models\User::where('nomor_hp', $normalized)->exists();
-            $existsInTemp = \App\Models\UserTemp::where('nomor_hp', $normalized)
-                ->where('id', '!=', $userTempId)
-                ->exists();
 
-            if ($existsInUsers || $existsInTemp) {
+            if ($existsInUsers) {
                 return response()->json([
                     'unique' => false,
                     'message' => 'Nomor HP sudah terdaftar. Silakan gunakan nomor lain.'
@@ -446,33 +440,17 @@ class RegisterController extends Controller
             }
         } elseif ($type === 'no_kk') {
             $existsInPermanent = \App\Models\Nasabah::where('no_kk', $value)->exists();
-            $existsInTemp = \App\Models\NasabahTemp::where('no_kk', $value)
-                ->where('id', '!=', $nasabahTempId)
-                ->exists();
 
-            if ($existsInPermanent || $existsInTemp) {
+            if ($existsInPermanent) {
                 return response()->json([
                     'unique' => false,
                     'message' => 'Nomor KK sudah terdaftar. Silakan gunakan nomor KK lain.'
                 ]);
             }
         } elseif ($type === 'nik') {
-            $dataKtpTempId = null;
-            if ($nasabahTempId) {
-                $tempKtp = \App\Models\DataKtpTemp::where('nasabah_id', $nasabahTempId)->first();
-                if ($tempKtp) {
-                    $dataKtpTempId = $tempKtp->id;
-                }
-            }
-
             $existsInPermanent = \App\Models\DataKtp::where('nik', $value)->exists();
-            $existsInTemp = \App\Models\DataKtpTemp::where('nik', $value)
-                ->when($dataKtpTempId, function ($query) use ($dataKtpTempId) {
-                    return $query->where('id', '!=', $dataKtpTempId);
-                })
-                ->exists();
 
-            if ($existsInPermanent || $existsInTemp) {
+            if ($existsInPermanent) {
                 return response()->json([
                     'unique' => false,
                     'message' => 'NIK sudah terdaftar. Silakan gunakan NIK lain.'
@@ -555,7 +533,6 @@ class RegisterController extends Controller
                     'email',
                     'max:255',
                     \Illuminate\Validation\Rule::unique('users', 'email'),
-                    \Illuminate\Validation\Rule::unique('users_temp', 'email')->ignore($userTempId),
                 ],
                 'nomor_hp' => 'required|string|max:20',
                 'password' => $userTemp ? 'nullable|string|min:8|confirmed' : 'required|string|min:8|confirmed',
@@ -574,9 +551,6 @@ class RegisterController extends Controller
                     'string',
                     'digits:16',
                     \Illuminate\Validation\Rule::unique('tbl_data_ktp', 'nik'),
-                    \Illuminate\Validation\Rule::unique('tbl_data_ktp_temp', 'nik')->when($dataKtpTemp, function ($query) use ($dataKtpTemp) {
-                        return $query->ignore($dataKtpTemp->id);
-                    }),
                 ],
                 'nama_lengkap_ktp' => 'required|string|max:100',
                 'tempat_lahir_ktp' => 'required|string|max:100',
@@ -605,7 +579,6 @@ class RegisterController extends Controller
                     'string',
                     'max:16',
                     \Illuminate\Validation\Rule::unique('tbl_nasabah', 'no_kk'),
-                    \Illuminate\Validation\Rule::unique('tbl_nasabah_temp', 'no_kk')->ignore($nasabahTempId),
                 ],
                 'tempat_lahir' => 'required|string|max:255',
                 'tanggal_lahir' => 'required|date',
