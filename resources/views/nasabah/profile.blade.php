@@ -262,6 +262,14 @@
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
                     <p class="font-semibold text-gray-900">{{ $nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? 'N/A') }}</p>
                 </div>
+                <div class="md:col-span-2">
+                    <p class="text-sm text-gray-600 mb-1">Alamat Domisili</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->alamat_domisili ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Kode Pos</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->kode_pos ?? 'N/A' }}</p>
+                </div>
             </div>
         </div>
     </div>
@@ -585,14 +593,14 @@ const formTemplates = {
     'data_pribadi': {
         title: 'Edit Data Pribadi',
         fields: [
-            { name: 'nama', label: 'Nama Lengkap', type: 'text', value: '{{ old("nama") ?? ($nasabah->dataKtp->nama_lengkap ?? ($nasabah->user->nama ?? "")) }}' },
-            { name: 'email', label: 'Email', type: 'email', value: '{{ old("email") ?? ($nasabah->user->email ?? "") }}' },
-            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ old("nomor_hp") ?? ($nasabah->user->nomor_hp ?? "") }}' },
-            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ old("no_kk") ?? ($nasabah->no_kk ?? "") }}' },
+            { name: 'nik', label: 'NIK', type: 'text', value: '{{ old("nik") ?? ($nasabah->dataKtp->nik ?? "") }}', numeric: true, maxlength: 16 },
+            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ old("no_kk") ?? ($nasabah->no_kk ?? "") }}', numeric: true, maxlength: 16 },
             { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', value: '{{ old("tempat_lahir") ?? ($nasabah->tempat_lahir ?? ($nasabah->dataKtp->tempat_lahir ?? "")) }}' },
             { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', value: '{{ old("tanggal_lahir") ?? ($nasabah->tanggal_lahir ? $nasabah->tanggal_lahir->format("Y-m-d") : ($nasabah->dataKtp && $nasabah->dataKtp->tanggal_lahir ? $nasabah->dataKtp->tanggal_lahir->format("Y-m-d") : "")) }}' },
             { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', value: '{{ old("jenis_kelamin") ?? ($nasabah->jenis_kelamin ?? "") }}', options: [{value: 'L', label: 'Laki-laki'}, {value: 'P', label: 'Perempuan'}] },
-            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat") ?? ($nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "")) }}' }
+            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat") ?? ($nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "")) }}' },
+            { name: 'alamat_domisili', label: 'Alamat Domisili', type: 'textarea', value: '{{ old("alamat_domisili") ?? ($nasabah->alamat_domisili ?? "") }}' },
+            { name: 'kode_pos', label: 'Kode Pos', type: 'text', value: '{{ old("kode_pos") ?? ($nasabah->kode_pos ?? "") }}', numeric: true, maxlength: 5 }
         ]
     },
     'pekerjaan': {

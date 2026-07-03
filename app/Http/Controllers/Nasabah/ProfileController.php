@@ -215,14 +215,14 @@ class ProfileController extends Controller
 
             case 'data_pribadi':
                 return [
-                    'nama' => $nasabah->user->nama ?? '',
-                    'email' => $nasabah->user->email ?? '',
-                    'nomor_hp' => $nasabah->user->nomor_hp ?? '',
+                    'nik' => $nasabah->dataKtp->nik ?? '',
                     'no_kk' => $nasabah->no_kk ?? '',
                     'tempat_lahir' => $nasabah->tempat_lahir ?? '',
                     'tanggal_lahir' => $nasabah->tanggal_lahir ? $nasabah->tanggal_lahir->format('Y-m-d') : '',
                     'jenis_kelamin' => $nasabah->jenis_kelamin ?? '',
                     'alamat' => $nasabah->alamat ?? '',
+                    'alamat_domisili' => $nasabah->alamat_domisili ?? '',
+                    'kode_pos' => $nasabah->kode_pos ?? '',
                 ];
 
             case 'data_ktp':
@@ -290,14 +290,14 @@ class ProfileController extends Controller
 
             case 'data_pribadi':
                 return [
-                    'nama' => $request->input('nama', ''),
-                    'email' => $request->input('email', ''),
-                    'nomor_hp' => $request->input('nomor_hp', ''),
+                    'nik' => $request->input('nik', ''),
                     'no_kk' => $request->input('no_kk', ''),
                     'tempat_lahir' => $request->input('tempat_lahir', ''),
                     'tanggal_lahir' => $request->input('tanggal_lahir', ''),
                     'jenis_kelamin' => $request->input('jenis_kelamin', ''),
                     'alamat' => $request->input('alamat', ''),
+                    'alamat_domisili' => $request->input('alamat_domisili', ''),
+                    'kode_pos' => $request->input('kode_pos', ''),
                 ];
 
             case 'data_ktp':
@@ -362,15 +362,26 @@ class ProfileController extends Controller
                 break;
 
             case 'data_pribadi':
+                $nasabah = Auth::user()->nasabah;
                 $rules = [
-                    'nama' => 'required|string|max:255',
-                    'email' => 'required|email|max:255',
-                    'nomor_hp' => 'required|string|max:20',
-                    'no_kk' => 'nullable|string|max:20',
+                    'nik' => [
+                        'required',
+                        'string',
+                        'digits:16',
+                        \Illuminate\Validation\Rule::unique('tbl_data_ktp', 'nik')->ignore($nasabah->dataKtp->id ?? null),
+                    ],
+                    'no_kk' => [
+                        'nullable',
+                        'string',
+                        'max:20',
+                        \Illuminate\Validation\Rule::unique('tbl_nasabah', 'no_kk')->ignore($nasabah->id ?? null),
+                    ],
                     'tempat_lahir' => 'nullable|string|max:255',
                     'tanggal_lahir' => 'nullable|date',
                     'jenis_kelamin' => 'nullable|in:L,P',
                     'alamat' => 'nullable|string',
+                    'alamat_domisili' => 'required|string',
+                    'kode_pos' => 'required|string|digits:5',
                 ];
                 break;
 
