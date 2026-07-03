@@ -1079,8 +1079,7 @@
                                                     </span>
                                                 </div>
                                             </div>
-
-                                            {{-- Button Kirim Ulang --}}
+                                             {{-- Button Kirim Ulang --}}
                                             <div class="flex items-center justify-center" id="resendBtnWrapper">
                                                 @if(($remainingCooldown ?? 0) > 0)
                                                     <button type="button" disabled
@@ -1106,9 +1105,9 @@
                                                         </svg>
                                                         <span class="text-sm">Kirim Ulang Kode OTP</span>
                                                     </button>
-                                                </div>
+                                                @endif
                                             </div>
-
+ 
                                             {{-- Info Bantuan --}}
                                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                                 <div class="flex items-start gap-3">
@@ -1130,7 +1129,6 @@
                                             </div>
                                         </div>
                                     @endif
-                                @endif
                                 </div>
 
                     @elseif($step == 3)
