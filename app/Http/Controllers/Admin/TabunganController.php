@@ -152,7 +152,7 @@ class TabunganController extends Controller
             // Pastikan tidak ada duplikasi transaksi
             if ($pengajuan->transTabungan->count() == 0) {
                 // V2 Logic: Master Data Driven
-                $kodeVia = 'TF';  // Pengajuan always Transfer
+                $kodeVia = ($request->metode_bayar === 'cash') ? 'CS' : 'TF';
                 $kodeTrans = 'STR';
 
                 // Get IDs from Master Tables
@@ -471,7 +471,7 @@ class TabunganController extends Controller
             ]);
 
             // V2 Logic: Master Data Driven
-            $kodeVia = ($pengajuan->metode_transfer == 'transfer') ? 'TF' : 'TN';
+            $kodeVia = ($pengajuan->metode_transfer == 'transfer') ? 'TF' : 'CS';
             $kodeTrans = 'PNR';
 
             // Get IDs
@@ -1150,7 +1150,7 @@ class TabunganController extends Controller
         }
 
         // V2 Logic Mapping
-        $kodeVia = ($request->via == 'transfer') ? 'TF' : 'TN';
+        $kodeVia = ($request->via == 'transfer') ? 'TF' : 'CS';
         $kodeTrans = ($request->jenis == 'setoran') ? 'STR' : 'PNR';
         
         $idVia = DB::table('jns_via')->where('kode', $kodeVia)->value('id');

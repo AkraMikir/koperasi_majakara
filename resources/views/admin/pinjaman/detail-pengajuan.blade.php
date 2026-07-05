@@ -340,35 +340,43 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Metode Pencairan & Cek Saldo
                                     *</label>
 
-                                <!-- Petty Cash Info Card (Only Transfer) -->
-                                <div id="card_petty_tf"
-                                    class="p-4 rounded-xl border-2 border-[#674c1d] bg-[#674c1d]/5 transition-all mb-4">
-                                    <div class="flex justify-between items-center">
-                                        <div>
-                                            <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">
-                                                Saldo Petty Cash (Transfer)</p>
-                                            <p class="text-xl font-black text-[#674c1d]">Rp
-                                                {{ number_format($adminSaldo->transfer, 0, ',', '.') }}
-                                            </p>
-                                        </div>
-                                        <div class="text-right">
-                                            <div
-                                                class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
-                                                <span
-                                                    class="w-2 h-2 rounded-full {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'bg-green-500' : 'bg-red-500' }} mr-1.5"></span>
-                                                {{ $adminSaldo->transfer >= $pengajuan->nominal ? 'Saldo Cukup' : 'Saldo Kurang' }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                @php
+                                     $jenisPencairan = $pengajuan->jenis_pencairan ?? 'transfer';
+                                     $isTransfer = $jenisPencairan === 'transfer';
+                                     $saldoAdmin = $isTransfer ? $adminSaldo->transfer : $adminSaldo->cash;
+                                     $metodeVal = $isTransfer ? 'petty_tf' : 'petty_cash';
+                                     $metodeLabel = $isTransfer ? 'Petty Cash (Transfer)' : 'Petty Cash (Cash)';
+                                 @endphp
 
-                                <!-- Method Label & Hidden Input -->
-                                <div
-                                    class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between mb-4">
-                                    <span class="text-sm text-gray-600">Metode:</span>
-                                    <span class="text-sm font-bold text-gray-900">Petty Cash (Transfer)</span>
-                                </div>
-                                <input type="hidden" name="metode_pencairan" value="petty_tf">
+                                 <!-- Petty Cash Info Card -->
+                                 <div id="card_petty_cash"
+                                     class="p-4 rounded-xl border-2 border-[#674c1d] bg-[#674c1d]/5 transition-all mb-4">
+                                     <div class="flex justify-between items-center">
+                                         <div>
+                                             <p class="text-[10px] uppercase tracking-wider text-gray-500 font-bold mb-1">
+                                                 Saldo Petty Cash ({{ $isTransfer ? 'Transfer' : 'Cash' }})</p>
+                                             <p class="text-xl font-black text-[#674c1d]">Rp
+                                                 {{ number_format($saldoAdmin, 0, ',', '.') }}
+                                             </p>
+                                         </div>
+                                         <div class="text-right">
+                                             <div
+                                                 class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold {{ $saldoAdmin >= $pengajuan->nominal ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700' }}">
+                                                 <span
+                                                     class="w-2 h-2 rounded-full {{ $saldoAdmin >= $pengajuan->nominal ? 'bg-green-500' : 'bg-red-500' }} mr-1.5"></span>
+                                                 {{ $saldoAdmin >= $pengajuan->nominal ? 'Saldo Cukup' : 'Saldo Kurang' }}
+                                             </div>
+                                         </div>
+                                     </div>
+                                 </div>
+
+                                 <!-- Method Label & Hidden Input -->
+                                 <div
+                                     class="p-3 bg-gray-50 border border-gray-200 rounded-lg flex items-center justify-between mb-4">
+                                     <span class="text-sm text-gray-600">Metode:</span>
+                                     <span class="text-sm font-bold text-gray-900">{{ $metodeLabel }}</span>
+                                 </div>
+                                 <input type="hidden" name="metode_pencairan" value="{{ $metodeVal }}">
 
                                 <!-- Dropdown Bank Pengirim (Untuk Transfer) -->
                                 @if(($pengajuan->jenis_pencairan ?? 'transfer') === 'transfer')
@@ -439,6 +447,8 @@
     <script>
         const nominalPengajuan = {{ $pengajuan->nominal }};
         const saldoTransfer = {{ $adminSaldo->transfer }};
+        const saldoCash = {{ $adminSaldo->cash }};
+        const jenisPencairan = "{{ $pengajuan->jenis_pencairan ?? 'transfer' }}";
         
         const bankNasabah = "{{ $pengajuan->nasabah->dataRek->nama_bank ?? '' }}";
         const saldoTabunganNasabah = {{ $pengajuan->nasabah->saldo ?? 0 }};
@@ -501,7 +511,8 @@
             const warningTabungan = document.getElementById('warningTabungan');
             const btn = document.getElementById('btnSubmitCairkan');
 
-            const isInsufficientAdmin = (saldoTransfer < nominalPengajuan);
+            const saldoAdmin = (jenisPencairan === 'transfer') ? saldoTransfer : saldoCash;
+            const isInsufficientAdmin = (saldoAdmin < nominalPengajuan);
             const isInsufficientTabungan = (saldoTabunganNasabah < biayaAdmin);
 
             if (isInsufficientAdmin) {

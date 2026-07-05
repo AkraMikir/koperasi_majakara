@@ -504,6 +504,16 @@ class PinjamanController extends Controller
         try {
             DB::beginTransaction();
 
+            // 🛡️ Cek Saldo CASH MODAL AWAL
+            $saldoTersedia = \App\Models\PettyCashSaldo::getSaldo(Auth::id(), 'admin', 'cash', 'other');
+            if ($saldoTersedia < (float) $janjiTemu->nominal) {
+                throw new \Exception(sprintf(
+                    'Saldo CASH MODAL AWAL tidak mencukupi untuk pencairan. Dibutuhkan: Rp %s | Tersedia: Rp %s',
+                    number_format($janjiTemu->nominal, 0, ',', '.'),
+                    number_format($saldoTersedia, 0, ',', '.')
+                ));
+            }
+
             // 1. Update janji temu (keterangan + status selesai)
             $janjiTemu->update([
                 'status' => '2',
@@ -565,6 +575,9 @@ class PinjamanController extends Controller
                     'denda_persen' => $masterDenda->denda_persen,
                     'tgl_pinjam' => $request->tgl_cair,
                     'lunas' => 'belum',
+                    'is_petty_cash' => 1,
+                    'petty_cash_ref' => $idPinjaman,
+                    'metode_pencairan' => 'petty_cash',
                 ]);
                  $pengajuan->update([
                      'status' => '3',
@@ -595,7 +608,41 @@ class PinjamanController extends Controller
                 return redirect()->back()->with('error', 'Pinjaman ini sudah dicairkan sebelumnya.');
             }
 
-            $pinjaman->update(['tgl_pinjam' => $request->tgl_cair]);
+            $pinjaman->update([
+                'tgl_pinjam' => $request->tgl_cair,
+                'is_petty_cash' => 1,
+                'petty_cash_ref' => $pinjaman->id,
+                'metode_pencairan' => 'petty_cash',
+            ]);
+
+            // 🛡️ Cek apakah sudah ada transaksi petty cash (hindari duplikasi)
+            $existingPc = \App\Models\PettyCashTransaksiNasabah::where('ref_table', PettyCashConstants::REF_PINJAMAN_H)
+                ->where('ref_id', $pinjaman->id)
+                ->first();
+            
+            if ($existingPc) {
+                throw new \Exception('Transaksi pencairan ini sudah tercatat di Petty Cash.');
+            }
+            
+            // Create Transaction Record for Disbursement
+            $pettyId = \App\Helpers\IdGenerator::generate('petty_cash_transaksi_nasabah', 'PC', 'AN', 'P', now());
+            \App\Models\PettyCashTransaksiNasabah::create([
+                'id' => $pettyId,
+                'admin_id' => Auth::id(),
+                'nasabah_id' => $pengajuan->id_anggota,
+                'nominal' => $pinjaman->jumlah_pinjam,
+                'id_jns_transaksi' => PettyCashConstants::JNS_PNCR,
+                'id_jns_via' => PettyCashConstants::VIA_CS, // Cash
+                'id_jns_fitur' => PettyCashConstants::FITUR_PINJAMAN,
+                'keterangan' => 'Pencairan Pinjaman (Janji Temu Tunai) #' . $pinjaman->id,
+                'ref_table' => PettyCashConstants::REF_PINJAMAN_H,
+                'ref_id' => $pinjaman->id,
+                'status' => 'approved',
+                'tgl_transaksi' => now(),
+            ]);
+
+            \App\Models\PettyCashSaldo::updateSaldo(Auth::id(), 'cash', -(float)$pinjaman->jumlah_pinjam, $pettyId, 'Pencairan Pinjaman (Janji Temu Tunai)', 'petty_cash_transaksi_nasabah', 'other');
+
             $this->generateJadwalAngsuran($pinjaman);
             $pengajuan->update([
                 'status' => '4',
