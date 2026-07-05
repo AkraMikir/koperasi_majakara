@@ -39,6 +39,7 @@ class CheckAdminPermission
             case 'crud-pinjaman':
                 $hasPermission = $this->permissionService->canCrudPinjamanAktif($user);
                 break;
+            case 'crud-biaya-transfer':
             case 'crud-master-data':
                 $hasPermission = $this->permissionService->canCrudMasterData($user);
                 break;
@@ -47,6 +48,12 @@ class CheckAdminPermission
                 break;
             case 'manage-nasabah':
                 $hasPermission = $this->permissionService->canManageNasabah($user);
+                break;
+            case 'verify-nasabah':
+                $hasPermission = $this->permissionService->canVerifyNasabah($user);
+                break;
+            case 'approve-nasabah-changes':
+                $hasPermission = $this->permissionService->canApproveNasabahChanges($user);
                 break;
             case 'pelunasan-dipercepat':
                 $hasPermission = $this->permissionService->canPelunasanDipercepat($user);

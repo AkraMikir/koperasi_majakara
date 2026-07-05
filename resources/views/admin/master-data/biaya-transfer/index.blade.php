@@ -14,11 +14,11 @@
             <h1 class="text-3xl font-bold text-gray-900 font-display">Master Biaya Transfer</h1>
             <p class="text-gray-600 mt-1">Kelola biaya admin transfer antar bank</p>
         </div>
-        @canCrudBiayaTransfer
+        @canCrudMasterData
         <a href="{{ route('admin.master-data.biaya-transfer.create') }}" class="px-4 py-2 bg-gradient-to-r from-[#674c1d] to-[#8b6f2f] text-white rounded-lg hover:from-[#4a3514] hover:to-[#674c1d] transition-all shadow-md text-sm font-medium">
             + Tambah Data
         </a>
-        @endcanCrudBiayaTransfer
+        @endcanCrudMasterData
     </div>
 
     @if(session('success'))
@@ -64,7 +64,7 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-600">{{ $item->keterangan ?? '-' }}</td>
                         <td class="px-6 py-4 text-center">
-                            @canCrudBiayaTransfer
+                            @canCrudMasterData
                             <form action="{{ route('admin.master-data.biaya-transfer.toggle-status', $item->id) }}" method="POST">
                                 @csrf
                                 <button type="submit" class="px-3 py-1 {{ $item->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }} rounded-full text-xs font-semibold">
@@ -75,11 +75,11 @@
                             <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $item->is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
                                 {{ $item->is_active ? 'Aktif' : 'Tidak Aktif' }}
                             </span>
-                            @endcanCrudBiayaTransfer
+                            @endcanCrudMasterData
                         </td>
                         <td class="px-6 py-4">
                             <div class="flex items-center justify-center space-x-2">
-                                @canCrudBiayaTransfer
+                                @canCrudMasterData
                                 <a href="{{ route('admin.master-data.biaya-transfer.edit', $item->id) }}" class="p-2 text-[#674c1d] hover:bg-[#674c1d]/10 rounded-lg transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
@@ -96,7 +96,7 @@
                                 </form>
                                 @else
                                 <span class="text-xs text-gray-400">View Only</span>
-                                @endcanCrudBiayaTransfer
+                                @endcanCrudMasterData
                             </div>
                         </td>
                     </tr>

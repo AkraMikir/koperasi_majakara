@@ -556,6 +556,33 @@
                 </div>
             </a>
 
+            {{-- Bank Registrasi --}}
+            <a href="{{ route('admin.master-data.bank-regis.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-violet-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-violet-500 to-violet-600 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-violet-50 text-violet-600 rounded-lg text-xs font-bold border border-violet-100">
+                            {{ $stats['total_bank_regis'] ?? 0 }} bank
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-violet-600 transition-colors">Bank Registrasi</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed">Daftar master bank yang digunakan untuk proses registrasi dan identifikasi rekening nasabah.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-violet-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
+
             {{-- Admin Operasional (hanya tampil untuk Admin Utama) --}}
             @isAdminUtama
             <a href="{{ route('admin.master-data.admin-operasional.index') }}"
@@ -584,6 +611,32 @@
                 </div>
             </a>
             @endisAdminUtama
+
+            <a href="{{ route('admin.master-data.otp-default.index') }}"
+                class="group bg-white rounded-2xl border border-gray-100 shadow-sm p-6 hover:shadow-md hover:border-red-500/30 transition-all duration-200 flex flex-col justify-between h-full">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-11 h-11 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white shadow-sm transition-transform group-hover:scale-110">
+                            <svg class="w-5.5 h-5.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                            </svg>
+                        </div>
+                        <span class="px-2.5 py-1 bg-red-50 text-red-600 rounded-lg text-xs font-bold border border-red-100">
+                            Keamanan
+                        </span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-red-600 transition-colors font-display">Master OTP Default</h3>
+                    <p class="text-xs text-gray-500 leading-relaxed font-sans">Konfigurasi kode OTP default (fallback) jika server pengiriman OTP WhatsApp mengalami kendala.</p>
+                </div>
+                <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
+                    <span class="text-xs font-semibold text-red-600 group-hover:underline flex items-center gap-1">
+                        Kelola
+                        <svg class="w-3.5 h-3.5 transform group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
+            </a>
 
         </div>
     </div>

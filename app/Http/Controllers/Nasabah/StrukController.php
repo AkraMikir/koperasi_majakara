@@ -42,7 +42,7 @@ class StrukController extends Controller
             ])
             ->findOrFail($id);
 
-        $logoPath = public_path('images/logo-koperasi-majakara.png');
+        $logoPath = public_path('images/logo/674c1d MAJAKARA.png');
         $hasLogo = is_file($logoPath);
 
         $pdf = Pdf::loadView('struk.tabungan', compact('transaksi', 'hasLogo', 'logoPath'));
@@ -168,17 +168,23 @@ class StrukController extends Controller
         
         $settings = SettingsStruk::getSettings();
         
-        // Estimasi bunga & nominal akhir
-        $tenorBulan = $deposito->tenor->tenor_bulan ?? 1;
-        $estimasiBunga = ($deposito->nominal_awal * ($deposito->bunga) * $tenorBulan) / 12;
-        $nominalAkhir = $deposito->nominal_awal + $estimasiBunga;
+        // Estimasi bunga & nominal akhir (dengan pajak)
+        $tenorBulan   = $deposito->tenor->tenor_bulan ?? 1;
+        $pajakRate    = \App\Models\Setting::where('key', 'pajak_deposito')->value('value') ?? 0.20;
+        $estimasiBunga = ($deposito->nominal_awal * ($deposito->bunga) * $tenorBulan) / 12; // bunga kotor
+        $pajakBunga   = $estimasiBunga * $pajakRate;
+        $bungaBersih  = $estimasiBunga - $pajakBunga;
+        $nominalAkhir = $deposito->nominal_awal + $bungaBersih;
         
         $data = [
-            'settings' => $settings,
-            'deposito' => $deposito,
-            'estimasi_bunga' => $estimasiBunga,
+            'settings'      => $settings,
+            'deposito'      => $deposito,
+            'estimasi_bunga'=> $estimasiBunga,
+            'pajak_rate'    => $pajakRate,
+            'pajak_bunga'   => $pajakBunga,
+            'bunga_bersih'  => $bungaBersih,
             'nominal_akhir' => $nominalAkhir,
-            'no_struk' => SettingsStruk::generateNoStruk('DEP'),
+            'no_struk'      => SettingsStruk::generateNoStruk('DEP'),
             'tanggal_cetak' => now()->format('d/m/Y H:i'),
         ];
         

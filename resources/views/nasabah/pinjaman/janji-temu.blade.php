@@ -3,7 +3,7 @@
 @section('title', 'Janji Temu Pinjaman')
 
 @section('content')
-<div class="w-full pb-6">
+<div class="w-full pb-28">
     <!-- Alert Messages -->
     @if(session('success'))
     <div class="mx-4 mt-4 mb-4">
@@ -170,23 +170,23 @@
                     <div class="space-y-3">
                         <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Nominal Pinjaman:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiNominal">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiNominal">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Estimasi Bunga (5%):</span>
-                            <span class="font-semibold text-gray-900" id="estimasiBunga">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiBunga">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Yang Diterima:</span>
-                            <span class="font-semibold" id="estimasiDiterima">Rp 0</span>
+                            <span class="font-semibold whitespace-nowrap text-right sm:text-left" id="estimasiDiterima">Rp 0</span>
                         </div>
                         <div class="border-t border-gray-300 pt-3 flex flex-wrap justify-between gap-1 items-start">
                             <span class="font-semibold text-[#8b6f2f]">Total yang Harus Dibayar:</span>
-                            <span class="text-xl font-bold text-[#8b6f2f]" id="estimasiTotal">Rp 0</span>
+                            <span class="text-xl font-bold text-[#8b6f2f] whitespace-nowrap text-right sm:text-left" id="estimasiTotal">Rp 0</span>
                         </div>
                         <div class="flex justify-between items-center flex-wrap gap-1">
                             <span class="text-sm text-gray-600">Angsuran per periode:</span>
-                            <span class="font-semibold text-gray-900" id="estimasiAngsuran">Rp 0</span>
+                            <span class="font-semibold text-gray-900 whitespace-nowrap text-right sm:text-left" id="estimasiAngsuran">Rp 0</span>
                         </div>
                     </div>
                 </div>

@@ -12,11 +12,14 @@ use App\Models\SukuBungaDeposito;
 use App\Models\MBarangGadai;
 use App\Models\JnsLokasiPerusahaan;
 use App\Models\AdminOperasional;
+use App\Models\MasterDataBankRegis;
 use App\Models\JnsBank;
 use App\Models\LogoBank;
 use App\Models\User;
 use App\Models\MasterTujuanPinjaman;
 use App\Models\SyaratKetentuanLayanan;
+use App\Models\MasterDefaultOtp;
+use App\Models\LogDefaultOtpUsage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -31,7 +34,7 @@ class MasterDataController extends Controller
     protected function checkCrudPermission()
     {
         if (!app(\App\Services\AdminPermissionService::class)->canCrudMasterData(auth()->user())) {
-            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mengelola Master Data.');
+            abort(403, 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat mengelola Master Data.');
         }
     }
 
@@ -56,9 +59,60 @@ class MasterDataController extends Controller
             'total_inap_kendaraan' => \App\Models\GadaiMasterInapKendaraan::count(),
             'total_denda_deposito' => MasterDendaDeposito::where('status_aktif', true)->count(),
             'total_tujuan_pinjaman' => MasterTujuanPinjaman::count(),
+            'total_bank_regis' => MasterDataBankRegis::where('status', true)->count(),
         ];
 
         return view('admin.master-data.index', compact('stats'));
+    }
+
+    // ==================== MASTER OTP DEFAULT ====================
+
+    public function otpDefaultIndex()
+    {
+        $permissionService = app(\App\Services\AdminPermissionService::class);
+        $user = auth()->user();
+
+        if (!$permissionService->isAdmin($user)) {
+            abort(403, 'Anda tidak memiliki akses untuk halaman ini.');
+        }
+
+        $isAdminUtama = $permissionService->isAdminUtama($user);
+        $masterOtp = MasterDefaultOtp::first();
+
+        // All admins can see logs
+        $logs = LogDefaultOtpUsage::with('user')->orderBy('created_at', 'desc')->paginate(15);
+
+        return view('admin.master-data.otp-default.index', compact('masterOtp', 'logs', 'isAdminUtama'));
+    }
+
+    public function otpDefaultUpdate(Request $request)
+    {
+        if (!app(\App\Services\AdminPermissionService::class)->isAdmin(auth()->user())) {
+            abort(403, 'Hanya Admin yang dapat mengubah kode OTP Default.');
+        }
+
+        $request->validate([
+            'otp_code' => 'required|numeric|digits:6',
+        ], [
+            'otp_code.required' => 'Kode OTP default harus diisi.',
+            'otp_code.numeric' => 'Kode OTP default harus berupa angka.',
+            'otp_code.digits' => 'Kode OTP default harus 6 digit.',
+        ]);
+
+        $masterOtp = MasterDefaultOtp::first();
+        if ($masterOtp) {
+            $masterOtp->update([
+                'otp_code_hashed' => Hash::make($request->otp_code),
+            ]);
+        } else {
+            MasterDefaultOtp::create([
+                'otp_code_hashed' => Hash::make($request->otp_code),
+                'used' => 0,
+            ]);
+        }
+
+        return redirect()->route('admin.master-data.otp-default.index')
+            ->with('success', 'Kode OTP Default berhasil diperbarui.');
     }
 
     // ==================== MASTER BUNGA PINJAMAN ====================
@@ -805,6 +859,7 @@ class MasterDataController extends Controller
             'email'                 => 'required|email|unique:users,email',
             'nomor_hp'              => 'required|string|max:20',
             'password'              => 'required|string|min:8|confirmed',
+            'pin'                   => 'required|digits:6|confirmed',
         ], [
             'nama.required'                 => 'Nama wajib diisi.',
             'email.required'                => 'Email wajib diisi.',
@@ -814,6 +869,9 @@ class MasterDataController extends Controller
             'password.required'             => 'Password wajib diisi.',
             'password.min'                  => 'Password minimal 8 karakter.',
             'password.confirmed'            => 'Konfirmasi password tidak cocok.',
+            'pin.required'                  => 'PIN wajib diisi.',
+            'pin.digits'                    => 'PIN harus 6 digit angka.',
+            'pin.confirmed'                 => 'Konfirmasi PIN tidak cocok.',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -822,7 +880,7 @@ class MasterDataController extends Controller
                 'email'             => $request->email,
                 'nomor_hp'          => $request->nomor_hp,
                 'password'          => Hash::make($request->password),
-                'pin'               => null,
+                'pin'               => $request->pin,
                 'foto'              => 'default-avatar.jpg',
                 'role'              => 'admin_operasional',
                 'email_verified_at' => now(),
@@ -859,6 +917,7 @@ class MasterDataController extends Controller
             'email'     => 'required|email|unique:users,email,' . $adminOp->user_id,
             'nomor_hp'  => 'required|string|max:20',
             'password'  => 'nullable|string|min:8|confirmed',
+            'pin'       => 'nullable|digits:6|confirmed',
         ], [
             'nama.required'         => 'Nama wajib diisi.',
             'email.required'        => 'Email wajib diisi.',
@@ -867,6 +926,8 @@ class MasterDataController extends Controller
             'nomor_hp.required'     => 'Nomor HP wajib diisi.',
             'password.min'          => 'Password minimal 8 karakter.',
             'password.confirmed'    => 'Konfirmasi password tidak cocok.',
+            'pin.digits'            => 'PIN harus 6 digit angka.',
+            'pin.confirmed'         => 'Konfirmasi PIN tidak cocok.',
         ]);
 
         DB::transaction(function () use ($request, $adminOp) {
@@ -878,6 +939,10 @@ class MasterDataController extends Controller
 
             if ($request->filled('password')) {
                 $userData['password'] = Hash::make($request->password);
+            }
+
+            if ($request->filled('pin')) {
+                $userData['pin'] = $request->pin;
             }
 
             $adminOp->user->update($userData);
@@ -1205,5 +1270,94 @@ class MasterDataController extends Controller
         }
 
         return redirect()->back()->with('success', 'Syarat & Ketentuan Layanan Gadai berhasil diperbarui.');
+    }
+
+    // ==================== MASTER DATA BANK REGIS ====================
+
+    public function bankRegisIndex()
+    {
+        $data = MasterDataBankRegis::latest()->paginate(15);
+        return view('admin.master-data.bank-regis.index', compact('data'));
+    }
+
+    public function bankRegisCreate()
+    {
+        $this->checkCrudPermission();
+        return view('admin.master-data.bank-regis.create');
+    }
+
+    public function bankRegisStore(Request $request)
+    {
+        $this->checkCrudPermission();
+        $request->validate([
+            'nama_bank' => 'required|string|max:100|unique:master_data_bank_regis,nama_bank',
+            'kode_bank' => 'nullable|string|max:20',
+            'status'    => 'boolean',
+        ], [
+            'nama_bank.required' => 'Nama bank wajib diisi.',
+            'nama_bank.unique'   => 'Nama bank sudah terdaftar.',
+            'nama_bank.max'      => 'Nama bank maksimal 100 karakter.',
+            'kode_bank.max'      => 'Kode bank maksimal 20 karakter.',
+        ]);
+
+        MasterDataBankRegis::create([
+            'nama_bank' => $request->nama_bank,
+            'kode_bank' => $request->kode_bank,
+            'status'    => $request->boolean('status', true),
+        ]);
+
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil ditambahkan.');
+    }
+
+    public function bankRegisEdit($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        return view('admin.master-data.bank-regis.edit', compact('data'));
+    }
+
+    public function bankRegisUpdate(Request $request, $id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $request->validate([
+            'nama_bank' => 'required|string|max:100|unique:master_data_bank_regis,nama_bank,' . $id,
+            'kode_bank' => 'nullable|string|max:20',
+            'status'    => 'boolean',
+        ], [
+            'nama_bank.required' => 'Nama bank wajib diisi.',
+            'nama_bank.unique'   => 'Nama bank sudah terdaftar.',
+            'nama_bank.max'      => 'Nama bank maksimal 100 karakter.',
+            'kode_bank.max'      => 'Kode bank maksimal 20 karakter.',
+        ]);
+
+        $data->update([
+            'nama_bank' => $request->nama_bank,
+            'kode_bank' => $request->kode_bank,
+            'status'    => $request->boolean('status', true),
+        ]);
+
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil diperbarui.');
+    }
+
+    public function bankRegisDestroy($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $data->delete();
+        return redirect()->route('admin.master-data.bank-regis.index')
+            ->with('success', 'Data bank berhasil dihapus.');
+    }
+
+    public function bankRegisToggleStatus($id)
+    {
+        $this->checkCrudPermission();
+        $data = MasterDataBankRegis::findOrFail($id);
+        $data->status = !$data->status;
+        $data->save();
+        return redirect()->back()
+            ->with('success', 'Status bank berhasil diubah.');
     }
 }

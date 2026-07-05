@@ -51,6 +51,25 @@
     </div>
     @endif
 
+    @if(is_null(auth()->user()->verified))
+    <!-- Verification Pending Banner (Profile Page) -->
+    <div class="mx-4 mb-6">
+        <div class="bg-amber-50 border border-amber-200 rounded-3xl p-5 shadow-md flex items-start gap-4 animate-fade-in relative z-20">
+            <div class="w-12 h-12 rounded-full bg-amber-100 flex items-center justify-center shrink-0 shadow-inner">
+                <svg class="w-6 h-6 text-amber-700 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-amber-900 font-display">Status Akun: Menunggu Verifikasi</h3>
+                <p class="text-xs text-amber-700 leading-relaxed mt-1">
+                    Akun Anda saat ini belum diverifikasi oleh Admin Utama. Mohon menunggu proses peninjauan berkas pendaftaran Anda selesai. Fitur-fitur transaksi akan diaktifkan setelah verifikasi disetujui.
+                </p>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Profile Header -->
     <div class="mx-4 mt-4 mb-6">
         <div class="bg-linear-to-br from-[#674c1d] via-[#8b6f2f] to-[#d4af37] rounded-3xl shadow-2xl p-4 sm:p-6 md:p-8 border-2 border-[#d4af37]/30 relative overflow-hidden">
@@ -79,27 +98,38 @@
                         
                         <!-- Status Badge -->
                         <div class="flex flex-wrap items-center justify-center md:justify-start gap-3 mb-4">
-                            <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30">
-                                Nasabah Aktif
-                            </span>
+                            @if(is_null(auth()->user()->verified))
+                                <span class="px-4 py-2 bg-yellow-500/20 backdrop-blur-sm rounded-full text-yellow-200 text-sm font-semibold border border-yellow-500/30 flex items-center gap-1.5 animate-pulse">
+                                    <svg class="w-4 h-4 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    Menunggu Verifikasi
+                                </span>
+                                <span class="px-4 py-2 bg-red-500/20 backdrop-blur-sm rounded-full text-red-200 text-sm font-semibold border border-red-500/30 flex items-center gap-1.5">
+                                    Status: Non-Aktif
+                                </span>
+                            @else
+                                <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 flex items-center gap-1.5">
+                                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                    Nasabah Aktif
+                                </span>
+                            @endif
                             <span class="px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-white text-sm font-semibold border border-white/30 truncate max-w-[10rem]">
                                 Saldo: Rp {{ number_format((float)$saldoTabungan, 0, ',', '.') }}
                             </span>
                         </div>
                         
                         <!-- Quick Info -->
-                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3 mt-6">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. HP</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-sm truncate">{{ $nasabah->user->nomor_hp ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">NIK</p>
-                                <p class="text-white font-semibold text-sm break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                             </div>
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20 min-w-0 overflow-hidden">
                                 <p class="text-white/80 text-xs mb-1">No. KK</p>
-                                <p class="text-white font-semibold text-sm">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                                <p class="text-white font-semibold text-xs sm:text-sm break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                             </div>
                         </div>
                         </div>
@@ -195,7 +225,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->user->email ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->user->email ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Nomor HP</p>
@@ -203,11 +233,11 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->dataKtp->nik ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. KK</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->no_kk ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->no_kk ?? 'N/A' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Tempat, Tanggal Lahir</p>
@@ -231,6 +261,14 @@
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
                     <p class="font-semibold text-gray-900">{{ $nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? 'N/A') }}</p>
+                </div>
+                <div class="md:col-span-2">
+                    <p class="text-sm text-gray-600 mb-1">Alamat Domisili</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->alamat_domisili ?? 'N/A' }}</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600 mb-1">Kode Pos</p>
+                    <p class="font-semibold text-gray-900">{{ $nasabah->kode_pos ?? 'N/A' }}</p>
                 </div>
             </div>
         </div>
@@ -303,7 +341,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">No. Rekening</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->dataRek->no_rekening ?? 'N/A' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Nama Pemilik Rekening</p>
@@ -362,7 +400,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Email</p>
-                    <p class="font-semibold text-gray-900">{{ $nasabah->darurat->email ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 break-all">{{ $nasabah->darurat->email ?? '-' }}</p>
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">Pekerjaan</p>
@@ -370,7 +408,7 @@
                 </div>
                 <div>
                     <p class="text-sm text-gray-600 mb-1">NIK</p>
-                    <p class="font-semibold text-gray-900 font-mono">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
+                    <p class="font-semibold text-gray-900 font-mono break-all">{{ $nasabah->darurat->no_ktp ?? '-' }}</p>
                 </div>
                 <div class="md:col-span-2">
                     <p class="text-sm text-gray-600 mb-1">Alamat</p>
@@ -555,14 +593,14 @@ const formTemplates = {
     'data_pribadi': {
         title: 'Edit Data Pribadi',
         fields: [
-            { name: 'nama', label: 'Nama Lengkap', type: 'text', value: '{{ old("nama") ?? ($nasabah->dataKtp->nama_lengkap ?? ($nasabah->user->nama ?? "")) }}' },
-            { name: 'email', label: 'Email', type: 'email', value: '{{ old("email") ?? ($nasabah->user->email ?? "") }}' },
-            { name: 'nomor_hp', label: 'Nomor HP', type: 'text', value: '{{ old("nomor_hp") ?? ($nasabah->user->nomor_hp ?? "") }}' },
-            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ old("no_kk") ?? ($nasabah->no_kk ?? "") }}' },
+            { name: 'nik', label: 'NIK', type: 'text', value: '{{ old("nik") ?? ($nasabah->dataKtp->nik ?? "") }}', numeric: true, maxlength: 16 },
+            { name: 'no_kk', label: 'No. KK', type: 'text', value: '{{ old("no_kk") ?? ($nasabah->no_kk ?? "") }}', numeric: true, maxlength: 16 },
             { name: 'tempat_lahir', label: 'Tempat Lahir', type: 'text', value: '{{ old("tempat_lahir") ?? ($nasabah->tempat_lahir ?? ($nasabah->dataKtp->tempat_lahir ?? "")) }}' },
             { name: 'tanggal_lahir', label: 'Tanggal Lahir', type: 'date', value: '{{ old("tanggal_lahir") ?? ($nasabah->tanggal_lahir ? $nasabah->tanggal_lahir->format("Y-m-d") : ($nasabah->dataKtp && $nasabah->dataKtp->tanggal_lahir ? $nasabah->dataKtp->tanggal_lahir->format("Y-m-d") : "")) }}' },
             { name: 'jenis_kelamin', label: 'Jenis Kelamin', type: 'select', value: '{{ old("jenis_kelamin") ?? ($nasabah->jenis_kelamin ?? "") }}', options: [{value: 'L', label: 'Laki-laki'}, {value: 'P', label: 'Perempuan'}] },
-            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat") ?? ($nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "")) }}' }
+            { name: 'alamat', label: 'Alamat', type: 'textarea', value: '{{ old("alamat") ?? ($nasabah->alamat ?? ($nasabah->dataKtp->alamat ?? "")) }}' },
+            { name: 'alamat_domisili', label: 'Alamat Domisili', type: 'textarea', value: '{{ old("alamat_domisili") ?? ($nasabah->alamat_domisili ?? "") }}' },
+            { name: 'kode_pos', label: 'Kode Pos', type: 'text', value: '{{ old("kode_pos") ?? ($nasabah->kode_pos ?? "") }}', numeric: true, maxlength: 5 }
         ]
     },
     'pekerjaan': {

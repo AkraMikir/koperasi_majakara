@@ -72,7 +72,7 @@
                     <p class="font-semibold text-red-600 text-lg">Rp {{ number_format($denda, 0, ',', '.') }}</p>
                     @php
                         $hariTelat = $angsuran->tgl_jatuh_tempo < now() && $angsuran->status_bayar !== 'lunas' 
-                            ? now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
+                            ? (int) now()->diffInDays($angsuran->tgl_jatuh_tempo, false) 
                             : 0;
                     @endphp
                     @if($hariTelat > 0)

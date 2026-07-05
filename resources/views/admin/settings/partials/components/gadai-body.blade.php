@@ -1,5 +1,8 @@
 <!-- HEADER -->
-<div class="text-center" style="margin-bottom: 12px;">
+<div class="text-center" style="margin-bottom: 12px; text-align: center;">
+    <div style="margin-bottom: 4px;">
+        <img src="{{ isset($isPdf) && $isPdf ? public_path('images/logo/674c1d MAJAKARA.png') : asset('images/logo/674c1d MAJAKARA.png') }}" alt="Logo" style="max-width: 130px; max-height: 65px; margin: 0 auto; display: block;" />
+    </div>
     <div class="font-bold underline" style="font-size: 14px; margin-bottom: 2px;">{{ $settings->nama_koperasi }}</div>
     <div style="font-size: 10px;">
         {{ $settings->alamat_koperasi }}<br>
@@ -7,7 +10,7 @@
     </div>
 </div>
 
-<div class="text-center font-bold" style="margin-bottom: 9px; font-size: 13px;">
+<div class="text-center font-bold" style="margin-bottom: 9px; font-size: 13px; text-align: center;">
     @if($data['jenis_trans'] === 'AKTIF')
         STRUK GADAI AWAL
     @elseif($data['jenis_trans'] === 'PERPANJANGAN')
@@ -21,62 +24,62 @@
 
 <table style="width: 100%; border-collapse: collapse;">
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; width: 45%; font-size: 12px; padding: 1px 0;">Nama Anggota</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['nama_anggota'] }}</td>
+        <td style="font-weight: bold; width: 35%; font-size: 11px; padding: 1px 0; white-space: nowrap;">Nama</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['nama_anggota'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; width: 45%; font-size: 12px; padding: 1px 0;">No. Anggota</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['no_anggota'] }}</td>
+        <td style="font-weight: bold; width: 35%; font-size: 11px; padding: 1px 0; white-space: nowrap;">Anggota</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['no_anggota'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; width: 45%; font-size: 12px; padding: 1px 0;">Kategori</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['kategori'] }}</td>
+        <td style="font-weight: bold; width: 35%; font-size: 11px; padding: 1px 0; white-space: nowrap;">Kategori</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['kategori'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; width: 45%; font-size: 12px; padding: 1px 0;">Barang</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['barang'] }}</td>
+        <td style="font-weight: bold; width: 35%; font-size: 11px; padding: 1px 0; white-space: nowrap;">Barang</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['barang'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; width: 45%; font-size: 12px; padding: 1px 0;">Slot Kode</td>
-        <td style="font-size: 12px; padding: 1px 0;">: <span class="bold">{{ $data['slot_kode'] }}</span></td>
+        <td style="font-weight: bold; width: 35%; font-size: 11px; padding: 1px 0; white-space: nowrap;">Slot</td>
+        <td style="font-size: 11px; padding: 1px 0;">: <span class="bold">{{ $data['slot_kode'] }}</span></td>
     </tr>
 </table>
 
 <div style="border-top: 1px dashed #000; margin: 9px 0;"></div>
 
-<div class="text-center font-bold" style="margin-bottom: 2px;">DETAIL GADAI</div>
+<div class="text-center font-bold" style="margin-bottom: 2px; text-align: center;">DETAIL GADAI</div>
 
 <table style="width: 100%; border-collapse: collapse;">
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Tanggal Mulai</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['tgl_mulai'] }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Mulai</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['tgl_mulai'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Jatuh Tempo</td>
-        <td style="font-size: 12px; padding: 1px 0;">: {{ $data['jatuh_tempo'] }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Tempo</td>
+        <td style="font-size: 11px; padding: 1px 0;">: {{ $data['jatuh_tempo'] }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Nominal Deal</td>
-        <td style="text-align: right; font-size: 12px; padding: 1px 0;">: Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Nominal</td>
+        <td style="text-align: right; font-size: 11px; padding: 1px 0;">: Rp {{ number_format($data['nominal_deal'], 0, ',', '.') }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Biaya Jasa</td>
-        <td style="text-align: right; font-size: 12px; padding: 1px 0;">: Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Jasa</td>
+        <td style="text-align: right; font-size: 11px; padding: 1px 0;">: Rp {{ number_format($data['biaya_jasa'], 0, ',', '.') }}</td>
     </tr>
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Biaya Inap</td>
-        <td style="text-align: right; font-size: 12px; padding: 1px 0;">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Inap</td>
+        <td style="text-align: right; font-size: 11px; padding: 1px 0;">: Rp {{ number_format($data['biaya_inap'], 0, ',', '.') }}</td>
     </tr>
     @if(isset($data['denda_aktif']) && $data['denda_aktif'] > 0)
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Denda Aktif</td>
-        <td style="text-align: right; font-size: 12px; padding: 1px 0;">: Rp {{ number_format($data['denda_aktif'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Denda</td>
+        <td style="text-align: right; font-size: 11px; padding: 1px 0;">: Rp {{ number_format($data['denda_aktif'], 0, ',', '.') }}</td>
     </tr>
     @endif
     @if(isset($data['extra_pinjaman_nominal']) && $data['extra_pinjaman_nominal'] > 0)
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; font-size: 12px; padding: 1px 0;">Extra Pinjaman</td>
-        <td style="text-align: right; font-size: 12px; padding: 1px 0;">: Rp {{ number_format($data['extra_pinjaman_nominal'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; font-size: 11px; padding: 1px 0; white-space: nowrap;">Ekstra</td>
+        <td style="text-align: right; font-size: 11px; padding: 1px 0;">: Rp {{ number_format($data['extra_pinjaman_nominal'], 0, ',', '.') }}</td>
     </tr>
     @if(!empty($data['extra_pinjaman_reason']))
     <tr style="vertical-align: top;">
@@ -91,8 +94,8 @@
 
 <table style="width: 100%; border-collapse: collapse;">
     <tr style="vertical-align: top;">
-        <td style="font-weight: bold; padding: 1px 0;">TOTAL TAGIHAN</td>
-        <td style="font-weight: bold; text-align: right; padding: 1px 0;">: Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }}</td>
+        <td style="font-weight: bold; padding: 1px 0; font-size: 11px;">Total</td>
+        <td style="font-weight: bold; text-align: right; padding: 1px 0; font-size: 11px;">: Rp {{ number_format($data['total_tagihan'], 0, ',', '.') }}</td>
     </tr>
 </table>
 

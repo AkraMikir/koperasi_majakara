@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <title>Struk Angsuran - {{ $angsuran->id ?? '-' }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
+        body { font-family: 'Courier', monospace; font-weight: bold; font-size: 11px; line-height: 1.4; color: #000; padding: 4px; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
         .underline { text-decoration: underline; }
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
         .table-row td { vertical-align: top; }
-        .label { font-weight: normal; width: 25%; font-size: 12px; }
+        .label { font-weight: normal; width: 35%; font-size: 11px; white-space: nowrap; }
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -34,7 +35,10 @@
 @endphp
 <body>
     <!-- HEADER -->
-    <div class="header">
+    <div class="header" style="text-align: center;">
+        <div style="margin-bottom: 4px;">
+            <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" alt="Logo" style="max-width: 130px; max-height: 65px;" />
+        </div>
         <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
             {{ $strukSettings->nama_koperasi }}
         </div>
@@ -52,11 +56,11 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">ID </td>
+            <td class="label">ID</td>
             <td class="id-kecil">: {{ $pinjaman->id ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">Angsuran </td>
+            <td class="label">Angsuran</td>
             <td class="id-kecil">: {{ $angsuran->no_urut ?? '-' }}</td>
         </tr>
         <tr>
@@ -65,11 +69,11 @@
         </tr>
         <tr>
             <td class="label">Tanggal</td>
-            <td class="id-kecil">: {{ isset($angsuran->tgl_bayar) ? $angsuran->tgl_bayar->format('d-m-Y H:i') : '-' }}</td>
+            <td class="id-kecil">: {{ ($angsuran->tgl_bayar ?? $angsuran->updated_at ?? $angsuran->created_at ?? now())->format('d-m-Y H:i') }}</td>
         </tr>
         <tr>
             <td class="label">Status</td>
-            <td class="id-kecil">: {{ $angsuran->pinjaman->lunas}}</td>
+            <td class="id-kecil">: {{ $angsuran->pinjaman->lunas ?? '-' }}</td>
         </tr>
     </table>
     

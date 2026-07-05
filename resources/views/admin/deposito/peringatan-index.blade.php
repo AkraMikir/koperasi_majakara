@@ -159,7 +159,7 @@
                         $jt = \Carbon\Carbon::parse($item->tgl_target_cair);
                         $isToday = $jt->isToday();
                         $isPast  = $jt->isPast() && !$isToday;
-                        $daysLeft = now()->diffInDays($jt, false);
+                        $daysLeft = (int) now()->diffInDays($jt, false);
                     @endphp
                     <tr class="{{ $isToday ? 'bg-red-50' : ($isPast ? 'bg-gray-50' : 'hover:bg-amber-50') }} transition">
                         <td class="px-4 py-3">

@@ -173,22 +173,73 @@
                     </div>
                 </div>
 
+                <!-- Divider PIN -->
+                <div class="border-t border-gray-100 pt-2">
+                    <div class="flex items-center gap-2">
+                        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider">Ganti PIN</p>
+                        <span class="text-xs text-gray-400">(kosongkan jika tidak ingin mengubah)</span>
+                    </div>
+                </div>
+
+                <!-- PIN Baru -->
+                <div>
+                    <label for="pin" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                        PIN Baru
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="pin" name="pin" maxlength="6" inputmode="numeric" pattern="\d{6}"
+                            placeholder="6 digit angka"
+                            class="w-full px-4 py-2.5 pr-12 border-2 rounded-xl outline-none transition-all text-sm tracking-widest text-center
+                                {{ $errors->has('pin') ? 'border-red-400 focus:border-red-500 bg-red-50' : 'border-gray-200 focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20' }}">
+                        <button type="button" onclick="togglePassword('pin', 'eye-pin')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <svg id="eye-pin" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    @error('pin')
+                        <p class="mt-1.5 text-xs text-red-600 flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            {{ $message }}
+                        </p>
+                    @enderror
+                </div>
+
+                <!-- Konfirmasi PIN Baru -->
+                <div>
+                    <label for="pin_confirmation" class="block text-sm font-semibold text-gray-700 mb-1.5">
+                        Konfirmasi PIN Baru
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="pin_confirmation" name="pin_confirmation" maxlength="6" inputmode="numeric" pattern="\d{6}"
+                            placeholder="Ulangi PIN baru"
+                            class="w-full px-4 py-2.5 pr-12 border-2 border-gray-200 rounded-xl focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d]/20 outline-none transition-all text-sm tracking-widest text-center">
+                        <button type="button" onclick="togglePassword('pin_confirmation', 'eye-pin-confirm')"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
+                            <svg id="eye-pin-confirm" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
                 <!-- Form Actions -->
                 <div class="flex items-center justify-between pt-2 border-t border-gray-100">
                     <!-- Delete action — hanya Admin Utama -->
                     @canCrudMasterData
-                    <form action="{{ route('admin.master-data.admin-operasional.destroy', $adminOp->id) }}" method="POST"
-                        onsubmit="return confirm('Yakin ingin menghapus akun ini? Aksi ini tidak dapat dibatalkan.')">
-                        @csrf
-                        @method('DELETE')
-                        <button type="submit"
-                            class="inline-flex items-center gap-1.5 px-4 py-2.5 text-red-600 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-all text-sm font-semibold">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                            </svg>
-                            Hapus Akun
-                        </button>
-                    </form>
+                    <button type="submit" form="delete-form-{{ $adminOp->id }}"
+                        onclick="return confirm('Yakin ingin menghapus akun ini? Aksi ini tidak dapat dibatalkan.')"
+                        class="inline-flex items-center gap-1.5 px-4 py-2.5 text-red-600 border border-red-200 bg-red-50 rounded-xl hover:bg-red-100 transition-all text-sm font-semibold">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Hapus Akun
+                    </button>
                     @else
                     <div></div>
                     @endcanCrudMasterData
@@ -208,6 +259,13 @@
                     </div>
                 </div>
             </form>
+
+            @canCrudMasterData
+            <form id="delete-form-{{ $adminOp->id }}" action="{{ route('admin.master-data.admin-operasional.destroy', $adminOp->id) }}" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
+            @endcanCrudMasterData
         </div>
     </div>
 </div>

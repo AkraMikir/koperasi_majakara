@@ -144,11 +144,11 @@ class AdminPermissionService
 
     /**
      * Check if user can CRUD Master Data
-     * Admin Utama: YES | Admin Operasional: NO
+     * Admin Utama: YES | Admin Operasional: YES
      */
     public function canCrudMasterData(?User $user): bool
     {
-        return $this->isAdminUtama($user);
+        return $this->isAdmin($user);
     }
 
     /**
@@ -188,12 +188,21 @@ class AdminPermissionService
     }
 
     /**
+     * Check if user can verify Nasabah
+     * Admin Utama: YES | Admin Operasional: YES
+     */
+    public function canVerifyNasabah(?User $user): bool
+    {
+        return $this->isAdmin($user);
+    }
+
+    /**
      * Check if user can approve Nasabah profile changes
-     * Admin Utama: YES | Admin Operasional: NO
+     * Admin Utama: YES | Admin Operasional: YES
      */
     public function canApproveNasabahChanges(?User $user): bool
     {
-        return $this->isAdminUtama($user);
+        return $this->isAdmin($user);
     }
 
     /**

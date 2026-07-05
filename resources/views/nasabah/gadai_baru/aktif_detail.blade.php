@@ -13,9 +13,9 @@
     $jatuhTempo = \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->startOfDay();
     $tenggang = \Carbon\Carbon::parse($gadai->tgl_tenggang)->startOfDay();
     $mulai = \Carbon\Carbon::parse($gadai->tgl_mulai)->startOfDay();
-    $sisaHari = $isTenggang ? $today->diffInDays($tenggang, false) : $today->diffInDays($jatuhTempo, false);
-    $totalDays = max(1, $mulai->diffInDays($jatuhTempo));
-    $elapsedDays = min($totalDays, $mulai->diffInDays($today));
+    $sisaHari = (int) ($isTenggang ? $today->diffInDays($tenggang, false) : $today->diffInDays($jatuhTempo, false));
+    $totalDays = max(1, (int) $mulai->diffInDays($jatuhTempo));
+    $elapsedDays = min($totalDays, (int) $mulai->diffInDays($today));
     $progressPct = round(($elapsedDays / $totalDays) * 100);
 @endphp
 

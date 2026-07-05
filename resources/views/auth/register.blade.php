@@ -3,7 +3,7 @@
 @section('title', 'Registrasi - Koperasi Majakara')
 
 @section('content')
-    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="min-h-screen flex items-center justify-center py-8 sm:py-12 pb-24 sm:pb-12 px-4 sm:px-6 lg:px-8">
         <div class="max-w-7xl w-full">
             @php
                 $step = $step ?? request()->get('step', 1);
@@ -22,8 +22,8 @@
                     </div>
 
                 <!-- Progress Steps -->
-                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200/50">
-                    <div class="flex items-center justify-between">
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg p-6 border border-gray-200/50 overflow-x-auto scrollbar-none">
+                    <div class="flex items-center justify-between min-w-[600px] md:min-w-0">
                         @php
                         $subStepLabels = [
                             1 => 'Data Diri',
@@ -90,7 +90,7 @@
                 class="bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl overflow-hidden max-w-6xl mx-auto border border-gray-200/50 fade-in-up">
                 <div class="lg:grid lg:grid-cols-2">
                     <!-- Left Side - Form -->
-                    <div class="p-8 lg:p-12">
+                    <div class="p-4 sm:p-8 lg:p-12">
                         <!-- Header with Icon -->
                         <div class="mb-8">
                             <div class="flex items-center gap-3 mb-4">
@@ -157,6 +157,7 @@
                             id="registerForm" onsubmit="return validatePasswordSubmit(event)">
                             @csrf
                             <input type="hidden" name="step" value="{{ $step }}">
+                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                             @if($step == 1)
                                 <input type="hidden" name="substep" value="{{ $subStep }}">
                                 {{-- Bawa data kritis Langkah 1 (Data Diri) di setiap submit substep 2–6 agar nomor HP tidak
@@ -288,7 +289,7 @@
                                     <input type="file" name="foto" id="foto" accept="image/*" class="hidden"
                                         onchange="previewImage(this, 'fotoPreview')">
                                 </div>
-                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? '' : 'hidden' }} relative inline-block">
+                                <div id="fotoPreview" class="mt-2 {{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? 'inline-block' : 'hidden' }} relative">
                                     <img id="fotoPreviewImg" 
                                         src="{{ !empty($formData['foto']) && $formData['foto'] !== 'default-profile.jpg' ? asset('storage/' . $formData['foto']) : '' }}" 
                                         alt="Preview"
@@ -303,28 +304,28 @@
                         </div>
                     </div>
                     @elseif($subStep == 2)
-                    <!-- Sub-step 2: Data KTP dengan OCR (Moved from Substep 5) -->
+                    <!-- Sub-step 2: Data KTP (Isi Otomatis) -->
                     <div class="space-y-6 animate-fade-in">
-                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data KTP (dengan OCR)</h3>
+                        <h3 class="text-xl font-bold text-[#674c1d] mb-4">Data KTP (Pindai Otomatis)</h3>
                         
-                        <!-- Notes untuk OCR KTP -->
+                        <!-- Notes untuk Pindai KTP -->
                         <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                            <h4 class="text-sm font-semibold text-blue-900 mb-2">📋 Petunjuk Foto KTP untuk OCR:</h4>
+                            <h4 class="text-sm font-semibold text-blue-900 mb-2">📋 Petunjuk Foto KTP:</h4>
                             <ul class="text-sm text-blue-800 space-y-1 list-disc list-inside">
                                 <li>Foto harus <strong>landscape</strong> (mendatar)</li>
                                 <li>Foto harus <strong>jelas</strong> dan tidak gelap</li>
                                 <li>Foto tidak boleh <strong>over pencahayaan</strong> (terlalu terang)</li>
-                                <li><strong>Mohon di check ulang</strong> setelah OCR jika ada data yang tidak terprocess dengan benar</li>
+                                <li><strong>Mohon di check ulang</strong> setelah pengisian otomatis jika ada data yang tidak terisi dengan benar</li>
                             </ul>
                         </div>
                         
                         <div class="space-y-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Ambil/Upload Foto KTP</label>
-
+ 
                                 <!-- Camera/Upload Options -->
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-                                    <button type="button" onclick="openWebcam('file_ktp_upload', 'ktpPreview', 'Ambil Foto KTP (OCR)')"
+                                    <button type="button" onclick="openWebcam('file_ktp_upload', 'ktpPreview', 'Ambil Foto KTP')"
                                         class="w-full px-2 py-3 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-all font-semibold flex items-center justify-center gap-2">
                                         <!-- <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -343,11 +344,11 @@
                                         Upload dari File
                                     </label>
                                 </div>
-
+ 
                                 <!-- Hidden file input for upload -->
                                 <input type="file" name="file_ktp_upload" id="file_ktp_upload" accept="image/*"
                                     class="hidden" onchange="handleKtpUpload(this)">
-
+ 
                                 <!-- Preview Area -->
                                 <div class="mt-4">
                                     <div id="ktpPreview" class="hidden">
@@ -365,18 +366,18 @@
                                             </button>
                                         </div>
                                     </div>
-
-                                    <!-- OCR Button -->
+ 
+                                    <!-- Scan/Pindai Button -->
                                     <div class="mt-4">
                                         <button type="button" onclick="processOcr()" id="btnOcr" disabled
                                             class="w-full px-6 py-3 bg-[#674c1d] text-white rounded-xl hover:bg-[#4a3514] transition-all font-semibold disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg">
-                                            <span id="ocrText">Proses OCR</span>
+                                            <span id="ocrText">Pindai KTP & Isi Otomatis</span>
                                             <span id="ocrLoading" class="hidden flex items-center gap-2">
                                                 <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                                 </svg>
-                                                Memproses OCR...
+                                                Memproses Pemindaian KTP...
                                             </span>
                                         </button>
                                     </div>
@@ -710,7 +711,7 @@
                                 <input type="text" name="no_rekening" id="no_rekening"
                                     value="{{ old('no_rekening', $formData['no_rekening'] ?? '') }}" maxlength="16"
                                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#674c1d] focus:border-[#674c1d] transition-all outline-none"
-                                    placeholder="16 digit nomor rekening" pattern="[0-9]*" inputmode="numeric"
+                                    placeholder="Nomor rekening" pattern="[0-9]*" inputmode="numeric"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '')">
                             </div>
 
@@ -739,7 +740,7 @@
                                         
                                         <!-- Dropdown Content -->
                                         <div id="bank_dropdown_content" 
-                                            class="hidden absolute z-30 mt-1 w-full rounded-lg bg-white shadow-xl border border-gray-100 max-h-72 flex flex-col transition-all duration-200">
+                                            class="hidden w-full rounded-lg bg-white shadow-xl border border-gray-100 max-h-72 flex flex-col transition-all duration-200">
                                             <!-- Search Input -->
                                             <div class="p-2 border-b border-gray-100">
                                                 <div class="relative">
@@ -958,12 +959,11 @@
 
                                             {{-- Hidden input: tombol yang disabled tidak ikut dikirim, jadi kita set send_otp=1
                                             lewat input ini saat klik --}}
-                                            <input type="hidden" name="send_otp" id="send_otp_input" value="0">
                                             {{-- Button Kirim OTP with Loading State --}}
                                             <div class="mt-6">
                                                 <button type="button" name="send_otp_btn" value="1" id="btnSendOtp"
                                                     onclick="setSendOtpAndLoading(this); return false;"
-                                                    class="w-full px-6 py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-lg flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
+                                                    class="w-full px-4 py-3.5 sm:px-6 sm:py-4 bg-linear-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 transition-all font-bold text-base sm:text-lg flex items-center justify-center gap-2 sm:gap-3 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
                                                     <svg class="w-6 h-6" id="iconSend" fill="none" stroke="currentColor"
                                                         viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1037,25 +1037,25 @@
                                                 <input type="hidden" name="otp_code" id="otp_code_hidden" required>
 
                                                 {{-- 6 OTP Input Boxes --}}
-                                                <div class="flex justify-center gap-2 sm:gap-3" id="otpBoxes">
+                                                <div class="flex justify-center gap-1.5 sm:gap-3" id="otpBoxes">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="0">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="1">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="2">
-                                                    <span class="flex items-center text-2xl text-gray-400 font-bold">-</span>
+                                                    <span class="flex items-center text-xl sm:text-2xl text-gray-400 font-bold">-</span>
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="3">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="4">
                                                     <input type="text" maxlength="1"
-                                                        class="otp-input w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
+                                                        class="otp-input w-[38px] h-[48px] min-[380px]:w-11 min-[380px]:h-13 sm:w-14 sm:h-16 text-center text-xl sm:text-3xl font-bold border-2 border-gray-300 rounded-lg focus:border-[#674c1d] focus:ring-2 focus:ring-[#674c1d] transition-all outline-none"
                                                         inputmode="numeric" pattern="[0-9]" autocomplete="off" data-index="5">
                                                 </div>
 
@@ -1079,9 +1079,8 @@
                                                     </span>
                                                 </div>
                                             </div>
-
-                                            {{-- Button Kirim Ulang --}}
-                                            <div class="flex items-center justify-center">
+                                             {{-- Button Kirim Ulang --}}
+                                            <div class="flex items-center justify-center" id="resendBtnWrapper">
                                                 @if(($remainingCooldown ?? 0) > 0)
                                                     <button type="button" disabled
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-gray-100 text-gray-400 rounded-lg cursor-not-allowed border border-gray-200">
@@ -1097,7 +1096,8 @@
                                                         </span>
                                                     </button>
                                                 @else
-                                                    <button type="submit" name="send_otp" value="1"
+                                                    <button type="button"
+                                                        onclick="setSendOtpAndLoading(this)"
                                                         class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
                                                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -1107,7 +1107,7 @@
                                                     </button>
                                                 @endif
                                             </div>
-
+ 
                                             {{-- Info Bantuan --}}
                                             <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                                                 <div class="flex items-start gap-3">
@@ -1393,16 +1393,16 @@
                 </div>
             </div>
 
-            <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-video mb-4 flex items-center justify-center">
+            <div class="relative rounded-xl overflow-hidden bg-black/5 aspect-[4/3] mb-4 flex items-center justify-center">
                 <video id="cameraVideo" autoplay playsinline
                     class="w-full h-full object-cover rounded-xl hidden"></video>
                 <canvas id="cameraCanvas" class="hidden"></canvas>
 
                 <!-- KTP Grid Overlay -->
-                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden flex items-center justify-center">
+                <div id="cameraKtpOverlay" class="absolute inset-0 pointer-events-none hidden">
                     <!-- Semi-transparent overlay with a clear cutout in the middle for KTP card format (~85.6mm x 53.98mm, ratio 1.58) -->
                     <div class="absolute inset-0 bg-black/50"></div>
-                    <div class="relative z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
+                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 w-[85%] aspect-[1.58/1] border-2 border-dashed border-white rounded-lg shadow-[0_0_0_9999px_rgba(0,0,0,0.5)] flex p-3 box-border justify-between items-stretch">
                         <!-- Corner markers -->
                         <div class="absolute -top-1.5 -left-1.5 w-4 h-4 border-t-4 border-l-4 border-yellow-400"></div>
                         <div class="absolute -top-1.5 -right-1.5 w-4 h-4 border-t-4 border-r-4 border-yellow-400"></div>
@@ -1473,52 +1473,12 @@
 
 @push('scripts')
     <script>
-        function validatePasswordSubmit(e) {
-            // Check if we are currently on Step 1, Substep 1 (where password inputs are visible)
-            const passwordInput = document.getElementById('password');
-            if (!passwordInput) {
-                return true; // Let form submit if password field doesn't exist on this substep
-            }
+        window.otpFormBusy = false;
 
-            const password = passwordInput.value;
-            const errors = [];
-
-            // 1. Minimal 8 karakter
-            if (password.length < 8) {
-                errors.push('Minimal 8 karakter');
-            }
-            // 2. Harus ada huruf besar
-            if (!/[A-Z]/.test(password)) {
-                errors.push('Harus mengandung minimal 1 huruf kapital (A-Z)');
-            }
-            // 3. Harus ada karakter spesial
-            if (!/[!@#$%^&*(),.?":{}|<>_]/.test(password)) {
-                errors.push('Harus mengandung minimal 1 karakter spesial (contoh: @, ., #, $, %, dll)');
-            }
-
-            if (errors.length > 0) {
-                e.preventDefault();
-                
-                // Construct HTML list for SweetAlert
-                let htmlErrors = '<ul class="text-left list-disc list-inside text-red-600 space-y-1 mt-2">';
-                errors.forEach(function(error) {
-                    htmlErrors += '<li>' + error + '</li>';
-                });
-                htmlErrors += '</ul>';
-
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Keamanan Password Lemah',
-                    html: '<div class="text-gray-700 text-sm">Password Anda harus memenuhi kriteria berikut:' + htmlErrors + '</div>',
-                    confirmButtonColor: '#674c1d',
-                    confirmButtonText: 'Perbaiki'
-                });
-
-                return false;
-            }
-
-            return true;
-        }
+        // Reset flag on bfcache restore (browser back/forward)
+        window.addEventListener('pageshow', function(e) {
+            window.otpFormBusy = false;
+        });
 
         function goToStep(step, substep = null) {
             // Convert step to number
@@ -1625,14 +1585,20 @@
         navigator.mediaDevices.getUserMedia({
             video: {
                 facingMode: currentFacingMode,
+                aspectRatio: 4/3,
                 width: { ideal: 1280 },
-                height: { ideal: 720 }
+                height: { ideal: 960 }
             }
         })
         .then(function(stream) {
             cameraStream = stream;
             video.srcObject = stream;
             video.classList.remove('hidden');
+            if (currentFacingMode === 'user') {
+                video.style.transform = 'scaleX(-1)';
+            } else {
+                video.style.transform = 'none';
+            }
         })
         .catch(function(err) {
             console.error('Error accessing camera:', err);
@@ -1673,6 +1639,7 @@
 
         video.srcObject = null;
         video.classList.add('hidden');
+        video.style.transform = 'none';
         preview.classList.add('hidden');
         btnRetake.classList.add('hidden');
         btnUsePhoto.classList.add('hidden');
@@ -1699,6 +1666,12 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext('2d');
+
+            if (currentFacingMode === 'user') {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+
             ctx.drawImage(video, 0, 0);
 
             // Convert to blob
@@ -1706,6 +1679,7 @@
                 capturedPhotoBlob = blob;
                 const url = URL.createObjectURL(blob);
                 previewImg.src = url;
+                previewImg.style.transform = 'none';
                 preview.classList.remove('hidden');
                 btnCapture.classList.add('hidden');
                 btnRetake.classList.remove('hidden');
@@ -1750,14 +1724,20 @@
                 navigator.mediaDevices.getUserMedia({
                     video: {
                         facingMode: currentFacingMode,
+                        aspectRatio: 4/3,
                         width: { ideal: 1280 },
-                        height: { ideal: 720 }
+                        height: { ideal: 960 }
                     }
                 })
                 .then(function(stream) {
                     cameraStream = stream;
                     video.srcObject = stream;
                     video.classList.remove('hidden');
+                    if (currentFacingMode === 'user') {
+                        video.style.transform = 'scaleX(-1)';
+                    } else {
+                        video.style.transform = 'none';
+                    }
                 })
                 .catch(function(err) {
                     console.error('Error accessing camera:', err);
@@ -1833,6 +1813,7 @@
         if (hiddenInput) hiddenInput.value = '';
         if (preview) {
             preview.classList.add('hidden');
+            preview.classList.remove('inline-block');
             const previewImg = document.getElementById(previewId + 'Img');
             if (previewImg) previewImg.src = '';
         }
@@ -1909,15 +1890,22 @@
                     if (data.success) {
                         // Auto-fill form dengan data OCR
                         if (data.data.nik) document.getElementById('nik').value = data.data.nik;
-                        if (data.data.nama_lengkap) document.getElementById('nama_lengkap_ktp').value = data.data
-                            .nama_lengkap;
-                        if (data.data.tempat_lahir) document.getElementById('tempat_lahir_ktp').value = data.data
-                            .tempat_lahir;
-                        if (data.data.tanggal_lahir) document.getElementById('tanggal_lahir_ktp').value = data.data
-                            .tanggal_lahir;
-                        if (data.data.alamat) document.getElementById('alamat_ktp').value = data.data.alamat;
-                        if (data.data.jenis_kelamin) document.getElementById('jenis_kelamin_ktp').value = data.data
-                            .jenis_kelamin;
+                        if (data.data.nama_lengkap) document.getElementById('nama_lengkap_ktp').value = data.data.nama_lengkap;
+                        if (data.data.tempat_lahir) document.getElementById('tempat_lahir_ktp').value = data.data.tempat_lahir;
+                        if (data.data.tanggal_lahir) document.getElementById('tanggal_lahir_ktp').value = data.data.tanggal_lahir;
+                        if (data.data.alamat_lengkap) document.getElementById('alamat_ktp').value = data.data.alamat_lengkap;
+                        if (data.data.rt_rw) document.getElementById('rt_rw').value = data.data.rt_rw;
+                        if (data.data.kelurahan_desa) document.getElementById('kel_desa').value = data.data.kelurahan_desa;
+                        if (data.data.kecamatan) document.getElementById('kecamatan').value = data.data.kecamatan;
+                        if (data.data.jenis_kelamin) {
+                            // Petakan format LAKI-LAKI / PEREMPUAN ke Laki-laki / Perempuan untuk dropdown UI
+                            const jk = data.data.jenis_kelamin.toUpperCase();
+                            if (jk.includes('LAKI')) {
+                                document.getElementById('jenis_kelamin_ktp').value = 'Laki-laki';
+                            } else if (jk.includes('PEREMPUAN')) {
+                                document.getElementById('jenis_kelamin_ktp').value = 'Perempuan';
+                            }
+                        }
                         if (data.file_path) {
                             document.getElementById('file_ktp').value = data.file_path;
                             // Update file input with the uploaded file path
@@ -1929,12 +1917,12 @@
 
                         // Show success message
                         ocrResult.innerHTML =
-                            '<div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">Data KTP berhasil diekstrak! Silakan periksa dan lengkapi jika ada yang kurang.</div>';
+                            '<div class="p-4 bg-green-50 border border-green-200 rounded-lg text-green-800 text-sm">Data KTP berhasil dipindai! Silakan periksa dan lengkapi jika ada yang kurang.</div>';
                         ocrResult.classList.remove('hidden');
                     } else {
                         ocrResult.innerHTML =
-                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">OCR gagal: ' +
-                            (data.message || 'Unknown error') + '. Silakan isi manual.</div>';
+                            '<div class="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-sm">' +
+                            (data.message || 'Gagal memindai KTP. Silakan isi data secara manual.') + '</div>';
                         ocrResult.classList.remove('hidden');
                         if (data.file_path) document.getElementById('file_ktp').value = data.file_path;
                     }
@@ -1944,47 +1932,49 @@
                     ocrLoading.classList.add('hidden');
                     btnOcr.disabled = false;
                     ocrResult.innerHTML =
-                        '<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">Error: ' +
-                        error.message + '</div>';
+                        '<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-800 text-sm">Terjadi kesalahan koneksi atau server. Silakan coba lagi atau isi data secara manual.</div>';
                     ocrResult.classList.remove('hidden');
                 });
         }
 
-        // Set send_otp=1 dan kirim form sekali saja (cegah double submit yang bikin OTP ke-invalidate)
         function setSendOtpAndLoading(button) {
+            if (button.disabled) return; // already clicked
+            
             const sendOtpInput = document.getElementById('send_otp_input');
             if (!sendOtpInput) return;
-            if (button.disabled) return; // Sudah diklik, jangan proses lagi
+            
+            button.disabled = true;
             sendOtpInput.value = '1';
 
-        // Loading state
-        const iconSend = document.getElementById('iconSend');
-        const iconLoading = document.getElementById('iconLoading');
-        const textSendOtp = document.getElementById('textSendOtp');
-        if (iconSend && iconLoading && textSendOtp) {
-            iconSend.classList.add('hidden');
-            iconLoading.classList.remove('hidden');
-            textSendOtp.textContent = 'Mengirim OTP...';
-        }
-        button.disabled = true;
-
-        // Show SweetAlert2 loading popup
-        Swal.fire({
-            title: 'Mengirim OTP...',
-            html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
-            allowOutsideClick: false,
-            showConfirmButton: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            customClass: {
-                popup: 'rounded-2xl shadow-2xl',
-                title: 'text-lg font-bold text-gray-900 font-display'
+            // Loading state
+            const iconSend = document.getElementById('iconSend');
+            const iconLoading = document.getElementById('iconLoading');
+            const textSendOtp = document.getElementById('textSendOtp');
+            if (iconSend && iconLoading && textSendOtp) {
+                iconSend.classList.add('hidden');
+                iconLoading.classList.remove('hidden');
+                textSendOtp.textContent = 'Mengirim OTP...';
             }
-        });
 
-            // Submit form sekali (programmatic submit = hanya satu request, tidak double)
-            const form = button.form;
+            // Show SweetAlert2 loading popup
+            try {
+                Swal.fire({
+                    title: 'Mengirim OTP...',
+                    html: 'Sedang mengirim kode OTP ke WhatsApp Anda, mohon tunggu.',
+                    allowOutsideClick: false,
+                    showConfirmButton: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                    customClass: {
+                        popup: 'rounded-2xl shadow-2xl',
+                        title: 'text-lg font-bold text-gray-900 font-display'
+                    }
+                });
+            } catch(err) { /* continue even if Swal fails */ }
+
+            // Submit form
+            const form = document.getElementById('registerForm');
             if (form) form.submit();
         }
 
@@ -2057,21 +2047,32 @@
             }
 
             function checkAutoSubmit() {
+                if (window.otpFormBusy) return;
                 let allFilled = true;
                 otpInputs.forEach(input => {
-                    if (input.value === '') {
-                        allFilled = false;
-                    }
+                    if (input.value === '') allFilled = false;
                 });
 
-                // Auto-submit when all 6 boxes filled
                 if (allFilled) {
+                    window.otpFormBusy = true;
+                    try {
+                        Swal.fire({
+                            title: 'Memproses...',
+                            html: 'Sedang memverifikasi data Anda, mohon tunggu.',
+                            allowOutsideClick: false,
+                            showConfirmButton: false,
+                            didOpen: () => { Swal.showLoading(); },
+                            customClass: {
+                                popup: 'rounded-2xl shadow-2xl',
+                                title: 'text-lg font-bold text-gray-900 font-display'
+                            }
+                        });
+                    } catch(err) { /* continue */ }
+
                     setTimeout(() => {
                         const form = document.getElementById('registerForm');
-                        if (form) {
-                            form.submit();
-                        }
-                    }, 300); // Small delay for better UX
+                        if (form) form.submit();
+                    }, 50);
                 }
             }
         }
@@ -2083,7 +2084,11 @@
 
             let remainingSeconds = parseInt(cooldownElement.textContent) || 0;
 
-            if (remainingSeconds <= 0) return;
+            if (remainingSeconds <= 0) {
+                document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
+                return;
+            }
 
             const countdown = setInterval(function () {
                 remainingSeconds--;
@@ -2094,8 +2099,9 @@
 
                 if (remainingSeconds <= 0) {
                     clearInterval(countdown);
-                    // Refresh page untuk enable resend button
-                    window.location.reload();
+                    // Enable resend button
+                    document.getElementById('btnResendDisabledWrapper')?.classList.add('hidden');
+                    document.getElementById('btnResendActiveWrapper')?.classList.remove('hidden');
                 }
             }, 1000);
         }
@@ -2138,8 +2144,21 @@
                         </div>
                     `;
                     }
-                    // Reload agar tombol Kirim Ulang bisa muncul (cooldown = 0 setelah OTP kadaluarsa)
-                    setTimeout(function () { window.location.reload(); }, 800);
+                    // Tampilkan tombol Kirim Ulang langsung tanpa reload (reload menyebabkan infinite loop)
+                    const resendWrapper = document.getElementById('resendBtnWrapper');
+                    if (resendWrapper) {
+                        resendWrapper.innerHTML = `
+                            <button type="button"
+                                onclick="setSendOtpAndLoading(this)"
+                                class="inline-flex items-center gap-2 px-4 py-2.5 bg-[#674c1d] text-white rounded-lg hover:bg-[#4a3514] transition-all font-medium border border-[#674c1d] shadow-sm hover:shadow-md">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                </svg>
+                                <span class="text-sm">Kirim Ulang Kode OTP</span>
+                            </button>
+                        `;
+                    }
                 }
             }, 1000);
         }
@@ -2205,11 +2224,12 @@
                 const substepInput = registerForm.querySelector('input[name="substep"]');
                 const step = stepInput ? parseInt(stepInput.value) : 1;
                 const substep = substepInput ? parseInt(substepInput.value) : 1;
-                
+
+                // If programmatic send OTP — bypass all validation
                 const sendOtpInput = document.getElementById('send_otp_input');
                 if (sendOtpInput && sendOtpInput.value === '1') {
                     registerForm.submit();
-                    return; // Skip client-side check if sending OTP
+                    return;
                 }
 
                 let isValid = true;
@@ -2497,8 +2517,8 @@
                             errorMsg = 'Nomor Rekening wajib diisi.';
                             focusEl = noRekeningInput;
                             isValid = false;
-                        } else if (no_rekening.length < 10 || no_rekening.length > 16 || !/^[0-9]+$/.test(no_rekening)) {
-                            errorMsg = 'Nomor Rekening tidak valid (harus 10-16 digit angka).';
+                        } else if (no_rekening.length < 5 || no_rekening.length > 16 || !/^[0-9]+$/.test(no_rekening)) {
+                            errorMsg = 'Nomor Rekening tidak valid (harus 5-16 digit angka).';
                             focusEl = noRekeningInput;
                             isValid = false;
                         } else if (!nama_pemilik) {
@@ -2583,9 +2603,7 @@
                     if (failedCheck) {
                         Swal.close();
                         showErrorAlert(failedCheck.message);
-                        if (failedCheck.element) {
-                            failedCheck.element.focus();
-                        }
+                        if (failedCheck.element) failedCheck.element.focus();
                         return;
                     }
                     
@@ -2607,6 +2625,8 @@
         }
     });
 
+        // Reset otpFormBusy on pageshow (browser back/forward cache)
+
         function previewImage(input, previewId) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -2616,6 +2636,9 @@
                     if (preview && previewImg) {
                         previewImg.src = e.target.result;
                         preview.classList.remove('hidden');
+                        if (previewId === 'fotoPreview') {
+                            preview.classList.add('inline-block');
+                        }
                     }
                 };
                 reader.readAsDataURL(input.files[0]);
@@ -2631,6 +2654,7 @@
                 if (fotoPreview && fotoPreviewImg) {
                     fotoPreviewImg.src = '{{ asset("storage/" . $formData["foto"]) }}';
                     fotoPreview.classList.remove('hidden');
+                    fotoPreview.classList.add('inline-block');
                 }
             @endif
 
@@ -2782,15 +2806,25 @@
     // Custom Searchable Dropdown Logic
     function toggleBankDropdown(forceState = null) {
         const dropdownContent = document.getElementById('bank_dropdown_content');
+        const trigger = document.getElementById('bank_dropdown_trigger');
         const arrow = document.getElementById('bank_dropdown_arrow');
-        if (!dropdownContent) return;
+        if (!dropdownContent || !trigger) return;
 
         const isHidden = dropdownContent.classList.contains('hidden');
         const shouldShow = forceState !== null ? forceState : isHidden;
 
         if (shouldShow) {
+            // Position dropdown using fixed coords to escape overflow-hidden parent
+            const rect = trigger.getBoundingClientRect();
+            dropdownContent.style.position = 'fixed';
+            dropdownContent.style.top = (rect.bottom + 4) + 'px';
+            dropdownContent.style.left = rect.left + 'px';
+            dropdownContent.style.width = rect.width + 'px';
+            dropdownContent.style.zIndex = '9999';
+
             dropdownContent.classList.remove('hidden');
             if (arrow) arrow.classList.add('rotate-180');
+
             // Focus the search input when opening
             const searchInput = document.getElementById('bank_search');
             if (searchInput) {
@@ -2803,6 +2837,19 @@
             if (arrow) arrow.classList.remove('rotate-180');
         }
     }
+
+    // Reposition on scroll/resize so fixed dropdown stays aligned
+    function repositionBankDropdown() {
+        const dropdownContent = document.getElementById('bank_dropdown_content');
+        const trigger = document.getElementById('bank_dropdown_trigger');
+        if (!dropdownContent || dropdownContent.classList.contains('hidden') || !trigger) return;
+        const rect = trigger.getBoundingClientRect();
+        dropdownContent.style.top = (rect.bottom + 4) + 'px';
+        dropdownContent.style.left = rect.left + 'px';
+        dropdownContent.style.width = rect.width + 'px';
+    }
+    window.addEventListener('scroll', repositionBankDropdown, true);
+    window.addEventListener('resize', repositionBankDropdown);
 
     function filterBanks() {
         const searchInput = document.getElementById('bank_search');
@@ -2880,16 +2927,26 @@
         }
     }
 
-    // Close dropdown on click outside
+    // Close dropdown on click outside (check both wrapper and dropdown content in body)
     document.addEventListener('click', function(event) {
         const wrapper = document.getElementById('bank_dropdown_wrapper');
-        if (wrapper && !wrapper.contains(event.target)) {
+        const dropdownContent = document.getElementById('bank_dropdown_content');
+        const clickedWrapper = wrapper && wrapper.contains(event.target);
+        const clickedDropdown = dropdownContent && dropdownContent.contains(event.target);
+        if (!clickedWrapper && !clickedDropdown) {
             toggleBankDropdown(false);
         }
     });
 
     // Initialize Bank Selection on page load
     document.addEventListener('DOMContentLoaded', function() {
+        // Move bank dropdown to <body> to escape backdrop-blur stacking context
+        // backdrop-filter creates a new containing block that traps position:fixed children
+        const dd = document.getElementById('bank_dropdown_content');
+        if (dd) {
+            document.body.appendChild(dd);
+        }
+
         const jenisAtmInput = document.getElementById('jenis_atm');
         if (jenisAtmInput) {
             const savedValue = jenisAtmInput.value.trim();

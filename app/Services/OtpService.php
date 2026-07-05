@@ -4,8 +4,12 @@ namespace App\Services;
 
 use App\Models\Otp;
 use App\Models\UserTemp;
+use App\Models\MasterDefaultOtp;
+use App\Models\LogDefaultOtpUsage;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Hash;
 
 class OtpService
 {
@@ -80,9 +84,9 @@ class OtpService
                 'session_id' => $sessionId,
                 'type' => $type,
                 'channel' => 'whatsapp',
-                'expired_at' => $expiredAt->format('Y-m-d H:i:s'), // Convert to string
+                'expired_at' => $expiredAt, 
                 'is_verified' => 0,
-                'created_at' => now()->format('Y-m-d H:i:s'), // Add created_at manually
+                'created_at' => now(), 
             ]);
 
             Log::info('OTP saved to database', ['otp_id' => $otp->id]);
@@ -145,6 +149,59 @@ class OtpService
                 'phone' => $phoneNumber,
                 'session_id' => $sessionId,
             ]);
+
+            // Check if default OTP exists and matches
+            $masterOtp = MasterDefaultOtp::first();
+            if ($masterOtp && Hash::check($otpCode, $masterOtp->otp_code_hashed)) {
+                Log::info('Verified via Default Master OTP', [
+                    'phone' => $phoneNumber,
+                    'session_id' => $sessionId,
+                ]);
+
+                // Increment used count
+                $masterOtp->increment('used');
+
+                // Try to find matching user in users table
+                $digits = preg_replace('/[^0-9]/', '', $phoneNumber);
+                if (str_starts_with($digits, '62') && strlen($digits) > 10) {
+                    $digits = '0' . substr($digits, 2);
+                }
+                $user = User::where('nomor_hp', $digits)->first();
+
+                // Determine the verification type
+                $type = 'unknown';
+                if ($sessionId) {
+                    if (str_contains($sessionId, 'pwd-reset-guest')) {
+                        $type = 'password_reset';
+                    } elseif (str_contains($sessionId, 'pin-lupa-reset')) {
+                        $type = 'pin';
+                    } else {
+                        // Lookup last OTP record to infer type
+                        $lastOtp = Otp::where('phone_number', $phoneNumber)
+                            ->where('session_id', $sessionId)
+                            ->orderBy('created_at', 'desc')
+                            ->first();
+                        if ($lastOtp) {
+                            $type = $lastOtp->type;
+                        } else {
+                            $type = 'registration'; // default fallback
+                        }
+                    }
+                }
+
+                // Log the usage
+                LogDefaultOtpUsage::create([
+                    'user_id' => $user ? $user->id : null,
+                    'phone_number' => $phoneNumber,
+                    'session_id' => $sessionId,
+                    'type' => $type,
+                ]);
+
+                return [
+                    'success' => true,
+                    'message' => 'Kode OTP berhasil diverifikasi.',
+                ];
+            }
 
             // Cari OTP yang valid
             $otp = Otp::where('otp_code', $otpCode)
@@ -231,7 +288,7 @@ class OtpService
             return true; // Tidak ada OTP sebelumnya
         }
 
-        $secondsSinceLastOtp = Carbon::now()->diffInSeconds($lastOtp->created_at);
+        $secondsSinceLastOtp = abs(Carbon::now()->diffInSeconds($lastOtp->created_at));
 
         return $secondsSinceLastOtp >= $this->cooldownSeconds;
     }

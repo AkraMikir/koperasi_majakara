@@ -4,15 +4,16 @@
     <meta charset="UTF-8">
     <title>Struk Gadai Awal - {{ $gadai->slot_kode }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
+        body { font-family: 'Courier', monospace; font-weight: bold; font-size: 11px; line-height: 1.4; color: #000; padding: 4px; }
         .center { text-align: center; }
         .bold { font-weight: bold; }
         .underline { text-decoration: underline; }
         .dashed { border-top: 1px dashed #000; margin: 9px 0; }
         .table-row { width: 100%; margin-bottom: 3px; }
         .table-row td { vertical-align: top; }
-        .label { font-weight: bold; width: 45%; }
+        .label { font-weight: bold; width: 35%; font-size: 11px; white-space: nowrap; }
         .header { margin-bottom: 12px; }
         .footer { margin-top: 12px; font-size: 10px; }
         table { width: 100%; border-collapse: collapse; }
@@ -27,7 +28,10 @@
     </style>
 </head>
 <body>
-    <div class="header">
+    <div class="header" style="text-align: center;">
+        <div style="margin-bottom: 4px;">
+            <img src="{{ public_path('images/logo/674c1d MAJAKARA.png') }}" alt="Logo" style="max-width: 130px; max-height: 65px;" />
+        </div>
         <div class="center bold underline" style="font-size: 14px; margin-bottom: 2px;">
             {{ $settings->nama_koperasi }}
         </div>
@@ -52,11 +56,11 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">Nama Anggota</td>
+            <td class="label">Nama</td>
             <td>: {{ $gadai->nasabah->user->nama ?? '-' }}</td>
         </tr>
         <tr>
-            <td class="label">No. Anggota</td>
+            <td class="label">Anggota</td>
             <td>: {{ $gadai->nasabah->id ?? '-' }}</td>
         </tr>
         <tr>
@@ -68,7 +72,7 @@
             <td>: {{ $gadai->nama_barang_display }}</td>
         </tr>
         <tr>
-            <td class="label">Slot Kode</td>
+            <td class="label">Slot</td>
             <td>: <span class="bold">{{ $gadai->slot_kode }}</span></td>
         </tr>
     </table>
@@ -81,23 +85,23 @@
     
     <table class="table-row">
         <tr>
-            <td class="label">Tanggal Mulai</td>
+            <td class="label">Mulai</td>
             <td>: {{ \Carbon\Carbon::parse($gadai->tgl_mulai)->format('d/m/Y') }}</td>
         </tr>
         <tr>
-            <td class="label">Jatuh Tempo</td>
+            <td class="label">Tempo</td>
             <td>: {{ \Carbon\Carbon::parse($gadai->tgl_jatuh_tempo)->format('d/m/Y') }}</td>
         </tr>
         <tr>
-            <td class="label">Nominal Deal</td>
+            <td class="label">Nominal</td>
             <td class="">: Rp {{ number_format($gadai->nominal_deal, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td class="label">Biaya Jasa</td>
+            <td class="label">Jasa</td>
             <td class="">: Rp {{ number_format($gadai->biaya_jasa, 0, ',', '.') }}</td>
         </tr>
         <tr>
-            <td class="label">Biaya Inap</td>
+            <td class="label">Inap</td>
             <td class="">: Rp {{ number_format($gadai->biaya_inap, 0, ',', '.') }}</td>
         </tr>
     </table>

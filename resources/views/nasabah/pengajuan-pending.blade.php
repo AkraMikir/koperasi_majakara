@@ -103,6 +103,10 @@
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-purple-100 text-purple-800">
                                             Pinjaman
                                         </span>
+                                    @elseif($item['type'] == 'pinjaman_bayar')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-800">
+                                            Pembayaran Pinjaman
+                                        </span>
                                     @elseif($item['type'] == 'deposito')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
                                             Deposito
@@ -110,6 +114,10 @@
                                     @elseif($item['type'] == 'gadai')
                                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
                                             Gadai
+                                        </span>
+                                    @elseif($item['type'] == 'gadai_repay')
+                                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-800">
+                                            Gadai - Tebus/Perpanjang
                                         </span>
                                     @endif
                                 </div>

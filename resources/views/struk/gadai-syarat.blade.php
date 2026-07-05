@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Syarat & Ketentuan Gadai - {{ $gadai->slot_kode }}</title>
         <style>
+        @page { margin: 0px; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Courier', monospace; font-size: 12px; line-height: 1.5; color: #000; padding: 4px; }
         .center { text-align: center; }

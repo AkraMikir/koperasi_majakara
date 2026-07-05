@@ -72,11 +72,11 @@ class NasabahManagementController extends Controller
      */
     public function approveChange(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can approve nasabah changes
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        // Authorization: Admin Utama & Admin Operasional can approve nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canApproveNasabahChanges(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menyetujui perubahan data nasabah.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat menyetujui perubahan data nasabah.'
             ], 403);
         }
 
@@ -110,13 +110,6 @@ class NasabahManagementController extends Controller
                     break;
 
                 case 'data_pribadi':
-                    // Update user table
-                    $nasabah->user->update([
-                        'nama' => $dataBaru['nama'] ?? $nasabah->user->nama,
-                        'email' => $dataBaru['email'] ?? $nasabah->user->email,
-                        'nomor_hp' => $dataBaru['nomor_hp'] ?? $nasabah->user->nomor_hp,
-                    ]);
-
                     // Update nasabah table
                     $nasabah->update([
                         'no_kk' => $dataBaru['no_kk'] ?? $nasabah->no_kk,
@@ -124,14 +117,45 @@ class NasabahManagementController extends Controller
                         'tanggal_lahir' => $dataBaru['tanggal_lahir'] ?? $nasabah->tanggal_lahir,
                         'jenis_kelamin' => $dataBaru['jenis_kelamin'] ?? $nasabah->jenis_kelamin,
                         'alamat' => $dataBaru['alamat'] ?? $nasabah->alamat,
+                        'alamat_domisili' => $dataBaru['alamat_domisili'] ?? $nasabah->alamat_domisili,
+                        'kode_pos' => $dataBaru['kode_pos'] ?? $nasabah->kode_pos,
                     ]);
+
+                    // Update or create dataKtp with nik
+                    if (isset($dataBaru['nik'])) {
+                        if ($nasabah->dataKtp) {
+                            $nasabah->dataKtp->update([
+                                'nik' => $dataBaru['nik'],
+                                'nama_lengkap' => $nasabah->dataKtp->nama_lengkap,
+                                'tempat_lahir' => $dataBaru['tempat_lahir'] ?? $nasabah->dataKtp->tempat_lahir,
+                                'tanggal_lahir' => $dataBaru['tanggal_lahir'] ?? $nasabah->dataKtp->tanggal_lahir,
+                                'alamat' => $dataBaru['alamat'] ?? $nasabah->dataKtp->alamat,
+                                'jenis_kelamin' => isset($dataBaru['jenis_kelamin']) 
+                                    ? ($dataBaru['jenis_kelamin'] === 'L' ? 'Laki-laki' : 'Perempuan') 
+                                    : $nasabah->dataKtp->jenis_kelamin,
+                            ]);
+                        } else {
+                            DataKtp::create([
+                                'nasabah_id' => $nasabah->id,
+                                'nik' => $dataBaru['nik'],
+                                'nama_lengkap' => $nasabah->user->nama ?? '',
+                                'tempat_lahir' => $dataBaru['tempat_lahir'] ?? $nasabah->tempat_lahir,
+                                'tanggal_lahir' => $dataBaru['tanggal_lahir'] ?? $nasabah->tanggal_lahir,
+                                'alamat' => $dataBaru['alamat'] ?? $nasabah->alamat,
+                                'jenis_kelamin' => isset($dataBaru['jenis_kelamin']) 
+                                    ? ($dataBaru['jenis_kelamin'] === 'L' ? 'Laki-laki' : 'Perempuan') 
+                                    : 'Laki-laki',
+                                'file_ktp' => $nasabah->foto_ktp ?? '',
+                            ]);
+                        }
+                    }
                     break;
 
                 case 'data_ktp':
                     if ($nasabah->dataKtp) {
                         $nasabah->dataKtp->update($dataBaru);
                     } else {
-                        DataKtp::create(array_merge($dataBaru, ['id_nasabah' => $nasabah->id]));
+                        DataKtp::create(array_merge($dataBaru, ['nasabah_id' => $nasabah->id]));
                     }
                     break;
 
@@ -139,7 +163,7 @@ class NasabahManagementController extends Controller
                     if ($nasabah->pekerjaan) {
                         $nasabah->pekerjaan->update($dataBaru);
                     } else {
-                        Pekerjaan::create(array_merge($dataBaru, ['id_nasabah' => $nasabah->id]));
+                        Pekerjaan::create(array_merge($dataBaru, ['nasabah_id' => $nasabah->id]));
                     }
                     break;
 
@@ -147,7 +171,7 @@ class NasabahManagementController extends Controller
                     if ($nasabah->dataRek) {
                         $nasabah->dataRek->update($dataBaru);
                     } else {
-                        DataRek::create(array_merge($dataBaru, ['id_nasabah' => $nasabah->id]));
+                        DataRek::create(array_merge($dataBaru, ['nasabah_id' => $nasabah->id]));
                     }
                     break;
 
@@ -211,11 +235,11 @@ class NasabahManagementController extends Controller
      */
     public function rejectChange(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can reject nasabah changes
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        // Authorization: Admin Utama & Admin Operasional can reject nasabah changes
+        if (!app(\App\Services\AdminPermissionService::class)->canApproveNasabahChanges(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat menolak perubahan data nasabah.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat menolak perubahan data nasabah.'
             ], 403);
         }
 
@@ -400,9 +424,9 @@ class NasabahManagementController extends Controller
      */
     public function verifyNasabah(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can verify nasabah
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
-            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat memverifikasi nasabah.');
+        // Authorization: Admin Utama & Admin Operasional can verify nasabah
+        if (!app(\App\Services\AdminPermissionService::class)->canVerifyNasabah(auth()->user())) {
+            return redirect()->back()->with('error', 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin yang dapat memverifikasi nasabah.');
         }
 
         $nasabah = Nasabah::with('user')->findOrFail($id);

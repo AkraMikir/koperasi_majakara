@@ -69,6 +69,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
 
     // Restricted Nasabah Routes (Require Account Verification)
     Route::middleware('nasabah.verified')->group(function () {
+        Route::get('/riwayat-transaksi', [NasabahDashboardController::class, 'riwayatTransaksi'])->name('riwayat-transaksi');
         // PIN Management Routes (DEPRECATED - Moved to Setting)
         Route::prefix('pin')->name('pin.')->group(function () {
             Route::post('/update', [\App\Http\Controllers\Nasabah\PinController::class, 'updatePin'])->name('update');
@@ -159,6 +160,7 @@ Route::prefix('nasabah')->middleware('auth')->name('nasabah.')->group(function (
             Route::get('/riwayat', [DepositoController::class, 'riwayat'])->name('riwayat');
             Route::get('/pengajuan', [DepositoController::class, 'pengajuan'])->name('pengajuan');
             Route::post('/pengajuan', [DepositoController::class, 'submitPengajuan'])->name('submit-pengajuan');
+            Route::post('/verify-pin', [DepositoController::class, 'verifyPin'])->name('verify-pin');
             Route::get('/pengajuan/{id}/status', [DepositoController::class, 'statusPengajuan'])->name('status-pengajuan');
             Route::get('/aktif/{id}', [DepositoController::class, 'detail'])->name('detail');
             // Ajukan pencairan deposito
@@ -325,6 +327,12 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
     Route::prefix('master-data')->name('master-data.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'index'])->name('index');
         
+        // Master OTP Default
+        Route::prefix('otp-default')->name('otp-default.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'otpDefaultIndex'])->name('index');
+            Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'otpDefaultUpdate'])->name('update');
+        });
+
         // Item Gadai Baru
         Route::prefix('item-gadai')->name('item-gadai.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterItemGadaiController::class, 'index'])->name('index');
@@ -530,7 +538,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::prefix('biaya-transfer')->name('biaya-transfer.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferIndex'])->name('index');
             
-            Route::middleware('admin.permission:crud-biaya-transfer')->group(function () {
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
                 Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferCreate'])->name('create');
                 Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferStore'])->name('store');
                 Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'biayaTransferEdit'])->name('edit');
@@ -600,6 +608,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
                 Route::post('/update', [\App\Http\Controllers\Admin\MasterDataController::class, 'syaratKetentuanLayananGadaiUpdate'])->name('update');
             });
         });
+
+        // Master Data Bank Registrasi - Semua admin bisa lihat, CRUD hanya Admin Utama & Operasional
+        Route::prefix('bank-regis')->name('bank-regis.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisIndex'])->name('index');
+            Route::middleware('admin.permission:crud-master-data')->group(function () {
+                Route::get('/create', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisCreate'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisStore'])->name('store');
+                Route::get('/{id}/edit', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisEdit'])->name('edit');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisUpdate'])->name('update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisDestroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Http\Controllers\Admin\MasterDataController::class, 'bankRegisToggleStatus'])->name('toggle-status');
+            });
+        });
     });
     
     // Nasabah Management Routes - View accessible by all admins, Management only for Admin Utama
@@ -611,13 +632,21 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/{id}', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'show'])->name('show');
         Route::post('/verify-admin-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyAdminPin'])->name('verify-admin-pin');
         
-        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
-        Route::middleware('admin.permission:manage-nasabah')->group(function () {
+        // Verification route - Admin Utama & Admin Operasional
+        Route::post('/{id}/verify', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyNasabah'])
+            ->middleware('admin.permission:verify-nasabah')
+            ->name('verify');
+
+        // Approve/Reject Nasabah Changes - Admin Utama & Admin Operasional
+        Route::middleware('admin.permission:approve-nasabah-changes')->group(function () {
             Route::post('/change/{id}/approve', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'approveChange'])->name('approve-change');
             Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
+        });
+
+        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
+        Route::middleware('admin.permission:manage-nasabah')->group(function () {
             Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
             Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
-            Route::post('/{id}/verify', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'verifyNasabah'])->name('verify');
         });
     });
     

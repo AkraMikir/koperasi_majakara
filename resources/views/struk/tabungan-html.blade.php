@@ -23,7 +23,7 @@
         /* Thermal Paper Width Settings (typically 58mm or 80mm) */
         .receipt-container {
             width: 100%;
-            max-width: 280px; /* Adjust for 58mm/80mm layout */
+            max-width: 220px; /* Adjust for 58mm layout */
             margin: 0 auto;
             padding: 0 2px;
         }
@@ -116,7 +116,7 @@
     <div class="receipt-container">
         <!-- Header -->
         <div class="text-center mb-4">
-            <img src="{{ asset('images/logo/674c1d MAJAKARA.png') }}" alt="Logo Koperasi Majakara" style="max-width: 100px;" />
+            <img src="{{ asset('images/logo/674c1d MAJAKARA.png') }}" alt="Logo Koperasi Majakara" style="max-width: 130px;" />
             <p class="font-bold">STRUK TRANSAKSI TABUNGAN</p>
             <p class="font-bold uppercase">{{ $transaksi->jenis }}</p>
         </div>
@@ -131,19 +131,19 @@
                 <span class="value">{{ $transaksi->tgl_transaksi ? $transaksi->tgl_transaksi->format('d/m/Y H:i') : '-' }}</span>
             </div>
             <div class="row">
-                <span class="label">No. Transaksi</span>
+                <span class="label">ID</span>
                 <span class="colon">:</span>
                 <span class="value text-sm">{{ $transaksi->id_transaksi ?? str_pad($transaksi->id ?? '', 5, '0', STR_PAD_LEFT) }}</span>
             </div>
             @if($transaksi->pengajuanSetor)
             <div class="row">
-                <span class="label">ID Pengajuan</span>
+                <span class="label">Pengajuan</span>
                 <span class="colon">:</span>
                 <span class="value text-sm">{{ $transaksi->pengajuanSetor->id }}</span>
             </div>
             @endif
             <div class="row">
-                <span class="label">Nama Nasabah</span>
+                <span class="label">Nama</span>
                 <span class="colon">:</span>
                 <span class="value">{{ $transaksi->nasabah->user->nama ?? 'N/A' }}</span>
             </div>
@@ -155,12 +155,12 @@
         <div class="mb-2">
             @if($transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik && (float)($transaksi->pengajuanTarik->biaya_transfer ?? 0) > 0)
             <div class="row">
-                <sp an class="label">Nilai Tarik</sp>
+                <span class="label">Tarik</span>
                 <span class="colon">:</span>
                 <span class="value">Rp {{ number_format($transaksi->pengajuanTarik->nominal ?? 0, 0, ',', '.') }}</span>
             </div>
             <div class="row">
-                <span class="label">Biaya Transfer</span>
+                <span class="label">Transfer</span>
                 <span class="colon">:</span>
                 <span class="value">Rp {{ number_format($transaksi->pengajuanTarik->biaya_transfer ?? 0, 0, ',', '.') }}</span>
             </div>
@@ -168,7 +168,7 @@
             @endif
             
             <div class="row font-bold">
-                <span class="label">Total {{ $transaksi->jenis === 'setoran' ? 'Setoran' : 'Didebet' }}</span>
+                <span class="label">Total</span>
                 <span class="colon">:</span>
                 <span class="value text-lg">Rp {{ number_format($transaksi->nominal ?? 0, 0, ',', '.') }}</span>
             </div>

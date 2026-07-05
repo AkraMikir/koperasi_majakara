@@ -401,7 +401,7 @@ class RegisterController extends Controller
 
         return response()->json([
             'success' => false,
-            'message' => 'Gagal mengekstrak data KTP: ' . ($ocrResult['error'] ?? 'Unknown error'),
+            'message' => 'Gagal memproses foto KTP. Silakan coba lagi dengan foto yang lebih jelas, atau isi data secara manual.',
             'file_path' => $fileKtpPath // Tetap return file path untuk digunakan manual
         ], 500);
     }
@@ -1284,8 +1284,10 @@ class RegisterController extends Controller
         $otpExpiresAtRemainingSeconds = 0;
         if ($otpExpiresAt) {
             $expiresAt = \Carbon\Carbon::parse($otpExpiresAt);
-            $otpExpiresAtRemainingSeconds = max(0, (int) $expiresAt->diffInSeconds(now(), false));
-            $otpExpiresAtRemainingSeconds = min(60, $otpExpiresAtRemainingSeconds); // kode berlaku 1 menit saja
+            // diffInSeconds: positive when $expiresAt is in the future
+            $diff = now()->diffInSeconds($expiresAt, false);
+            $otpExpiresAtRemainingSeconds = max(0, (int) $diff);
+            $otpExpiresAtRemainingSeconds = min(60, $otpExpiresAtRemainingSeconds);
         }
 
         // Tampilkan view dengan data (phone dinormalisasi agar tidak "Nomor tidak ditemukan")

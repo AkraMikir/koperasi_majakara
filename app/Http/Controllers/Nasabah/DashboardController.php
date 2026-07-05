@@ -72,7 +72,6 @@ class DashboardController extends Controller
         $transTabungan = TransTabungan::where('id_anggota', $idAnggota)
             ->with('jnsTransaksi')
             ->latest('tgl_transaksi')
-            ->take(5)
             ->get();
             
         foreach($transTabungan as $t) {
@@ -92,17 +91,17 @@ class DashboardController extends Controller
         try {
             $transDeposito = \App\Models\TransDeposito::whereHas('deposito', function($q) use ($idAnggota) {
                 $q->where('id_nasabah', $idAnggota);
-            })->latest('tgl_transaksi')->take(5)->get();
+            })->latest('tgl_transaksi')->get();
             
             foreach($transDeposito as $t) {
-                $isInflow = (strtolower($t->jenis) == 'setoran' || strtolower($t->jenis) == 'bunga');
+                $isInflow = (strtolower($t->jenis) == 'setor_awal' || strtolower($t->jenis) == 'bunga');
                 $allTransaksi[] = (object)[
                     'id' => 'D-'.$t->id,
                     'tgl_transaksi' => $t->tgl_transaksi,
                     'nominal' => $t->nominal,
-                    'jenis' => 'Deposito - ' . ucfirst($t->jenis),
+                    'jenis' => 'Deposito - ' . (strtolower($t->jenis) == 'setor_awal' ? 'Setoran Awal' : ($strtolower($t->jenis) == 'pencairan' ? 'Pencairan' : ucfirst($t->jenis))),
                     'is_inflow' => $isInflow,
-                    'url' => '#', 
+                    'url' => $t->deposito_id ? route('nasabah.deposito.detail', $t->deposito_id) : '#', 
                     'icon_type' => 'deposito'
                 ];
             }
@@ -110,18 +109,32 @@ class DashboardController extends Controller
 
         // 3. Gadai
         try {
-            $transGadai = \App\Models\TransGadai::where('nasabah_id', $idAnggota)
-                ->latest('tgl_transaksi')->take(5)->get();
-                
-            foreach($transGadai as $t) {
-                $isInflow = (strtolower($t->jenis) == 'pencairan');
+            // Pencairan Gadai (Initial contract creation)
+            $activeGadais = \App\Models\GadaiActive::where('nasabah_id', $idAnggota)->get();
+            foreach ($activeGadais as $g) {
                 $allTransaksi[] = (object)[
-                    'id' => 'G-'.$t->id,
-                    'tgl_transaksi' => $t->tgl_transaksi,
-                    'nominal' => $t->nominal,
-                    'jenis' => 'Gadai - ' . ucfirst($t->jenis),
-                    'is_inflow' => $isInflow,
-                    'url' => '#', 
+                    'id' => 'G-DISB-'.$g->id,
+                    'tgl_transaksi' => $g->tgl_mulai,
+                    'nominal' => $g->nominal_deal,
+                    'jenis' => 'Gadai - Pencairan',
+                    'is_inflow' => true,
+                    'url' => route('nasabah.gadai_baru.aktif-detail', $g->id),
+                    'icon_type' => 'gadai'
+                ];
+            }
+
+            // Gadai Payments (Tebus / Perpanjangan)
+            $gadaiPayments = \App\Models\GadaiPaymentLog::whereHas('gadaiActive', function($q) use ($idAnggota) {
+                $q->where('nasabah_id', $idAnggota);
+            })->get();
+            foreach ($gadaiPayments as $p) {
+                $allTransaksi[] = (object)[
+                    'id' => 'G-PAY-'.$p->id,
+                    'tgl_transaksi' => $p->created_at,
+                    'nominal' => $p->nominal,
+                    'jenis' => 'Gadai - ' . ($p->jenis_pembayaran === 'tebus' ? 'Pelunasan' : 'Perpanjangan'),
+                    'is_inflow' => false,
+                    'url' => route('nasabah.gadai_baru.aktif-detail', $p->gadai_active_id),
                     'icon_type' => 'gadai'
                 ];
             }
@@ -129,18 +142,32 @@ class DashboardController extends Controller
 
         // 4. Pinjaman
         try {
-            $transPinjaman = \App\Models\TempoPinjamanB::whereHas('pinjaman', function($q) use ($idAnggota) {
-                $q->where('id_anggota', $idAnggota);
-            })->where('status_bayar', 'lunas')->whereNotNull('tgl_bayar')->latest('tgl_bayar')->take(5)->get();
-            
-            foreach($transPinjaman as $t) {
+            // Pencairan Pinjaman (Initial Loan approval)
+            $loans = \App\Models\PinjamanH::where('id_anggota', $idAnggota)->get();
+            foreach ($loans as $l) {
                 $allTransaksi[] = (object)[
-                    'id' => 'P-'.$t->id,
-                    'tgl_transaksi' => $t->tgl_bayar,
-                    'nominal' => $t->jumlah_terbayar,
-                    'jenis' => 'Pinjaman - Angsuran',
+                    'id' => 'P-DISB-'.$l->id,
+                    'tgl_transaksi' => $l->tgl_pinjam,
+                    'nominal' => $l->jumlah_pinjam,
+                    'jenis' => 'Pinjaman - Pencairan',
+                    'is_inflow' => true,
+                    'url' => route('nasabah.pinjaman.detail-pinjaman', $l->id),
+                    'icon_type' => 'pinjaman'
+                ];
+            }
+
+            // Payment installments (PengajuanPembayaranPinjaman)
+            $loanPayments = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
+                ->where('status', '3')
+                ->get();
+            foreach ($loanPayments as $p) {
+                $allTransaksi[] = (object)[
+                    'id' => 'P-PAY-'.$p->id,
+                    'tgl_transaksi' => $p->tgl_pembayaran,
+                    'nominal' => $p->nominal,
+                    'jenis' => 'Pinjaman - Angsuran ' . ($p->jenis_tempo === 'bulanan' ? 'Bulanan' : 'Musiman'),
                     'is_inflow' => false,
-                    'url' => '#', 
+                    'url' => route('nasabah.pinjaman.detail-pembayaran', $p->id),
                     'icon_type' => 'pinjaman'
                 ];
             }
@@ -240,6 +267,171 @@ class DashboardController extends Controller
     }
 
     /**
+     * Show unified transaction history for verified nasabah.
+     */
+    public function riwayatTransaksi(Request $request)
+    {
+        $idAnggota = $this->getIdAnggota();
+        $allTransaksi = [];
+
+        // Filter parameters
+        $filterType = $request->input('type'); // tabungan, deposito, pinjaman, gadai
+        $filterFlow = $request->input('flow'); // masuk (inflow), keluar (outflow)
+
+        // 1. Tabungan
+        if (!$filterType || $filterType === 'tabungan') {
+            $transTabungan = TransTabungan::where('id_anggota', $idAnggota)
+                ->with('jnsTransaksi')
+                ->latest('tgl_transaksi')
+                ->get();
+                
+            foreach($transTabungan as $t) {
+                $isSetoran = optional($t->jnsTransaksi)->kode === 'STR';
+                if ($filterFlow && (($filterFlow === 'masuk' && !$isSetoran) || ($filterFlow === 'keluar' && $isSetoran))) {
+                    continue;
+                }
+                $allTransaksi[] = (object)[
+                    'id' => 'T-'.$t->id,
+                    'tgl_transaksi' => $t->tgl_transaksi,
+                    'nominal' => $t->nominal,
+                    'jenis' => 'Tabungan - ' . (optional($t->jnsTransaksi)->nama ?? 'Transaksi'),
+                    'is_inflow' => $isSetoran,
+                    'url' => route('nasabah.tabungan.detail-transaksi', $t->id),
+                    'icon_type' => 'tabungan'
+                ];
+            }
+        }
+
+        // 2. Deposito
+        if (!$filterType || $filterType === 'deposito') {
+            try {
+                $transDeposito = \App\Models\TransDeposito::whereHas('deposito', function($q) use ($idAnggota) {
+                    $q->where('id_nasabah', $idAnggota);
+                })->latest('tgl_transaksi')->get();
+                
+                foreach($transDeposito as $t) {
+                    $isInflow = (strtolower($t->jenis) == 'setor_awal' || strtolower($t->jenis) == 'bunga');
+                    if ($filterFlow && (($filterFlow === 'masuk' && !$isInflow) || ($filterFlow === 'keluar' && $isInflow))) {
+                        continue;
+                    }
+                    $allTransaksi[] = (object)[
+                        'id' => 'D-'.$t->id,
+                        'tgl_transaksi' => $t->tgl_transaksi,
+                        'nominal' => $t->nominal,
+                        'jenis' => 'Deposito - ' . (strtolower($t->jenis) == 'setor_awal' ? 'Setoran Awal' : ($strtolower($t->jenis) == 'pencairan' ? 'Pencairan' : ucfirst($t->jenis))),
+                        'is_inflow' => $isInflow,
+                        'url' => $t->deposito_id ? route('nasabah.deposito.detail', $t->deposito_id) : '#', 
+                        'icon_type' => 'deposito'
+                    ];
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // 3. Gadai
+        if (!$filterType || $filterType === 'gadai') {
+            try {
+                // Pencairan Gadai (Initial contract creation)
+                if (!$filterFlow || $filterFlow === 'masuk') {
+                    $activeGadais = \App\Models\GadaiActive::where('nasabah_id', $idAnggota)->get();
+                    foreach ($activeGadais as $g) {
+                        $allTransaksi[] = (object)[
+                            'id' => 'G-DISB-'.$g->id,
+                            'tgl_transaksi' => $g->tgl_mulai,
+                            'nominal' => $g->nominal_deal,
+                            'jenis' => 'Gadai - Pencairan',
+                            'is_inflow' => true,
+                            'url' => route('nasabah.gadai_baru.aktif-detail', $g->id),
+                            'icon_type' => 'gadai'
+                        ];
+                    }
+                }
+
+                // Gadai Payments (Tebus / Perpanjangan)
+                if (!$filterFlow || $filterFlow === 'keluar') {
+                    $gadaiPayments = \App\Models\GadaiPaymentLog::whereHas('gadaiActive', function($q) use ($idAnggota) {
+                        $q->where('nasabah_id', $idAnggota);
+                    })->get();
+                    foreach ($gadaiPayments as $p) {
+                        $allTransaksi[] = (object)[
+                            'id' => 'G-PAY-'.$p->id,
+                            'tgl_transaksi' => $p->created_at,
+                            'nominal' => $p->nominal,
+                            'jenis' => 'Gadai - ' . ($p->jenis_pembayaran === 'tebus' ? 'Pelunasan' : 'Perpanjangan'),
+                            'is_inflow' => false,
+                            'url' => route('nasabah.gadai_baru.aktif-detail', $p->gadai_active_id),
+                            'icon_type' => 'gadai'
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // 4. Pinjaman
+        if (!$filterType || $filterType === 'pinjaman') {
+            try {
+                // Pencairan Pinjaman (Initial Loan approval)
+                if (!$filterFlow || $filterFlow === 'masuk') {
+                    $loans = \App\Models\PinjamanH::where('id_anggota', $idAnggota)->get();
+                    foreach ($loans as $l) {
+                        $allTransaksi[] = (object)[
+                            'id' => 'P-DISB-'.$l->id,
+                            'tgl_transaksi' => $l->tgl_pinjam,
+                            'nominal' => $l->jumlah_pinjam,
+                            'jenis' => 'Pinjaman - Pencairan',
+                            'is_inflow' => true,
+                            'url' => route('nasabah.pinjaman.detail-pinjaman', $l->id),
+                            'icon_type' => 'pinjaman'
+                        ];
+                    }
+                }
+
+                // Payment installments (PengajuanPembayaranPinjaman)
+                if (!$filterFlow || $filterFlow === 'keluar') {
+                    $loanPayments = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
+                        ->where('status', '3')
+                        ->get();
+                    foreach ($loanPayments as $p) {
+                        $allTransaksi[] = (object)[
+                            'id' => 'P-PAY-'.$p->id,
+                            'tgl_transaksi' => $p->tgl_pembayaran,
+                            'nominal' => $p->nominal,
+                            'jenis' => 'Pinjaman - Angsuran ' . ($p->jenis_tempo === 'bulanan' ? 'Bulanan' : 'Musiman'),
+                            'is_inflow' => false,
+                            'url' => route('nasabah.pinjaman.detail-pembayaran', $p->id),
+                            'icon_type' => 'pinjaman'
+                        ];
+                    }
+                }
+            } catch (\Exception $e) {}
+        }
+
+        // Sort by tgl_transaksi descending
+        usort($allTransaksi, function($a, $b) {
+            $timeA = $a->tgl_transaksi ? Carbon::parse($a->tgl_transaksi)->timestamp : 0;
+            $timeB = $b->tgl_transaksi ? Carbon::parse($b->tgl_transaksi)->timestamp : 0;
+            return $timeB - $timeA;
+        });
+
+        // Paginate manually
+        $perPage = 10;
+        $page = \Illuminate\Pagination\Paginator::resolveCurrentPage('page') ?: 1;
+        $allTransaksiCollection = collect($allTransaksi);
+        $paginatedItems = $allTransaksiCollection->forPage($page, $perPage)->values()->all();
+        $transaksi = new \Illuminate\Pagination\LengthAwarePaginator(
+            $paginatedItems,
+            $allTransaksiCollection->count(),
+            $perPage,
+            $page,
+            [
+                'path' => \Illuminate\Pagination\Paginator::resolveCurrentPath(),
+                'query' => $request->query()
+            ]
+        );
+
+        return view('nasabah.riwayat-transaksi', compact('transaksi'));
+    }
+
+    /**
      * Show unified pengajuan pending page.
      */
     public function pengajuanPending(Request $request)
@@ -289,6 +481,7 @@ class DashboardController extends Controller
         
         // Get Pengajuan Pinjaman
         $pinjaman = PengajuanPinjaman::where('id_anggota', $idAnggota)
+            ->where('status', '1') // ONLY pending
             ->whereDoesntHave('pinjaman') // Belum disetujui
             ->latest()
             ->get();
@@ -306,12 +499,31 @@ class DashboardController extends Controller
                 'durasi' => $p->durasi ?? null,
             ];
         }
+
+        // Get Pengajuan Pembayaran Pinjaman (Angsuran)
+        $pinjamanBayar = \App\Models\PengajuanPembayaranPinjaman::where('id_anggota', $idAnggota)
+            ->where('status', '1') // Pending
+            ->latest()
+            ->get();
+        
+        foreach ($pinjamanBayar as $pb) {
+            $allPengajuan[] = [
+                'id' => $pb->id,
+                'type' => 'pinjaman_bayar',
+                'jenis' => 'Pembayaran Pinjaman',
+                'nominal' => $pb->nominal ?? 0,
+                'tanggal' => $pb->created_at,
+                'status' => $this->getStatusText($pb->status),
+                'detail_url' => route('nasabah.pinjaman.detail-pembayaran', $pb->id),
+                'metode' => $pb->metode_pembayaran ?? 'N/A',
+            ];
+        }
         
         // Get Pengajuan Deposito
         $deposito = PengajuanDeposito::where('id_nasabah', $idAnggota)
             ->where('status', '1') // Pending
             ->whereDoesntHave('deposito') // Belum disetujui
-            ->with(['tenor', 'jenisDeposito'])
+            ->with(['tenor', 'paket'])
             ->latest()
             ->get();
         
@@ -325,7 +537,7 @@ class DashboardController extends Controller
                 'status' => $this->getStatusText($d->status),
                 'detail_url' => '#', // TODO: Add route when deposito detail page is ready
                 'metode' => $d->metode_setor ?? 'N/A',
-                'tenor' => $d->tenor ? $d->tenor->nama : null,
+                'tenor' => $d->tenor ? $d->tenor->tenor_bulan . ' Bulan' : ($d->paket ? $d->paket->tenor_bulan . ' Bulan' : null),
             ];
         }
         
@@ -353,16 +565,47 @@ class DashboardController extends Controller
                 'item' => $g->itemGadai ? $g->itemGadai->nama_item : 'N/A',
             ];
         }
+
+        // Get Pengajuan Tebus / Perpanjangan Gadai (GadaiPengajuan)
+        $gadaiRepay = \App\Models\GadaiPengajuan::whereHas('gadaiActive', function($q) use ($idAnggota) {
+                $q->where('nasabah_id', $idAnggota);
+            })
+            ->where('status', 'pending')
+            ->with(['gadaiActive.item'])
+            ->latest()
+            ->get();
+
+        foreach ($gadaiRepay as $gr) {
+            $allPengajuan[] = [
+                'id' => $gr->id,
+                'type' => 'gadai_repay',
+                'jenis' => 'Gadai - ' . ($gr->jenis_pengajuan === 'lunas' ? 'Pelunasan' : 'Perpanjangan'),
+                'nominal' => $gr->nominal ?? 0,
+                'tanggal' => $gr->created_at,
+                'status' => $this->getStatusText($gr->status),
+                'detail_url' => route('nasabah.gadai_baru.status-pengajuan'),
+                'metode' => $gr->metode ?? 'N/A',
+                'item' => $gr->gadaiActive && $gr->gadaiActive->item ? $gr->gadaiActive->item->nama_item : 'N/A',
+            ];
+        }
         
         // Sort by tanggal (newest first)
         usort($allPengajuan, function($a, $b) {
-            return $b['tanggal']->timestamp - $a['tanggal']->timestamp;
+            $timeA = $a['tanggal'] ? $a['tanggal']->timestamp : 0;
+            $timeB = $b['tanggal'] ? $b['tanggal']->timestamp : 0;
+            return $timeB - $timeA;
         });
         
         // Filter by type if requested
         $filterType = $request->get('type');
         if ($filterType) {
             $allPengajuan = array_filter($allPengajuan, function($item) use ($filterType) {
+                if ($filterType === 'pinjaman') {
+                    return $item['type'] === 'pinjaman' || $item['type'] === 'pinjaman_bayar';
+                }
+                if ($filterType === 'gadai') {
+                    return $item['type'] === 'gadai' || $item['type'] === 'gadai_repay';
+                }
                 return $item['type'] == $filterType;
             });
         }

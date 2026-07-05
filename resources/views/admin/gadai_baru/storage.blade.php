@@ -149,13 +149,13 @@
                                  @endphp
                                  <div class="w-40 h-44 {{ $cardClass }} rounded-xl p-3 flex flex-col justify-between shadow-sm transition-all hover:shadow-md cursor-default group relative"
                                       x-data="{}" 
-                                      title="{{ $slot->nasabah_nama }} — {{ $slot->item_nama }}">
+                                      title="{{ $slot->nasabah_nama }} — {{ $slot->nama_barang_manual ?: $slot->item_nama }}">
                                       <div class="flex justify-between items-start">
                                           <div class="font-mono font-black text-sm {{ $textClass }}">{{ $slot->kode_slot }}</div>
                                           <span class="px-1.5 py-0.5 {{ $badgeClass }} text-[9px] font-black rounded uppercase tracking-wide">{{ $statusText }}</span>
                                       </div>
                                       <div class="flex-1 flex flex-col justify-center min-w-0 my-2">
-                                          <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->item_nama }}">{{ $slot->item_nama }}</div>
+                                          <div class="text-xs {{ $textClass }} font-black truncate leading-tight mb-1" title="{{ $slot->nama_barang_manual ?: $slot->item_nama }}">{{ $slot->nama_barang_manual ?: $slot->item_nama }}</div>
                                           <div class="text-[10px] text-gray-500 font-semibold truncate" title="{{ $slot->nasabah_nama }}">{{ $slot->nasabah_nama }}</div>
                                           @if($isLunas && $slot->tgl_ambil_limit)
                                               @php
@@ -170,12 +170,12 @@
                                           @endif
                                       </div>
                                       @if($isExpired)
-                                          <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                          <button onclick="openEmptyAuctionModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->nama_barang_manual ?: $slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
                                               Kosongkan & Lelang
                                           </button>
                                       @elseif($isLunas)
-                                          <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->item_nama) }}')"
+                                          <button onclick="openAmbilModal({{ $slot->active_gadai_id }}, '{{ $slot->kode_slot }}', '{{ addslashes($slot->nasabah_nama) }}', '{{ addslashes($slot->nama_barang_manual ?: $slot->item_nama) }}')"
                                               class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 active:scale-95 text-white text-[10px] font-black rounded-lg transition-all shadow-sm uppercase tracking-wider">
                                               Serahkan Barang
                                           </button>
@@ -405,6 +405,79 @@
 </div>
 
 <script>
+    let selectedAuctionFiles = [];
+    let selectedAmbilFiles = [];
+
+    function updateAuctionFileInput() {
+        const fileInput = document.querySelector('#emptyAuctionModal input[type="file"]');
+        if (!fileInput) return;
+        const dataTransfer = new DataTransfer();
+        selectedAuctionFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    }
+
+    function updateAmbilFileInput() {
+        const fileInput = document.querySelector('#ambilModal input[type="file"]');
+        if (!fileInput) return;
+        const dataTransfer = new DataTransfer();
+        selectedAmbilFiles.forEach(file => dataTransfer.items.add(file));
+        fileInput.files = dataTransfer.files;
+    }
+
+    function renderAuctionPreviews() {
+        const container = document.getElementById('image_preview_container');
+        if (!container) return;
+        container.innerHTML = '';
+        selectedAuctionFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const div = document.createElement('div');
+                div.className = 'relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shadow-sm group';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeAuctionFile(${index})" class="absolute top-0.5 right-0.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black transition-all hover:scale-110 shadow-sm">
+                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function renderAmbilPreviews() {
+        const container = document.getElementById('ambil_image_preview_container');
+        if (!container) return;
+        container.innerHTML = '';
+        selectedAmbilFiles.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const div = document.createElement('div');
+                div.className = 'relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shadow-sm group';
+                div.innerHTML = `
+                    <img src="${e.target.result}" class="w-full h-full object-cover">
+                    <button type="button" onclick="removeAmbilFile(${index})" class="absolute top-0.5 right-0.5 bg-rose-500/90 hover:bg-rose-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] font-black transition-all hover:scale-110 shadow-sm">
+                        <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                `;
+                container.appendChild(div);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function removeAuctionFile(index) {
+        selectedAuctionFiles.splice(index, 1);
+        updateAuctionFileInput();
+        renderAuctionPreviews();
+    }
+
+    function removeAmbilFile(index) {
+        selectedAmbilFiles.splice(index, 1);
+        updateAmbilFileInput();
+        renderAmbilPreviews();
+    }
+
     function openEmptyAuctionModal(gadaiId, slotKode, nasabahNama, itemNama) {
         document.getElementById('modal_gadai_id').value = gadaiId;
         document.getElementById('modal_slot_kode').textContent = slotKode;
@@ -414,24 +487,24 @@
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
+
     function closeEmptyAuctionModal() {
         document.getElementById('emptyAuctionModal').classList.add('hidden');
         document.body.style.overflow = '';
         document.getElementById('image_preview_container').innerHTML = '';
+        selectedAuctionFiles = [];
+        const fileInput = document.querySelector('#emptyAuctionModal input[type="file"]');
+        if (fileInput) fileInput.value = '';
     }
+
     function previewImages(event) {
-        const container = document.getElementById('image_preview_container');
-        container.innerHTML = '';
         Array.from(event.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const div = document.createElement('div');
-                div.className = 'relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shadow-sm';
-                div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                container.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+            if (!selectedAuctionFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedAuctionFiles.push(file);
+            }
         });
+        updateAuctionFileInput();
+        renderAuctionPreviews();
     }
 
     function openAmbilModal(gadaiId, slotKode, nasabahNama, itemNama) {
@@ -444,14 +517,19 @@
         modal.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
     }
+
     function closeAmbilModal() {
         document.getElementById('ambilModal').classList.add('hidden');
         document.body.style.overflow = '';
         document.getElementById('ambil_image_preview_container').innerHTML = '';
+        selectedAmbilFiles = [];
+        const fileInput = document.querySelector('#ambilModal input[type="file"]');
+        if (fileInput) fileInput.value = '';
         const checkbox = document.getElementById('struk_hilang');
         if (checkbox) checkbox.checked = false;
         toggleDendaSection(false);
     }
+
     function toggleDendaSection(isChecked) {
         const dendaSection = document.getElementById('denda_payment_section');
         if (dendaSection) {
@@ -462,19 +540,15 @@
             }
         }
     }
+
     function previewAmbilImages(event) {
-        const container = document.getElementById('ambil_image_preview_container');
-        container.innerHTML = '';
         Array.from(event.target.files).forEach(file => {
-            const reader = new FileReader();
-            reader.onload = e => {
-                const div = document.createElement('div');
-                div.className = 'relative w-14 h-14 rounded-xl overflow-hidden border border-gray-200 shadow-sm';
-                div.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover">`;
-                container.appendChild(div);
-            };
-            reader.readAsDataURL(file);
+            if (!selectedAmbilFiles.some(f => f.name === file.name && f.size === file.size)) {
+                selectedAmbilFiles.push(file);
+            }
         });
+        updateAmbilFileInput();
+        renderAmbilPreviews();
     }
 </script>
 @endsection
