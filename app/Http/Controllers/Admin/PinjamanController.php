@@ -224,6 +224,7 @@ class PinjamanController extends Controller
             $pinjaman = PinjamanH::create([
                 'id' => $idPinjaman,
                 'id_anggota' => $pengajuan->id_anggota,
+                'id_tujuan' => $pengajuan->id_tujuan,
                 'id_pengajuan' => $pengajuan->id,
                 'jumlah_pinjam' => $jumlahPinjam,
                 'lama_pinjam' => $durasi,
@@ -564,6 +565,7 @@ class PinjamanController extends Controller
                 PinjamanH::create([
                     'id' => $idPinjaman,
                     'id_anggota' => $pengajuan->id_anggota,
+                    'id_tujuan' => $pengajuan->id_tujuan,
                     'id_pengajuan' => $pengajuan->id,
                     'jumlah_pinjam' => $nominal,
                     'lama_pinjam' => $durasi,
@@ -779,7 +781,22 @@ class PinjamanController extends Controller
             ? $pinjaman->tempoBulanan->sortBy('no_urut')
             : $pinjaman->tempoMingguan->sortBy('no_urut');
 
-        return view('admin.pinjaman.detail-pinjaman', compact('pinjaman', 'angsuran'));
+        // Foto pencairan: owner_id = id_pengajuan, owner_trans = PNCR
+        $fotoPencairan = collect();
+        if ($pinjaman->pengajuan) {
+            $fotoPencairan = BuktiFoto::where('owner_id', $pinjaman->pengajuan->id)
+                ->where('owner_fitur', 'P')
+                ->where('owner_trans', 'PNCR')
+                ->get();
+        }
+
+        // Foto transaksi lain-lain: owner_id = id pinjaman, owner_trans bukan PNCR dan bukan LUNAS
+        $fotoLainLain = BuktiFoto::where('owner_id', $pinjaman->id)
+            ->where('owner_fitur', 'P')
+            ->whereNotIn('owner_trans', ['PNCR', 'LUNAS'])
+            ->get();
+
+        return view('admin.pinjaman.detail-pinjaman', compact('pinjaman', 'angsuran', 'fotoPencairan', 'fotoLainLain'));
     }
 
     /**
