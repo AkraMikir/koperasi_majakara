@@ -428,6 +428,18 @@ class ActivityLogService
         );
     }
 
+    public function logResetPasswordNasabah(int $nasabahId, string $nasabahNama): void
+    {
+        $this->log(
+            'reset_password_nasabah',
+            'nasabah',
+            "Mereset password nasabah {$nasabahNama}",
+            ['nasabah' => $nasabahNama],
+            'Nasabah',
+            $nasabahId
+        );
+    }
+
     public function logVerifyNasabah(int $nasabahId, string $nasabahNama): void
     {
         $this->log(

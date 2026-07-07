@@ -124,5 +124,15 @@ class AppServiceProvider extends ServiceProvider
         Blade::if('canManageNasabah', function () {
             return auth()->check() && app(AdminPermissionService::class)->canManageNasabah(auth()->user());
         });
+
+        // Check if user can reset Nasabah PIN
+        Blade::if('canResetNasabahPin', function () {
+            return auth()->check() && app(AdminPermissionService::class)->canResetNasabahPin(auth()->user());
+        });
+
+        // Check if user can reset Nasabah Password
+        Blade::if('canResetNasabahPassword', function () {
+            return auth()->check() && app(AdminPermissionService::class)->canResetNasabahPassword(auth()->user());
+        });
     }
 }
