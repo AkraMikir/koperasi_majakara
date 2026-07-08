@@ -222,7 +222,7 @@
                             <span class="text-sm text-gray-600">Bunga:</span>
                             <div class="text-right">
                                 <span class="font-semibold text-gray-900 block" id="estimasiFlatPerHariTransfer">flat - per hari</span>
-                                <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>
+                                <!-- <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span> -->
                             </div>
                         </div>
                         <div class="flex justify-between items-center flex-wrap gap-1">
@@ -632,7 +632,7 @@ function updateEstimasiTransfer() {
             if (!data.success) return;
             const d = data.data;
             document.getElementById('estimasiNominalTransfer').textContent = 'Rp ' + d.nominal.toLocaleString('id-ID');
-            document.getElementById('estimasiBungaTransfer').textContent = d.bunga_persen + '% (Rp ' + d.bunga_total.toLocaleString('id-ID') + ')';
+            // document.getElementById('estimasiBungaTransfer').textContent = d.bunga_persen + '% (Rp ' + d.bunga_total.toLocaleString('id-ID') + ')';
             document.getElementById('estimasiFlatPerHariTransfer').textContent = 'flat ' + (d.bunga_flat_hari !== undefined ? d.bunga_flat_hari.toLocaleString('id-ID') : '0') + '% per hari';
             document.getElementById('estimasiTotalTransfer').textContent = 'Rp ' + d.total_yang_harus_dibayar.toLocaleString('id-ID');
             document.getElementById('estimasiAngsuranTransfer').textContent = 'Rp ' + d.angsuran_per_bulan.toLocaleString('id-ID');

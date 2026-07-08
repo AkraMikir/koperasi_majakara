@@ -159,6 +159,7 @@ class StrukController extends Controller
             'tujuan_pinjaman' => $pinjaman->tujuanPinjaman->tujuan ?? 'Modal Usaha',
             'tanggal' => $pinjaman->tgl_pinjam ? $pinjaman->tgl_pinjam->format('d/m/Y') : now()->format('d/m/Y'),
             'bunga_rate' => (float)$pinjaman->bunga,
+            'bunga_hari' => (float)$pinjaman->bunga_flat_hari,
             'lama_pinjam' => $pinjaman->lama_pinjam,
             'tanggal_jatuh_tempo' => $tanggal_jatuh_tempo,
             'denda_rate' => (float)$pinjaman->denda_persen,
