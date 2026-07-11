@@ -342,7 +342,7 @@
                                 <div class="w-12 h-12 bg-linear-to-br from-[#8b6f2f] to-[#d4af37] text-white rounded-xl flex items-center justify-center font-bold shrink-0 text-lg">1</div>
                                 <div class="bg-[#674c1d]/5 rounded-xl p-4 flex-1">
                                     <h4 class="font-bold text-gray-900 mb-1">Isi Form Pengajuan</h4>
-                                    <p class="text-gray-600 text-sm">Input nominal dan durasi pinjaman (1-24 bulan)</p>
+                                    <p class="text-gray-600 text-sm">Input nominal dan durasi pinjaman (1-3 bulan)</p>
                                 </div>
                             </div>
                             <div class="flex items-start space-x-4">
@@ -372,11 +372,10 @@
                         <div class="mt-8 p-4 bg-[#d4af37]/10 rounded-xl border-l-4 border-[#d4af37]">
                             <h4 class="font-bold text-[#674c1d] mb-2">💡 Info Bunga Pinjaman</h4>
                             <p class="text-sm text-gray-700 mb-2">Bunga otomatis disesuaikan berdasarkan durasi:</p>
-                            <div class="grid grid-cols-2 gap-2 text-sm">
-                                <div class="flex justify-between"><span class="text-gray-600">1-3 bulan:</span><span class="font-bold text-[#674c1d]">10%</span></div>
-                                <div class="flex justify-between"><span class="text-gray-600">4-6 bulan:</span><span class="font-bold text-[#674c1d]">12%</span></div>
-                                <div class="flex justify-between"><span class="text-gray-600">7-9 bulan:</span><span class="font-bold text-[#674c1d]">14%</span></div>
-                                <div class="flex justify-between"><span class="text-gray-600">10-12 bulan:</span><span class="font-bold text-[#674c1d]">16%</span></div>
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm">
+                                <div class="flex justify-between"><span class="text-gray-600">1 bulan:</span><span class="font-bold text-[#674c1d]">6%</span></div>
+                                <div class="flex justify-between"><span class="text-gray-600">2 bulan:</span><span class="font-bold text-[#674c1d]">8%</span></div>
+                                <div class="flex justify-between"><span class="text-gray-600">3 bulan:</span><span class="font-bold text-[#674c1d]">10%</span></div>
                             </div>
                             <p class="text-xs text-gray-500 mt-2">*Bunga dibagi ke setiap angsuran bulanan</p>
                         </div>
@@ -401,7 +400,7 @@
                             <div class="space-y-3 mb-8">
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-[#674c1d] rounded-full"></div>
-                                    <p class="text-gray-700">Durasi fleksibel 1-24 bulan</p>
+                                    <p class="text-gray-700">Durasi fleksibel 1-3 bulan</p>
                                 </div>
                                 <div class="flex items-center space-x-3">
                                     <div class="w-2 h-2 bg-[#674c1d] rounded-full"></div>
@@ -704,11 +703,11 @@
                     <div class="space-y-3 text-sm">
                         <div class="flex items-center justify-between py-2 border-b border-gray-100">
                             <span class="text-gray-600">Bunga:</span>
-                            <span class="font-semibold text-[#8b6f2f]">10-24%</span>
+                            <span class="font-semibold text-[#8b6f2f]">6-10%</span>
                         </div>
                         <div class="flex items-center justify-between py-2 border-b border-gray-100">
                             <span class="text-gray-600">Durasi:</span>
-                            <span class="font-semibold text-gray-900">1-24 bln</span>
+                            <span class="font-semibold text-gray-900">1-3 bln</span>
                         </div>
                         <div class="flex items-center justify-between py-2 border-b border-gray-100">
                             <span class="text-gray-600">Minimal:</span>
