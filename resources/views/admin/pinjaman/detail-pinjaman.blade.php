@@ -222,6 +222,60 @@
             </div>
             @endif
 
+            <!-- Foto Pencairan -->
+            @if($fotoPencairan->count() > 0)
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-primary font-display mb-1">Foto Pencairan</h3>
+                <p class="text-xs text-gray-500 mb-4">Bukti transfer saat pencairan dana pinjaman</p>
+                <div class="space-y-4">
+                    @foreach($fotoPencairan as $foto)
+                    @php $imgUrl = asset('storage/' . $foto->file_path); @endphp
+                    <div>
+                        <div class="rounded-xl overflow-hidden border border-gray-200 cursor-pointer" onclick="window.open('{{ $imgUrl }}', '_blank')">
+                            <img src="{{ $imgUrl }}" alt="Foto Pencairan" class="w-full h-auto hover:scale-105 transition-transform duration-200">
+                        </div>
+                        @if($foto->keterangan)
+                        <p class="text-xs text-gray-500 mt-2">{{ $foto->keterangan }}</p>
+                        @endif
+                        <a href="{{ $imgUrl }}" download class="mt-2 w-full inline-flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Unduh
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Foto Transaksi Lain-lain -->
+            @if($fotoLainLain->count() > 0)
+            <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
+                <h3 class="text-lg font-bold text-primary font-display mb-1">Foto Transaksi Lain-lain</h3>
+                <p class="text-xs text-gray-500 mb-4">Dokumen atau bukti transaksi tambahan terkait pinjaman ini</p>
+                <div class="space-y-4">
+                    @foreach($fotoLainLain as $foto)
+                    @php $imgUrl = asset('storage/' . $foto->file_path); @endphp
+                    <div>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-mono">{{ $foto->owner_trans }}</span>
+                        </div>
+                        <div class="rounded-xl overflow-hidden border border-gray-200 cursor-pointer" onclick="window.open('{{ $imgUrl }}', '_blank')">
+                            <img src="{{ $imgUrl }}" alt="Foto Transaksi" class="w-full h-auto hover:scale-105 transition-transform duration-200">
+                        </div>
+                        @if($foto->keterangan)
+                        <p class="text-xs text-gray-500 mt-2">{{ $foto->keterangan }}</p>
+                        @endif
+                        <a href="{{ $imgUrl }}" download class="mt-2 w-full inline-flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Unduh
+                        </a>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+
             <!-- Pelunasan Dipercepat — hanya Admin Utama -->
             @canPelunasanDipercepat
             @if($pinjaman->lunas === 'belum')

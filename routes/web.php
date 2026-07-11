@@ -643,11 +643,19 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
             Route::post('/change/{id}/reject', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'rejectChange'])->name('reject-change');
         });
 
-        // Management routes - ONLY Admin Utama (Admin Operasional CANNOT access)
-        Route::middleware('admin.permission:manage-nasabah')->group(function () {
-            Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])->name('generate-pin');
-            Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])->name('reset-pin');
-        });
+        // PIN Management routes - Admin Utama & Admin Operasional
+        Route::get('/generate-pin/random', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'generateRandomPin'])
+            ->middleware('admin.permission:reset-nasabah-pin')
+            ->name('generate-pin');
+
+        Route::post('/{id}/reset-pin', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPin'])
+            ->middleware('admin.permission:reset-nasabah-pin')
+            ->name('reset-pin');
+
+        // Password Management routes - Admin Utama & Admin Operasional
+        Route::post('/{id}/reset-password', [\App\Http\Controllers\Admin\NasabahManagementController::class, 'resetPassword'])
+            ->middleware('admin.permission:reset-nasabah-password')
+            ->name('reset-password');
     });
     
     // Petty Cash Routes

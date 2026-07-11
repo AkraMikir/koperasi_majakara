@@ -49,6 +49,12 @@ class CheckAdminPermission
             case 'manage-nasabah':
                 $hasPermission = $this->permissionService->canManageNasabah($user);
                 break;
+            case 'reset-nasabah-pin':
+                $hasPermission = $this->permissionService->canResetNasabahPin($user);
+                break;
+            case 'reset-nasabah-password':
+                $hasPermission = $this->permissionService->canResetNasabahPassword($user);
+                break;
             case 'verify-nasabah':
                 $hasPermission = $this->permissionService->canVerifyNasabah($user);
                 break;

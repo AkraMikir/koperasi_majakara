@@ -349,17 +349,15 @@ class NasabahManagementController extends Controller
      */
     public function resetPin(Request $request, $id)
     {
-        // Authorization: Only Admin Utama can reset nasabah PIN
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canResetNasabahPin(auth()->user())) {
             return response()->json([
                 'success' => false,
-                'message' => 'Anda tidak memiliki akses untuk fitur ini. Hanya Admin Utama yang dapat mereset PIN nasabah.'
+                'message' => 'Anda tidak memiliki akses untuk fitur ini.'
             ], 403);
         }
 
         $nasabah = Nasabah::with('user')->findOrFail($id);
         
-        // Validasi input PIN baru
         $request->validate([
             'pin_baru' => 'required|digits:6',
         ], [
@@ -368,19 +366,18 @@ class NasabahManagementController extends Controller
         ]);
 
         try {
-            $pinBaru = (int) $request->pin_baru;
-
-            // Update PIN nasabah
+            // Simpan sebagai string agar leading zero tidak terpotong
+            // Eloquent cast 'hashed' pada kolom pin akan otomatis hash
             $nasabah->user->update([
-                'pin' => $pinBaru,
+                'pin' => $request->pin_baru,
             ]);
 
             Log::info('Admin reset PIN nasabah', [
-                'admin_id' => auth()->id(),
-                'admin_email' => auth()->user()->email,
-                'nasabah_id' => $nasabah->id,
+                'admin_id'      => auth()->id(),
+                'admin_email'   => auth()->user()->email,
+                'nasabah_id'    => $nasabah->id,
                 'nasabah_email' => $nasabah->user->email,
-                'timestamp' => now(),
+                'timestamp'     => now(),
             ]);
 
             app(ActivityLogService::class)->logResetPin($nasabah->id, $nasabah->user->nama ?? 'N/A');
@@ -388,12 +385,63 @@ class NasabahManagementController extends Controller
             return redirect()->back()->with('success', 'PIN nasabah berhasil direset. Silakan informasikan PIN baru kepada nasabah melalui WhatsApp.');
         } catch (\Exception $e) {
             Log::error('Error reset PIN nasabah', [
-                'admin_id' => auth()->id(),
+                'admin_id'   => auth()->id(),
                 'nasabah_id' => $nasabah->id,
-                'error' => $e->getMessage(),
+                'error'      => $e->getMessage(),
             ]);
 
             return redirect()->back()->with('error', 'Terjadi kesalahan saat reset PIN. Silakan coba lagi.');
+        }
+    }
+
+    /**
+     * Reset Password nasabah
+     * Route: POST /admin/nasabah/{id}/reset-password
+     */
+    public function resetPassword(Request $request, $id)
+    {
+        if (!app(\App\Services\AdminPermissionService::class)->canResetNasabahPassword(auth()->user())) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki akses untuk fitur ini.'
+            ], 403);
+        }
+
+        $nasabah = Nasabah::with('user')->findOrFail($id);
+
+        $request->validate([
+            'password_baru'              => 'required|string|min:8|confirmed',
+            'password_baru_confirmation' => 'required|string|min:8',
+        ], [
+            'password_baru.required'  => 'Password baru harus diisi',
+            'password_baru.min'       => 'Password minimal 8 karakter',
+            'password_baru.confirmed' => 'Konfirmasi password tidak cocok',
+        ]);
+
+        try {
+            $nasabah->user->update([
+                'password' => Hash::make($request->password_baru),
+            ]);
+
+            Log::info('Admin reset password nasabah', [
+                'admin_id'      => auth()->id(),
+                'admin_email'   => auth()->user()->email,
+                'nasabah_id'    => $nasabah->id,
+                'nasabah_email' => $nasabah->user->email,
+                'timestamp'     => now(),
+            ]);
+
+            app(ActivityLogService::class)->logResetPasswordNasabah($nasabah->id, $nasabah->user->nama ?? 'N/A');
+
+            return redirect()->back()->with('success', 'Password nasabah berhasil direset. Silakan informasikan password baru kepada nasabah melalui WhatsApp.');
+        } catch (\Exception $e) {
+            Log::error('Error reset password nasabah', [
+                'admin_id'   => auth()->id(),
+                'nasabah_id' => $nasabah->id,
+                'error'      => $e->getMessage(),
+            ]);
+
+            return redirect()->back()->with('error', 'Terjadi kesalahan saat reset password. Silakan coba lagi.');
         }
     }
 
@@ -403,8 +451,7 @@ class NasabahManagementController extends Controller
      */
     public function generateRandomPin()
     {
-        // Authorization: Only Admin Utama can generate random PIN
-        if (!app(\App\Services\AdminPermissionService::class)->canManageNasabah(auth()->user())) {
+        if (!app(\App\Services\AdminPermissionService::class)->canResetNasabahPin(auth()->user())) {
             return response()->json([
                 'success' => false,
                 'message' => 'Anda tidak memiliki akses untuk fitur ini.'

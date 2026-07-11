@@ -207,11 +207,20 @@ class AdminPermissionService
 
     /**
      * Check if user can reset Nasabah PIN
-     * Admin Utama: YES | Admin Operasional: NO
+     * Admin Utama: YES | Admin Operasional: YES
      */
     public function canResetNasabahPin(?User $user): bool
     {
-        return $this->isAdminUtama($user);
+        return $this->isAdmin($user);
+    }
+
+    /**
+     * Check if user can reset Nasabah Password
+     * Admin Utama: YES | Admin Operasional: YES
+     */
+    public function canResetNasabahPassword(?User $user): bool
+    {
+        return $this->isAdmin($user);
     }
 
     /**

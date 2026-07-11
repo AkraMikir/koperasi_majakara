@@ -238,7 +238,7 @@
                     Suku Bunga</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle; font-size: 11px;">
-                    : {{ number_format($data['bunga_rate'] ?? 0, 2) }}% Flat per bulan</td>
+                    : {{ number_format($data['bunga_hari'] ?? 0, 2) }}% Flat per hari</td>
                 <td
                     style="border: none; padding: 2px 4px; text-align: left; vertical-align: middle;">
                     Jangka Waktu Pelunasan</td>

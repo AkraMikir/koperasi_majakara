@@ -606,7 +606,12 @@ class RegisterController extends Controller
         // Sub-step 5: Rekening (Moved from Substep 4)
         elseif ($subStep == 5) {
             $validationRules = [
-                'no_rekening' => 'required|regex:/^[0-9]+$/|max:16',
+                'no_rekening' => [
+                    'required',
+                    'regex:/^[0-9]+$/',
+                    'max:16',
+                    \Illuminate\Validation\Rule::unique('tbl_data_rek', 'no_rekening'),
+                ],
                 'nama_pemilik_rekening' => 'required|string|max:255',
                 'jenis_atm' => 'required|string|max:255',
             ];
@@ -642,6 +647,7 @@ class RegisterController extends Controller
         } elseif ($subStep == 4 || $subStep == 5) {
             $customMessages = [
                 'no_rekening.regex' => 'Nomor rekening hanya boleh berisi angka.',
+                'no_rekening.unique' => 'Nomor rekening sudah terdaftar di sistem.',
             ];
         }
         

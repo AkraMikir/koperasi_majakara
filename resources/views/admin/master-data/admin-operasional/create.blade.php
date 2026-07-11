@@ -207,7 +207,8 @@
                                 <li>Admin Operasional dapat melakukan approval tabungan & pinjaman</li>
                                 <li>Tidak dapat membuat/menghapus data transaksi manual</li>
                                 <li>Tidak dapat mengubah Master Data</li>
-                                <li>Tidak dapat mengelola akun nasabah (approve/reset PIN)</li>
+                                <li>Dapat mereset PIN dan password nasabah</li>
+                                <li>Tidak dapat menghapus/membuat data transaksi manual nasabah</li>
                             </ul>
                         </div>
                     </div>
