@@ -222,7 +222,7 @@
                             <span class="text-sm text-gray-600">Bunga:</span>
                             <div class="text-right">
                                 <span class="font-semibold text-gray-900 block" id="estimasiFlatPerHariTransfer">flat - per hari</span>
-                                <!-- <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span> -->
+                                <!-- <span class="text-sm text-gray-500 block" id="estimasiBungaTransfer">-</span>   -->
                             </div>
                         </div>
                         <div class="flex justify-between items-center flex-wrap gap-1">
