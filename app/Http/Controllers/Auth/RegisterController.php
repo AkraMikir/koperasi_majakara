@@ -1138,20 +1138,22 @@ class RegisterController extends Controller
             $isResend = $request->session()->has('otp_sent_at');
 
             if ($isResend) {
-                // Resend OTP - invalidate old OTP first
+                // Resend OTP - invalidate old OTP first, pass email dari UserTemp
                 $otpResult = $this->otpService->resend(
                     $nomorHpDisplay,
                     $sessionId,
                     null, // user_id null karena masih temp
-                    'registration'
+                    'registration',
+                    $userTemp->email ?? null // email untuk pengiriman OTP
                 );
             } else {
-                // First time send OTP
+                // First time send OTP — pass email dari UserTemp
                 $otpResult = $this->otpService->generateAndSend(
                     $nomorHpDisplay,
                     $sessionId,
                     null, // user_id null karena masih temp
-                    'registration'
+                    'registration',
+                    $userTemp->email ?? null // email untuk pengiriman OTP
                 );
             }
 
@@ -1178,9 +1180,12 @@ class RegisterController extends Controller
                     'is_resend' => $isResend,
                 ]);
 
-                $message = $isResend 
-                    ? 'Kode OTP baru telah dikirim ke WhatsApp Anda.' 
-                    : 'Kode OTP telah dikirim ke WhatsApp nomor ' . $nomorHpDisplay . '. Silakan cek pesan masuk Anda.';
+                $maskedEmail = $userTemp->email
+                    ? preg_replace('/(?<=.{2}).(?=[^@]*@)/', '*', $userTemp->email)
+                    : '';
+                $message = $isResend
+                    ? 'Kode OTP baru telah dikirim ke email Anda.'
+                    : 'Kode OTP telah dikirim ke email ' . $maskedEmail . '. Silakan cek kotak masuk.';
 
                 return redirect()->route('register', ['step' => 2])
                     ->with('success', $message);
@@ -1304,6 +1309,7 @@ class RegisterController extends Controller
             'sessionId' => $sessionId,
             'formData' => [],
             'phone' => $nomorHpDisplay,
+            'email' => $userTemp->email ?? '',
             'otpSent' => $otpSent, // Flag apakah OTP sudah dikirim
             'remainingCooldown' => $remainingCooldown, // Seconds remaining for resend
             'otpExpiresAt' => $otpExpiresAt,

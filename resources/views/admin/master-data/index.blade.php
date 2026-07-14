@@ -626,7 +626,7 @@
                         </span>
                     </div>
                     <h3 class="text-base font-bold text-gray-900 mb-1.5 group-hover:text-red-600 transition-colors font-display">Master OTP Default</h3>
-                    <p class="text-xs text-gray-500 leading-relaxed font-sans">Konfigurasi kode OTP default (fallback) jika server pengiriman OTP WhatsApp mengalami kendala.</p>
+                    <p class="text-xs text-gray-500 leading-relaxed font-sans">Konfigurasi kode OTP default (fallback) jika server pengiriman OTP Email mengalami kendala.</p>
                 </div>
                 <div class="flex items-center justify-end mt-4 pt-3 border-t border-gray-50">
                     <span class="text-xs font-semibold text-red-600 group-hover:underline flex items-center gap-1">

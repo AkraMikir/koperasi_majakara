@@ -125,23 +125,26 @@ class SettingController extends Controller
             // Simpan session ID di session
             session(['password_reset_session' => $sessionId]);
 
-            // Kirim OTP
+            // Kirim OTP — kirim ke email user
             $result = $this->otpService->generateAndSend(
                 $user->nomor_hp,
                 $sessionId,
                 $user->id,
-                'password_reset'
+                'password_reset',
+                $user->email
             );
 
             if ($result['success']) {
                 Log::info('OTP password reset sent', [
                     'user_id' => $user->id,
-                    'phone' => $user->nomor_hp,
+                    'email'   => $user->email,
                 ]);
+
+                $maskedEmail = preg_replace('/(?<=.{2}).(?=[^@]*@)/', '*', $user->email ?? '');
 
                 return response()->json([
                     'success' => true,
-                    'message' => 'Kode OTP telah dikirim ke WhatsApp Anda (***' . substr($user->nomor_hp, -4) . ')',
+                    'message' => 'Kode OTP telah dikirim ke email Anda (' . $maskedEmail . ')',
                 ]);
             } else {
                 return response()->json([

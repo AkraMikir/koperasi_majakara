@@ -13,33 +13,56 @@ use Illuminate\Support\Facades\Hash;
 
 class OtpService
 {
-    protected $whatsAppService;
+    protected $emailService;
     protected $otpLength;
     protected $expiryMinutes;
     protected $maxAttempts;
     protected $cooldownSeconds;
 
-    public function __construct(WhatsAppService $whatsAppService)
+    public function __construct(EmailService $emailService)
     {
-        $this->whatsAppService = $whatsAppService;
-        $this->otpLength = (int) config('services.otp.length', 6);
-        $this->expiryMinutes = (int) config('services.otp.expiry_minutes', 5);
-        $this->maxAttempts = (int) config('services.otp.max_attempts', 3);
+        $this->emailService    = $emailService;
+        $this->otpLength       = (int) config('services.otp.length', 6);
+        $this->expiryMinutes   = (int) config('services.otp.expiry_minutes', 5);
+        $this->maxAttempts     = (int) config('services.otp.max_attempts', 3);
         $this->cooldownSeconds = min(60, (int) config('services.otp.cooldown_seconds', 60)); // max 1 menit
     }
 
     /**
-     * Generate dan kirim OTP ke WhatsApp
+     * Generate dan kirim OTP ke Email
      * 
-     * @param string $phoneNumber Nomor telepon tujuan
-     * @param string $sessionId Session ID registrasi
-     * @param int|null $userTempId ID dari users_temp (optional)
-     * @param string $type Tipe OTP (registration, transaction, login, pin)
+     * @param string      $phoneNumber Nomor telepon (digunakan untuk rate-limit & lookup di tbl_otp)
+     * @param string      $sessionId   Session ID registrasi / transaksi
+     * @param int|null    $userTempId  ID dari users / users_temp (optional)
+     * @param string      $type        Tipe OTP (registration, transaction, login, pin, password_reset)
+     * @param string|null $email       Alamat email tujuan. Jika null, akan di-resolve dari User::find($userTempId)
      * @return array ['success' => bool, 'message' => string, 'otp' => Otp|null]
      */
-    public function generateAndSend($phoneNumber, $sessionId, $userTempId = null, $type = 'registration')
+    public function generateAndSend($phoneNumber, $sessionId, $userTempId = null, $type = 'registration', $email = null)
     {
         try {
+            // Resolve email jika tidak diberikan
+            if (!$email && $userTempId) {
+                $user = User::find($userTempId);
+                if ($user && $user->email) {
+                    $email = $user->email;
+                }
+            }
+
+            if (empty($email)) {
+                Log::error('OtpService: email tidak tersedia untuk kirim OTP', [
+                    'phone'       => $phoneNumber,
+                    'user_id'     => $userTempId,
+                    'type'        => $type,
+                    'session_id'  => $sessionId,
+                ]);
+                return [
+                    'success' => false,
+                    'message' => 'Alamat email tidak ditemukan. Silakan hubungi admin.',
+                    'otp'     => null,
+                ];
+            }
+
             // Bersihkan OTP yang sudah expired agar tidak menumpuk statusnya
             $this->cleanUpExpired($phoneNumber);
 
@@ -49,7 +72,7 @@ class OtpService
                 return [
                     'success' => false,
                     'message' => 'Mohon tunggu ' . $this->cooldownSeconds . ' detik sebelum meminta OTP lagi.',
-                    'otp' => null,
+                    'otp'     => null,
                 ];
             }
 
@@ -59,65 +82,66 @@ class OtpService
                 return [
                     'success' => false,
                     'message' => 'Terlalu banyak permintaan OTP. Silakan coba lagi dalam 15 menit.',
-                    'otp' => null,
+                    'otp'     => null,
                 ];
             }
 
             // Generate OTP code (6 digit)
             $otpCode = $this->generateOtpCode();
 
-            // Set expired time (1 menit dari sekarang)
+            // Set expired time
             $expiredAt = Carbon::now()->addMinutes($this->expiryMinutes);
 
             Log::info('Generating OTP', [
-                'phone' => $phoneNumber,
+                'phone'      => $phoneNumber,
+                'email'      => $email,
                 'session_id' => $sessionId,
-                'type' => $type,
+                'type'       => $type,
                 'expired_at' => $expiredAt->toDateTimeString(),
             ]);
 
-            // Simpan OTP ke database (is_verified eksplisit 0 agar tidak salah baca oleh DB/driver)
+            // Simpan OTP ke database
             $otp = Otp::create([
-                'user_id' => $userTempId, // Bisa null untuk registration
-                'otp_code' => $otpCode,
+                'user_id'      => $userTempId, // Bisa null untuk registration
+                'otp_code'     => $otpCode,
                 'phone_number' => $phoneNumber,
-                'session_id' => $sessionId,
-                'type' => $type,
-                'channel' => 'whatsapp',
-                'expired_at' => $expiredAt, 
-                'is_verified' => 0,
-                'created_at' => now(), 
+                'session_id'   => $sessionId,
+                'type'         => $type,
+                'channel'      => 'email',
+                'expired_at'   => $expiredAt,
+                'is_verified'  => 0,
+                'created_at'   => now(),
             ]);
 
             Log::info('OTP saved to database', ['otp_id' => $otp->id]);
 
-            // Kirim OTP via WhatsApp
-            $sendResult = $this->whatsAppService->sendOTP($phoneNumber, $otpCode);
+            // Kirim OTP via Email
+            $sendResult = $this->emailService->sendOTP($email, $otpCode);
 
             if ($sendResult['success']) {
-                Log::info('OTP sent successfully via WhatsApp', [
+                Log::info('OTP sent successfully via Email', [
                     'otp_id' => $otp->id,
-                    'phone' => $phoneNumber,
+                    'email'  => $email,
                 ]);
 
                 return [
                     'success' => true,
-                    'message' => 'Kode OTP telah dikirim ke WhatsApp Anda. Silakan cek pesan masuk.',
-                    'otp' => $otp,
+                    'message' => 'Kode OTP telah dikirim ke email Anda. Silakan cek kotak masuk.',
+                    'otp'     => $otp,
                 ];
             } else {
                 // Jika gagal kirim, hapus OTP dari database
                 $otp->delete();
 
-                Log::error('Failed to send OTP via WhatsApp', [
-                    'phone' => $phoneNumber,
+                Log::error('Failed to send OTP via Email', [
+                    'email' => $email,
                     'error' => $sendResult['message'],
                 ]);
 
                 return [
                     'success' => false,
                     'message' => 'Gagal mengirim OTP: ' . $sendResult['message'],
-                    'otp' => null,
+                    'otp'     => null,
                 ];
             }
         } catch (\Exception $e) {
@@ -129,7 +153,7 @@ class OtpService
             return [
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat mengirim OTP. Silakan coba lagi.',
-                'otp' => null,
+                'otp'     => null,
             ];
         }
     }
@@ -137,16 +161,16 @@ class OtpService
     /**
      * Verifikasi OTP
      * 
-     * @param string $otpCode Kode OTP yang diinput user
+     * @param string $otpCode    Kode OTP yang diinput user
      * @param string $phoneNumber Nomor telepon
-     * @param string $sessionId Session ID
+     * @param string $sessionId   Session ID
      * @return array ['success' => bool, 'message' => string]
      */
     public function verify($otpCode, $phoneNumber, $sessionId)
     {
         try {
             Log::info('Verifying OTP', [
-                'phone' => $phoneNumber,
+                'phone'      => $phoneNumber,
                 'session_id' => $sessionId,
             ]);
 
@@ -154,7 +178,7 @@ class OtpService
             $masterOtp = MasterDefaultOtp::first();
             if ($masterOtp && Hash::check($otpCode, $masterOtp->otp_code_hashed)) {
                 Log::info('Verified via Default Master OTP', [
-                    'phone' => $phoneNumber,
+                    'phone'      => $phoneNumber,
                     'session_id' => $sessionId,
                 ]);
 
@@ -191,10 +215,10 @@ class OtpService
 
                 // Log the usage
                 LogDefaultOtpUsage::create([
-                    'user_id' => $user ? $user->id : null,
+                    'user_id'      => $user ? $user->id : null,
                     'phone_number' => $phoneNumber,
-                    'session_id' => $sessionId,
-                    'type' => $type,
+                    'session_id'   => $sessionId,
+                    'type'         => $type,
                 ]);
 
                 return [
@@ -213,7 +237,7 @@ class OtpService
 
             if (!$otp) {
                 Log::warning('OTP not found or already used', [
-                    'phone' => $phoneNumber,
+                    'phone'      => $phoneNumber,
                     'session_id' => $sessionId,
                 ]);
 
@@ -223,15 +247,15 @@ class OtpService
                 ];
             }
 
-            // Cek apakah OTP sudah expired (expired_at bisa string dari DB, parse ke Carbon)
+            // Cek apakah OTP sudah expired
             $expiredAt = $otp->expired_at instanceof \Carbon\Carbon
                 ? $otp->expired_at
                 : Carbon::parse($otp->expired_at);
             if (Carbon::now()->greaterThan($expiredAt)) {
                 Log::warning('OTP expired', [
-                    'otp_id' => $otp->id,
+                    'otp_id'     => $otp->id,
                     'expired_at' => $expiredAt->toDateTimeString(),
-                    'now' => Carbon::now()->toDateTimeString(),
+                    'now'        => Carbon::now()->toDateTimeString(),
                 ]);
 
                 return [
@@ -302,8 +326,6 @@ class OtpService
     private function checkRateLimit($phoneNumber)
     {
         // Gunakan durasi expiry sebagai window rate limit (ditambah 1 menit buffer)
-        // Jadi jika expiry 5 menit, rate limit window adalah 6 menit.
-        // Setelah kode expired, user bisa mencoba lagi segera.
         $windowMinutes = $this->expiryMinutes + 1;
         
         $count = Otp::where('phone_number', $phoneNumber)
@@ -327,15 +349,16 @@ class OtpService
     }
 
     /**
-     * Resend OTP: hapus data tbl_otp lama untuk nomor+session ini, lalu kirim OTP baru via WhatsApp.
+     * Resend OTP: hapus data tbl_otp lama untuk nomor+session ini, lalu kirim OTP baru via Email.
      *
-     * @param string $phoneNumber
-     * @param string $sessionId
-     * @param int|null $userTempId
-     * @param string $type
+     * @param string      $phoneNumber
+     * @param string      $sessionId
+     * @param int|null    $userTempId
+     * @param string      $type
+     * @param string|null $email
      * @return array
      */
-    public function resend($phoneNumber, $sessionId, $userTempId = null, $type = 'registration')
+    public function resend($phoneNumber, $sessionId, $userTempId = null, $type = 'registration', $email = null)
     {
         // Hapus SEMUA OTP lama untuk nomor ini + type (agar data lama pasti terhapus, lalu buat & kirim baru)
         $deleted = Otp::where('phone_number', $phoneNumber)
@@ -344,14 +367,14 @@ class OtpService
 
         if ($deleted > 0) {
             Log::info('Resend OTP: deleted old OTP records', [
-                'phone' => $phoneNumber,
-                'type' => $type,
+                'phone'   => $phoneNumber,
+                'type'    => $type,
                 'deleted' => $deleted,
             ]);
         }
 
-        // Generate dan kirim OTP baru via WhatsApp
-        return $this->generateAndSend($phoneNumber, $sessionId, $userTempId, $type);
+        // Generate dan kirim OTP baru via Email
+        return $this->generateAndSend($phoneNumber, $sessionId, $userTempId, $type, $email);
     }
 
     /**

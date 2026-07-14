@@ -16,7 +16,7 @@
                             <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Koperasi Majakara" class="h-20 w-auto mx-auto mb-4 pulse-glow">
                         </div>
                         <h1 class="text-3xl font-bold text-majakara-brown font-display mb-2">Lupa Password</h1>
-                        <p class="text-gray-600">Masukkan nomor WhatsApp terdaftar Anda untuk mengirim kode OTP verifikasi</p>
+                        <p class="text-gray-600">Masukkan nomor HP terdaftar Anda. Kode OTP akan dikirim ke <strong>email</strong> yang terdaftar di akun Anda.</p>
                     </div>
 
                     <!-- Alert Messages -->
@@ -46,10 +46,10 @@
                     <form method="POST" action="{{ route('password.email') }}" id="forgotPasswordForm" class="space-y-6">
                         @csrf
                         
-                        <!-- WhatsApp Field -->
+                        <!-- Nomor HP Field -->
                         <div>
                             <label for="whatsapp_number" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Nomor WhatsApp Terdaftar <span class="text-red-500">*</span>
+                                Nomor HP Terdaftar <span class="text-red-500">*</span>
                             </label>
                             <div class="relative">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">

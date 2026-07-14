@@ -65,23 +65,27 @@ class ForgotPasswordController extends Controller
                 'forgot_password_session_id' => $sessionId,
             ]);
 
-            // Kirim OTP via OtpService
+            // Kirim OTP via OtpService — kirim ke email user
             $result = $this->otpService->generateAndSend(
                 $user->nomor_hp,
                 $sessionId,
                 $user->id,
-                'password_reset'
+                'password_reset',
+                $user->email
             );
 
             if ($result['success']) {
-                Log::info('Forgot password OTP sent to guest user via WhatsApp number', [
+                Log::info('Forgot password OTP sent to guest user via Email', [
                     'user_id' => $user->id,
-                    'phone' => $user->nomor_hp,
+                    'email'   => $user->email,
                 ]);
+
+                // Masking email untuk ditampilkan
+                $maskedEmail = preg_replace('/(?<=.{2}).(?=[^@]*@)/', '*', $user->email);
 
                 // Redirect ke halaman verifikasi OTP
                 return redirect()->route('password.verify')
-                    ->with('success', 'Kode OTP telah dikirim ke WhatsApp Anda (***' . substr($user->nomor_hp, -4) . ')');
+                    ->with('success', 'Kode OTP telah dikirim ke email Anda (' . $maskedEmail . '). Silakan cek kotak masuk.');
             } else {
                 return redirect()->back()
                     ->with('error', $result['message'])
@@ -211,7 +215,7 @@ class ForgotPasswordController extends Controller
         if (!$userId || !$phone || !$sessionId) {
             return response()->json([
                 'success' => false,
-                'message' => 'Session expired. Silakan masukkan nomor WhatsApp Anda kembali.'
+                'message' => 'Session expired. Silakan masukkan nomor HP Anda kembali.'
             ]);
         }
 
@@ -228,18 +232,19 @@ class ForgotPasswordController extends Controller
             $newSessionId = 'pwd-reset-guest-' . $user->id . '-' . Str::random(10);
             session(['forgot_password_session_id' => $newSessionId]);
 
-            // Panggil service resend
+            // Panggil service resend — kirim ke email user
             $result = $this->otpService->resend(
                 $phone,
                 $newSessionId,
                 $user->id,
-                'password_reset'
+                'password_reset',
+                $user->email
             );
 
             if ($result['success']) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Kode OTP baru telah dikirim ke WhatsApp Anda.'
+                    'message' => 'Kode OTP baru telah dikirim ke email Anda.'
                 ]);
             } else {
                 return response()->json([

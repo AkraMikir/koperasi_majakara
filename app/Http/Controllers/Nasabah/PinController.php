@@ -112,12 +112,13 @@ class PinController extends Controller
             $sessionId = 'lupa-pin-' . $user->id . '-' . Str::uuid()->toString();
             $request->session()->put('lupa_pin_session_id', $sessionId);
 
-            // Send OTP
+            // Send OTP — kirim ke email user
             $otpResult = $this->otpService->generateAndSend(
                 $user->nomor_hp,
                 $sessionId,
                 $user->id,
-                'pin' // Type: pin reset
+                'pin', // Type: pin reset
+                $user->email
             );
 
             if ($otpResult['success']) {
@@ -126,10 +127,12 @@ class PinController extends Controller
                     'phone' => $user->nomor_hp,
                 ]);
 
+                $maskedEmail = preg_replace('/(?<=.{2}).(?=[^@]*@)/', '*', $user->email ?? '');
+
                 $request->session()->put('lupa_pin_otp_sent_at', now()->toDateTimeString());
 
                 return redirect()->back()
-                    ->with('success', 'Kode OTP telah dikirim ke WhatsApp nomor ' . $user->nomor_hp . '. Silakan cek pesan masuk Anda.')
+                    ->with('success', 'Kode OTP telah dikirim ke email ' . $maskedEmail . '. Silakan cek kotak masuk.')
                     ->with('lupa_pin_otp_sent', true);
             } else {
                 Log::error('Failed to send OTP Lupa PIN', [
@@ -171,12 +174,13 @@ class PinController extends Controller
         }
 
         try {
-            // Resend OTP
+            // Resend OTP — kirim ke email user
             $otpResult = $this->otpService->resend(
                 $user->nomor_hp,
                 $sessionId,
                 $user->id,
-                'pin'
+                'pin',
+                $user->email
             );
 
             if ($otpResult['success']) {
@@ -188,7 +192,7 @@ class PinController extends Controller
                 $request->session()->put('lupa_pin_otp_sent_at', now()->toDateTimeString());
 
                 return redirect()->back()
-                    ->with('success', 'Kode OTP baru telah dikirim ke WhatsApp Anda.')
+                    ->with('success', 'Kode OTP baru telah dikirim ke email Anda.')
                     ->with('lupa_pin_otp_sent', true);
             } else {
                 return redirect()->back()

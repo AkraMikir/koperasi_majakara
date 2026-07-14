@@ -165,7 +165,7 @@
                 </div>
                 <div>
                     <h2 class="text-lg font-bold text-gray-900 font-display">Reset Password (Lupa Password)</h2>
-                    <p class="text-sm text-gray-600">Gunakan OTP WhatsApp untuk reset password</p>
+                    <p class="text-sm text-gray-600">Gunakan OTP Email untuk reset password</p>
                 </div>
             </div>
 
@@ -190,7 +190,7 @@
                     <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
                     </svg>
-                    Kirim Kode OTP WhatsApp
+                    Kirim Kode OTP Email
                 </button>
                 <p id="countdown-pwd" class="text-center text-sm text-gray-500 hidden"></p>
             </div>
@@ -381,12 +381,12 @@
             } else {
                 showAlert('error', data.message);
                 btn.disabled = false;
-                btn.innerHTML = '<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>Kirim Kode OTP WhatsApp';
+                btn.innerHTML = '<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>Kirim Kode OTP Email';
             }
         } catch (error) {
             showAlert('error', 'Terjadi kesalahan. Silakan coba lagi.');
             btn.disabled = false;
-            btn.innerHTML = '<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>Kirim Kode OTP WhatsApp';
+            btn.innerHTML = '<svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>Kirim Kode OTP Email';
         }
     }
 

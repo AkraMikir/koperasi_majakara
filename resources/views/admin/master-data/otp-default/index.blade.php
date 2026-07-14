@@ -15,7 +15,7 @@
                 </a>
                 <h1 class="text-3xl font-bold text-gray-900 font-display">Master OTP Default</h1>
             </div>
-            <p class="text-gray-600 mt-1 ml-8">Konfigurasi kode OTP default untuk fallback darurat ketika pengiriman WhatsApp Fonnte terkendala</p>
+            <p class="text-gray-600 mt-1 ml-8">Konfigurasi kode OTP default untuk fallback darurat ketika pengiriman Email terkendala</p>
         </div>
         <div class="flex items-center gap-2.5 px-4 py-2 bg-white border border-gray-100 rounded-xl shadow-sm">
             <span class="relative flex h-2.5 w-2.5">

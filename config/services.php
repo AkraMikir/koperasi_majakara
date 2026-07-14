@@ -37,21 +37,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Fonnte WhatsApp API Configuration
+    | Hostinger Email Configuration
     |--------------------------------------------------------------------------
     |
-    | Configuration for Fonnte WhatsApp Business API integration
-    | Used for sending OTP and notifications via WhatsApp
+    | Configuration for Hostinger Email API (SMTP)
+    | Used for sending OTP and notifications via Email
     |
     */
-    'fonnte' => [
-        'api_key' => env('FONNTE_API_KEY'),
-        'api_url' => env('FONNTE_API_URL', 'https://api.fonnte.com/send'),
-        'sender_number' => env('FONNTE_SENDER_NUMBER', '08139552626'),
-        // SSL: set false hanya untuk development lokal jika error "unable to get local issuer certificate"
-        'verify_ssl' => env('FONNTE_VERIFY_SSL', true),
-        // Opsional: path ke cacert.pem (unduh dari https://curl.se/ca/cacert.pem)
-        'ssl_cert_path' => env('FONNTE_SSL_CERT_PATH'),
+    'hostinger_email' => [
+        'api_key'             => env('HOSTINGER_EMAIL_API_KEY'),
+        'mailbox_resource_id' => env('HOSTINGER_MAILBOX_RESOURCE_ID', 'ACfcce24a5a4159cb4284a002e888d'),
+        'from'                => env('MAIL_FROM_ADDRESS', 'koperasi@majakara.com'),
+        'name'                => env('MAIL_FROM_NAME', 'Koperasi Majakara'),
     ],
 
     /*

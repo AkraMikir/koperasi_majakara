@@ -16,7 +16,7 @@
                             <img src="{{ asset('images/logo/logo_coklat.png') }}" alt="Logo Koperasi Majakara" class="h-20 w-auto mx-auto mb-4 pulse-glow">
                         </div>
                         <h1 class="text-3xl font-bold text-majakara-brown font-display mb-2">Verifikasi OTP</h1>
-                        <p class="text-gray-600">Masukkan kode OTP yang dikirim ke WhatsApp Anda untuk mengatur ulang password</p>
+                        <p class="text-gray-600">Masukkan kode OTP yang dikirim ke <strong>email</strong> Anda untuk mengatur ulang password</p>
                     </div>
 
                     <!-- Alert Messages -->
@@ -49,7 +49,7 @@
                         <!-- OTP Code Field -->
                         <div>
                             <label for="otp_code" class="block text-sm font-semibold text-gray-700 mb-2">
-                                Kode OTP WhatsApp (6 Digit) <span class="text-red-500">*</span>
+                                Kode OTP Email (6 Digit) <span class="text-red-500">*</span>
                             </label>
                             <input type="text" name="otp_code" id="otp_code" required maxlength="6"
                                 class="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-majakara-dark-gold focus:border-majakara-dark-gold text-center text-2xl tracking-widest font-mono bg-white/50 outline-none transition-all"
