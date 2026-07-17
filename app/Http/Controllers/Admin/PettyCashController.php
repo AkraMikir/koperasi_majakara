@@ -1007,7 +1007,9 @@ class PettyCashController extends Controller
             $manualQuery->whereDate('created_at', '<=', $request->tanggal_sampai);
         }
 
-        $manualIn   = (clone $manualQuery)->where('tipe', 'masuk')->sum(DB::raw('nominal_cash + nominal_tf'));
+        $manualIn   = (clone $manualQuery)->where('tipe', 'masuk')
+            ->whereNull('ref_table')
+            ->sum(DB::raw('nominal_cash + nominal_tf'));
         $manualOut  = (clone $manualQuery)->where('tipe', 'keluar')->sum(DB::raw('nominal_cash + nominal_tf'));
 
         // Saldo Saat Ini (Untuk Rekonsiliasi)
