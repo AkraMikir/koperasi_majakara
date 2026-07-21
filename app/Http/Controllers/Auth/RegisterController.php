@@ -1391,6 +1391,16 @@ class RegisterController extends Controller
                     'foto_selfie' => $nasabahTemp->foto_selfie,
                 ]);
 
+                // Create Admin Notification
+                \App\Models\AdminNotification::notify(
+                    'pendaftaran_nasabah',
+                    'Pendaftaran Anggota Baru',
+                    'Anggota baru ' . $user->nama . ' telah mendaftar dan memerlukan verifikasi.',
+                    route('admin.nasabah.show', $nasabah->id),
+                    (string) $nasabah->id,
+                    'Nasabah'
+                );
+
                 // Move Pekerjaan
                 $pekerjaanTemp = PekerjaanTemp::where('nasabah_id', $nasabahTemp->id)->first();
                 if ($pekerjaanTemp) {

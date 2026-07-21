@@ -113,20 +113,33 @@
                         <thead>
                             <tr class="border-b-2 border-[#674c1d]/20 bg-linear-to-r from-[#674c1d]/5 to-[#8b6f2f]/5">
                                 <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">No. Urut</th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jatuh Tempo
-                                </th>
-                                <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jumlah
-                                    Tagihan</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jatuh Tempo</th>
+                                <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Jumlah Tagihan</th>
                                 <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Terbayar</th>
                                 <th class="px-4 py-3 text-left text-xs font-bold text-[#674c1d] uppercase">Status</th>
+                                <th class="px-4 py-3 text-center text-xs font-bold text-[#674c1d] uppercase w-[120px]">Aksi</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($angsuran as $item)
+                            @php
+                                $sisaHari = $item->hitungSisaHari();
+                            @endphp
                             <tr
                                 class="border-b border-gray-100 hover:bg-linear-to-r hover:from-[#674c1d]/5 hover:to-[#8b6f2f]/5 transition-all">
                                 <td class="px-4 py-3 text-sm font-medium">#{{ $item->no_urut }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $item->tgl_jatuh_tempo->format('d M Y') }}</td>
+                                <td class="px-4 py-3 text-sm">
+                                    <div>{{ $item->tgl_jatuh_tempo->format('d M Y') }}</div>
+                                    @if($item->status_bayar !== 'lunas')
+                                        @if($sisaHari > 0)
+                                            <span class="text-[10px] text-gray-500 font-semibold">(Sisa {{ $sisaHari }} Hari)</span>
+                                        @elseif($sisaHari === 0)
+                                            <span class="text-[10px] text-yellow-600 font-bold">(Jatuh Tempo Hari Ini)</span>
+                                        @else
+                                            <span class="text-[10px] text-red-600 font-bold">(Telat {{ abs($sisaHari) }} Hari)</span>
+                                        @endif
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3">
                                     <p class="font-semibold text-[#674c1d]">Rp
                                         {{ number_format($item->jumlah_tagihan, 0, ',', '.') }}</p>
@@ -149,10 +162,25 @@
                                         {{ ucfirst($item->status_bayar) }}
                                     </span>
                                 </td>
+                                <td class="px-4 py-3 text-center">
+                                    @if($item->status_bayar !== 'lunas')
+                                        <button type="button"
+                                            onclick="kirimPengingatWa('{{ $pinjaman->jenis }}', '{{ $item->id }}', this)"
+                                            class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all text-xs font-medium shadow-sm hover:scale-105"
+                                            title="Kirim WA Pengingat">
+                                            <svg class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                                <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.717-1.458L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.37 9.864-9.799.002-2.63-1.023-5.101-2.885-6.968C16.63 1.97 14.16 .947 11.536.947c-5.445 0-9.87 4.37-9.874 9.799-.001 1.77.476 3.498 1.38 5.048l-.995 3.637 3.73-.974zm12.515-5.32c-.3-.15-1.772-.875-2.047-.975-.275-.1-.475-.15-.675.15-.2.3-.775.975-.95 1.175-.175.2-.35.225-.65.075-.3-.15-1.267-.467-2.413-1.485-.892-.793-1.493-1.773-1.668-2.073-.175-.3-.018-.463.13-.61.134-.133.3-.35.45-.525.15-.175.2-.3.3-.5.1-.2.05-.375-.025-.525-.075-.15-.675-1.625-.925-2.225-.244-.589-.493-.51-.675-.52-.172-.007-.368-.009-.565-.009-.196 0-.517.074-.787.374-.27.3-1.03 1.01-1.03 2.463 0 1.453 1.056 2.859 1.203 3.059.148.2 2.08 3.175 5.038 4.453.704.304 1.254.485 1.681.62.707.224 1.35.193 1.859.118.568-.084 1.772-.725 2.022-1.425.25-.7.25-1.299.175-1.425-.075-.125-.275-.2-.575-.35z"/>
+                                            </svg>
+                                            Kirim WA
+                                        </button>
+                                    @else
+                                        <span class="text-xs text-gray-400">-</span>
+                                    @endif
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="5" class="px-4 py-12 text-center">
+                                <td colspan="6" class="px-4 py-12 text-center">
                                     <p class="text-gray-500">Belum ada jadwal angsuran</p>
                                 </td>
                             </tr>
@@ -403,3 +431,46 @@ document.getElementById('pelunasanForm').addEventListener('submit', function(e) 
 @endif
 @endcanPelunasanDipercepat
 @endsection
+
+@push('scripts')
+<script>
+function kirimPengingatWa(jenis, tempoId, btn) {
+    if (!confirm('Buka WhatsApp untuk mengirim pesan pengingat jatuh tempo?')) return;
+    
+    const originalContent = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '...';
+    
+    fetch(`/admin/pinjaman/angsuran/${jenis}/${tempoId}/buat-pengingat`)
+        .then(res => {
+            if (!res.ok) {
+                return res.json().then(data => { throw new Error(data.message || 'Gagal memproses request'); });
+            }
+            return res.json();
+        })
+        .then(data => {
+            if (data.success) {
+                let phone = data.phone;
+                if (phone.startsWith('0')) {
+                    phone = '62' + phone.substring(1);
+                } else if (phone.startsWith('+')) {
+                    phone = phone.substring(1);
+                }
+                
+                const url = `https://wa.me/${phone}?text=${encodeURIComponent(data.message)}`;
+                window.open(url, '_blank');
+            } else {
+                alert(data.message || 'Terjadi kesalahan saat membuat pesan.');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert(err.message || 'Terjadi kesalahan sistem saat menghubungi server.');
+        })
+        .finally(() => {
+            btn.disabled = false;
+            btn.innerHTML = originalContent;
+        });
+}
+</script>
+@endpush

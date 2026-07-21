@@ -15,6 +15,20 @@ trait CalculatesDenda
     }
 
     /**
+     * Hitung sisa hari jatuh tempo.
+     * Jika positif: Sisa hari sebelum jatuh tempo.
+     * Jika nol: Jatuh tempo hari ini.
+     * Jika negatif: Terlambat X hari.
+     */
+    public function hitungSisaHari()
+    {
+        $now = Carbon::now()->startOfDay();
+        $tanggalJatuhTempo = Carbon::parse($this->tgl_jatuh_tempo)->startOfDay();
+
+        return (int) $now->diffInDays($tanggalJatuhTempo, false);
+    }
+
+    /**
      * Hitung jumlah hari telat (H+1 setelah jatuh tempo).
      */
     public function hitungHariTelat()

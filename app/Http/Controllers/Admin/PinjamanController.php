@@ -1858,4 +1858,68 @@ class PinjamanController extends Controller
                 ->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
         }
     }
+
+    /**
+     * Buat pesan pengingat jatuh tempo angsuran pinjaman nasabah via WhatsApp (JSON response).
+     * Route: GET /admin/pinjaman/angsuran/{jenis}/{tempoId}/buat-pengingat
+     */
+    public function buatPengingatWa($jenis, $tempoId)
+    {
+        try {
+            if ($jenis === 'bulanan') {
+                $tempo = \App\Models\TempoPinjamanB::with('pinjaman.nasabah.user')->findOrFail($tempoId);
+            } else {
+                $tempo = \App\Models\TempoPinjamanM::with('pinjaman.nasabah.user')->findOrFail($tempoId);
+            }
+
+            $user = $tempo->pinjaman->nasabah->user;
+            if (!$user || !$user->nomor_hp) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Nomor WhatsApp nasabah tidak ditemukan.'
+                ], 422);
+            }
+
+            $sisaHari = $tempo->hitungSisaHari();
+            $dendaBerjalan = $tempo->hitungDenda();
+            $totalTagihan = $tempo->jumlah_tagihan + $dendaBerjalan;
+
+            $statusText = '';
+            if ($sisaHari > 0) {
+                $statusText = "akan jatuh tempo dalam {$sisaHari} hari lagi";
+            } elseif ($sisaHari === 0) {
+                $statusText = "jatuh tempo HARI INI";
+            } else {
+                $hariTelat = abs($sisaHari);
+                $statusText = "telah terlambat {$hariTelat} hari (masuk masa denda)";
+            }
+
+            $pesan = "Halo *{$user->nama}*,\n\n";
+            $pesan .= "Ini adalah pengingat dari Koperasi untuk angsuran ke-{$tempo->no_urut} Anda pada Pinjaman #{$tempo->pinjaman_id}.\n";
+            $pesan .= "• Tanggal Jatuh Tempo: " . $tempo->tgl_jatuh_tempo->format('d M Y') . "\n";
+            $pesan .= "• Status: {$statusText}\n";
+            $pesan .= "• Pokok Angsuran: Rp " . number_format($tempo->jumlah_tagihan, 0, ',', '.') . "\n";
+            if ($dendaBerjalan > 0) {
+                $pesan .= "• Denda Terakumulasi: Rp " . number_format($dendaBerjalan, 0, ',', '.') . "\n";
+            }
+            $pesan .= "• Total Pembayaran: *Rp " . number_format($totalTagihan, 0, ',', '.') . "*\n\n";
+            $pesan .= "Mohon segera melakukan pembayaran melalui transfer bank atau datang langsung ke kantor koperasi. Abaikan pesan ini jika Anda sudah membayar.\n\n";
+            $pesan .= "Terima kasih.";
+
+            return response()->json([
+                'success' => true,
+                'phone' => $user->nomor_hp,
+                'message' => $pesan
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error buat pengingat WA', [
+                'error' => $e->getMessage()
+            ]);
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem saat membuat pengingat.'
+            ], 500);
+        }
+    }
 }

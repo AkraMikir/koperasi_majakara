@@ -295,6 +295,7 @@ Route::prefix('admin')->middleware(['auth', 'admin'])->name('admin.')->group(fun
         Route::get('/pinjaman-aktif/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPinjaman'])->name('detail-pinjaman');
         Route::get('/angsuran', [\App\Http\Controllers\Admin\PinjamanController::class, 'angsuran'])->name('angsuran');
         Route::get('/angsuran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailAngsuran'])->name('detail-angsuran');
+        Route::get('/angsuran/{jenis}/{tempoId}/buat-pengingat', [\App\Http\Controllers\Admin\PinjamanController::class, 'buatPengingatWa'])->name('buat-pengingat-wa');
         Route::get('/pembayaran', [\App\Http\Controllers\Admin\PinjamanController::class, 'pembayaran'])->name('pembayaran');
         Route::get('/pembayaran/{id}', [\App\Http\Controllers\Admin\PinjamanController::class, 'detailPembayaran'])->name('detail-pembayaran');
         Route::get('/pembayaran/{id}/struk', [\App\Http\Controllers\Admin\StrukController::class, 'pembayaranPinjaman'])->name('struk-pembayaran');
