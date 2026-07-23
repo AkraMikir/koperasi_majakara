@@ -83,8 +83,17 @@
                             </div>
                             <div>
                                 <p class="text-sm text-gray-600">Penghasilan</p>
-                                <p class="font-semibold text-gray-900">Rp
-                                    {{ number_format((float) ($pengajuan->nasabah->pekerjaan->penghasilan ?? 0), 0, ',', '.') }}
+                                <p class="font-semibold text-gray-900">
+                                    @php
+                                        $penghasilanVal = $pengajuan->nasabah->pekerjaan->penghasilan ?? null;
+                                    @endphp
+                                    @if ($penghasilanVal === null || $penghasilanVal === '')
+                                        N/A
+                                    @elseif (is_numeric($penghasilanVal))
+                                        Rp {{ number_format((float) $penghasilanVal, 0, ',', '.') }}
+                                    @else
+                                        {{ $penghasilanVal }}
+                                    @endif
                                 </p>
                             </div>
                         @endif
