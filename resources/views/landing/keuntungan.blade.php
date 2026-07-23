@@ -508,7 +508,7 @@
                         </svg>
                     </div>
                     <h3 class="text-2xl font-bold mb-2">Bunga Pinjaman</h3>
-                    <div class="text-5xl font-bold mb-4">10-24%</div>
+                    <div class="text-5xl font-bold mb-4">6-30%</div>
                     <p class="text-white/80 mb-6">Bunga kompetitif berdasarkan durasi pinjaman</p>
                     <div class="space-y-2">
                         <div class="flex items-center space-x-2">

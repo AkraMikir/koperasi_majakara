@@ -99,30 +99,33 @@ class PinjamanController extends Controller
         $query = PengajuanPinjaman::with('nasabah.user')
             ->latest();
 
-        // Filter by status: kosong / Semua Status = tampilkan semua pengajuan
+        // Filter by status
         if ($request->filled('status')) {
-            if ($request->status === 'pending') {
-                $query->whereDoesntHave('pinjaman');
-            } elseif ($request->status === 'approved') {
-                $query->whereHas('pinjaman');
+            $status = $request->status;
+            if ($status === 'pending') {
+                $query->where('status', '1');
+            } elseif ($status === 'rejected') {
+                $query->where('status', '2');
+            } elseif ($status === 'approved') {
+                $query->where('status', '3');
+            } elseif ($status === 'disbursed') {
+                $query->where('status', '4');
             }
         }
 
-        // Filter by jenis
-        if ($request->has('jenis') && $request->jenis !== '') {
-            $query->where('jenis', $request->jenis);
-        }
-
-        // Search
-        if ($request->has('search') && $request->search !== '') {
+        // Search (by ID, nama, or email)
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->whereHas('nasabah.user', function($q) use ($search) {
-                $q->where('nama', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
+            $query->where(function($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                  ->orWhereHas('nasabah.user', function($q2) use ($search) {
+                      $q2->where('nama', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                  });
             });
         }
 
-        $pengajuan = $query->paginate(15);
+        $pengajuan = $query->paginate(15)->withQueryString();
 
         return view('admin.pinjaman.pengajuan', compact('pengajuan'));
     }

@@ -427,7 +427,7 @@
                                     <span class="text-xs bg-white/20 px-2 py-1 rounded-full font-semibold">POPULER</span>
                                 </div>
                                 <div class="text-xl md:text-2xl font-bold mb-1">Pinjaman</div>
-                                <div class="text-xs md:text-sm opacity-90">Bunga 10-24%</div>
+                                <div class="text-xs md:text-sm opacity-90">Pinjam Tenang dengan Bunga Ringan Flat per Hari</div>
                             </div>
                             <div class="bg-linear-to-br from-[#d4af37] to-[#8b6f2f] rounded-2xl p-4 md:p-6 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 cursor-pointer">
                                 <div class="flex items-center justify-between mb-2 md:mb-3">
