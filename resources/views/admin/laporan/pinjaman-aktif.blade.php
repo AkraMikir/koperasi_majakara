@@ -6,7 +6,7 @@
 <div class="space-y-6">
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 font-display">Pinjaman Aktif (Outstanding)</h1>
+            <h1 class="text-3xl font-bold text-gray-900 font-display">Pinjaman Aktif (Sisa Piutang)</h1>
             <p class="text-gray-600 mt-1">Daftar pinjaman belum lunas dan sisa pokok</p>
         </div>
         <a href="{{ route('admin.laporan.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 text-sm font-medium">← Daftar Laporan</a>
@@ -14,7 +14,7 @@
 
     <div class="bg-white rounded-2xl shadow-md border border-gray-100 overflow-hidden">
         <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900">Total Outstanding: Rp {{ number_format($total_outstanding ?? 0, 0, ',', '.') }}</h2>
+            <h2 class="font-semibold text-gray-900">Total Sisa Piutang: Rp {{ number_format($total_outstanding ?? 0, 0, ',', '.') }}</h2>
             <div class="flex items-center gap-2">
                 <a href="{{ route('admin.laporan.pinjaman-aktif', ['export' => 'pdf']) }}" class="px-3 py-1.5 bg-red-100 text-red-700 rounded-lg text-sm font-medium hover:bg-red-200">Export PDF</a>
                 <a href="{{ route('admin.laporan.pinjaman-aktif', ['export' => 'excel']) }}" class="px-3 py-1.5 bg-green-100 text-green-700 rounded-lg text-sm font-medium hover:bg-green-200">Export Excel</a>

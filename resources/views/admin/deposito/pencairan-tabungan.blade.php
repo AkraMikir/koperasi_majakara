@@ -68,7 +68,7 @@
                     $dep = $p->deposito;
                     $bungaKotor = $dep ? ($dep->nominal_awal * $dep->bunga * ($dep->tenor?->tenor_hari ?? 365) / 365) : 0;
                     $pajak = $bungaKotor * 0.2;
-                    $estimasiCair = $p->is_cancel ? ($dep?->nominal_awal ?? 0) : ($dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0);
+                    $estimasiCair = $p->nominal_akhir;
                 @endphp
                 <tr class="hover:bg-gray-50 transition-colors">
                     <td class="px-4 py-3">

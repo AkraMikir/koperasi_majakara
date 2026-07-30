@@ -159,11 +159,18 @@ class PinjamanH extends Model
             return $item->status_bayar === 'lunas';
         });
 
-        if ($allLunas) {
+        if ($allLunas && $this->lunas !== 'lunas') {
             $this->update(['lunas' => 'lunas']);
+            
+            // Centralized limit restoration
+            $limit = \App\Models\LimitPinjaman::where('id_nasabah', $this->id_anggota)->first();
+            if ($limit) {
+                $limit->nominal_terpakai = max(0, $limit->nominal_terpakai - $this->jumlah_pinjam);
+                $limit->save();
+            }
             return true;
         }
 
-        return false;
+        return $this->lunas === 'lunas';
     }
 }

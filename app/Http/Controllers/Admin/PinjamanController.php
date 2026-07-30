@@ -1082,12 +1082,6 @@ class PinjamanController extends Controller
 
         app(ActivityLogService::class)->logPelunasanDipercepat($pinjaman->id, $jumlahBayar, $pinjaman->nasabah->user->nama ?? 'N/A');
 
-        // Update nominal terpakai limit nasabah
-        $limit = \App\Models\LimitPinjaman::where('id_nasabah', $pinjaman->id_anggota)->first();
-        if ($limit) {
-            $limit->nominal_terpakai = max(0, $limit->nominal_terpakai - $pinjaman->jumlah_pinjam);
-            $limit->save();
-        }
 
         return redirect()->route('admin.pinjaman.detail-pinjaman', $pinjaman->id)
             ->with('success', 'Pinjaman berhasil dilunasi dipercepat. Total pembayaran: Rp ' . number_format($jumlahBayar, 0, ',', '.'));

@@ -406,7 +406,7 @@ class LaporanKeuanganController extends Controller
         $sheet->setCellValue('C8', number_format($data['pencairan_pinjaman'], 0, ',', '.'));
         $sheet->setCellValue('B9', 'Angsuran Masuk');
         $sheet->setCellValue('C9', number_format($data['angsuran_masuk'], 0, ',', '.'));
-        $sheet->setCellValue('B10', 'Outstanding');
+        $sheet->setCellValue('B10', 'Sisa Piutang');
         $sheet->setCellValue('C10', number_format($data['outstanding'], 0, ',', '.'));
         return $this->downloadSpreadsheet($spreadsheet, 'Laporan-Rekapitulasi.xlsx');
     }
@@ -474,7 +474,7 @@ class LaporanKeuanganController extends Controller
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Pinjaman Aktif');
-        $sheet->setCellValue('A1', 'Laporan Pinjaman Aktif (Outstanding)');
+        $sheet->setCellValue('A1', 'Laporan Pinjaman Aktif (Sisa Piutang)');
         $sheet->setCellValue('A3', 'No');
         $sheet->setCellValue('B3', 'ID Pinjaman');
         $sheet->setCellValue('C3', 'Nasabah');
@@ -495,7 +495,7 @@ class LaporanKeuanganController extends Controller
             $sheet->setCellValue('H' . $row, $r->sisa_angsuran);
             $row++;
         }
-        $sheet->setCellValue('F' . $row, 'TOTAL OUTSTANDING');
+        $sheet->setCellValue('F' . $row, 'TOTAL SISA PIUTANG');
         $sheet->setCellValue('G' . $row, $data['total_outstanding']);
         return $this->downloadSpreadsheet($spreadsheet, 'Laporan-Pinjaman-Aktif.xlsx');
     }

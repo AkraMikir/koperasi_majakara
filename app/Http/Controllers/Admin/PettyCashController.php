@@ -601,7 +601,7 @@ class PettyCashController extends Controller
                     \App\Services\PettyCashConstants::FITUR_PINJAMAN => \App\Services\PettyCashConstants::SUMBER_PINJAMAN,
                     \App\Services\PettyCashConstants::FITUR_DEPOSITO => \App\Services\PettyCashConstants::SUMBER_DEPOSITO,
                     \App\Services\PettyCashConstants::FITUR_GADAI    => \App\Services\PettyCashConstants::SUMBER_GADAI,
-                    default => \App\Services\PettyCashConstants::SUMBER_PETTY,
+                    default => \App\Services\PettyCashConstants::SUMBER_LAIN,
                 };
                 
                 // Cek via
@@ -616,8 +616,8 @@ class PettyCashController extends Controller
 
             // Jika setoran manual tanpa detail (Setor Manual tab)
             if (empty($groupedAdmin)) {
-                if ($nominalCash > 0) $groupedAdmin[\App\Services\PettyCashConstants::SUMBER_PETTY]['cash'] = $nominalCash;
-                if ($nominalTf > 0) $groupedAdmin[\App\Services\PettyCashConstants::SUMBER_PETTY]['transfer'] = $nominalTf;
+                if ($nominalCash > 0) $groupedAdmin[\App\Services\PettyCashConstants::SUMBER_LAIN]['cash'] = $nominalCash;
+                if ($nominalTf > 0) $groupedAdmin[\App\Services\PettyCashConstants::SUMBER_LAIN]['transfer'] = $nominalTf;
             }
 
             foreach ($groupedAdmin as $sumber => $tipes) {
@@ -832,7 +832,7 @@ class PettyCashController extends Controller
                     \App\Services\PettyCashConstants::FITUR_PINJAMAN => \App\Services\PettyCashConstants::SUMBER_PINJAMAN,
                     \App\Services\PettyCashConstants::FITUR_DEPOSITO => \App\Services\PettyCashConstants::SUMBER_DEPOSITO,
                     \App\Services\PettyCashConstants::FITUR_GADAI    => \App\Services\PettyCashConstants::SUMBER_GADAI,
-                    default => \App\Services\PettyCashConstants::SUMBER_PETTY,
+                    default => \App\Services\PettyCashConstants::SUMBER_LAIN,
                 };
 
                 if (!isset($grouped[$sumber])) {
@@ -848,7 +848,7 @@ class PettyCashController extends Controller
 
             // Jika setoran manual tanpa detail, pastikan tetap tercatat
             if (empty($grouped) && ($setoran->nominal_cash > 0 || $setoran->nominal_tf > 0)) {
-                $grouped[\App\Services\PettyCashConstants::SUMBER_PETTY] = [
+                $grouped[\App\Services\PettyCashConstants::SUMBER_LAIN] = [
                     'cash' => (float)$setoran->nominal_cash,
                     'tf'   => (float)$setoran->nominal_tf
                 ];
@@ -908,45 +908,84 @@ class PettyCashController extends Controller
     {
         $request->validate(['keterangan_owner' => 'required|string']);
 
-        $setoran = PettyCashSetoranKantor::where('status', 'pending')->findOrFail($id);
-        $setoran->update([
-            'status'           => 'rejected',
-            'keterangan_owner' => $request->keterangan_owner,
-        ]);
+        try {
+            DB::beginTransaction();
 
-        // 🔥 PEMISAHAN PENGEMBALIAN SALDO ADMIN
-        $dataPotongan = collect($setoran->data_potongan);
-        $nominalCash = $dataPotongan->filter(fn($t) => in_array($t['via_kode'], ['CS', 'TN']))->sum('nominal');
-        $nominalTf = $dataPotongan->filter(fn($t) => $t['via_kode'] === 'TF')->sum('nominal');
+            $setoran = PettyCashSetoranKantor::where('status', 'pending')->findOrFail($id);
+            $setoran->update([
+                'status'           => 'rejected',
+                'keterangan_owner' => $request->keterangan_owner,
+            ]);
 
-        if ($nominalCash > 0) {
-            PettyCashSaldo::buatMutasi(
-                $setoran->admin_id, 'admin', (float) $nominalCash,
-                "Setoran ditolak Owner, saldo Cash dikembalikan",
-                $id, 'petty_cash_setoran_kantor', 'cash'
-            );
-        }
+            // 🔥 PEMISAHAN PENGEMBALIAN SALDO ADMIN BERDASARKAN SUMBER
+            $dataPotongan = $setoran->data_potongan ?? [];
+            $grouped = [];
 
-        if ($nominalTf > 0) {
-            PettyCashSaldo::buatMutasi(
-                $setoran->admin_id, 'admin', (float) $nominalTf,
-                "Setoran ditolak Owner, saldo TF dikembalikan",
-                $id, 'petty_cash_setoran_kantor', 'transfer'
-            );
-        }
+            foreach ($dataPotongan as $item) {
+                $fiturId = $item['fitur_id'] ?? null;
+                $sumber = match ($fiturId) {
+                    \App\Services\PettyCashConstants::FITUR_TABUNGAN => \App\Services\PettyCashConstants::SUMBER_TABUNGAN,
+                    \App\Services\PettyCashConstants::FITUR_PINJAMAN => \App\Services\PettyCashConstants::SUMBER_PINJAMAN,
+                    \App\Services\PettyCashConstants::FITUR_DEPOSITO => \App\Services\PettyCashConstants::SUMBER_DEPOSITO,
+                    \App\Services\PettyCashConstants::FITUR_GADAI    => \App\Services\PettyCashConstants::SUMBER_GADAI,
+                    default => \App\Services\PettyCashConstants::SUMBER_LAIN,
+                };
 
-        // Update transaksi nasabah: lepas dari setoran ini agar bisa disetor ulang
-        $transaksis = PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)->get();
-        foreach ($transaksis as $t) {
-            if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
-                DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => null]);
+                if (!isset($grouped[$sumber])) {
+                    $grouped[$sumber] = ['cash' => 0, 'tf' => 0];
+                }
+
+                if (($item['via_kode'] ?? '') === 'TF') {
+                    $grouped[$sumber]['tf'] += (float)$item['nominal'];
+                } else {
+                    $grouped[$sumber]['cash'] += (float)$item['nominal'];
+                }
             }
-        }
-        
-        PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)
-            ->update(['setoran_kantor_id' => null]);
 
-        return back()->with('success', 'Setoran ditolak dan saldo admin dikembalikan.');
+            // Jika setoran manual tanpa detail
+            if (empty($grouped) && ($setoran->nominal_cash > 0 || $setoran->nominal_tf > 0)) {
+                $grouped[\App\Services\PettyCashConstants::SUMBER_LAIN] = [
+                    'cash' => (float)$setoran->nominal_cash,
+                    'tf'   => (float)$setoran->nominal_tf
+                ];
+            }
+
+            foreach ($grouped as $sumber => $nominal) {
+                if ($nominal['cash'] > 0) {
+                    PettyCashSaldo::buatMutasi(
+                        $setoran->admin_id, 'admin', (float)$nominal['cash'],
+                        "Setoran Cash ({$sumber}) ditolak Owner, saldo dikembalikan (#{$id})",
+                        $id, 'petty_cash_setoran_kantor', 'cash', $sumber
+                    );
+                }
+
+                if ($nominal['tf'] > 0) {
+                    PettyCashSaldo::buatMutasi(
+                        $setoran->admin_id, 'admin', (float)$nominal['tf'],
+                        "Setoran TF ({$sumber}) ditolak Owner, saldo dikembalikan (#{$id})",
+                        $id, 'petty_cash_setoran_kantor', 'transfer', $sumber
+                    );
+                }
+            }
+
+            // Update transaksi nasabah: lepas dari setoran ini agar bisa disetor ulang
+            $transaksis = PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)->get();
+            foreach ($transaksis as $t) {
+                if ($t->ref_table === 'tbl_pengajuan_pembayaran_pinjaman' || $t->ref_table === 'tbl_pengajuan_tabungan') {
+                    DB::table($t->ref_table)->where('id', $t->ref_id)->update(['setoran_kantor_id' => null]);
+                }
+            }
+            
+            PettyCashTransaksiNasabah::where('setoran_kantor_id', $id)
+                ->update(['setoran_kantor_id' => null]);
+
+            DB::commit();
+
+            return back()->with('success', 'Setoran ditolak dan saldo admin dikembalikan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return back()->with('error', 'Terjadi kesalahan: ' . $e->getMessage());
+        }
     }
 
 

@@ -26,7 +26,7 @@
         <tr><th colspan="2">Pinjaman</th></tr>
         <tr><td>Pencairan (periode)</td><td class="text-right">Rp {{ number_format($pencairan_pinjaman ?? 0, 0, ',', '.') }}</td></tr>
         <tr><td>Angsuran Masuk (periode)</td><td class="text-right">Rp {{ number_format($angsuran_masuk ?? 0, 0, ',', '.') }}</td></tr>
-        <tr><td class="font-bold">Outstanding</td><td class="text-right font-bold">Rp {{ number_format($outstanding ?? 0, 0, ',', '.') }}</td></tr>
+        <tr><td class="font-bold">Sisa Piutang</td><td class="text-right font-bold">Rp {{ number_format($outstanding ?? 0, 0, ',', '.') }}</td></tr>
     </table>
     <p style="margin-top: 20px; font-size: 10px; color: #666;">Dicetak dari Koperasi Majakara - {{ now()->format('d/m/Y H:i') }}</p>
 </body>

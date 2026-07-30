@@ -18,15 +18,7 @@
             $dep = $pencairan->deposito;
             $nasabah = $pencairan->nasabah;
             $isCancel = $pencairan->is_cancel;
-            $isEarly = $dep && $dep->tgl_jatuh_tempo > now();
-            $bungaKotor = ($dep && !$isEarly) ? ($dep->nominal_awal * $dep->bunga * (($dep->tenor?->tenor_hari ?? 365) / 365)) : 0;
-            $pajak = $bungaKotor * 0.2;
-            
-            if ($isCancel) {
-                $estimasiCair = $dep ? $dep->nominal_awal : 0;
-            } else {
-                $estimasiCair = $dep ? ($dep->nominal_awal + $bungaKotor - $pajak) : 0;
-            }
+            $estimasiCair = $pencairan->nominal_akhir;
         @endphp
 
         {{-- Simplified Destination Card --}}

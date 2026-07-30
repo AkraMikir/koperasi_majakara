@@ -14,7 +14,7 @@
 </head>
 <body>
     <h1>Laporan Pinjaman Aktif</h1>
-    <p>Outstanding: Rp {{ number_format($total_outstanding ?? 0, 0, ',', '.') }}</p>
+    <p>Sisa Piutang: Rp {{ number_format($total_outstanding ?? 0, 0, ',', '.') }}</p>
     <table>
         <thead>
             <tr>

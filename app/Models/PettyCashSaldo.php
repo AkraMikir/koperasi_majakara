@@ -31,9 +31,6 @@ class PettyCashSaldo extends Model
         'updated_at'  => 'datetime',
     ];
 
-    /**
-     * Get current saldo for a user (last record).
-     */
     public static function getSaldo(int $userId, string $role = 'admin', string $tipe = null, string $sumber = null): float
     {
         $query = static::where('user_id', $userId)
@@ -45,11 +42,11 @@ class PettyCashSaldo extends Model
 
         if ($sumber) {
             $query->where('sumber', $sumber);
+            $last = $query->latest('id')->first();
+            return $last ? (float) $last->saldo_akhir : 0.0;
         }
 
-        $last = $query->latest('id')->first();
-
-        return $last ? (float) $last->saldo_akhir : 0.0;
+        return (float) $query->sum('mutasi');
     }
 
     public static function getSaldoCash(int $userId): float { return static::getSaldo($userId, 'admin', 'cash'); }

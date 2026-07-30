@@ -56,7 +56,7 @@
                     <table class="w-full text-sm">
                         <tr><td class="py-2 text-gray-600">Pencairan (periode)</td><td class="py-2 text-right font-semibold">Rp {{ number_format($pencairan_pinjaman ?? 0, 0, ',', '.') }}</td></tr>
                         <tr><td class="py-2 text-gray-600">Angsuran Masuk (periode)</td><td class="py-2 text-right font-semibold">Rp {{ number_format($angsuran_masuk ?? 0, 0, ',', '.') }}</td></tr>
-                        <tr class="border-t border-gray-200"><td class="py-2 font-medium">Outstanding</td><td class="py-2 text-right font-bold">Rp {{ number_format($outstanding ?? 0, 0, ',', '.') }}</td></tr>
+                        <tr class="border-t border-gray-200"><td class="py-2 font-medium">Sisa Piutang</td><td class="py-2 text-right font-bold">Rp {{ number_format($outstanding ?? 0, 0, ',', '.') }}</td></tr>
                     </table>
                 </div>
             </div>
