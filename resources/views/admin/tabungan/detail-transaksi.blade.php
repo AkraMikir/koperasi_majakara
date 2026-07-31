@@ -116,15 +116,22 @@
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Foto Transfer</h2>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     @foreach($transaksi->pengajuanSetor->buktiFoto as $bukti)
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="border border-gray-200 rounded-lg overflow-hidden group relative">
                         @if($bukti->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path))
-                        <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Foto" class="w-full h-48 object-cover"
+                        <img src="{{ asset('storage/' . $bukti->file_path) }}" alt="Bukti Foto" class="w-full h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                            onclick="openImageModal(this.src)"
                             onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'400\' height=\'200\'%3E%3Crect fill=\'%23f3f4f6\' width=\'400\' height=\'200\'/%3E%3Ctext x=\'50%25\' y=\'50%25\' text-anchor=\'middle\' dy=\'.3em\' fill=\'%239ca3af\' font-family=\'Arial\' font-size=\'14\'%3EGambar tidak dapat dimuat%3C/text%3E%3C/svg%3E';">
                         @else
                         <div class="w-full h-48 bg-gray-100 flex items-center justify-center text-gray-500 text-sm">File tidak ditemukan</div>
                         @endif
-                        <div class="p-3 bg-gray-50">
+                        <div class="p-3 bg-gray-50 flex items-center justify-between">
                             <p class="text-xs text-gray-600">{{ $bukti->keterangan ?? 'Bukti Transfer' }}</p>
+                            @if($bukti->file_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($bukti->file_path))
+                            <a href="{{ asset('storage/' . $bukti->file_path) }}" download class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Unduh
+                            </a>
+                            @endif
                         </div>
                     </div>
                     @endforeach
@@ -133,10 +140,14 @@
             @elseif($transaksi->jenis === 'penarikan' && $transaksi->pengajuanTarik && $transaksi->pengajuanTarik->foto_bukti_tf_admin)
             <div class="bg-white rounded-2xl shadow-md p-6 border border-gray-100">
                 <h2 class="text-lg font-bold text-primary font-display mb-4 pb-4 border-b border-gray-200">Bukti Transfer Admin</h2>
-                <div class="max-w-md border border-gray-200 rounded-lg overflow-hidden shadow-sm">
-                    <img src="{{ asset('storage/' . $transaksi->pengajuanTarik->foto_bukti_tf_admin) }}" alt="Bukti Transfer" class="w-full h-auto cursor-pointer" onclick="window.open(this.src)">
-                    <div class="p-3 bg-gray-50 text-center text-xs text-gray-500">
-                        Bukti transfer di-upload saat persetujuan
+                <div class="max-w-md border border-gray-200 rounded-lg overflow-hidden shadow-sm group relative">
+                    <img src="{{ asset('storage/' . $transaksi->pengajuanTarik->foto_bukti_tf_admin) }}" alt="Bukti Transfer" class="w-full h-auto cursor-pointer hover:opacity-90 transition-opacity" onclick="openImageModal(this.src)">
+                    <div class="p-3 bg-gray-50 flex items-center justify-between">
+                        <span class="text-xs text-gray-500">Bukti transfer di-upload saat persetujuan</span>
+                        <a href="{{ asset('storage/' . $transaksi->pengajuanTarik->foto_bukti_tf_admin) }}" download class="text-xs text-blue-600 hover:text-blue-800 font-medium flex items-center gap-1">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                            Unduh
+                        </a>
                     </div>
                 </div>
             </div>
@@ -197,4 +208,62 @@
         </div>
     </div>
 </div>
+
+<!-- Image Lightbox Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[110] hidden items-center justify-center p-4">
+    <div class="relative max-w-4xl w-full flex flex-col items-center">
+        <!-- Close Button -->
+        <button onclick="closeImageModal()" class="absolute -top-12 right-0 text-white hover:text-gray-300 transition-colors flex items-center gap-1 font-medium bg-black/40 px-3 py-1.5 rounded-full text-sm">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            Tutup
+        </button>
+
+        <!-- Image Container -->
+        <div class="bg-white rounded-2xl p-2 shadow-2xl max-h-[80vh] overflow-hidden flex items-center justify-center">
+            <img id="modal-img" src="" alt="Bukti Pembesaran" class="max-w-full max-h-[75vh] object-contain rounded-xl">
+        </div>
+
+        <!-- Download Button inside Modal -->
+        <a id="modal-download-btn" href="" download class="mt-4 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-colors shadow-lg flex items-center gap-2 text-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Unduh Gambar
+        </a>
+    </div>
+</div>
+
+<script>
+function openImageModal(src) {
+    const modal = document.getElementById('image-modal');
+    const modalImg = document.getElementById('modal-img');
+    const downloadBtn = document.getElementById('modal-download-btn');
+    
+    modalImg.src = src;
+    downloadBtn.href = src;
+    
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeImageModal() {
+    const modal = document.getElementById('image-modal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+}
+
+// Tutup ketika klik background
+document.getElementById('image-modal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeImageModal();
+    }
+});
+
+// Tutup ketika tombol Escape ditekan
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeImageModal();
+    }
+});
+</script>
 @endsection
